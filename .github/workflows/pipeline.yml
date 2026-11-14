@@ -228,9 +228,9 @@ jobs:
       - name: Build
         if: matrix.task == 'build'
         env:
-          SUPABASE_URL: ${{ vars.ENABLE_PRODUCTION_BILLING == 'true' && secrets.SUPABASE_URL || '' }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ vars.ENABLE_PRODUCTION_BILLING == 'true' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
-          SUPABASE_PROJECT_ID: ${{ vars.ENABLE_PRODUCTION_BILLING == 'true' && secrets.SUPABASE_PROJECT_ID || '' }}
+          SUPABASE_URL: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SUPABASE_URL || '' }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
+          SUPABASE_PROJECT_ID: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SUPABASE_PROJECT_ID || '' }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: pnpm build --concurrency=2
 
