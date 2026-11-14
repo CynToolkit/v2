@@ -10,6 +10,7 @@ import { installUpdateAfterServerStops } from "./main/update-shutdown";
 import {
   buildCoreReleaseRegistry,
   fetchLatestDesktopRelease,
+  getDesktopReleaseFeedUrl,
   getDefaultUserDataPath,
   getReleaseWorkflowEnvironmentVariableNames,
   PipelabContext,
@@ -513,10 +514,6 @@ app.whenReady().then(async () => {
     console.log(`[Update] FORCE_UPDATE_CHECK: ${process.env.FORCE_UPDATE_CHECK}`);
     console.log(`[Update] Supports Auto-Update: ${supportsAutoUpdate}`);
 
-    let updateUrl =
-      process.env.APP_UPDATE_URL ||
-      "https://github.com/CynToolkit/pipelab/releases/latest/download";
-
     let latestRelease: any = null;
 
     // 1. Try to resolve the latest desktop-specific release from GitHub
@@ -528,16 +525,20 @@ app.whenReady().then(async () => {
         `[Update] Fetching ${isPrerelease ? "beta" : "stable"} releases from GitHub API...`,
       );
 
-      const release = await fetchLatestDesktopRelease({ allowPrerelease: isPrerelease });
+      const release = await fetchLatestDesktopRelease({
+        allowPrerelease: isPrerelease,
+        currentVersion,
+      });
       if (release) {
         latestRelease = release;
-        updateUrl = `https://github.com/CynToolkit/pipelab/releases/download/${release.tag_name}`;
         console.log(`[Update] Target Tag: ${release.tag_name}`);
         console.log(`[Update] Release API URL: ${release.html_url}`);
       } else {
-        console.warn("[Update] No desktop release found, using fallback URL");
+        console.warn("[Update] No compatible desktop release found");
       }
     }
+
+    const updateUrl = getDesktopReleaseFeedUrl(latestRelease, process.env.APP_UPDATE_URL);
 
     // Helper to resolve manual download details for the platform
     const resolveManualDownloadUrl = (
@@ -566,7 +567,10 @@ app.whenReady().then(async () => {
       };
     };
 
-    if (supportsAutoUpdate) {
+    if (!updateUrl) {
+      console.warn("[Update] No update feed is available; skipping updater setup");
+      sendUpdateStatus("update-not-available");
+    } else if (supportsAutoUpdate) {
       console.log(`[Update] Final Feed URL: ${updateUrl}`);
       if (process.platform === "win32") {
         console.log(`[Update] (Windows) Squirrel will request: ${updateUrl}/RELEASES`);

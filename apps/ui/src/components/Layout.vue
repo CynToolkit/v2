@@ -712,7 +712,7 @@ const helpMenuItems = computed(() => [
     label: "Report an Issue",
     icon: "mdi mdi-github",
     command: () => {
-      openLink("https://github.com/CynToolkit/pipelab/issues/new");
+      openLink("https://github.com/CynToolkit/v2/issues/new");
     },
   },
 ]);

@@ -138,7 +138,7 @@ const config: ForgeConfig = {
     {
       name: "@electron-forge/publisher-github",
       config: {
-        repository: { owner: "CynToolkit", name: "pipelab" },
+        repository: { owner: "CynToolkit", name: "v2" },
         prerelease: process.env.PRERELEASE === "true",
         draft: false,
         generateReleaseNotes: true,

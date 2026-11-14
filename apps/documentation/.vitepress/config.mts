@@ -85,13 +85,14 @@ export default defineConfig({
             { text: 'Development setup', link: '/contributing/development' },
             { text: 'Architecture and packages', link: '/contributing/architecture' },
             { text: 'Release process', link: '/contributing/releases' },
+            { text: 'Repository migration', link: '/contributing/repository-migration' },
           ],
         },
       ],
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/CynToolkit/pipelab' },
+      { icon: 'github', link: 'https://github.com/CynToolkit/v2' },
       { icon: 'discord', link: 'https://discord.gg/MzNw26cBb5' },
       { icon: 'x', link: 'https://x.com/pipelabapp' },
       { icon: 'mastodon', link: 'https://mastodon.gamedev.place/@pipelab' },
@@ -99,7 +100,7 @@ export default defineConfig({
     ],
 
     editLink: {
-      pattern: 'https://github.com/CynToolkit/pipelab/edit/develop/apps/documentation/:path'
+      pattern: 'https://github.com/CynToolkit/v2/edit/main/apps/documentation/:path'
     },
 
     search: {

@@ -14,6 +14,29 @@ export interface GitHubRelease {
 export interface FetchReleaseOptions {
   repo?: string;
   allowPrerelease?: boolean;
+  currentVersion?: string;
+}
+
+function getEligibleVersion(
+  packageName: string,
+  tagName: string,
+  { allowPrerelease = false, currentVersion }: FetchReleaseOptions,
+): string | null {
+  const prefix = `${packageName}@`;
+  if (!tagName.startsWith(prefix)) return null;
+
+  const version = tagName.slice(prefix.length);
+  if (!semver.valid(version)) return null;
+  if (!allowPrerelease && semver.prerelease(version)) return null;
+
+  if (currentVersion !== undefined) {
+    const validCurrentVersion = semver.valid(currentVersion);
+    if (!validCurrentVersion || semver.major(version) !== semver.major(validCurrentVersion)) {
+      return null;
+    }
+  }
+
+  return version;
 }
 
 /**
@@ -24,7 +47,7 @@ export async function fetchPackageReleases(
   packageName: string,
   options: FetchReleaseOptions = {},
 ): Promise<GitHubRelease[]> {
-  const { repo = "CynToolkit/pipelab", allowPrerelease = false } = options;
+  const { repo = "CynToolkit/v2", allowPrerelease = false } = options;
 
   try {
     const override = process.env.PIPELAB_OVERRIDE_RELEASE;
@@ -43,9 +66,11 @@ export async function fetchPackageReleases(
       );
       if (response.ok) {
         const release: GitHubRelease = await response.json();
-        return [release];
+        if (getEligibleVersion(packageName, release.tag_name, options)) return [release];
+        console.warn(`[GitHub] Release override ${targetTag} is not eligible for this build.`);
+      } else {
+        console.warn(`[GitHub] Override release tag ${targetTag} was not found.`);
       }
-      console.warn(`[GitHub] Override release tag ${targetTag} not found or error occurred`);
     }
 
     const matchingRefsUrl = `https://api.github.com/repos/${repo}/git/matching-refs/tags/${encodeURIComponent(packageName)}`;
@@ -69,26 +94,16 @@ export async function fetchPackageReleases(
     }
 
     // Extract tags matching the packageName@ pattern
-    const matchingTags = refs
+    const eligibleTags = refs
       .map((r: any) => r.ref.replace("refs/tags/", ""))
-      .filter((tag: string) => tag.startsWith(`${packageName}@`));
+      .filter((tag: string) => getEligibleVersion(packageName, tag, options));
 
-    // Filter by semver and prerelease options
-    const filteredTags = matchingTags.filter((tag: string) => {
-      const version = tag.split("@").pop();
-      if (!version || !semver.valid(version)) {
-        return false;
-      }
-      const isPrerelease = semver.prerelease(version) !== null;
-      return allowPrerelease || !isPrerelease;
-    });
-
-    if (filteredTags.length === 0) {
+    if (eligibleTags.length === 0) {
       return [];
     }
 
     // Sort by version (newest/highest first)
-    filteredTags.sort((a, b) => {
+    eligibleTags.sort((a, b) => {
       const vA = a.split("@").pop() || "0.0.0";
       const vB = b.split("@").pop() || "0.0.0";
       return semver.rcompare(vA, vB);
@@ -96,7 +111,7 @@ export async function fetchPackageReleases(
 
     // Walk tags from newest to oldest, skipping any that have no GitHub Release attached.
     // A bare git tag (no release) returns 404 from the releases/tags endpoint.
-    for (const tag of filteredTags) {
+    for (const tag of eligibleTags) {
       console.log(`[GitHub] Fetching release details for tag: ${tag}`);
 
       const releaseResponse = await fetch(
@@ -196,4 +211,12 @@ export async function fetchLatestDesktopRelease(
   }
 
   return latest;
+}
+
+export function getDesktopReleaseFeedUrl(
+  release: GitHubRelease | null,
+  overrideUrl?: string,
+): string | null {
+  if (overrideUrl) return overrideUrl;
+  return release ? `https://github.com/CynToolkit/v2/releases/download/${release.tag_name}` : null;
 }

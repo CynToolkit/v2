@@ -1,7 +1,7 @@
 # Install and start Pipelab
 
 Download a published desktop release from the
-[Pipelab GitHub releases page](https://github.com/CynToolkit/pipelab/releases/latest).
+[Pipelab GitHub releases page](https://github.com/CynToolkit/v2/releases/latest).
 Release assets are generated for Linux x64, Windows x64, macOS x64, and macOS
 arm64. The configured release formats are Linux ZIP, Windows Squirrel/ZIP, and
 macOS DMG. Minimum operating-system versions and Linux distribution
