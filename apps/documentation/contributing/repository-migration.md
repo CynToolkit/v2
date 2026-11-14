@@ -1,129 +1,124 @@
 # Repository migration operations
 
-This runbook covers the GitHub repository move from `CynToolkit/pipelab` to
-`CynToolkit/v2`. The imported history is the legacy `develop` branch at
-`d497fd91fa4611d232ae458245b8b9da841926f1`, now the v2 repository's `main`
-history. The legacy `main` branch was `04bb8a77e1e35dac405fc3174637e720fa9a4804`;
-it was not the source of the import. The import contains Git history but no
-tags. Repository settings, issues, pull requests, releases, Actions history,
-secrets, and integrations do not move with Git history.
+This runbook covers the move from `CynToolkit/pipelab` to `CynToolkit/v2`. The
+imported Git history came from legacy `develop` at
+`d497fd91fa4611d232ae458245b8b9da841926f1`; v2 `main` now contains that history
+and the repository-migration follow-up. Legacy `main` at
+`04bb8a77e1e35dac405fc3174637e720fa9a4804` was not the import source. No tags
+were imported. Git history does not transfer repository settings, issues, PRs,
+releases, Actions history, secrets, or integrations.
 
-## Configure v2 before enabling workflows
+## Configure v2 before enabling Actions
 
-The imported repository initially had Actions enabled and no branch rulesets.
-Keep Actions disabled while reviewing and configuring the settings below, then
-enable Actions for CI in a controlled step. Do not create a v2 production
-deployment, billing operation, or release as a migration check.
+Actions are currently disabled in v2. Keep them disabled until the required
+secrets, Cloudflare targets, permissions, and branch protections below are
+ready. No deployment, billing operation, or release is performed by this
+runbook.
 
-Create a `main` ruleset or branch protection rule. Choose required CI checks
-after the first safe CI run has reported its exact check names. Review who may
-push, bypass reviews, and create release tags. Confirm Actions workflow
-permissions, fork-PR policy, Dependabot, webhooks, GitHub Apps, environments,
-and organization policies. None of those settings are included in the Git
-import.
+Create a `main` ruleset or branch protection rule. Set required reviews and
+required CI checks after the first safe CI run reports its exact check names.
+Review who can push, bypass reviews, and create release tags. Confirm Actions
+workflow permissions, fork-PR policy, Dependabot, webhooks, GitHub Apps, and
+organization policies. These settings are not part of the Git import.
 
-### Actions variables that control external effects
+### Actions secrets
 
-All variables below are unset by default. Leave them unset until the listed
-prerequisites are satisfied.
+Configure only the credentials for services that v2 will use. Do not put
+secret values in Git, issues, logs, or documentation. Confirm each target
+project and account with its owner before adding values.
 
-| Repository variable             | Effect when set to `true`                                                                                                                                                       | Additional control                                                                                                                                                                                         |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ENABLE_PAGES_DEPLOYMENTS`      | Allows a manually dispatched editor, website, or documentation Pages deployment.                                                                                                | `confirm_deployment` must also be checked. Preview targets use the dedicated `v2-migration-preview` Pages branch.                                                                                          |
-| `ENABLE_PRODUCTION_DEPLOYMENTS` | Allows a production Pages deployment.                                                                                                                                           | Requires `ENABLE_PAGES_DEPLOYMENTS`, target `production`, `confirm_deployment`, `confirm_production`, and dispatch from v2 `main`. Production billing remains independently controlled.                    |
-| `ENABLE_PRODUCTION_BILLING`     | Allows configured Supabase project values into build environments. Without it, CI and preview builds receive empty Supabase values, so hosted auth and billing are unavailable. | Verify that the project, auth URLs, billing provider, and production ownership are intentionally shared before enabling. This variable does not deploy Supabase functions or change billing configuration. |
-| `ENABLE_RELEASE_PUBLISHING`     | Allows desktop GitHub Release and CLI npm publishing jobs to run for matching tags.                                                                                             | Verify tag rules, `GITHUB_TOKEN` permissions, npm ownership/token, signing, and release cutover before enabling.                                                                                           |
+| Secret                                                                | Used for                                                                                  |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`                                                | Automatic Pages deployments; scope it to the intended v2 Pages projects.                  |
+| `CLOUDFLARE_ACCOUNT_ID`                                               | Cloudflare account containing the v2 Pages projects.                                      |
+| `CLOUDFLARE_EDITOR_UI_PROJECT_NAME`                                   | Editor UI Pages project.                                                                  |
+| `CLOUDFLARE_PAGES_PROJECT_NAME`                                       | Website Pages project.                                                                    |
+| `CLOUDFLARE_DOCS_PROJECT_NAME`                                        | Documentation Pages project.                                                              |
+| `SUPABASE_URL`                                                        | Production main builds and deploys.                                                       |
+| `SUPABASE_PUBLISHABLE_KEY`                                            | Production client builds; workflows temporarily accept `SUPABASE_ANON_KEY` as a fallback. |
+| `SUPABASE_PROJECT_ID`                                                 | Production client builds.                                                                 |
+| `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                              |
+| `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | macOS signing.                                                                            |
+| `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | macOS notarization.                                                                       |
+| `NPM_TOKEN`                                                           | Publishing `@pipelab/cli` to npm from its release tag.                                    |
+| `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                                     |
 
-Editor, website, and documentation deployments are manual dispatches. A
-production deployment requires both deployment variables and explicit
-production confirmation from `main`; a push or pull request cannot deploy.
-Pull requests to `main` still get documentation build validation. PR preview
-deployments are no longer automatic: choose the source branch in **Actions →
-Deploy Editor UI** or **Deploy Website**, select `preview`, and confirm the
-deployment. Preview uses the `v2-migration-preview` Pages branch, not `main`.
-The documentation workflow's preview also uses that Pages branch and retains
-the configured `docs-v2.pipelab.app` preview domain. Verify the Cloudflare
-project's production branch and custom-domain routing before enabling Pages.
+The destination project identifiers and secret values have not been migrated.
+Set the three Pages project-name secrets to the intended v2 projects; do not
+reuse a legacy value without confirming its target. Deploy jobs fail with a
+clear missing-secret error when required Cloudflare values are absent.
 
-### Secrets to configure only for services being reused
+### Automatic workflow behavior
 
-Add values through GitHub's Actions secrets or an approved secret manager; do
-not put values in Git, issues, or logs. Confirm each credential's scope and
-the exact target project/account before copying it.
+| Event                                              | CI and deployment behavior                                                                                                                                                                           |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Push to `main`                                     | Run CI and deploy the editor, website, and documentation to their configured v2 Pages projects on branch `main` when matching paths change. Production Supabase values are available to main builds. |
+| Pull request targeting `main` from this repository | Run CI and deploy Pages previews on a unique `pr-<number>` branch. Preview builds omit Supabase values. Editor and website previews post their deployment URL to the PR.                             |
+| Pull request targeting `main` from a fork          | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped.                                                                            |
+| Manual dispatch from `main`                        | Retry an editor, website, or documentation production deployment without a code push. Dispatches from other branches do not deploy.                                                                  |
+| `@pipelab/app@<version>` tag                       | Build and publish a desktop GitHub Release.                                                                                                                                                          |
+| `@pipelab/cli@<version>` tag                       | Build and publish the CLI package to npm.                                                                                                                                                            |
 
-- Cloudflare: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
-  `CLOUDFLARE_EDITOR_UI_PROJECT_NAME`, `CLOUDFLARE_PAGES_PROJECT_NAME`.
-- Supabase client builds: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (the
-  workflows temporarily accept `SUPABASE_ANON_KEY` as a fallback),
-  `SUPABASE_PROJECT_ID`.
-- Telemetry: `POSTHOG_API_KEY`.
-- Desktop signing/notarization: `CERTIFICATE_OSX_APPLICATION`,
-  `CERTIFICATE_OSX_APPLICATION_PASSWORD`, `APPLE_ID`, `APPLE_ID_PASSWORD`,
-  `APPLE_TEAM_ID`.
-- CLI publication: `NPM_TOKEN`.
-- Optional authenticated Construct acceptance: `CONSTRUCT_CI_USERNAME`,
-  `CONSTRUCT_CI_PASSWORD`.
+Deploy workflows use `pull_request` and check that the PR head repository is
+the same repository before running jobs that can access secrets. They do not
+use `pull_request_target`. A fork PR still receives the general CI workflow and
+documentation build, without Cloudflare or production Supabase credentials.
 
-The existing Supabase project and billing configuration are not migrated by
-this repository change. Production Pages workflows pass Supabase project
-values only when `ENABLE_PRODUCTION_BILLING=true`; previews omit those values.
-CI and release builds also require that variable before including them. Do
-not deploy Supabase functions or alter billing
-products as part of repository cutover. Review Supabase Auth allowed URLs,
-OAuth/email settings, worker bindings, Polar configuration, and production
-ownership separately before enabling production billing or shipping a build
-that contains those project values.
+Cloudflare project names and domains are not encoded in these workflows.
+Configure each v2 Pages project's production branch as `main`, then attach the
+intended custom domains and DNS records manually in Cloudflare. Deployments
+only upload build output to the configured project and branch; they never
+create or modify Pages custom domains or DNS records. PR preview branches are
+`pr-<number>` and use the Pages preview URL until an owner configures a custom
+preview domain separately. The previous docs workflow managed
+`docs-v2.pipelab.app` as a preview alias; if retaining it, an owner must choose
+and configure its stable preview branch manually. The automatic workflow does
+not retarget this domain to individual PR branches.
+
+Production authentication and billing use the configured Supabase client
+values on main builds and deployments. Same-repository and fork PR previews
+omit those values. Configure the intended Supabase project, Auth URLs,
+OAuth/email settings, worker bindings, and Polar billing independently; this
+repository change does not deploy Supabase functions or change billing
+products. Never place service-role or secret keys in client builds.
 
 ## Releases and existing desktop installations
 
-The legacy repository currently holds the published v1.42.3 release and the
-`@pipelab/app@2.0.0-beta.33` prerelease, including Windows installer/update
-assets and a macOS DMG. Git history import does not transfer those release
-records, assets, or tags. The v2 workflows remain blocked until
-`ENABLE_RELEASE_PUBLISHING=true`; do not import or recreate old tags wholesale.
-Select any historical release/tag migration deliberately and only after
-reviewing its workflow side effects, npm version state, and asset provenance.
+The legacy repository currently holds the v1.42.3 release and the
+`@pipelab/app@2.0.0-beta.33` prerelease with Windows installer/update assets
+and a macOS DMG. Git import did not transfer these release records, assets, or
+tags. Matching v2 version tags start publishing automatically; review each
+version and publication target before creating a tag. Do not copy old tags
+wholesale.
 
-New builds read desktop releases from `CynToolkit/v2`. This code change does
-not change already-installed binaries: they continue to query
-`CynToolkit/pipelab`. Keep the old repository's release page and required
-assets available until an old-client bridge path has been produced and tested
-on supported Windows and macOS installations. Establish and verify that
-bridge before retiring legacy release publishing or changing legacy release
-availability. This migration does not publish a bridge build.
+New builds read desktop releases from `CynToolkit/v2`. Already-installed
+binaries retain the repository URL compiled into their version and continue
+to query `CynToolkit/pipelab`. Keep the old release page and required assets
+available until an old-client bridge has been produced and tested on supported
+Windows and macOS installations. This migration does not publish a bridge
+build.
 
-The website download page and desktop release links now point to v2; users
+The website download page and desktop release links now point to v2. Users
 needing older releases should continue to use the legacy repository until the
-bridge and historical release decisions are complete. Historical changelog
-entries and their old PR/commit links intentionally remain pointed at the old
-repository.
+bridge and release decisions are complete. Historical changelog entries and
+their old PR/commit links intentionally remain pointed at the old repository.
 
-## Deferred pull requests and cutover checklist
+## Deferred pull requests and remaining work
 
 The import does not move open PRs, reviews, comments, draft state, or branch
-metadata. Legacy PRs #135, #112, and #52 remain to be dispositioned. For each,
-review its diff against imported `main`; preserve desired changes by replaying
-or adapting them on a v2 branch, then open a new v2 PR. Close or clearly mark
-the legacy PR with the v2 replacement link when appropriate. Do not assume the
-old branch can merge cleanly or that comments/reviews transfer.
+metadata. Legacy PRs #135, #112, and #52 remain to be dispositioned. Review
+each diff against v2 `main`; preserve desired changes by adapting them on a v2
+branch and opening a new v2 PR. Close or mark the old PR with its replacement
+link when appropriate. Do not assume old branches merge cleanly or that
+comments and reviews transfer.
 
-Before enabling production operations:
-
-1. Configure and review v2 settings, secrets, variables, and the `main`
-   protection ruleset above.
-2. Enable Actions and observe safe CI on a pull request. Keep all four external
-   effect variables unset during this check.
-3. Review and disposition legacy PRs #135, #112, and #52; verify their desired
-   changes on v2 separately.
-4. Validate website downloads, updater URLs, Changesets links, npm ownership,
-   signing credentials, Cloudflare project/domain routing, and Supabase Auth
-   and billing configuration with their respective owners.
-5. Test a manually confirmed Pages preview on `v2-migration-preview` before
-   considering production. Production requires the dedicated production
-   variables, both confirmation inputs, and dispatch from `main`.
-6. Verify the old-client bridge on real supported installs before setting
-   `ENABLE_RELEASE_PUBLISHING=true` or retiring legacy release access. Review
-   any selected tag separately before importing it.
+Before enabling Actions, configure the v2 secrets and Cloudflare Pages projects
+above, review the automatic triggers and `main` ruleset, and decide how to
+handle those three legacy PRs. After Actions are enabled, verify CI and the
+automatic PR preview on a same-repository PR. Confirm production deployment
+targets and Supabase billing configuration with their owners before merging
+deployment changes to `main`. Test the old-client bridge before retiring
+legacy release access.
 
 Archiving or deleting the old repository is a separate owner decision and is
 not an automatic migration step.
