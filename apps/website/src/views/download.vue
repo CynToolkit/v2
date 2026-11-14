@@ -18,7 +18,7 @@
     </div>
     <div class="flex flex-column text-center justify-content-center mt-8">
       <p>Looking for beta or older versions?</p>
-      <a href="https://github.com/CynToolkit/pipelab/releases"
+      <a href="https://github.com/CynToolkit/v2/releases"
         >Check the releases page</a
       >
     </div>
@@ -127,7 +127,7 @@ export interface Uploader {
 const release = ref<Release>();
 
 
-fetch("https://api.github.com/repos/CynToolkit/pipelab/releases/latest", {
+fetch("https://api.github.com/repos/CynToolkit/v2/releases/latest", {
     headers: {
         "Accept": "application/vnd.github+json",
     }

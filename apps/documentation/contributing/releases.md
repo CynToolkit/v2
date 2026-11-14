@@ -21,6 +21,12 @@ Review the generated version changes before publishing. The desktop and CLI have
 
 Both workflows use Node 24.15.0 and frozen pnpm installs. Push the intended version tag only after the matching package version is committed and reviewed.
 
+In the v2 repository, tag-triggered publishing jobs run only when the
+repository variable `ENABLE_RELEASE_PUBLISHING` is exactly `true`. Keep it
+unset until the release target, token permissions, signing credentials, and
+old-client update bridge have been reviewed. The workflow details and
+migration gates are in the [repository migration runbook](/contributing/repository-migration).
+
 ## Desktop GitHub release
 
 The desktop workflow builds these matrix entries:
@@ -32,7 +38,7 @@ The desktop workflow builds these matrix entries:
 
 Forge is configured for Windows Squirrel outputs, Linux ZIP, and macOS DMG on release builds. The workflow uploads files produced by Forge, verifies macOS executable architecture and code signature, then publishes or updates the same-tag GitHub Release. Tags containing `-` mark the GitHub Release as a prerelease. The release asset glob also accepts `.deb` and `.rpm`, but those patterns do not mean Forge currently creates those formats.
 
-The workflow references these secret names; configure values in GitHub Actions secrets and never place their values in this documentation:
+The workflow references these secret names; configure values in GitHub Actions secrets only when release publishing and the intended Supabase project are approved. Build environments receive Supabase values only when `ENABLE_PRODUCTION_BILLING=true`. Never place secret values in this documentation:
 
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY` (falls back to the legacy `SUPABASE_ANON_KEY` while migrating)
@@ -48,9 +54,19 @@ Apple signing/notarization is enabled by Forge only when all required Apple cred
 
 ## CLI npm release
 
-The CLI workflow checks `@pipelab/cli@<version>`, builds the bundled CLI and UI, then validates the staged package manifest, `pipelab` and `plab` bins, bundled UI, assets, and npm pack contents before publishing publicly. It requires the `NPM_TOKEN` Actions secret for npm authentication. It also passes `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to the legacy `SUPABASE_ANON_KEY` secret), `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the build.
+The CLI workflow checks `@pipelab/cli@<version>`, builds the bundled CLI and UI, then validates the staged package manifest, `pipelab` and `plab` bins, bundled UI, assets, and npm pack contents before publishing publicly. It requires the `NPM_TOKEN` Actions secret for npm authentication. It passes `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to the legacy `SUPABASE_ANON_KEY` secret), and `SUPABASE_PROJECT_ID` only when `ENABLE_PRODUCTION_BILLING=true`; `POSTHOG_API_KEY` is independent of that gate.
 
-For the Supabase key-name rollout, add `SUPABASE_PUBLISHABLE_KEY` to Doppler and GitHub Actions secrets first. Preview and release builds prefer it and temporarily fall back to `SUPABASE_ANON_KEY`. Verify Editor, Website, Desktop, and CLI authentication before removing the old secret in a separate approved change. Do not put service-role or secret keys in browser build variables.
+For the Supabase key-name rollout, add `SUPABASE_PUBLISHABLE_KEY` to Doppler and GitHub Actions secrets first. Production builds prefer it and temporarily fall back to `SUPABASE_ANON_KEY`; v2 preview builds omit Supabase values. Verify Editor, Website, Desktop, and CLI authentication before removing the old secret in a separate approved change. Do not put service-role or secret keys in browser build variables.
+
+Desktop update selection uses the v2 repository and filters releases to the
+installed app major. Stable builds exclude prereleases; beta builds may use
+stable or prerelease releases from that same major. If no eligible release is
+found, automatic update setup is skipped instead of falling back to the
+unfiltered `releases/latest/download` endpoint. `APP_UPDATE_URL` remains an
+explicit operator override. Already-installed binaries keep the repository
+URL compiled into their version, so preserve the legacy release assets until
+the old-client bridge is built and verified; see the
+[repository migration runbook](/contributing/repository-migration).
 
 For a version containing a prerelease segment, the workflow derives the npm dist-tag from the segment before the first dot (for example, `beta` from `2.0.0-beta.4`). A version without a prerelease segment publishes with `latest`. This is npm dist-tag behavior; it is distinct from the desktop GitHub prerelease flag.
 

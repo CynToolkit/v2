@@ -1,31 +1,29 @@
 name: Deploy Website
 
 on:
-  push:
-    branches: [develop, main]
-    paths:
-      - 'apps/website/**'
-      - 'packages/**'
-      - 'plugins/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-website.yml'
-  pull_request:
-    branches: [develop]
-    paths:
-      - 'apps/website/**'
-      - 'packages/**'
-      - 'plugins/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-website.yml'
-      - '.github/actions/upsert-preview-comment/action.yml'
+  workflow_dispatch:
+    inputs:
+      confirm_deployment:
+        description: Explicitly allow a website Pages deployment
+        required: true
+        type: boolean
+        default: false
+      target:
+        description: Pages branch to deploy
+        required: true
+        type: choice
+        options:
+          - preview
+          - production
+        default: preview
+      confirm_production:
+        description: Explicitly allow a production deployment from main
+        required: true
+        type: boolean
+        default: false
 permissions:
   contents: read
   deployments: write
-  pull-requests: write
 
 concurrency:
   group: deploy-website-${{ github.ref }}
@@ -33,7 +31,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref != 'acceptance/local-construct-electron') }}
+    if: ${{ inputs.confirm_deployment && vars.ENABLE_PAGES_DEPLOYMENTS == 'true' && (inputs.target != 'production' || (inputs.confirm_production && github.ref == 'refs/heads/main' && vars.ENABLE_PRODUCTION_DEPLOYMENTS == 'true')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,24 +50,21 @@ jobs:
 
       - name: Build website
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SUPABASE_URL: ${{ inputs.target == 'production' && vars.ENABLE_PRODUCTION_BILLING == 'true' && secrets.SUPABASE_URL || '' }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ inputs.target == 'production' && vars.ENABLE_PRODUCTION_BILLING == 'true' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
+          SUPABASE_PROJECT_ID: ${{ inputs.target == 'production' && vars.ENABLE_PRODUCTION_BILLING == 'true' && secrets.SUPABASE_PROJECT_ID || '' }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: pnpm --filter @pipelab/website build
 
       - name: Resolve Cloudflare branch name
         id: branch
         env:
-          GH_HEAD_REF: ${{ github.head_ref }}
-          GH_REF_NAME: ${{ github.ref_name }}
+          DEPLOY_TARGET: ${{ inputs.target }}
         run: |
-          branch="${GH_HEAD_REF:-$GH_REF_NAME}"
-          branch="${branch//\//-}"
-          branch="${branch//[^a-zA-Z0-9_-]/-}"
-          if [[ -z "$branch" ]]; then
-            echo 'Could not determine the Cloudflare Pages branch name.' >&2
-            exit 1
+          if [[ "$DEPLOY_TARGET" == 'production' ]]; then
+            branch='main'
+          else
+            branch='v2-migration-preview'
           fi
           echo "name=$branch" >> "$GITHUB_OUTPUT"
 
@@ -81,11 +76,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           command: pages deploy apps/website/dist --project-name=${{ secrets.CLOUDFLARE_PAGES_PROJECT_NAME }} --branch=${{ steps.branch.outputs.name }}
-
-      - name: Post website preview comment
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: ./.github/actions/upsert-preview-comment
-        with:
-          name: Website
-          url: ${{ steps.deploy.outputs.deployment-url }}
-          marker: "<!-- pipelab-preview-website -->"

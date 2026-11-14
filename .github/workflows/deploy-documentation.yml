@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [main]
     paths:
       - "apps/documentation/**"
       - "package.json"
@@ -14,6 +14,11 @@ on:
     inputs:
       confirm_deployment:
         description: Explicitly allow a Cloudflare Pages deployment
+        required: true
+        type: boolean
+        default: false
+      confirm_production:
+        description: Explicitly allow a production deployment from main
         required: true
         type: boolean
         default: false
@@ -58,7 +63,7 @@ jobs:
         run: pnpm docs:build
 
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_deployment }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_deployment && vars.ENABLE_PAGES_DEPLOYMENTS == 'true' && (inputs.target != 'production' || (inputs.confirm_production && github.ref == 'refs/heads/main' && vars.ENABLE_PRODUCTION_DEPLOYMENTS == 'true')) }}
     permissions:
       contents: read
       deployments: write
@@ -90,7 +95,7 @@ jobs:
           if [[ "$DEPLOY_TARGET" == 'production' ]]; then
             branch='main'
           else
-            branch='develop'
+            branch='v2-migration-preview'
           fi
           echo "name=$branch" >> "$GITHUB_OUTPUT"
 
@@ -188,7 +193,7 @@ jobs:
 
           project_name='pipelab-docs'
           preview_domain='docs-v2.pipelab.app'
-          preview_target='develop.pipelab-docs.pages.dev'
+          preview_target='v2-migration-preview.pipelab-docs.pages.dev'
           api_base='https://api.cloudflare.com/client/v4'
           project_url="${api_base}/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${project_name}"
 

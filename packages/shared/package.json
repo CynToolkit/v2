@@ -7,7 +7,7 @@
   "author": "CynToolkit",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CynToolkit/pipelab.git",
+    "url": "https://github.com/CynToolkit/v2.git",
     "directory": "packages/shared"
   },
   "type": "module",

@@ -85,5 +85,5 @@ deleted according to its retention date.
   plan.
 
 See [Contributor architecture](/contributing/architecture) and
-[`supabase/README.md`](https://github.com/CynToolkit/pipelab/blob/develop/supabase/README.md)
+[`supabase/README.md`](https://github.com/CynToolkit/v2/blob/main/supabase/README.md)
 for service and deployment details.

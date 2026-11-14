@@ -3,7 +3,7 @@
   "_changelog": [
     "@changesets/changelog-github",
     {
-      "repo": "CynToolkit/pipelab"
+      "repo": "CynToolkit/v2"
     }
   ],
   "privatePackages": {

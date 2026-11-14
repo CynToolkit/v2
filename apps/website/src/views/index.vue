@@ -148,7 +148,7 @@ const menuItems = ref([
   {
     label: "Github",
     icon: SimpleIconsGithub,
-    to: "//github.com/CynToolkit/pipelab",
+    to: "//github.com/CynToolkit/v2",
     external: true,
     disabled: false,
     iconOnly: true,
