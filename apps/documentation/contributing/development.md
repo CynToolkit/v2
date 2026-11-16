@@ -147,6 +147,18 @@ The UI dev server also allows assets from the resolved workspace `node_modules`
 directory. When a Git worktree shares dependencies through a symlink, icon fonts
 remain available through the normal UI dev command.
 
+## Keep CLI and UI behavior aligned
+
+The CLI and UI should call the same engine use cases for shared capabilities.
+Keep policy, validation, execution, and capability gates in that shared layer;
+host code should pass its transport-specific inputs. When adding workflow IPC
+inputs or feature gates, update
+`apps/cli/tests/e2e/parity-contracts/workflow-execution.ts`; the CLI typecheck
+script checks that exhaustive contract. Add a behavioral test that runs both
+host paths against the shared engine. Document deliberate differences in that
+contract, such as environment source, connection identity, and CLI-only
+terminal options.
+
 ## Package the desktop app
 
 ```sh

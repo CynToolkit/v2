@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "paths": {
+      "@pipelab/core-node": ["../../packages/core-node/dist/src/index.d.ts"],
+      "@pipelab/shared": ["../../packages/shared/dist/src/index.d.ts"]
+    }
+  },
+  "include": ["tests/e2e/parity-contracts/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
