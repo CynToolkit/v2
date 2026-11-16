@@ -52,10 +52,12 @@ clear missing-secret error when required Cloudflare values are absent.
 
 | Event                                              | CI and deployment behavior                                                                                                                                                                           |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Push to `main`                                     | Run CI and deploy the editor to its configured Pages production branch `develop`; deploy the website and documentation to branch `main` when matching paths change. Production Supabase values are available to main builds. |
-| Pull request targeting `main` from this repository | Run CI and deploy Pages previews on a unique `pr-<number>` branch. Preview builds omit Supabase values. Editor and website previews post their deployment URL to the PR.                             |
-| Pull request targeting `main` from a fork          | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped.                                                                            |
-| Manual dispatch from `main`                        | Retry an editor, website, or documentation production deployment without a code push. Dispatches from other branches do not deploy.                                                                  |
+| Push to `main`                                                     | Run CI and deploy the editor, website, and documentation to Pages branch `main`. Production Supabase values are available to main builds. |
+| Push to `develop`                                                  | Run CI and deploy the editor, website, and documentation to Pages branch `develop` as previews. Production Supabase values are omitted. |
+| Pull request targeting `main` or `develop` from this repository    | Run CI and deploy Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
+| Pull request targeting `main` or `develop` from a fork             | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped. |
+| Manual dispatch from `main`                                        | Retry editor, website, or documentation production deployment without a code push. |
+| Manual dispatch from `develop`                                     | Retry an editor, website, or documentation preview deployment without a code push. |
 | `@pipelab/app@<version>` tag                       | Build and publish a desktop GitHub Release.                                                                                                                                                          |
 | `@pipelab/cli@<version>` tag                       | Build and publish the CLI package to npm.                                                                                                                                                            |
 
@@ -65,16 +67,21 @@ use `pull_request_target`. A fork PR still receives the general CI workflow and
 documentation build, without Cloudflare or production Supabase credentials.
 
 Cloudflare project names and domains are not encoded in these workflows. The
-existing Pages projects and production branches are:
+existing Pages projects and their current and required production branches are:
 
-| App | Pages project | Production branch | Known domain |
+| App | Pages project | Current branch → required production branch | Known domain |
 | --- | --- | --- | --- |
-| Editor | `pipelab` | `develop` | `editor.pipelab.app` |
-| Website | `pipelab-website` | `main` | — |
-| Documentation | `pipelab-docs` | `main` | — |
+| Editor | `pipelab` | `develop` → `main` | `editor.pipelab.app` |
+| Website | `pipelab-website` | `main` → `main` | — |
+| Documentation | `pipelab-docs` | `main` → `main` | — |
 
-Keep these production branches when configuring the projects. Attach any
-additional custom domains and DNS records manually in Cloudflare. Deployments
+Before enabling Actions, change the existing editor Pages project's production
+branch from `develop` to `main`; the website and documentation projects already
+use `main`. Cloudflare Pages Direct Upload does not expose this setting in the
+dashboard; update the project through the [Cloudflare Pages project API](https://developers.cloudflare.com/pages/get-started/direct-upload/)
+with a token that has Pages Edit permission. This runbook does not perform that
+configuration change. Attach any additional custom domains and DNS records
+manually in Cloudflare. Deployments
 only upload build output to the configured project and branch; they never
 create or modify Pages custom domains or DNS records. PR preview branches are
 `pr-<number>` and use the Pages preview URL until an owner configures a custom
@@ -84,8 +91,8 @@ and configure its stable preview branch manually. The automatic workflow does
 not retarget this domain to individual PR branches.
 
 Production authentication and billing use the configured Supabase client
-values on main builds and deployments. Same-repository and fork PR previews
-omit those values. Configure the intended Supabase project, Auth URLs,
+values on `main` builds and deployments. `develop` deployments and same-repository
+or fork PR previews omit those values. Configure the intended Supabase project, Auth URLs,
 OAuth/email settings, worker bindings, and Polar billing independently; this
 repository change does not deploy Supabase functions or change billing
 products. Never place service-role or secret keys in client builds.
