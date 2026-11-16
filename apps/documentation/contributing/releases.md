@@ -56,7 +56,17 @@ builds; never put secret values in this documentation:
 - `APPLE_ID_PASSWORD`
 - `APPLE_TEAM_ID`
 
-Apple signing/notarization is enabled by Forge only when all required Apple credentials are present. CI imports the certificate on macOS jobs and performs architecture and signature checks before upload. GitHub's workflow token is used for release publication.
+macOS prereleases may be built without Apple credentials. If none of the five
+Apple secrets are configured, Forge ad-hoc signs the app before packaging; the
+workflow still checks architecture and signature integrity, but the build is
+not Developer ID signed or notarized. macOS may block the app on first launch;
+users can approve that app through Apple's per-app [Open Anyway](https://support.apple.com/en-us/102445)
+flow. Do not disable Gatekeeper
+globally. If only some Apple secrets are set, the release job fails and names
+the missing secrets. Stable macOS releases require all five secrets and use
+Developer ID signing and notarization. CI imports the certificate and checks
+the Developer ID identity before upload when credentials are present. GitHub's
+workflow token is used for release publication.
 
 ## CLI npm release
 

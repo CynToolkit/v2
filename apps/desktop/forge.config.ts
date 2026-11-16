@@ -86,9 +86,11 @@ const isPullRequestBuild = process.env.GITHUB_EVENT_NAME === "pull_request";
 const hasMacSigningCredentials = Boolean(
   process.env.APPLE_ID && process.env.APPLE_ID_PASSWORD && process.env.APPLE_TEAM_ID,
 );
-// Forked pull requests do not receive signing secrets, so keep their macOS
-// validation builds unsigned. Other builds are signed when credentials exist.
 const enableMacSigning = !isPullRequestBuild && hasMacSigningCredentials;
+// Unsigned prereleases still need an ad-hoc signature after Fuses modifies the
+// Electron binary, before Forge creates the DMG.
+const enableMacAdHocSigning =
+  !isPullRequestBuild && version.includes("-") && !hasMacSigningCredentials;
 
 const config: ForgeConfig = {
   outDir: path.resolve(__dirname, "../out"),
@@ -122,7 +124,9 @@ const config: ForgeConfig = {
             strictVerify: false,
           } as any,
         }
-      : {}),
+      : enableMacAdHocSigning
+        ? { osxSign: { identity: "-", identityValidation: false } }
+        : {}),
   },
   makers: [
     new MakerSquirrel({
