@@ -2,7 +2,7 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'apps/documentation/**'
       - 'package.json'
@@ -11,7 +11,7 @@ on:
       - 'turbo.json'
       - '.github/workflows/deploy-documentation.yml'
   pull_request:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'apps/documentation/**'
       - 'package.json'
@@ -52,7 +52,7 @@ jobs:
         run: pnpm docs:build
 
   deploy:
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) }}
     permissions:
       contents: read
       deployments: write
@@ -91,11 +91,12 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [[ "$EVENT_NAME" != 'pull_request' ]]; then
-            branch='main'
-          else
+          if [[ "$EVENT_NAME" == 'pull_request' ]]; then
             branch="pr-${PR_NUMBER}"
+          else
+            branch="$REF_NAME"
           fi
           echo "name=$branch" >> "$GITHUB_OUTPUT"
 

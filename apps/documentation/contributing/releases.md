@@ -58,7 +58,7 @@ Apple signing/notarization is enabled by Forge only when all required Apple cred
 
 The CLI workflow checks `@pipelab/cli@<version>`, builds the bundled CLI and UI, then validates the staged package manifest, `pipelab` and `plab` bins, bundled UI, assets, and npm pack contents before publishing publicly. It requires the `NPM_TOKEN` Actions secret for npm authentication. It passes `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to the legacy `SUPABASE_ANON_KEY` secret), `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the build.
 
-For the Supabase key-name rollout, add `SUPABASE_PUBLISHABLE_KEY` to Doppler and GitHub Actions secrets first. Production builds prefer it and temporarily fall back to `SUPABASE_ANON_KEY`; preview builds omit production Supabase values. Verify Editor, Website, Desktop, and CLI authentication before removing the old secret in a separate approved change. Do not put service-role or secret keys in browser build variables.
+For the Supabase key-name rollout, add `SUPABASE_PUBLISHABLE_KEY` to Doppler and GitHub Actions secrets first. Production builds on `main` prefer it and temporarily fall back to `SUPABASE_ANON_KEY`; `develop` and PR preview builds omit production Supabase values. Verify Editor, Website, Desktop, and CLI authentication before removing the old secret in a separate approved change. Do not put service-role or secret keys in browser build variables.
 
 Desktop update selection uses the v2 repository and filters releases to the
 installed app major. Stable builds exclude prereleases; beta builds may use
