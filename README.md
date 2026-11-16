@@ -120,6 +120,10 @@ We use **Changesets** to manage versions and changelogs:
 
 ```bash
 pnpm changeset          # Document a change
-pnpm changeset version  # Bump versions
-pnpm changeset tag      # Create git tags
 ```
+
+The release workflow on `main` uses Changesets to open a version pull request.
+Desktop, CLI, and UI share one version. Merging the version PR publishes the
+bundled CLI to npm, then builds the desktop installers and publishes one
+GitHub release for that version. See the
+[release runbook](apps/documentation/contributing/releases.md) for setup and recovery.

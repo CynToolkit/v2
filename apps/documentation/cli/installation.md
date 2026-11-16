@@ -1,6 +1,6 @@
 # Install and configure the CLI
 
-Pipelab publishes its standalone command-line package as `@pipelab/cli` on npm. The package provides both `pipelab` and `plab` executable names. A release job builds a bundled package, checks that its manifest and UI/assets are present, and publishes it with public access.
+Pipelab publishes its standalone command-line package as `@pipelab/cli` on npm. The package provides both `pipelab` and `plab` executable names. The shared release workflow builds the bundle with its UI and assets, checks the npm package with a dry run, and publishes it with public access. The CLI and desktop app share one release version.
 
 ```sh
 npm install --global @pipelab/cli
