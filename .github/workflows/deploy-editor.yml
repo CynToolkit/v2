@@ -80,7 +80,8 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           if [[ "$EVENT_NAME" != 'pull_request' ]]; then
-            branch='main'
+            # GitHub main publishes to the existing Pages project's production branch.
+            branch='develop'
           else
             branch="pr-${PR_NUMBER}"
           fi
