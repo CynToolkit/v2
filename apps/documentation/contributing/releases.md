@@ -12,6 +12,10 @@ pnpm changeset version
 pnpm changeset tag
 ```
 
+Pipelab v2 starts a fresh product release baseline. The first v2 prerelease has
+one concise baseline entry; inherited v1 development notes are not part of the
+v2 release notes. Use a new Changeset for each future v2 package change.
+
 Review the generated version changes before publishing. The desktop and CLI have distinct package versions and distinct tag-triggered workflows; each workflow checks that its tag matches the corresponding package manifest. The `.changeset/config.json` links the CLI and UI packages for versioning, but the release workflows still use their own exact tag prefixes:
 
 | Product | Tag | Workflow | Publication |
