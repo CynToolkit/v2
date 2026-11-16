@@ -35,8 +35,8 @@ version PR.
 
 Enable **Settings → Actions → General → Allow GitHub Actions to create and
 approve pull requests**. The workflow requests contents and pull-request write
-permissions for the action. Configure `NPM_TOKEN` with permission to publish
-`@pipelab/cli` before merging the version PR. No personal GitHub token or
+permissions for the action. Configure npm Trusted Publishing for `@pipelab/cli`
+before merging the version PR (see below). No npm token, personal GitHub token, or
 separate tag dispatch is needed: desktop jobs follow the action's output
 within the same workflow. Pushing a tag alone does not start a release.
 
@@ -85,7 +85,26 @@ workflow token is used for release publication.
 ## CLI npm release
 
 The release action publishes `@pipelab/cli` from its staged `dist` directory
-with public access. It requires `NPM_TOKEN` for npm authentication and passes
+with public access using [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/).
+In the npm package's **Settings → Trusted publishing**, add a **GitHub Actions**
+publisher with these values:
+
+| Field | Value |
+| --- | --- |
+| Organization or user | `CynToolkit` |
+| Repository | `v2` |
+| Workflow filename | `release.yml` |
+| Environment name | Leave blank |
+| Allowed actions | Allow direct publishing with `npm publish` |
+
+The release job grants `id-token: write` on a GitHub-hosted runner. Node
+24.15.0 includes an npm version supporting OIDC (npm 11.5.1 or newer is
+required). pnpm delegates publishing to npm, which authenticates automatically;
+do not add `NPM_TOKEN` or `NODE_AUTH_TOKEN`. The staged manifest preserves the
+repository metadata required by npm. A new trust configuration must complete
+its first successful publish within two days; recreate it if it expires.
+
+The workflow passes
 `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to
 `SUPABASE_ANON_KEY`), `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the
 bundle build. Desktop packaging starts after successful CLI publication.

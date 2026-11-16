@@ -29,6 +29,7 @@ await writeFile(
     {
       name: cliPackage.name,
       version: cliPackage.version,
+      repository: cliPackage.repository,
       type: "module",
       main: "index.mjs",
       bin: {

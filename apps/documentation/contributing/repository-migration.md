@@ -40,7 +40,6 @@ project and account with its owner before adding values.
 | `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                              |
 | `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | Optional for macOS prereleases; required for stable signed builds.                       |
 | `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | Optional for macOS prereleases; required for stable signed and notarized builds.         |
-| `NPM_TOKEN`                                                           | Publishing the bundled `@pipelab/cli` during the shared product release.                                    |
 | `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                                     |
 
 The destination project identifiers and secret values have not been migrated.
@@ -67,7 +66,9 @@ The **Release** workflow on `main` uses `changesets/action@v1` to open a
 version pull request or publish the CLI to npm. Desktop, CLI, and UI share one
 fixed-group version. After successful npm publication, the same workflow
 builds desktop installers and publishes one GitHub release for that version.
-Configure `NPM_TOKEN` before merging the version PR. Allow GitHub Actions to
+Configure npm Trusted Publishing for `@pipelab/cli`: GitHub owner `CynToolkit`,
+repository `v2`, workflow filename `release.yml`, no environment, and allow
+direct publishing. No npm publishing secret is required. Allow GitHub Actions to
 create pull requests in repository settings, and approve workflows on the
 generated PR when GitHub requires it. No tag push or separate dispatch is
 needed. See [Release Pipelab](/contributing/releases).
