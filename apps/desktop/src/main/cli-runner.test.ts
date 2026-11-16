@@ -127,7 +127,6 @@ describe("getLocalCliRunner", () => {
 
     try {
       if (!parent.stdout) throw new Error("Windows process tree fixture has no output stream.");
-      const startWaiting = Date.now();
       parent.stdout.setEncoding("utf8");
       let startTimer!: NodeJS.Timeout;
       let pidChunk: unknown;
@@ -154,8 +153,13 @@ describe("getLocalCliRunner", () => {
         ]);
       }
 
+      const cleanupStartedAt = Date.now();
       await stopCliProcessTree(parent, descendantPid, descendantCreationTime, launcherCreationTime);
-      assert.ok(Date.now() - startWaiting < 10_000);
+      const cleanupDurationMs = Date.now() - cleanupStartedAt;
+      assert.ok(
+        cleanupDurationMs < 10_000,
+        `Process tree cleanup took ${cleanupDurationMs}ms (limit 10000ms).`,
+      );
       await waitForProcessExit(descendantPid);
       assert.equal(await isProcessRunning(descendantPid), false);
     } finally {

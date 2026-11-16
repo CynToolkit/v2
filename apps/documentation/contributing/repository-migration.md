@@ -38,8 +38,8 @@ project and account with its owner before adding values.
 | `SUPABASE_PUBLISHABLE_KEY`                                            | Production client builds; workflows temporarily accept `SUPABASE_ANON_KEY` as a fallback. |
 | `SUPABASE_PROJECT_ID`                                                 | Production client builds.                                                                 |
 | `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                              |
-| `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | macOS signing.                                                                            |
-| `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | macOS notarization.                                                                       |
+| `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | Optional for macOS prereleases; required for stable signed builds.                       |
+| `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | Optional for macOS prereleases; required for stable signed and notarized builds.         |
 | `NPM_TOKEN`                                                           | Publishing `@pipelab/cli` to npm from its release tag.                                    |
 | `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                                     |
 
@@ -47,6 +47,10 @@ The destination project identifiers and secret values have not been migrated.
 Set the three Pages project-name secrets to the intended v2 projects; do not
 reuse a legacy value without confirming its target. Deploy jobs fail with a
 clear missing-secret error when required Cloudflare values are absent.
+
+For macOS releases, either leave all five Apple secrets unset for ad-hoc-signed
+prereleases or configure all five together. A partial set fails with the names
+of the missing secrets. Stable macOS releases require all five.
 
 ### Automatic workflow behavior
 

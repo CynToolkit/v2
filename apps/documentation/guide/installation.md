@@ -12,6 +12,12 @@ currently match every name produced by the desktop release workflow. If a card
 does not offer the right file, use the GitHub releases page and choose an asset
 for your operating system and architecture.
 
+macOS prereleases may be ad-hoc signed and not notarized until Apple release
+credentials are configured. Gatekeeper may block first launch; approve that
+app with Apple's per-app [Open Anyway](https://support.apple.com/en-us/102445)
+flow. Do not disable Gatekeeper globally. These prereleases may require manual
+installation from the GitHub release page.
+
 ## First launch
 
 1. Open the downloaded installer or application archive for your system.
