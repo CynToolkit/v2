@@ -1,5 +1,29 @@
 # @pipelab/test-utils
 
+## 1.0.0-beta.40
+
+### Major Changes
+
+- 5817f0c: Remove the ActionRunner/Action execution API and the workflow adapter. Plugin
+  registries and plugin tests now use native WorkflowTask implementations.
+
+### Minor Changes
+
+- 5817f0c: Define the native Workflow task context and Pipelab services bundle, with native task test utilities for plugin Workflow tasks.
+
+### Patch Changes
+
+- Updated dependencies [db2afdf]
+- Updated dependencies [5817f0c]
+- Updated dependencies [a38c96e]
+- Updated dependencies [7df1907]
+- Updated dependencies [42bf940]
+- Updated dependencies [8c0b8a4]
+- Updated dependencies [8c0b8a4]
+- Updated dependencies [2ac814b]
+- Updated dependencies [c67d995]
+  - @pipelab/workflow-runtime@1.0.0-beta.2
+
 ## 1.0.0-beta.39
 
 ### Patch Changes

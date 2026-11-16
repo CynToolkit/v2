@@ -1,5 +1,13 @@
 # @pipelab/app
 
+## 2.0.0-beta.34
+
+### Patch Changes
+
+- 2ac814b: Improve Desktop local release recovery and make saved runs and artifacts verifiable after a cold restart.
+- 91b93b9: Authenticate each Desktop-launched CLI server on a per-launch loopback port before loading the UI.
+- d497fd9: Starting the Desktop CLI on a slow Windows machine no longer fails when PowerShell takes more than five seconds to answer: each identity check now has 15 seconds and one retry, and cleanup has 30.
+
 ## 2.0.0-beta.33
 
 ### Patch Changes

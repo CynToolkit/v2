@@ -1,5 +1,11 @@
 # @pipelab/constants
 
+## 1.0.0-beta.35
+
+### Patch Changes
+
+- 91b93b9: Authenticate each Desktop-launched CLI server on a per-launch loopback port before loading the UI.
+
 ## 1.0.0-beta.34
 
 ### Patch Changes
