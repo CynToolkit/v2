@@ -1,11 +1,22 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { ListrTaskState, type ListrTask } from "listr2";
 import { createSandbox } from "@pipelab/test-utils";
-import { createReleaseConfig, type ReleaseConfig } from "@pipelab/shared";
+import { DEFAULT_NODE_VERSION, DEFAULT_PNPM_VERSION } from "@pipelab/constants";
+import {
+  createReleaseConfig,
+  resolveReleaseDefaults,
+  type Events,
+  type ReleaseConfig,
+} from "@pipelab/shared";
 import type { WorkflowEvent, WorkflowResult } from "@pipelab/workflow-runtime";
 import * as coreNode from "@pipelab/core-node";
+import { PipelabContext, registerWorkflowHandlers, useAPI } from "@pipelab/core-node";
+import {
+  engineExecutionOptionPolicy,
+  executionInputPolicy,
+} from "../parity-contracts/workflow-execution";
 import {
   createWorkflowListr,
   formatWorkflowStepElapsed,
@@ -44,6 +55,208 @@ const persistWorkflowFixture = async (
   );
   await writeFile(join(configRoot, "workflows", `${config.id}.json`), JSON.stringify(config));
 };
+
+describe("CLI and IPC workflow execution parity", () => {
+  let sandbox: Awaited<ReturnType<typeof createSandbox>> | undefined;
+
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    await sandbox?.remove();
+    sandbox = undefined;
+  });
+
+  test("runs the same saved workflow through the shared engine with equivalent step results", async () => {
+    sandbox = await createSandbox("workflow-cli-ipc-parity");
+    const sourcePath = join(sandbox.path, "source");
+    await mkdir(sourcePath, { recursive: true });
+    await writeFile(join(sourcePath, "marker.txt"), "same workflow");
+    const config = createReleaseConfig({
+      id: "parity-workflow",
+      project: "parity-project",
+      name: "Parity workflow",
+      source: {
+        provider: "@pipelab/core/source/folder",
+        config: { path: sourcePath },
+      },
+    });
+    await persistWorkflowFixture(sandbox, config);
+
+    const context = new PipelabContext({ userDataPath: sandbox.paths.userData });
+    const nodePath = join(
+      context.getThirdPartyPath("node", DEFAULT_NODE_VERSION),
+      process.platform === "win32" ? "node.exe" : "bin/node",
+    );
+    const pnpmPath = join(context.getPackagesPath("pnpm", DEFAULT_PNPM_VERSION), "bin/pnpm.cjs");
+    await mkdir(dirname(nodePath), { recursive: true });
+    await mkdir(dirname(pnpmPath), { recursive: true });
+    await writeFile(nodePath, "fixture runtime");
+    await writeFile(pnpmPath, "fixture runtime");
+    const executeSharedWorkflow = coreNode.executeWorkflow;
+    let cliResult: WorkflowResult | undefined;
+    let cliRunId: string | undefined;
+    vi.spyOn(coreNode, "executeWorkflow").mockImplementation(async (context, name, options) => {
+      const execution = await executeSharedWorkflow(context, name, options);
+      cliResult = execution.result;
+      cliRunId = execution.runId;
+      return execution;
+    });
+    await runWorkflowCommand(config.id, { userData: sandbox.paths.userData });
+
+    vi.mocked(coreNode.executeWorkflow).mockRestore();
+    registerWorkflowHandlers(context);
+    const sentEvents: Array<Events<"workflow:execute">> = [];
+    await useAPI().handlers["workflow:execute"]?.(
+      { sender: "parity-test" },
+      {
+        value: { name: `workflows/${config.id}`, env: {} },
+        send: async (events) => {
+          sentEvents.push(events);
+        },
+      },
+    );
+    const completion = sentEvents.find(
+      (event) => event.type === "end" && event.data.type === "success",
+    );
+    const ipcResult =
+      completion?.type === "end" && completion.data.type === "success"
+        ? completion.data.result.result
+        : undefined;
+    const ipcRunId =
+      completion?.type === "end" && completion.data.type === "success"
+        ? completion.data.result.runId
+        : undefined;
+    const comparableSteps = (result: WorkflowResult | undefined) =>
+      Object.entries(result?.steps ?? {}).map(([id, step]) => [
+        id,
+        step.status,
+        Object.keys(step.outputs).sort(),
+      ]);
+
+    expect(cliResult?.status).toBe("completed");
+    expect(ipcResult?.status).toBe(cliResult?.status);
+    expect(comparableSteps(ipcResult)).toEqual(comparableSteps(cliResult));
+    if (!cliRunId || !ipcRunId) throw new Error("Expected both hosts to return a workflow run ID.");
+    await expect(
+      readFile(
+        join(context.getArtifactsPath("workflow", cliRunId), "source", "marker.txt"),
+        "utf8",
+      ),
+    ).resolves.toBe("same workflow");
+    await expect(
+      readFile(
+        join(context.getArtifactsPath("workflow", ipcRunId), "source", "marker.txt"),
+        "utf8",
+      ),
+    ).resolves.toBe("same workflow");
+    expect(Object.keys(executionInputPolicy).sort()).toEqual([
+      "connectionOverrides",
+      "connectionValues",
+      "destinations",
+      "env",
+      "name",
+      "release",
+      "skipPreflight",
+    ]);
+    expect(engineExecutionOptionPolicy.skipPreflight).toContain("shared");
+  });
+
+  test("reports the same missing required environment value through CLI and IPC", async () => {
+    sandbox = await createSandbox("workflow-cli-ipc-missing-env");
+    const variableName = "PIPELAB_PARITY_REQUIRED_SOURCE_PATH";
+    vi.stubEnv(variableName, undefined);
+    const config = createReleaseConfig({
+      id: "missing-env-workflow",
+      project: "parity-project",
+      name: "Missing environment workflow",
+      source: {
+        provider: "@pipelab/core/source/folder",
+        config: { path: `\${{ env.${variableName} }}` },
+      },
+    });
+    await persistWorkflowFixture(sandbox, config);
+
+    await expect(
+      runWorkflowCommand(config.id, {
+        userData: sandbox.paths.userData,
+        skipPersistence: true,
+      }),
+    ).rejects.toThrow(new RegExp(variableName));
+
+    const context = new PipelabContext({ userDataPath: sandbox.paths.userData });
+    registerWorkflowHandlers(context);
+    const sentEvents: Array<Events<"workflow:execute">> = [];
+    await useAPI().handlers["workflow:execute"]?.(
+      { sender: "parity-test" },
+      {
+        value: { name: `workflows/${config.id}`, env: {} },
+        send: async (events) => {
+          sentEvents.push(events);
+        },
+      },
+    );
+    const error = sentEvents.find((event) => event.type === "end" && event.data.type === "error");
+    expect(error?.type).toBe("end");
+    if (error?.type === "end" && error.data.type === "error") {
+      expect(error.data.ipcError).toContain(variableName);
+    }
+  });
+
+  test("reports the same missing required Connection through CLI and IPC", async () => {
+    sandbox = await createSandbox("workflow-cli-ipc-missing-connection");
+    const config: ReleaseConfig = {
+      ...createReleaseConfig({
+        id: "missing-connection-workflow",
+        project: "parity-project",
+        name: "Missing Connection workflow",
+        source: {
+          provider: "@pipelab/core/source/folder",
+          config: { path: sandbox.path },
+        },
+      }),
+      destinations: [
+        {
+          id: "itch-production",
+          provider: "@pipelab/plugin-itch/destination",
+          enabled: true,
+          config: { accountConnectionId: "itch", project: "pipelab/game" },
+          slots: [{ id: "windows", enabled: true, config: { channel: "windows" } }],
+        },
+      ],
+    };
+    const resolvedConfig = resolveReleaseDefaults(config, coreNode.buildCoreReleaseRegistry(), {
+      host: { platform: process.platform, architecture: process.arch },
+    });
+    await persistWorkflowFixture(sandbox, resolvedConfig);
+
+    const cliFailure = await runWorkflowCommand(config.id, {
+      userData: sandbox.paths.userData,
+      skipPersistence: true,
+    }).then(
+      () => "",
+      (error: unknown) => (error instanceof Error ? error.message : String(error)),
+    );
+
+    const context = new PipelabContext({ userDataPath: sandbox.paths.userData });
+    registerWorkflowHandlers(context);
+    const sentEvents: Array<Events<"workflow:execute">> = [];
+    await useAPI().handlers["workflow:execute"]?.(
+      { sender: "parity-test" },
+      {
+        value: { name: `workflows/${config.id}`, env: {} },
+        send: async (events) => {
+          sentEvents.push(events);
+        },
+      },
+    );
+    const error = sentEvents.find((event) => event.type === "end" && event.data.type === "error");
+    const ipcFailure =
+      error?.type === "end" && error.data.type === "error" ? error.data.ipcError : "";
+
+    expect(cliFailure).toContain("Required workflow Connection alias is missing: itch");
+    expect(ipcFailure).toBe(cliFailure);
+  });
+});
 
 describe("workflow CLI result output", () => {
   let sandbox: Awaited<ReturnType<typeof createSandbox>> | undefined;

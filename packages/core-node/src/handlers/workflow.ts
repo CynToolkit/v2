@@ -237,23 +237,25 @@ const historyArtifacts = (
     };
   });
 
+export interface ExecuteWorkflowOptions {
+  release?: { version?: string; description?: string };
+  workflowConfig?: ReleaseConfig;
+  env?: WorkflowEnvironment;
+  connectionValues?: WorkflowConnectionValues;
+  connectionOverrides?: readonly WorkflowConnectionOverride[];
+  persist?: boolean;
+  signal?: AbortSignal;
+  onEvent?: (event: WorkflowEvent) => void;
+  onRunCreated?: (id: string) => void | Promise<void>;
+  logger?: WorkflowLogger;
+  /** Skip the destination preflight gate (offline use). The skip is recorded in the run. */
+  skipPreflight?: boolean;
+}
+
 export const executeWorkflow = async (
   context: PipelabContext,
   configName: string,
-  options: {
-    release?: { version?: string; description?: string };
-    workflowConfig?: ReleaseConfig;
-    env?: WorkflowEnvironment;
-    connectionValues?: WorkflowConnectionValues;
-    connectionOverrides?: readonly WorkflowConnectionOverride[];
-    persist?: boolean;
-    signal?: AbortSignal;
-    onEvent?: (event: WorkflowEvent) => void;
-    onRunCreated?: (id: string) => void | Promise<void>;
-    logger?: WorkflowLogger;
-    /** Skip the destination preflight gate (offline use). The skip is recorded in the run. */
-    skipPreflight?: boolean;
-  } = {},
+  options: ExecuteWorkflowOptions = {},
 ) => {
   const workflowId = configName.replace(/^workflows\//, "").replace(/\.json$/, "");
   let storedEntity: Awaited<ReturnType<ReleasePersistence["loadWithProject"]>> | undefined;

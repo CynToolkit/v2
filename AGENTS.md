@@ -126,6 +126,19 @@ Avoid `any` and unjustified casts. Prefer narrowing, schema validation, and
 typed boundaries. Keep generic packages independent of integration-specific
 details. Do not add speculative abstractions or unrelated cleanup.
 
+## CLI and UI parity
+
+The CLI and UI are hosts for the same product capabilities. Put workflow policy,
+validation, execution, and capability checks in shared use cases or the engine;
+host code should provide transport and host-specific inputs only. When adding an
+execution input or feature gate, update the typed CLI/UI parity contract and add
+a behavioral regression test that exercises both host paths through the shared
+engine. Classify deliberate host differences explicitly (for example, CLI
+process environment versus UI-initiated environment, desktop identity-backed
+connections versus explicit CLI overrides, and CLI-only terminal options).
+Never add a client-local feature gate for a capability that should apply to both
+hosts.
+
 ## Area-specific guidance
 
 - Plugin changes: preserve the plugin registry and public exports; put
