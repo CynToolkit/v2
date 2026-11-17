@@ -1,6 +1,11 @@
 import type { ConnectionTestContext, PreflightContext, PreflightResult } from "@pipelab/shared";
 import { failed, preflightSignal, unverifiable, verified } from "../preflight";
 import { inspectChromiumProfile } from "./browser-profiles";
+import type { ProviderHostContext } from "@pipelab/plugin-core";
+
+export interface ConstructPreflightServices {
+  context: ProviderHostContext;
+}
 
 const LOGIN_URL = "https://account.construct.net/login.json";
 
@@ -38,12 +43,13 @@ export const verifyConstructAccount = async (
 /** Reads the browser profile's Construct session in a throwaway copy of the profile. */
 export const verifyConstructProfile = async (
   profilePath: string,
+  context: ProviderHostContext,
   signal?: AbortSignal,
 ): Promise<PreflightResult> => {
   if (!profilePath) return failed("Choose a browser profile signed in to Construct.");
   const timeout = preflightSignal(signal);
   const inspection = await Promise.race([
-    inspectChromiumProfile(profilePath),
+    inspectChromiumProfile(profilePath, context),
     new Promise<undefined>((resolve) =>
       timeout.addEventListener("abort", () => resolve(undefined), { once: true }),
     ),
@@ -59,8 +65,9 @@ export const verifyConstructProfile = async (
 export const checkConstructPreflight = async ({
   inputs,
   connectionValues,
+  services,
   signal,
-}: PreflightContext<unknown>): Promise<PreflightResult> => {
+}: PreflightContext<ConstructPreflightServices>): Promise<PreflightResult> => {
   const alias = String(inputs.accountConnectionId || "").trim();
   if (alias) {
     const account = connectionValues[alias];
@@ -73,7 +80,11 @@ export const checkConstructPreflight = async ({
   const username = String(inputs.username ?? "").trim();
   const password = String(inputs.password ?? "");
   if (username && password) return verifyConstructAccount(username, password, signal);
-  return verifyConstructProfile(String(inputs.customProfile ?? "").trim(), signal);
+  return verifyConstructProfile(
+    String(inputs.customProfile ?? "").trim(),
+    services.context,
+    signal,
+  );
 };
 
 export const testConstructConnection = async ({
