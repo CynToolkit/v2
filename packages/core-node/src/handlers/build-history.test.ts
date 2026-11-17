@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { spawn } from "node:child_process";
@@ -34,6 +34,28 @@ afterEach(async () => {
 });
 
 describe("BuildHistoryStorage workflow runs", () => {
+  it("hides an invalid history file instead of failing, keeping it aside on disk", async () => {
+    const root = await mkdtemp(join(tmpdir(), "pipelab-runs-"));
+    workspaces.push(root);
+    const context = new PipelabContext({ userDataPath: root });
+    const storage = new BuildHistoryStorage(context);
+    const historyDirectory = context.getConfigPath("pipelines");
+    await mkdir(historyDirectory, { recursive: true });
+    const badEntry = { ...entry("run-bad", "workflow-a", 10), logs: [{ message: "no id" }] };
+    await writeFile(
+      join(historyDirectory, "project-1.history.json"),
+      JSON.stringify({ version: "1.0.0", entries: [badEntry] }),
+    );
+
+    await expect(storage.reconcileInterruptedRuns()).resolves.toBe(0);
+    expect(await storage.getAll()).toEqual([]);
+    const files = await readdir(historyDirectory);
+    expect(files.some((file) => file.startsWith("project-1.history.json.invalid-"))).toBe(true);
+
+    await storage.save(entry("run-new", "workflow-a", 20));
+    expect((await storage.getByProject("project-1")).map((run) => run.id)).toEqual(["run-new"]);
+  });
+
   it("reads legacy pipelineId entries from the existing project history file", async () => {
     const root = await mkdtemp(join(tmpdir(), "pipelab-runs-"));
     workspaces.push(root);
@@ -231,7 +253,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     });
   });
 
-  it("does not report a corrupt history document as a missing run", async () => {
+  it("hides a corrupt history document and keeps the file aside", async () => {
     const root = await mkdtemp(join(tmpdir(), "pipelab-runs-"));
     workspaces.push(root);
     const storage = new BuildHistoryStorage(new PipelabContext({ userDataPath: root }));
@@ -239,7 +261,10 @@ describe("BuildHistoryStorage workflow runs", () => {
     await mkdir(join(root, "config", "pipelines"), { recursive: true });
     await writeFile(historyPath, "{ incomplete", "utf8");
 
-    await expect(storage.get("run-1", "project-1")).rejects.toThrow(/invalid|json|parse/i);
+    await expect(storage.get("run-1", "project-1")).resolves.toBeUndefined();
+    const files = await readdir(join(root, "config", "pipelines"));
+    expect(files).toHaveLength(1);
+    expect(files[0]).toMatch(/^project-1\.history\.json\.invalid-\d+$/);
   });
 
   it("propagates unexpected history directory failures", async () => {

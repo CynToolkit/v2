@@ -25,6 +25,22 @@ let launcherCreationTime: string | undefined;
 let stoppingServerProcess: ChildProcess | null = null;
 let cleanupPendingProcess: ChildProcess | null = null;
 
+const CLI_OUTPUT_TAIL_LINES = 40;
+let cliOutputTail: string[] = [];
+let lastCliExitCode: number | null = null;
+
+/**
+ * When the CLI died after reporting ready, the UI load fails with a generic
+ * ERR_FAILED. Return the CLI's last output so the real cause can be shown.
+ */
+export const getCliExitDiagnostics = (): string | undefined => {
+  if (lastCliExitCode === null) return undefined;
+  return (
+    `The background server exited with code ${lastCliExitCode}. Last output:\n` +
+    (cliOutputTail.length ? cliOutputTail.join("\n") : "(no output captured)")
+  );
+};
+
 export const getUiDevelopmentPort = () => {
   const testPort = process.env.PIPELAB_TEST_DESKTOP_UI_PORT;
   if (process.env.PIPELAB_TEST_DESKTOP === "1" && testPort && /^\d+$/.test(testPort)) {
@@ -151,6 +167,14 @@ export const startServer = async (): Promise<number> => {
       console.info(
         `[Server] CLI launch environment: NODE_OPTIONS=${childEnv.NODE_OPTIONS ? "set" : "unset"}, ELECTRON_RUN_AS_NODE=${childEnv.ELECTRON_RUN_AS_NODE ?? "unset"}, npm_node_execpath=${process.env.npm_node_execpath ? "set" : "unset"}`,
       );
+      cliOutputTail = [];
+      for (const stream of [child.stdout, child.stderr]) {
+        stream?.on("data", (chunk: Buffer | string) => {
+          cliOutputTail.push(...chunk.toString().split(/\r?\n/).filter(Boolean));
+          if (cliOutputTail.length > CLI_OUTPUT_TAIL_LINES)
+            cliOutputTail.splice(0, cliOutputTail.length - CLI_OUTPUT_TAIL_LINES);
+        });
+      }
       child.on("error", (error) => console.error("ERROR: CLI server process failed:", error));
       monitorCliProcessExit(child, (code) => {
         if (
@@ -178,6 +202,7 @@ export const startServer = async (): Promise<number> => {
       });
       child.on("close", (code) => {
         console.info(`CLI server process exited with code ${code}`);
+        lastCliExitCode = code ?? -1;
         if (
           serverProcess === child &&
           stoppingServerProcess !== child &&

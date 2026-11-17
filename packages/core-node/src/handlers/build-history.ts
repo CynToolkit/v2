@@ -55,9 +55,27 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
     try {
       return parseBuildHistoryDocument(JSON.parse(data)).entries;
     } catch (error) {
-      throw new Error(
-        `Invalid build history for project ${projectId}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      // Build history files are not migrated. An unreadable file must never block
+      // startup or new runs: move it aside (kept on disk) and start empty.
+      const reason = error instanceof Error ? error.message : String(error);
+      const quarantinedPath = `${historyPath}.invalid-${Date.now()}`;
+      try {
+        await rename(historyPath, quarantinedPath);
+        this.logger
+          .logger()
+          .error(
+            `Ignoring invalid build history for project ${projectId}: ${reason}. ` +
+              `The file was moved to ${quarantinedPath}; delete it if you no longer need it.`,
+          );
+      } catch (renameError) {
+        this.logger
+          .logger()
+          .error(
+            `Ignoring invalid build history for project ${projectId} in ${historyPath}: ${reason}. ` +
+              `It could not be moved aside (${renameError instanceof Error ? renameError.message : String(renameError)}); delete or move it manually.`,
+          );
+      }
+      return [];
     }
   }
 
