@@ -17,8 +17,8 @@ one Changesets fixed group and release with the same version.
 4. After that PR merges, the action runs `pnpm release`: build the bundled CLI,
    inspect its npm package with `npm pack --dry-run`, and run `changeset publish`.
 5. When the action reports `published: true`, the same workflow builds the
-   desktop installers and publishes one GitHub release tagged
-   `@pipelab/app@<version>` at that commit.
+   desktop installers and publishes one GitHub release named `v<version>`
+   (for example, `v2.0.0-beta.40`), tagged `@pipelab/app@<version>` at that commit.
 
 The CLI is the only npm-public workspace. Its `publishConfig.directory` points
 to `apps/cli/dist`, which contains the standalone bundle, executable manifest,
