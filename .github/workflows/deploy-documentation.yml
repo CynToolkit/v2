@@ -1,58 +1,14 @@
 name: Deploy Documentation
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'apps/documentation/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-documentation.yml'
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - 'apps/documentation/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-documentation.yml'
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
-concurrency:
-  group: deploy-documentation-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  validate-fork:
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
-          run_install: false
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24.15.0
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build documentation
-        run: pnpm docs:build
-
   deploy:
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) }}
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       deployments: write
@@ -73,8 +29,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build documentation
-        run: pnpm docs:build
+      - name: Download verified documentation build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-documentation
+          path: apps/documentation/.vitepress/dist
 
       - name: Validate Cloudflare deployment configuration
         env:

@@ -83,12 +83,18 @@ Root `pnpm test`, `pnpm lint`, `pnpm typecheck`, and `pnpm build` delegate to Tu
 
 ### Cross-platform local release CI
 
-Push and pull request CI runs credential-free local release, run-history,
-artifact IPC, and Construct profile validation tests on Linux, Windows, and
-macOS, regardless of branch. It does not launch Electron; the minimal startup
+The single **CI & Release** workflow (`release.yml`) runs on pushes to `main`
+and `develop`, and PRs targeting those branches. Feature branch pushes alone
+do not duplicate their PR run. Its **CI passed** gate blocks deployments and
+main's Changesets publication until required checks succeed.
+
+Linux's full test suite covers credential-free local release, run-history,
+artifact IPC, and Construct profile validation. Focused platform jobs run the
+same release coverage on Windows and macOS without duplicating Linux tests.
+Regular CI does not launch Electron; the minimal startup
 smoke remains manual-only. Authenticated Construct-to-Electron acceptance is
 an explicit workflow dispatch with `Run authenticated local Ship` enabled.
-The dispatch runs after the credential-free platform matrix passes; pushes
+The dispatch runs after the complete CI gate passes; pushes
 and pull requests do not access Construct secrets. It requires the
 `CONSTRUCT_CI_USERNAME` and `CONSTRUCT_CI_PASSWORD` GitHub Actions secrets for
 a dedicated test account. CI creates a temporary Chromium profile through
