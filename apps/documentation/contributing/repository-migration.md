@@ -54,8 +54,8 @@ of the missing secrets. Stable macOS releases require all five.
 
 | Event                                              | CI and deployment behavior                                                                                                                                                                           |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Push to `main`                                                     | Run CI, then deploy changed web apps to Pages branch `main` after the CI gate succeeds. Production Supabase values are available to main builds. |
-| Push to `develop`                                                  | Run CI, then deploy changed web apps to Pages branch `develop` as previews after the CI gate succeeds. Production Supabase values are omitted. |
+| Push to `main`                                                     | Run CI, then deploy all three web apps to Pages branch `main` after the CI gate succeeds. Production Supabase values are available to main builds. |
+| Push to `develop`                                                  | Run CI, then deploy all three web apps to Pages branch `develop` as previews after the CI gate succeeds. Production Supabase values are omitted. |
 | Pull request targeting `main` or `develop` from this repository    | Run CI, then deploy changed web apps as Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
 | Pull request targeting `main` or `develop` from a fork             | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped. |
 | Manual dispatch from `main`                                        | Run validation and optionally authenticated Construct acceptance; no deployment or release. |

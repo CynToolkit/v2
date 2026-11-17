@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: pipeline-${{ github.event.pull_request.number || github.ref }}
+  group: pipeline-${{ github.event_name == 'workflow_dispatch' && 'dispatch-' || '' }}${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -273,7 +273,7 @@ jobs:
           test "$PLATFORM_RESULT" = success
 
   changes:
-    name: Find changed web apps
+    name: Select web deployments
     runs-on: ubuntu-latest
     outputs:
       editor: ${{ steps.paths.outputs.editor }}
@@ -286,13 +286,15 @@ jobs:
       - name: Match deployment paths
         id: paths
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
         shell: bash
         run: |
           files="$RUNNER_TEMP/changed-files"
           all=false
-          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+          # Every successful push must catch up apps skipped by earlier failed/cancelled runs.
+          if [[ "$EVENT_NAME" == push || -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
             all=true
             touch "$files"
           else

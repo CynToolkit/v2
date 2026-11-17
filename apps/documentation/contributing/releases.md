@@ -53,14 +53,18 @@ the gate fails if any required job fails, is cancelled, or is skipped.
 Production deployments and Changesets publication also depend on this gate
 for the exact commit being processed. The npm trusted workflow remains `release.yml`.
 
-Changed editor, website and documentation deployments run independently after
-CI passes: production on `main`, previews on `develop` and same-repository
-PRs. Fork PRs run validation without deployment credentials. The deployment
+Editor, website and documentation deployments run independently after CI
+passes. Every successful push deploys all three apps: production on `main`,
+previews on `develop`. This catches up changes from earlier failed or
+cancelled runs. Same-repository PR previews deploy only changed apps. Fork PRs
+run validation without deployment credentials. The deployment
 YAML files are reusable workflows called by this entry point, not independent
 push triggers. Website and documentation deployments download the verified build artifacts
 from the same run. Editor deployment builds with its channel's configuration,
 which can differ from the desktop UI used in validation.
-Outdated PR/develop runs are cancelled; active main runs finish in sequence.
+Outdated PR/develop runs are cancelled. An in-progress main push run is not
+cancelled; a newer push can replace a queued main run. Manual acceptance runs
+have a separate concurrency group and do not replace push runs.
 Manual dispatch runs checks and optional authenticated acceptance only; it does
 not deploy or publish. To retry deployment, re-run failed jobs on its original run.
 

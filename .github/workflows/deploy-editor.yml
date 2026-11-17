@@ -32,9 +32,9 @@ jobs:
       - name: Build editor UI
         env:
           VITE_PIPELAB_MODE: ${{ (github.event_name == 'pull_request' || github.ref == 'refs/heads/develop') && 'hosted' || '' }}
-          SUPABASE_URL: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && secrets.SUPABASE_URL || '' }}
-          SUPABASE_PUBLISHABLE_KEY: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
-          SUPABASE_PROJECT_ID: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' && secrets.SUPABASE_PROJECT_ID || '' }}
+          SUPABASE_URL: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SUPABASE_URL || '' }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
+          SUPABASE_PROJECT_ID: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SUPABASE_PROJECT_ID || '' }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
         run: pnpm --filter @pipelab/ui build
 
