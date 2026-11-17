@@ -10,6 +10,9 @@
       "dependsOn": ["^build", "@pipelab/ui#build"],
       "outputs": ["dist/**"]
     },
+    "@pipelab/documentation#build": {
+      "outputs": [".vitepress/dist/**"]
+    },
     "package": {
       "dependsOn": ["build"],
       "outputs": ["out/**", "bin/**"]
