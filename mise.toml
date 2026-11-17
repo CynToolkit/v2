@@ -1,7 +1,7 @@
 [tools]
 node = "24"
 pnpm = "10.33.0"
-supabase = "2.117.0"
+supabase = "3.2.0"
 
 [tasks.install]
 run = "pnpm install"
@@ -81,7 +81,7 @@ if [ ! -f supabase/config.toml ]; then
   supabase init
 fi
 supabase start
-supabase migration up --local
+supabase migration up
 '''
 
 [tasks."local:r2"]
@@ -126,7 +126,7 @@ description = "Deploy all Supabase Edge Functions to an explicitly selected proj
 run = '''
 set -eu
 : "${SUPABASE_PROJECT_REF:?Set SUPABASE_PROJECT_REF to the approved Supabase project}"
-supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+supabase functions deploy --remote="$SUPABASE_PROJECT_REF"
 '''
 
 [tasks."local:app"]

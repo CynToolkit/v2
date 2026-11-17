@@ -10,7 +10,7 @@
     "typecheck": "vue-tsc --build --force",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "supa:types": "supabase gen types typescript --project-id uehmyyeqheqnxmzhctcd --schema public > src/database.types.ts"
+    "supa:types": "supabase gen types typescript --remote=uehmyyeqheqnxmzhctcd --schema public > src/database.types.ts"
   },
   "dependencies": {
     "@pipelab/shared": "workspace:*",

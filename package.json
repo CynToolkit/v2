@@ -14,7 +14,7 @@
     "make": "pnpm --filter @pipelab/app make",
     "changeset": "changeset",
     "version-packages": "pnpm changeset version && pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts",
-    "supa:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > packages/shared/src/database.types.ts",
+    "supa:types": "supabase gen types typescript --remote=$SUPABASE_PROJECT_ID > packages/shared/src/database.types.ts",
     "pipelab": "node scripts/pipelab-dev.mjs",
     "docs": "pnpm --filter @pipelab/documentation dev",
     "docs:build": "pnpm --filter @pipelab/documentation build",
