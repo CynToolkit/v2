@@ -3,7 +3,12 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
-import { getUiDevelopmentPort, startServer, stopServer } from "./main/server-process";
+import {
+  getCliExitDiagnostics,
+  getUiDevelopmentPort,
+  startServer,
+  stopServer,
+} from "./main/server-process";
 import { getProtocolName, getAppBundleId } from "@pipelab/constants";
 import { registerIpcHandlers } from "./main/ipc-handlers";
 import { installUpdateAfterServerStops } from "./main/update-shutdown";
@@ -696,7 +701,8 @@ app.whenReady().then(async () => {
     dialog.showErrorBox(
       "Startup Error",
       "Failed to start the background server. This is required for Pipelab to function.\n\n" +
-        (error instanceof Error ? error.message : String(error)),
+        (error instanceof Error ? error.message : String(error)) +
+        (getCliExitDiagnostics() ? `\n\n${getCliExitDiagnostics()}` : ""),
     );
     app.quit();
     return;
