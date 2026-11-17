@@ -31,12 +31,11 @@
     "typecheck": "tsc -b",
     "test": "vitest run"
   },
-  "dependencies": {},
   "devDependencies": {
     "@pipelab/tsconfig": "workspace:*",
     "@types/node": "24.12.2",
     "oxfmt": "0.40.0",
-    "oxlint": "1.55.0",
+    "oxlint": "1.94.0",
     "typescript": "5.9.3",
     "vitest": "3.1.4"
   }

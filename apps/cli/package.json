@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false && tsc --noEmit -p tsconfig.parity.json --composite false"
   },
   "dependencies": {
-    "@clack/prompts": "1.2.0",
+    "@clack/prompts": "1.9.0",
     "@pipelab/constants": "workspace:*",
     "@pipelab/core-node": "workspace:*",
     "@pipelab/providers": "workspace:*",
@@ -38,17 +38,17 @@
     "commander": "^12.1.0",
     "dotenv": "17.4.2",
     "execa": "9.5.1",
-    "listr2": "11.1.0",
+    "listr2": "11.4.1",
     "nanoid": "5.1.16",
     "posthog-node": "5.30.6",
-    "serve-handler": "6.1.7"
+    "serve-handler": "6.1.8"
   },
   "devDependencies": {
     "@pipelab/test-utils": "workspace:*",
     "@pipelab/tsconfig": "workspace:*",
     "@types/node": "24.12.2",
     "cross-env": "7.0.3",
-    "tsdown": "0.21.2",
+    "tsdown": "0.23.7",
     "typescript": "^5.0.0",
     "vitest": "3.1.4"
   },
