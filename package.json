@@ -23,6 +23,7 @@
     "release": "pnpm exec turbo build --filter=@pipelab/cli... --concurrency=2 && pnpm --filter @pipelab/cli exec npm pack ./dist --dry-run && pnpm changeset publish"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "^2.27.11",
     "@pipelab/constants": "workspace:*",
     "@pipelab/core-node": "workspace:*",

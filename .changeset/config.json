@@ -1,16 +1,10 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.2/schema.json",
-  "_changelog": [
-    "@changesets/changelog-github",
-    {
-      "repo": "CynToolkit/v2"
-    }
-  ],
   "privatePackages": {
     "tag": false,
     "version": true
   },
-  "changelog": "@changesets/changelog-git",
+  "changelog": ["@changesets/changelog-github", { "repo": "CynToolkit/v2" }],
   "commit": false,
   "access": "public",
   "fixed": [["@pipelab/app", "@pipelab/ui", "@pipelab/cli"]],
