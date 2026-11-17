@@ -9,7 +9,7 @@ Desktop (`@pipelab/app`), CLI (`@pipelab/cli`), and UI (`@pipelab/ui`) belong to
 one Changesets fixed group and release with the same version.
 
 1. Run `pnpm changeset`, describe the change, and commit it with your code.
-2. Merge to `main`. `.github/workflows/release.yml` runs `changesets/action@v1`
+2. Merge to `main`. After CI passes, `.github/workflows/release.yml` runs `changesets/action@v1`
    to open or update a **Version Packages** pull request. `pnpm version-packages`
    updates versions, changelogs, and the pnpm lockfile.
 3. On the generated PR, select **Approve workflows to run** if GitHub requires
@@ -44,6 +44,25 @@ All builds use Node 24.15.0 and frozen pnpm installs. Review the release target,
 signing credentials, and old-client update bridge before merging a version PR.
 See the [repository migration runbook](/contributing/repository-migration) for
 required secrets and repository setup.
+
+The **CI & Release** workflow is the single entry point for PRs targeting
+`main` or `develop`, pushes to those branches, and manual acceptance checks.
+Lint, typecheck, Linux tests/builds and Windows/macOS release checks run before
+the **CI passed** gate. Configure branch protection to require **CI passed**;
+the gate fails if any required job fails, is cancelled, or is skipped.
+Production deployments and Changesets publication also depend on this gate
+for the exact commit being processed. The npm trusted workflow remains `release.yml`.
+
+Changed editor, website and documentation deployments run independently after
+CI passes: production on `main`, previews on `develop` and same-repository
+PRs. Fork PRs run validation without deployment credentials. The deployment
+YAML files are reusable workflows called by this entry point, not independent
+push triggers. Website and documentation deployments download the verified build artifacts
+from the same run. Editor deployment builds with its channel's configuration,
+which can differ from the desktop UI used in validation.
+Outdated PR/develop runs are cancelled; active main runs finish in sequence.
+Manual dispatch runs checks and optional authenticated acceptance only; it does
+not deploy or publish. To retry deployment, re-run failed jobs on its original run.
 
 ## Desktop GitHub release
 
@@ -127,7 +146,7 @@ releases are marked as prereleases when the shared version contains `-`.
 
 ## Verify and recover
 
-Inspect the single **Release** Actions run: CLI npm publication, each desktop
+Inspect the single **CI & Release** Actions run: CLI npm publication, each desktop
 build, and the final GitHub release publication. Confirm the npm version and
 desktop tag match, and inspect the installer assets and macOS checks. A desktop
 version mismatch fails before packaging; missing artifacts fail upload.

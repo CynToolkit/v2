@@ -1,39 +1,14 @@
 name: Deploy Editor UI
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'apps/ui/**'
-      - 'packages/**'
-      - 'plugins/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-editor.yml'
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - 'apps/ui/**'
-      - 'packages/**'
-      - 'plugins/**'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-editor.yml'
-      - '.github/actions/upsert-preview-comment/action.yml'
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
-concurrency:
-  group: deploy-editor-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   deploy:
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')) }}
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       deployments: write

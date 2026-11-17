@@ -10,9 +10,8 @@ releases, Actions history, secrets, or integrations.
 
 ## Configure v2 before enabling Actions
 
-Actions are currently disabled in v2. Keep them disabled until the required
-secrets, Cloudflare targets, permissions, and branch protections below are
-ready. No deployment, billing operation, or release is performed by this
+Configure the required secrets, Cloudflare targets, permissions, and branch
+protections below before enabling deployments in a new environment. No deployment, billing operation, or release is performed by this
 runbook.
 
 Create a `main` ruleset or branch protection rule. Set required reviews and
@@ -55,15 +54,15 @@ of the missing secrets. Stable macOS releases require all five.
 
 | Event                                              | CI and deployment behavior                                                                                                                                                                           |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Push to `main`                                                     | Run CI and deploy the editor, website, and documentation to Pages branch `main`. Production Supabase values are available to main builds. |
-| Push to `develop`                                                  | Run CI and deploy the editor, website, and documentation to Pages branch `develop` as previews. Production Supabase values are omitted. |
-| Pull request targeting `main` or `develop` from this repository    | Run CI and deploy Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
+| Push to `main`                                                     | Run CI, then deploy changed web apps to Pages branch `main` after the CI gate succeeds. Production Supabase values are available to main builds. |
+| Push to `develop`                                                  | Run CI, then deploy changed web apps to Pages branch `develop` as previews after the CI gate succeeds. Production Supabase values are omitted. |
+| Pull request targeting `main` or `develop` from this repository    | Run CI, then deploy changed web apps as Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
 | Pull request targeting `main` or `develop` from a fork             | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped. |
-| Manual dispatch from `main`                                        | Retry editor, website, or documentation production deployment without a code push. |
-| Manual dispatch from `develop`                                     | Retry an editor, website, or documentation preview deployment without a code push. |
+| Manual dispatch from `main`                                        | Run validation and optionally authenticated Construct acceptance; no deployment or release. |
+| Manual dispatch from `develop`                                     | Run validation and optionally authenticated Construct acceptance; no deployment or release. |
 
-The **Release** workflow on `main` uses `changesets/action@v1` to open a
-version pull request or publish the CLI to npm. Desktop, CLI, and UI share one
+The single **CI & Release** workflow in `release.yml` uses `changesets/action@v1` to open a
+version pull request or publish the CLI to npm on `main`, after **CI passed** succeeds. Desktop, CLI, and UI share one
 fixed-group version. After successful npm publication, the same workflow
 builds desktop installers and publishes one GitHub release for that version.
 Configure npm Trusted Publishing for `@pipelab/cli`: GitHub owner `CynToolkit`,
@@ -73,9 +72,10 @@ create pull requests in repository settings, and approve workflows on the
 generated PR when GitHub requires it. No tag push or separate dispatch is
 needed. See [Release Pipelab](/contributing/releases).
 
-Deploy workflows use `pull_request` and check that the PR head repository is
+Deployment files use `workflow_call` and are called only after CI succeeds.
+The entry workflow checks that the PR head repository is
 the same repository before running jobs that can access secrets. They do not
-use `pull_request_target`. A fork PR still receives the general CI workflow and
+use `pull_request_target`. A fork PR still receives the general CI checks and
 documentation build, without Cloudflare or production Supabase credentials.
 
 Cloudflare project names and domains are not encoded in these workflows. The
