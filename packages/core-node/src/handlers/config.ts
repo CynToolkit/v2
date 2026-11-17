@@ -27,19 +27,22 @@ export const registerConfigHandlers = (context: PipelabContext) => {
   const { handle } = useAPI();
   const { logger } = useLogger();
   const releasePersistence = () => new ReleasePersistence(context);
-  const profileCache = new ConstructProfileDiscoveryCache(discoverBrowserProfiles, async (path) => {
-    const inspected = await inspectChromiumProfile(path);
-    const candidate: BrowserProfileCandidate = {
-      browser: "Manual",
-      profileName: path.split(/[\\/]/).pop() || path,
-      path,
-      isDefault: false,
-      ...inspected,
-      score: null,
-      reason: inspected.usable ? undefined : "Folder is not a readable Chromium profile",
-    };
-    return candidate;
-  });
+  const profileCache = new ConstructProfileDiscoveryCache(
+    () => discoverBrowserProfiles(context),
+    async (path) => {
+      const inspected = await inspectChromiumProfile(path, context);
+      const candidate: BrowserProfileCandidate = {
+        browser: "Manual",
+        profileName: path.split(/[\\/]/).pop() || path,
+        path,
+        isDefault: false,
+        ...inspected,
+        score: null,
+        reason: inspected.usable ? undefined : "Folder is not a readable Chromium profile",
+      };
+      return candidate;
+    },
+  );
   handle("construct:profiles:discover", async (_, { send, value }) => {
     try {
       const profiles = await profileCache.get(value.path, value.forceRefresh);

@@ -1,6 +1,21 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { checkConstructPreflight, testConstructConnection } from "./preflight";
 
+const context = {
+  releaseTag: "latest",
+  getPackagesPath: () => "",
+  getThirdPartyPath: () => "",
+  getTempPath: () => "",
+  createTempFolder: async () => "",
+  getCachePath: () => "",
+  getPnpmPath: () => "",
+  getNodePath: () => process.execPath,
+  getConnectionsPath: () => "",
+  ensureNodeJS: async () => process.execPath,
+  ensurePNPM: async () => "pnpm",
+  resolveBundledAsset: async () => "",
+};
+
 const login = (body: unknown, status = 200) =>
   vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(body), { status }));
 
@@ -18,7 +33,7 @@ describe("Construct account check", () => {
     login({ request: { status: "error" } });
     const result = await testConstructConnection({
       values: { username: "a", password: "b" },
-      services: {},
+      services: { context },
     });
     expect(result.status).toBe("failed");
   });
@@ -27,7 +42,7 @@ describe("Construct account check", () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
     const result = await testConstructConnection({
       values: { username: "a", password: "b" },
-      services: {},
+      services: { context },
     });
     expect(result.status).toBe("unverifiable");
   });
@@ -37,7 +52,7 @@ describe("Construct account check", () => {
     const result = await checkConstructPreflight({
       inputs: { accountConnectionId: "acc" },
       connectionValues: { acc: { username: "a", password: "b" } },
-      services: {},
+      services: { context },
     });
     expect(result.status).toBe("verified");
   });
@@ -46,7 +61,7 @@ describe("Construct account check", () => {
     const result = await checkConstructPreflight({
       inputs: { accountConnectionId: "acc" },
       connectionValues: { acc: {} },
-      services: {},
+      services: { context },
     });
     expect(result.status).toBe("failed");
   });

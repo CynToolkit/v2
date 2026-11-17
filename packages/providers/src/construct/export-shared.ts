@@ -6,7 +6,7 @@ import {
   InputsDefinition,
   ParamsToInput,
   runWithLiveLogs,
-  fetchPackage,
+  type fetchPackage,
 } from "@pipelab/plugin-core";
 import {
   constructAccountOrigin,
@@ -23,7 +23,7 @@ import { dirname, join, delimiter, resolve, sep } from "node:path";
 import { mkdir, readdir, stat, copyFile, chmod, rm, open } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
-import { createRequire } from "node:module";
+import { loadConstructPlaywright } from "./playwright-runtime.js";
 import lockfile from "proper-lockfile";
 import {
   formatRendererCrash,
@@ -497,10 +497,7 @@ export const exportc3p = async (
     const browserName = "chromium";
 
     const packageResolutionStartedAt = Date.now();
-    const { packageDir: playwrightPkgPath } = await fetchPackage("playwright-core", "1.62.1", {
-      installDeps: true,
-      context: ctx,
-    });
+    const { packageDir: playwrightPkgPath, playwright } = await loadConstructPlaywright(ctx);
     throwIfAborted(abortSignal);
     logElapsed("Playwright package resolved after", packageResolutionStartedAt);
     const playwrightCli = join(playwrightPkgPath, "cli.js");
@@ -509,13 +506,6 @@ export const exportc3p = async (
 
     process.env.PLAYWRIGHT_BROWSERS_PATH = browsersPath;
 
-    // Resolve through Playwright so its revision and platform-specific directory
-    // stay aligned with the installed playwright-core package.
-    // Electron's Vite main-process bundle is CommonJS, so use an absolute anchor
-    // for createRequire instead of relying on import.meta.url.
-    const require = createRequire(join(process.cwd(), "package.json"));
-    const playwrightModule = require(join(playwrightPkgPath, "index.js"));
-    const playwright = playwrightModule.default || playwrightModule;
     const browserInstance = playwright[browserName];
     const browserExecutable = browserInstance.executablePath();
 

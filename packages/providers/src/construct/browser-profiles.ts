@@ -2,7 +2,9 @@ import { access, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { homedir, platform, tmpdir } from "node:os";
 import { delimiter, join, normalize } from "node:path";
-import { chromium } from "playwright";
+import type { BrowserType } from "playwright";
+import type { ProviderHostContext } from "@pipelab/plugin-core";
+import { loadConstructPlaywright } from "./playwright-runtime.js";
 import { preparePlaywrightProfile } from "./export-shared.js";
 
 export type BrowserProfileAuthStatus = "authenticated" | "not-authenticated" | "unknown";
@@ -158,7 +160,7 @@ const chromiumRoots = (): Array<[string, string]> => {
   ];
 };
 
-const executable = (browser: string) => {
+const executable = (browser: string, chromium: BrowserType) => {
   const names =
     browser === "Chrome"
       ? ["google-chrome-stable", "chrome"]
@@ -220,10 +222,11 @@ export const chromiumProfiles = async (root: string): Promise<ChromiumProfile[]>
 
 export const inspectChromiumProfile = async (
   profile: string,
+  context: ProviderHostContext,
 ): Promise<
   Pick<BrowserProfileCandidate, "addonCount" | "authStatus" | "lastUpdatedAt" | "usable">
 > => {
-  const inspection = await inspectChromiumProfileForBrowser(profile, "Chrome");
+  const inspection = await inspectChromiumProfileForBrowser(profile, "Chrome", context);
   return {
     ...inspection,
     lastUpdatedAt: await constructStorageUpdatedAt(profile),
@@ -231,9 +234,11 @@ export const inspectChromiumProfile = async (
   };
 };
 
-const inspectChromiumProfileForBrowser = async (profile: string, browser: string) => {
-  const browserPath = executable(browser);
-  if (!browserPath) return { addonCount: null, authStatus: "unknown" as const };
+const inspectChromiumProfileForBrowser = async (
+  profile: string,
+  browser: string,
+  context: ProviderHostContext,
+) => {
   try {
     await access(join(profile, "Preferences"));
   } catch {
@@ -241,13 +246,17 @@ const inspectChromiumProfileForBrowser = async (profile: string, browser: string
   }
   const temp = await mkdtemp(join(tmpdir(), "pipelab-profile-"));
   try {
+    const { playwright } = await loadConstructPlaywright(context);
+    const { chromium } = playwright;
+    const browserPath = executable(browser, chromium);
+    if (!browserPath) return { addonCount: null, authStatus: "unknown" as const };
     await preparePlaywrightProfile(profile, temp, () => {});
-    const context = await chromium.launchPersistentContext(temp, {
+    const browserContext = await chromium.launchPersistentContext(temp, {
       executablePath: browserPath,
       headless: true,
     });
     try {
-      const page = await context.newPage();
+      const page = await browserContext.newPage();
       const authStatusPromise = waitForConstructAuthResponse(page);
       await page
         .goto("https://editor.construct.net/", { waitUntil: "domcontentloaded", timeout: 15000 })
@@ -272,7 +281,7 @@ const inspectChromiumProfileForBrowser = async (profile: string, browser: string
       });
       return { addonCount, authStatus };
     } finally {
-      await context.close();
+      await browserContext.close();
     }
   } catch {
     return { addonCount: null, authStatus: "unknown" as const };
@@ -281,13 +290,13 @@ const inspectChromiumProfileForBrowser = async (profile: string, browser: string
   }
 };
 
-const discoverChromium = async () => {
+const discoverChromium = async (context: ProviderHostContext) => {
   const found: BrowserProfileCandidate[] = [];
   for (const [browser, root] of chromiumRoots()) {
     for (const profile of await chromiumProfiles(root)) {
       const path = normalize(join(root, profile.path));
       if (!existsSync(join(path, "Preferences"))) continue;
-      const inspection = await inspectChromiumProfileForBrowser(path, browser);
+      const inspection = await inspectChromiumProfileForBrowser(path, browser, context);
       found.push({
         browser,
         profileName: profile.name,
@@ -402,9 +411,11 @@ const discoverSafari = async (): Promise<BrowserProfileCandidate[]> => {
   }
 };
 
-export const discoverBrowserProfiles = async (): Promise<BrowserProfileCandidate[]> => {
+export const discoverBrowserProfiles = async (
+  context: ProviderHostContext,
+): Promise<BrowserProfileCandidate[]> => {
   const candidates = [
-    ...(await discoverChromium()),
+    ...(await discoverChromium(context)),
     ...(await discoverFirefox()),
     ...(await discoverSafari()),
   ];
