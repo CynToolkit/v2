@@ -2,34 +2,48 @@
 
 This runbook covers releases of the Pipelab application and CLI themselves. It is separate from user-authored **Release workflows**, which build or deliver a user's game. A game workflow does not create a Pipelab GitHub Release or publish the CLI to npm.
 
-## Version and tag flow
+## Shared release flow
 
-The repository uses Changesets. The root README documents this sequence:
+The repository follows the [Changesets Action publishing guide](https://github.com/changesets/action/tree/v1#with-publishing).
+Desktop (`@pipelab/app`), CLI (`@pipelab/cli`), and UI (`@pipelab/ui`) belong to
+one Changesets fixed group and release with the same version.
 
-```sh
-pnpm changeset
-pnpm changeset version
-pnpm changeset tag
-```
+1. Run `pnpm changeset`, describe the change, and commit it with your code.
+2. Merge to `main`. `.github/workflows/release.yml` runs `changesets/action@v1`
+   to open or update a **Version Packages** pull request. `pnpm version-packages`
+   updates versions, changelogs, and the pnpm lockfile.
+3. On the generated PR, select **Approve workflows to run** if GitHub requires
+   it, then review the version changes and CI results before merging.
+4. After that PR merges, the action runs `pnpm release`: build the bundled CLI,
+   inspect its npm package with `npm pack --dry-run`, and run `changeset publish`.
+5. When the action reports `published: true`, the same workflow builds the
+   desktop installers and publishes one GitHub release tagged
+   `@pipelab/app@<version>` at that commit.
 
-Pipelab v2 starts a fresh product release baseline. The first v2 prerelease has
-one concise baseline entry; inherited v1 development notes are not part of the
-v2 release notes. Use a new Changeset for each future v2 package change.
+The CLI is the only npm-public workspace. Its `publishConfig.directory` points
+to `apps/cli/dist`, which contains the standalone bundle, executable manifest,
+UI, and assets. Internal libraries and templates remain private to the
+workspace; they are bundled with the CLI rather than published separately.
+Changesets still versions private packages when dependencies change.
 
-Review the generated version changes before publishing. The desktop and CLI have distinct package versions and distinct tag-triggered workflows; each workflow checks that its tag matches the corresponding package manifest. The `.changeset/config.json` links the CLI and UI packages for versioning, but the release workflows still use their own exact tag prefixes:
+The repository is in Changesets `beta` prerelease mode. The included baseline
+Changeset makes the first version PR align the previously different desktop
+and CLI versions. Keep generated version changes in that PR rather than
+editing versions manually. To prepare a stable release, run
+`pnpm changeset pre exit`, commit the resulting state, and review the next
+version PR.
 
-| Product | Tag | Workflow | Publication |
-| --- | --- | --- | --- |
-| Desktop app | `@pipelab/app@<version>` | `.github/workflows/release.yml` | GitHub Release with generated desktop assets |
-| CLI | `@pipelab/cli@<version>` | `.github/workflows/release-cli.yml` | Public npm package `@pipelab/cli` |
+Enable **Settings → Actions → General → Allow GitHub Actions to create and
+approve pull requests**. The workflow requests contents and pull-request write
+permissions for the action. Configure npm Trusted Publishing for `@pipelab/cli`
+before merging the version PR (see below). No npm token, personal GitHub token, or
+separate tag dispatch is needed: desktop jobs follow the action's output
+within the same workflow. Pushing a tag alone does not start a release.
 
-Both workflows use Node 24.15.0 and frozen pnpm installs. Push the intended version tag only after the matching package version is committed and reviewed.
-
-In the v2 repository, matching version tags trigger the release workflows
-automatically. Review the release target, token permissions, signing
-credentials, and old-client update bridge before creating a tag. Repository
-settings and required secrets are listed in the
-[repository migration runbook](/contributing/repository-migration).
+All builds use Node 24.15.0 and frozen pnpm installs. Review the release target,
+signing credentials, and old-client update bridge before merging a version PR.
+See the [repository migration runbook](/contributing/repository-migration) for
+required secrets and repository setup.
 
 ## Desktop GitHub release
 
@@ -70,7 +84,30 @@ workflow token is used for release publication.
 
 ## CLI npm release
 
-The CLI workflow checks `@pipelab/cli@<version>`, builds the bundled CLI and UI, then validates the staged package manifest, `pipelab` and `plab` bins, bundled UI, assets, and npm pack contents before publishing publicly. It requires the `NPM_TOKEN` Actions secret for npm authentication. It passes `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to the legacy `SUPABASE_ANON_KEY` secret), `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the build.
+The release action publishes `@pipelab/cli` from its staged `dist` directory
+with public access using [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/).
+In the npm package's **Settings → Trusted publishing**, add a **GitHub Actions**
+publisher with these values:
+
+| Field | Value |
+| --- | --- |
+| Organization or user | `CynToolkit` |
+| Repository | `v2` |
+| Workflow filename | `release.yml` |
+| Environment name | Leave blank |
+| Allowed actions | Allow direct publishing with `npm publish` |
+
+The release job grants `id-token: write` on a GitHub-hosted runner. Node
+24.15.0 includes an npm version supporting OIDC (npm 11.5.1 or newer is
+required). pnpm delegates publishing to npm, which authenticates automatically;
+do not add `NPM_TOKEN` or `NODE_AUTH_TOKEN`. The staged manifest preserves the
+repository metadata required by npm. A new trust configuration must complete
+its first successful publish within two days; recreate it if it expires.
+
+The workflow passes
+`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to
+`SUPABASE_ANON_KEY`), `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the
+bundle build. Desktop packaging starts after successful CLI publication.
 
 For the Supabase key-name rollout, add `SUPABASE_PUBLISHABLE_KEY` to Doppler and GitHub Actions secrets first. Production builds on `main` prefer it and temporarily fall back to `SUPABASE_ANON_KEY`; `develop` and PR preview builds omit production Supabase values. Verify Editor, Website, Desktop, and CLI authentication before removing the old secret in a separate approved change. Do not put service-role or secret keys in browser build variables.
 
@@ -84,12 +121,24 @@ URL compiled into their version, so preserve the legacy release assets until
 the old-client bridge is built and verified; see the
 [repository migration runbook](/contributing/repository-migration).
 
-For a version containing a prerelease segment, the workflow derives the npm dist-tag from the segment before the first dot (for example, `beta` from `2.0.0-beta.4`). A version without a prerelease segment publishes with `latest`. This is npm dist-tag behavior; it is distinct from the desktop GitHub prerelease flag.
+Changesets selects npm dist-tags from its prerelease state (`beta` while the
+repository is in beta mode, and `latest` for stable releases). Desktop GitHub
+releases are marked as prereleases when the shared version contains `-`.
 
 ## Verify and recover
 
-After pushing a tag, inspect the Actions run for the matching workflow and confirm every build/package validation and publication step completed. For desktop releases, inspect the generated assets and macOS checks; for CLI releases, confirm package validation and the npm publish step. A tag/package version mismatch fails before publication, and missing desktop artifacts fail the upload gate.
+Inspect the single **Release** Actions run: CLI npm publication, each desktop
+build, and the final GitHub release publication. Confirm the npm version and
+desktop tag match, and inspect the installer assets and macOS checks. A desktop
+version mismatch fails before packaging; missing artifacts fail upload.
 
-The workflows do not define an automated rollback procedure. The desktop publication step updates files on the same tag, and the CLI job publishes a version to npm; treat retries and corrections as operator actions. Inspect the workflow run and current published tag/package state before deciding how to correct a failed or partial release. Do not delete or move tags as a generic recovery step.
+If desktop packaging or GitHub publication fails after npm publication,
+use **Re-run failed jobs** on that run. This keeps the successful npm job and
+retries the desktop work for the same version. Re-running the entire workflow
+will skip desktop publication if Changesets finds the CLI version already on
+npm. Do not delete or move tags as a generic recovery step, or attempt to
+republish an existing npm version. npm and GitHub publication are separate
+operations, so a failed desktop build can leave the CLI available first.
 
-See [Develop Pipelab](/contributing/development) for local build commands and [CLI installation](/cli/installation) for the user-facing CLI package.
+See [Develop Pipelab](/contributing/development) for local build commands and
+[CLI installation](/cli/installation) for the user-facing CLI package.

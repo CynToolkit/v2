@@ -7,13 +7,13 @@
     }
   ],
   "privatePackages": {
-    "tag": true,
+    "tag": false,
     "version": true
   },
   "changelog": "@changesets/changelog-git",
   "commit": false,
   "access": "public",
-  "fixed": [["@pipelab/ui", "@pipelab/cli"]],
+  "fixed": [["@pipelab/app", "@pipelab/ui", "@pipelab/cli"]],
   "linked": [],
   "baseBranch": "main",
   "updateInternalDependencies": "patch"

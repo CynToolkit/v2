@@ -1,7 +1,7 @@
 {
   "name": "@pipelab/cli",
   "version": "2.0.0-beta.39",
-  "private": true,
+  "private": false,
   "description": "The command line interface for Pipelab",
   "license": "FSL-1.1-MIT",
   "author": "CynToolkit",
@@ -56,5 +56,9 @@
     "env": {
       "NODE_ENV": "development"
     }
+  },
+  "publishConfig": {
+    "directory": "dist",
+    "access": "public"
   }
 }

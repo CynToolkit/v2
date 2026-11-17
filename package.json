@@ -13,12 +13,14 @@
     "package": "pnpm --filter @pipelab/app package",
     "make": "pnpm --filter @pipelab/app make",
     "changeset": "changeset",
+    "version-packages": "pnpm changeset version && pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts",
     "supa:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > packages/shared/src/database.types.ts",
     "pipelab": "node scripts/pipelab-dev.mjs",
     "docs": "pnpm --filter @pipelab/documentation dev",
     "docs:build": "pnpm --filter @pipelab/documentation build",
     "docs:preview": "pnpm --filter @pipelab/documentation preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "pnpm exec turbo build --filter=@pipelab/cli... --concurrency=2 && pnpm --filter @pipelab/cli exec npm pack ./dist --dry-run && pnpm changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.11",

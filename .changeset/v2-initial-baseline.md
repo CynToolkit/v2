@@ -1,4 +1,6 @@
 ---
+"@pipelab/app": patch
+"@pipelab/cli": patch
 ---
 
-Initial prerelease of the new Pipelab v2 product.
+Release the desktop app and standalone CLI together under one Pipelab version.
