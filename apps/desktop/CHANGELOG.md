@@ -1,5 +1,11 @@
 # @pipelab/app
 
+## 2.0.0-beta.41
+
+### Patch Changes
+
+- 5f3e21a: Load Construct's cached Playwright runtime on demand instead of requiring it at application startup. Download automation tools only when inspecting a browser profile or exporting a Construct project.
+
 ## 2.0.0-beta.40
 
 ### Patch Changes
