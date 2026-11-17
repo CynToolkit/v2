@@ -23,6 +23,7 @@
     "@pipelab/plugin-core": "1.0.0-beta.40"
   },
   "changesets": [
+    "clear-build-history-errors",
     "lazy-construct-playwright",
     "v2-initial-baseline"
   ]
