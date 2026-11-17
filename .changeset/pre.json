@@ -22,5 +22,7 @@
     "@pipelab/workflow-runtime": "1.0.0-beta.2",
     "@pipelab/plugin-core": "1.0.0-beta.40"
   },
-  "changesets": []
+  "changesets": [
+    "v2-initial-baseline"
+  ]
 }
