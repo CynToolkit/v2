@@ -11,7 +11,7 @@
   },
   "license": "FSL-1.1-MIT",
   "devDependencies": {
-    "@mermaid-js/mermaid-cli": "^11.6.0",
+    "@mermaid-js/mermaid-cli": "^12.2.0",
     "vitepress": "2.0.0-alpha.5",
     "vitepress-plugin-lightbox": "^1.0.2",
     "vue": "3.5.13"
