@@ -9,7 +9,7 @@ import {
   BuildHistoryEntry,
   IBuildHistoryStorage,
 } from "@pipelab/shared";
-import checkDiskSpace from "check-disk-space";
+import { checkDiskSpace } from "check-disk-space";
 import { getFolderSize } from "../utils/fs-extras";
 import { SandboxFolder } from "@pipelab/constants";
 import { serializeFileMutation } from "../release-persistence-lock";
