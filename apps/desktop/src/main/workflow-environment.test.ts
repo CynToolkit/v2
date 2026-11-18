@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import type { ReleaseConfig } from "@pipelab/shared";
 import {
   readRequestedWorkflowEnvironment,
@@ -37,7 +37,10 @@ describe("readRequestedWorkflowEnvironment", () => {
   });
 
   it("omits values that are missing from the initiating process", () => {
-    assert.deepEqual(readRequestedWorkflowEnvironment(["MISSING_VALUE"], ["MISSING_VALUE"], {}), {});
+    assert.deepEqual(
+      readRequestedWorkflowEnvironment(["MISSING_VALUE"], ["MISSING_VALUE"], {}),
+      {},
+    );
   });
 
   it("derives allowed names from the saved workflow instead of renderer-supplied names", async () => {
@@ -55,11 +58,12 @@ describe("readRequestedWorkflowEnvironment", () => {
     };
     const result = await readWorkflowEnvironmentForWorkflow(
       "release-a",
-      async (id) =>
-        id === "release-a" ? workflow : Promise.reject(new Error("missing")),
+      async (id) => (id === "release-a" ? workflow : Promise.reject(new Error("missing"))),
       (config) => {
         const path = config.source.config.path;
-        return typeof path === "string" ? [path.match(/env\.([A-Za-z_][A-Za-z0-9_]*)/)?.[1] || ""] : [];
+        return typeof path === "string"
+          ? [path.match(/env\.([A-Za-z_][A-Za-z0-9_]*)/)?.[1] || ""]
+          : [];
       },
       { PROJECT_PATH: "/desktop/game", PATH: "/bin", UNRELATED_SECRET: "do-not-return" },
     );

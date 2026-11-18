@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import type { UpdateState } from "@pipelab/shared";
 import type { GitHubRelease } from "@pipelab/core-node/desktop";
 import { createUpdater, resolveAvailableUpdate, type NativeUpdater } from "./updater";

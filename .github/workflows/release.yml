@@ -121,7 +121,7 @@ jobs:
         env:
           NODE_ENV: development
           PIPELAB_TEST_USER_DATA_PATH: ${{ env.PIPELAB_CI_USER_DATA }}
-        run: pnpm --filter @pipelab/app exec node --import tsx --test --test-name-pattern="starts the local TypeScript CLI on Windows" src/main/cli-runner.test.ts
+        run: pnpm --filter @pipelab/app exec vitest run src/main/cli-runner.test.ts -t "starts the local TypeScript CLI on Windows"
 
       - name: Cold-start Desktop and verify the first run (Linux)
         if: runner.os == 'Linux'

@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { describe, it } from "node:test";
+import { describe, it } from "vitest";
 import {
   getWindowsProcessCreationTime,
   startAuthenticatedCliProcess,
@@ -178,9 +178,8 @@ describe("getLocalCliRunner", () => {
     }
   });
 
-  it(
+  it.skipIf(process.platform !== "win32")(
     "reports a Windows same-PID cleanup failure even when the server PID is known",
-    { skip: process.platform !== "win32" },
     async () => {
       const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], {
         stdio: "ignore",
@@ -243,9 +242,8 @@ describe("getLocalCliRunner", () => {
     }
   });
 
-  it(
+  it.skipIf(process.platform === "win32")(
     "escalates process-group cleanup when the CLI server ignores SIGTERM",
-    { skip: process.platform === "win32" },
     async () => {
       const script = [
         'import { spawn } from "node:child_process";',
@@ -273,9 +271,8 @@ describe("getLocalCliRunner", () => {
     },
   );
 
-  it(
+  it.skipIf(process.platform !== "win32")(
     "starts the local TypeScript CLI on Windows",
-    { skip: process.platform !== "win32" },
     async () => {
       const projectRoot = resolve(process.cwd(), "../..");
       const entryPoint = join(projectRoot, "apps", "cli", "src", "index.ts");
