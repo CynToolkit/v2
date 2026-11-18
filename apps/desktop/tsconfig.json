@@ -21,7 +21,7 @@
     "vite.base.config.mts",
     "vite.main.config.mts",
     "vite.preload.config.mts",
-    "forge.config.ts"
+    "electron-builder.config.mjs"
   ],
   "references": [
     {

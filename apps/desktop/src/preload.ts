@@ -46,6 +46,7 @@ if (process.contextIsolated) {
       showItemInFolder: (path: string) => ipcRenderer.invoke("shell:showItemInFolder", path),
       isPathBlacklisted: (path: string) => ipcRenderer.invoke("path:isBlacklisted", path),
       relaunch: () => ipcRenderer.invoke("app:relaunch"),
+      installUpdate: () => ipcRenderer.invoke("app:install-update"),
       readWorkflowEnvironment: (workflowId: string) =>
         ipcRenderer.invoke("workflow:environment:read", workflowId),
     });
@@ -70,6 +71,7 @@ if (process.contextIsolated) {
     showItemInFolder: (path: string) => ipcRenderer.invoke("shell:showItemInFolder", path),
     isPathBlacklisted: (path: string) => ipcRenderer.invoke("path:isBlacklisted", path),
     relaunch: () => ipcRenderer.invoke("app:relaunch"),
+    installUpdate: () => ipcRenderer.invoke("app:install-update"),
     readWorkflowEnvironment: (workflowId: string) =>
       ipcRenderer.invoke("workflow:environment:read", workflowId),
   };

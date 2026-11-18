@@ -3,10 +3,20 @@ import type { ILogObjMeta } from "tslog";
 
 export type UpdateStatus =
   | "update-available"
+  | "update-downloading"
   | "update-downloaded"
   | "checking-for-update"
   | "update-not-available"
   | "error";
+
+export interface UpdateState {
+  status: UpdateStatus;
+  version?: string;
+  /** Manual download page or installer, set when in-app install is unavailable. */
+  downloadUrl?: string;
+  /** Download progress from 0 to 100, set while `update-downloading`. */
+  progress?: number;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type IpcEvent<TYPE extends string, DATA> = { type: TYPE; data: DATA };
@@ -41,11 +51,7 @@ export type IpcDefinition = {
   ];
   "update:set-status": [
     // input
-    {
-      status: UpdateStatus;
-      downloadUrl?: string;
-      version?: string;
-    },
+    UpdateState,
     EndEvent<void>,
   ];
 };

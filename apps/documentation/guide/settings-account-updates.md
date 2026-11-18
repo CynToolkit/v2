@@ -65,10 +65,13 @@ profile access or affect the local settings file.
 
 ## Desktop updates
 
-The packaged desktop app checks for a newer release. Windows and macOS support
-the in-app download and restart flow. Linux shows the manual download path. In
-development, update checks are normally disabled unless the app is explicitly
-configured to force a check. Unsigned macOS prereleases may require manual
+The packaged desktop app checks for a newer release shortly after launch and
+every few hours while it stays open, without delaying startup. Windows, macOS and
+Linux AppImage installs download the update in the background, show the
+download progress in the sidebar, and ask you to restart when it is ready; if
+the download fails, the sidebar shows a download link instead. Other Linux
+installs show the manual download link. Update
+checks are disabled in development builds. Unsigned macOS prereleases may require manual
 installation and per-app Gatekeeper approval; in-app updates are not verified
 for those builds.
 

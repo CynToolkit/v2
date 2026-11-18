@@ -1,39 +1,18 @@
 import { builtinModules } from "node:module";
-import type { ConfigEnv, Plugin, UserConfig } from "vite";
-import pkg from "./package.json" with { type: "json" };
+import type { UserConfig } from "vite";
 
-export const builtins = ["electron", ...builtinModules.map((m) => [m, `node:${m}`]).flat()];
+// The main and preload bundles contain all of their dependencies, so only
+// Electron and Node built-ins stay external.
+export const external = ["electron", ...builtinModules.flatMap((m) => [m, `node:${m}`])];
 
-export const external = [
-  ...builtins,
-  ...Object.keys("dependencies" in pkg ? (pkg.dependencies as Record<string, unknown>) : {}),
-];
-
-export function getBuildConfig(env: ConfigEnv<"build">): UserConfig {
-  const { root, mode, command } = env;
-
+export function getBuildConfig(): UserConfig {
   return {
-    root,
-    mode,
     build: {
-      // Prevent multiple builds from interfering with each other.
+      // Main and preload build into the same directory.
       emptyOutDir: false,
-      // 🚧 Multiple builds may conflict.
       outDir: ".vite/build",
-      watch: command === "serve" ? {} : null,
-      minify: command === "build",
+      minify: true,
     },
     clearScreen: false,
-  };
-}
-
-export function pluginHotRestart(): Plugin {
-  return {
-    name: "@electron-forge/plugin-vite:hot-restart",
-    closeBundle() {
-      // Main process hot restart.
-      // https://github.com/electron/forge/blob/v7.2.0/packages/api/core/src/api/start.ts#L216-L223
-      process.stdin.emit("data", "rs");
-    },
   };
 }

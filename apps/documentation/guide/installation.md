@@ -3,8 +3,8 @@
 Download a published desktop release from the
 [Pipelab GitHub releases page](https://github.com/CynToolkit/v2/releases/latest).
 Release assets are generated for Linux x64, Windows x64, macOS x64, and macOS
-arm64. The configured release formats are Linux ZIP, Windows Squirrel/ZIP, and
-macOS DMG. Minimum operating-system versions and Linux distribution
+arm64. The release formats are a Windows NSIS installer (`.exe`), macOS DMG and ZIP,
+and Linux AppImage and ZIP. Minimum operating-system versions and Linux distribution
 compatibility are not specified by the release configuration.
 
 The website download cards select assets by filename, and those filters do not

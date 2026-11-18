@@ -93,7 +93,7 @@ typings/
 # Build output
 dist/
 
-# Electron-Forge
+# Desktop packaging output
 out/
 
 sentry.properties
