@@ -398,8 +398,8 @@ importers:
         specifier: 5.5.0
         version: 5.5.0
       tslog:
-        specifier: 4.9.3
-        version: 4.9.3
+        specifier: 5.5.0
+        version: 5.5.0
       type-fest:
         specifier: 6.0.1
         version: 6.0.1
@@ -829,8 +829,8 @@ importers:
         specifier: 1.6.0
         version: 1.6.0(quickjs-emscripten@0.31.0)
       tslog:
-        specifier: 4.9.3
-        version: 4.9.3
+        specifier: 5.5.0
+        version: 5.5.0
       type-fest:
         specifier: 6.0.1
         version: 6.0.1
@@ -8260,9 +8260,10 @@ packages:
   tslib@2.9.1:
     resolution: {integrity: sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==}
 
-  tslog@4.9.3:
-    resolution: {integrity: sha512-oDWuGVONxhVEBtschLf2cs/Jy8i7h1T+CpdkTNWQgdAF7DhRo2G8vMCgILKe7ojdEkLhICWgI1LYSSKaJsRgcw==}
-    engines: {node: '>=16'}
+  tslog@5.5.0:
+    resolution: {integrity: sha512-GgdyKPwUtVMKDSHFtZJg3taWUHyL8pV262AfVlak00gE4qwpCpTEZT1tQ/ZS/FQsiTWqjvAD/viTt1vDmNhQ4A==}
+    engines: {node: '>=22'}
+    hasBin: true
 
   tsx@4.19.1:
     resolution: {integrity: sha512-0flMz1lh74BR4wOvBjuh9olbnwqCPc35OOlfyzHba0Dc+QNUeWX/Gq2YTbnwcWPO3BMd8fkzRVrHcsR+a7z7rA==}
@@ -17111,7 +17112,7 @@ snapshots:
 
   tslib@2.9.1: {}
 
-  tslog@4.9.3: {}
+  tslog@5.5.0: {}
 
   tsx@4.19.1:
     dependencies:
