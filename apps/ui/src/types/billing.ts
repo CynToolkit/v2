@@ -26,5 +26,6 @@ export type BillingSubscription = {
   recurringInterval: string | null;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
-  product: { id: string; name: string };
+  // `benefits` is not currently returned by the function; consumers must tolerate it being absent.
+  product: { id: string; name: string; benefits?: { id?: string }[] };
 };
