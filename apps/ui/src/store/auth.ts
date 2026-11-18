@@ -4,7 +4,7 @@ import {
   FunctionsHttpError,
   FunctionsRelayError,
 } from "@supabase/supabase-js";
-import type { Subscription } from "@polar-sh/sdk/models/components/subscription";
+import type { models } from "@polar-sh/sdk/2026-10";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { useAPI } from "@renderer/composables/api";
 import { uiEnvironment } from "@renderer/composables/ui-runtime";
@@ -14,6 +14,8 @@ import posthog from "posthog-js";
 import { createEventHook } from "@vueuse/core";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { withRequestTimeout } from "@renderer/utils/request-timeout";
+
+type Subscription = models.Subscription;
 
 export type SubscriptionStatus = "idle" | "loading" | "ready" | "error";
 type AuthActionResponse = {

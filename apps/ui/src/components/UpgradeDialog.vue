@@ -81,10 +81,10 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import { useAuth } from "@renderer/store/auth";
-import type { Product } from "@polar-sh/sdk/models/components/product";
+import type { models } from "@polar-sh/sdk/2026-10";
 import { openAsyncUrl } from "@renderer/utils/open-async-url";
 
-type Plan = Product;
+type Plan = models.Product;
 
 const emit = defineEmits(["close"]);
 const auth = useAuth();
