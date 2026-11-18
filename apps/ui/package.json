@@ -28,7 +28,7 @@
     "@codemirror/lint": "6.8.2",
     "@codemirror/state": "6.4.1",
     "@codemirror/view": "6.34.0",
-    "@floating-ui/vue": "1.1.5",
+    "@floating-ui/vue": "2.0.1",
     "@jitl/quickjs-wasmfile-release-sync": "0.31.0",
     "@mdi/font": "7.4.47",
     "@pipelab/constants": "workspace:*",
