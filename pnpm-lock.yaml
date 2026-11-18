@@ -622,8 +622,8 @@ importers:
         specifier: 7.0.1
         version: 7.0.1
       check-disk-space:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 4.0.0
+        version: 4.0.0
       es-toolkit:
         specifier: 1.25.2
         version: 1.25.2
@@ -5230,9 +5230,8 @@ packages:
   character-entities-legacy@3.0.0:
     resolution: {integrity: sha512-RpPp0asT/6ufRm//AJVwpViZbGM/MkjQFxJccQRHmISF/22NBtsHqAWmL+/pmkPWoIUJdWyeVleTl1wydHATVQ==}
 
-  check-disk-space@3.4.0:
-    resolution: {integrity: sha512-drVkSqfwA+TvuEhFipiR1OC9boEGZL5RrWvVsOthdcvQNXyCCuKkEiTOTXZ7qxSf/GLwq4GvzfrQD/Wz325hgw==}
-    engines: {node: '>=16'}
+  check-disk-space@4.0.0:
+    resolution: {integrity: sha512-IopHYYq3Y+QOZpJJ2OiqNqrA9nS0FSB0B6kDgC52cWAOGC7WnsaIJoUCxpQ/980Z1Cox2FhtKXeaJBx3Yv7ncA==}
 
   chevrotain@13.2.0:
     resolution: {integrity: sha512-GTouk5YzgBxlTPCaDn5q0q2EJKkrYmnPF+HmF8v0Qo4r3iyPG7HJivkN1wthCXZcm3sIcZFpGTRovLPNdJNRCA==}
@@ -13723,7 +13722,7 @@ snapshots:
 
   character-entities-legacy@3.0.0: {}
 
-  check-disk-space@3.4.0: {}
+  check-disk-space@4.0.0: {}
 
   chevrotain@13.2.0:
     dependencies:
