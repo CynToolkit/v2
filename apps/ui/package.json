@@ -52,7 +52,7 @@
     "elkjs": "0.12.1",
     "es-toolkit": "1.25.2",
     "fancy-ansi": "0.1.3",
-    "get-value": "3.0.1",
+    "get-value": "4.1.0",
     "klona": "2.0.6",
     "mutative": "1.0.11",
     "nanoid": "5.1.16",
