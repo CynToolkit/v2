@@ -485,10 +485,14 @@ export const executeWorkflow = async (
         throw preflightFailure;
       }
     }
+    // tslog v5 types its level methods as overloads with specific first arguments, so the
+    // workflow logger contract (variadic unknown) is adapted through a narrow typed view.
+    const loose = () =>
+      logger() as unknown as Record<"info" | "warn" | "error", (...args: unknown[]) => void>;
     const workflowLogger = options.logger ?? {
-      info: (...args: unknown[]) => logger().info(...args),
-      warn: (...args: unknown[]) => logger().warn(...args),
-      error: (...args: unknown[]) => logger().error(...args),
+      info: (...args: unknown[]) => loose().info(...args),
+      warn: (...args: unknown[]) => loose().warn(...args),
+      error: (...args: unknown[]) => loose().error(...args),
     };
     result = await runWorkflow(workflow, {
       host: createLocalHost(workspaceRoot, {
