@@ -1,5 +1,5 @@
 import { runWithLiveLogs } from "@pipelab/plugin-core";
-import { execa, Options as ExecaOptions } from "execa";
+import { execa, type Options as ExecaOptions, type Result as ExecaResult } from "execa";
 import os from "node:os";
 
 export type Options = {
@@ -67,7 +67,7 @@ export const openExternalTerminal = async (
   args: string[] = [],
   options: ExecaOptions = {},
   keepOpen = false,
-) => {
+): Promise<ExecaResult<ExecaOptions>> => {
   const platform = process.platform;
 
   if (platform === "darwin") {

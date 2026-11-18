@@ -44,7 +44,7 @@
     "adm-zip": "0.6.0",
     "electron": "39.8.10",
     "es-toolkit": "1.25.2",
-    "execa": "9.4.1",
+    "execa": "10.2.1",
     "node-stream-zip": "1.15.0",
     "proper-lockfile": "4.1.2",
     "ts-deepmerge": "8.0.0",
