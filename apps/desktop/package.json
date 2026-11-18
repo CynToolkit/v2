@@ -51,7 +51,7 @@
     "electron": "39.8.10",
     "electron-builder": "26.18.0",
     "electron-updater": "6.8.11",
-    "posthog-node": "5.30.6",
+    "posthog-node": "6.0.2",
     "semver": "7.8.0",
     "tsx": "4.19.1",
     "typescript": "5.8.3",
