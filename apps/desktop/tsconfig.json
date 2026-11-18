@@ -7,7 +7,8 @@
     "inlineSourceMap": true,
     "paths": {
       "@pipelab/core-node/desktop": ["../../packages/core-node/src/desktop.ts"],
-      "@pipelab/*": ["../../packages/shared/src/libs/*"]
+      "@pipelab/*": ["../../packages/shared/src/libs/*"],
+      "check-disk-space": ["../../node_modules/check-disk-space/dist/check-disk-space.d.mts"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "*.ts", "*.mts", "package.json"],
