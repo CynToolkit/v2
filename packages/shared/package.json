@@ -45,7 +45,7 @@
     "quickjs-emscripten": "0.31.0",
     "quickjs-emscripten-core": "0.31.0",
     "quickjs-emscripten-sync": "1.6.0",
-    "tslog": "4.9.3",
+    "tslog": "5.5.0",
     "type-fest": "6.0.1",
     "valibot": "1.4.2"
   },
