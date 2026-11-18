@@ -51,7 +51,7 @@
             <div v-for="(price, pIndex) in plan.prices" :key="pIndex">
               <span v-if="price.amountType === 'free'" class="price">Free</span>
               <span v-else-if="price.amountType === 'fixed'" class="price">
-                {{ price.priceAmount / 100 }} {{ price.priceCurrency }} /
+                {{ (price.priceAmount ?? 0) / 100 }} {{ price.priceCurrency }} /
                 {{ plan.recurringInterval }}
               </span>
             </div>
@@ -81,10 +81,10 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import { useAuth } from "@renderer/store/auth";
-import type { Product } from "@polar-sh/sdk/models/components/product";
+import type { BillingPlan } from "@renderer/types/billing";
 import { openAsyncUrl } from "@renderer/utils/open-async-url";
 
-type Plan = Product;
+type Plan = BillingPlan;
 
 const emit = defineEmits(["close"]);
 const auth = useAuth();
