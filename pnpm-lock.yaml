@@ -290,8 +290,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
       '@trpc/client':
-        specifier: 10.45.3
-        version: 10.45.3(@trpc/server@10.45.3)
+        specifier: 11.29.4
+        version: 11.29.4(@trpc/server@11.29.4(@types/ws@8.18.1)(typescript@5.8.3))(typescript@5.8.3)
       '@vee-validate/valibot':
         specifier: 4.15.1
         version: 4.15.1(valibot@1.4.2(typescript@5.8.3))(vue@3.5.13(typescript@5.8.3))
@@ -4258,13 +4258,32 @@ packages:
   '@tanstack/virtual-core@3.17.10':
     resolution: {integrity: sha512-eMorKWIi2nekElu+8DgSMJR4iR+sTDeh+W8VjKiMH79yUfEDJ3W9aL/96/wwbxNjyV6EfN39HKszSxjd90zAqQ==}
 
-  '@trpc/client@10.45.3':
-    resolution: {integrity: sha512-Fkr2pUckEyse4HeAj79FL9OIKGrITRzK4Z1KDB0qxlCwA7sgcAeafY23qzOOKHeJxAi+hTJmJx3k9p2iabY90g==}
+  '@trpc/client@11.29.4':
+    resolution: {integrity: sha512-YPUlKF1SWBsIbafntzv4X92BW53iVw04OQ88RvWhYw0m6QJPk7wwdihY3Yfxj/eHaG5royrj+iz4CiX5kH8xmw==}
     peerDependencies:
-      '@trpc/server': 10.45.3
+      '@trpc/server': 11.29.4
+      typescript: '>=5.7.2'
 
-  '@trpc/server@10.45.3':
-    resolution: {integrity: sha512-CVZM42FdGwqYQxV7vSRwb//AF8REfV60S/fUnwx7xqCnnSDus0FW/UuAOW4eQJ30RQlOPy4MYU8B3dbTAx85Ew==}
+  '@trpc/server@11.29.4':
+    resolution: {integrity: sha512-UPBsGC3kBAT9jrTHG0ozvxxwDAm7fcixEPhJf4unxnZ86JwZ/8RjaYwICizvFrgrA2ajr5gSxFaHtTA1ICtTfg==}
+    peerDependencies:
+      '@types/aws-lambda': '*'
+      '@types/express': '*'
+      '@types/ws': '*'
+      fastify: '*'
+      next: '*'
+      typescript: '>=5.7.2'
+    peerDependenciesMeta:
+      '@types/aws-lambda':
+        optional: true
+      '@types/express':
+        optional: true
+      '@types/ws':
+        optional: true
+      fastify:
+        optional: true
+      next:
+        optional: true
 
   '@tsconfig/node20@20.1.10':
     resolution: {integrity: sha512-5OZgdnxbFuvwm05iVwPXMU5/7iPuVDDZzAnxPDLj+kjN7fwQZSSVgHQhKTNkBPOO6Qef2D5MxPAoPLCGqE2VuQ==}
@@ -12740,11 +12759,16 @@ snapshots:
 
   '@tanstack/virtual-core@3.17.10': {}
 
-  '@trpc/client@10.45.3(@trpc/server@10.45.3)':
+  '@trpc/client@11.29.4(@trpc/server@11.29.4(@types/ws@8.18.1)(typescript@5.8.3))(typescript@5.8.3)':
     dependencies:
-      '@trpc/server': 10.45.3
+      '@trpc/server': 11.29.4(@types/ws@8.18.1)(typescript@5.8.3)
+      typescript: 5.8.3
 
-  '@trpc/server@10.45.3': {}
+  '@trpc/server@11.29.4(@types/ws@8.18.1)(typescript@5.8.3)':
+    dependencies:
+      typescript: 5.8.3
+    optionalDependencies:
+      '@types/ws': 8.18.1
 
   '@tsconfig/node20@20.1.10': {}
 
