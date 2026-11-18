@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@pipelab/workflow-runtime": "workspace:*",
-    "execa": "9.5.1"
+    "execa": "10.2.1"
   },
   "devDependencies": {
     "@pipelab/tsconfig": "workspace:*",

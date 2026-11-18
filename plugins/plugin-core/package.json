@@ -35,7 +35,7 @@
     "@types/node": "^24.12.2",
     "archiver": "7.0.1",
     "electron": "39.8.10",
-    "execa": "9.5.2",
+    "execa": "10.2.1",
     "pacote": "21.5.1",
     "semver": "^7.7.4",
     "tar": "7.5.21",
