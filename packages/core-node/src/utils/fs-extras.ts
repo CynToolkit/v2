@@ -4,7 +4,7 @@ import { join, dirname } from "node:path";
 import type { Readable } from "node:stream";
 import * as tar from "tar";
 import yauzl from "yauzl";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { pipeline } from "node:stream/promises";
 
 /**
@@ -185,7 +185,7 @@ export const zipFolder = async (
   if (abortSignal?.aborted) throw abortError();
 
   const output = createWriteStream(to);
-  const archive = archiver("zip", { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
 
   return new Promise<string>((resolve, reject) => {
     let settled = false;

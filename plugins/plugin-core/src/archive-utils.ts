@@ -4,7 +4,7 @@ import { join, dirname } from "node:path";
 import zlib from "zlib";
 import * as tar from "tar";
 import yauzl from "yauzl";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 
 /**
  * Extracts a .tar.gz archive.
@@ -51,7 +51,7 @@ export async function extractZip(archivePath: string, destinationDir: string): P
       zipfile.on("entry", (entry) => {
         const entryPath = join(destinationDir, entry.fileName);
 
-        if (/\/$/.test(entry.fileName)) {
+        if (entry.fileName.endsWith('/')) {
           // It's a directory
           mkdirP(entryPath, { recursive: true })
             .then(() => zipfile.readEntry())
@@ -101,7 +101,7 @@ export const zipFolder = async (
 
   const output = createWriteStream(to);
 
-  const archive = archiver("zip", {
+  const archive = new ZipArchive({
     zlib: { level: 9 }, // Sets the compression level.
   });
 
