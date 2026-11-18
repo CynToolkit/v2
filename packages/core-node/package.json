@@ -33,6 +33,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@napi-rs/keyring": "2.0.0",
     "@pipelab/asset-electron": "workspace:*",
     "@pipelab/asset-tauri": "workspace:*",
     "@pipelab/constants": "workspace:*",
@@ -41,7 +42,6 @@
     "@pipelab/shared": "workspace:*",
     "@pipelab/workflow-runtime": "workspace:*",
     "@supabase/supabase-js": "2.99.3",
-    "@napi-rs/keyring": "2.0.0",
     "adm-zip": "0.6.0",
     "archiver": "7.0.1",
     "check-disk-space": "3.4.0",
@@ -66,7 +66,7 @@
     "@types/semver": "^7.7.1",
     "@types/tar": "7.0.87",
     "@types/ws": "8.18.1",
-    "@types/yauzl": "2.10.3",
+    "@types/yauzl": "3.4.0",
     "memfs": "4.57.6",
     "pacote": "21.5.1",
     "typescript": "^5.0.0",
