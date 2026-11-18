@@ -68,7 +68,7 @@
     "@types/ws": "8.18.1",
     "@types/yauzl": "3.4.0",
     "memfs": "4.57.6",
-    "pacote": "21.5.1",
+    "pacote": "22.0.1",
     "typescript": "^5.0.0",
     "vitest": "3.1.4"
   }
