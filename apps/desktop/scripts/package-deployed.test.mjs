@@ -2,7 +2,7 @@ import { deepStrictEqual, rejects, strictEqual } from "node:assert";
 import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import test from "node:test";
+import { test } from "vitest";
 
 import {
   copyTreeWithoutSymlinks,
@@ -48,7 +48,6 @@ test("rejects symlinks while copying the CLI", async (t) => {
   } catch (error) {
     if (process.platform === "win32" && ["EPERM", "EACCES"].includes(error?.code)) {
       t.skip("creating symlinks is not permitted on this Windows runner");
-      return;
     }
     throw error;
   }
@@ -81,7 +80,6 @@ test("rejects deployed links that escape the stage", async (t) => {
   } catch (error) {
     if (process.platform === "win32" && ["EPERM", "EACCES"].includes(error?.code)) {
       t.skip("creating symlinks is not permitted on this Windows runner");
-      return;
     }
     throw error;
   }

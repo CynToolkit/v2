@@ -33,7 +33,7 @@
     "smoke:electron:manual": "node scripts/electron-smoke-test.mjs",
     "start": "pnpm build:vite && electron .",
     "start:args": "pnpm build:vite && electron . --project ./tests/e2e/fixtures/folder-to-electron.json --action run",
-    "test": "node --test scripts/package-deployed.test.mjs && node --import tsx --test \"src/**/*.test.ts\"",
+    "test": "vitest run",
     "test:local-release-e2e": "node scripts/electron-local-release-test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false"
   },
@@ -55,6 +55,7 @@
     "semver": "7.8.0",
     "tsx": "4.19.1",
     "typescript": "5.8.3",
-    "vite": "6.3.3"
+    "vite": "6.3.3",
+    "vitest": "3.1.4"
   }
 }

@@ -1,4 +1,4 @@
-import { afterEach, describe, it, mock } from "node:test";
+import { afterEach, describe, it, vi } from "vitest";
 import assert from "node:assert/strict";
 import { ChildProcess, spawn } from "node:child_process";
 import { access, mkdtemp, rm } from "node:fs/promises";
@@ -145,7 +145,6 @@ describe("authenticated Desktop CLI startup", () => {
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "EADDRINUSE") {
         context.skip("The legacy CLI port is already occupied in this test environment.");
-        return;
       }
       throw error;
     }
@@ -223,7 +222,7 @@ describe("authenticated Desktop CLI startup", () => {
 
   it("reports partial CLI output when readiness times out", async () => {
     const startupLogs: string[] = [];
-    const info = mock.method(console, "info", (...args: unknown[]) => {
+    const info = vi.spyOn(console, "info").mockImplementation((...args: unknown[]) => {
       startupLogs.push(args.map(String).join(" "));
     });
     try {
@@ -233,7 +232,7 @@ describe("authenticated Desktop CLI startup", () => {
         "partial startup output should be logged before the CLI process is cleaned up",
       );
     } finally {
-      info.mock.restore();
+      info.mockRestore();
     }
   });
 
