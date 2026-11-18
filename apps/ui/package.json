@@ -57,7 +57,7 @@
     "mutative": "2.0.2",
     "nanoid": "6.0.2",
     "path-browserify": "1.0.1",
-    "pinia": "2.2.4",
+    "pinia": "4.1.0",
     "pinia-plugin-persistedstate": "4.1.1",
     "polished": "4.3.1",
     "posthog-js": "1.215.0",
