@@ -9,7 +9,7 @@ import {
   isWithin,
   verifyBundledCli,
   verifyStageLinks,
-} from "./run-forge-deployed.mjs";
+} from "./package-deployed.mjs";
 
 async function temporaryDirectory(name) {
   return mkdtemp(path.join(tmpdir(), `pipelab-${name}-`));
@@ -31,7 +31,10 @@ test("copies an ordinary CLI tree and preserves file contents", async () => {
   await copyTreeWithoutSymlinks(source, target);
 
   deepStrictEqual(await readFile(path.join(target, "index.mjs"), "utf8"), "export default true;\n");
-  deepStrictEqual(await readFile(path.join(target, "ui", "index.html"), "utf8"), "<!doctype html>\n");
+  deepStrictEqual(
+    await readFile(path.join(target, "ui", "index.html"), "utf8"),
+    "<!doctype html>\n",
+  );
 });
 
 test("rejects symlinks while copying the CLI", async (t) => {
@@ -71,7 +74,10 @@ test("rejects deployed links that escape the stage", async (t) => {
   await mkdir(path.join(root, "outside"), { recursive: true });
 
   try {
-    await symlink(path.join(root, "outside"), path.join(stage, "node_modules", "workspace-package"));
+    await symlink(
+      path.join(root, "outside"),
+      path.join(stage, "node_modules", "workspace-package"),
+    );
   } catch (error) {
     if (process.platform === "win32" && ["EPERM", "EACCES"].includes(error?.code)) {
       t.skip("creating symlinks is not permitted on this Windows runner");

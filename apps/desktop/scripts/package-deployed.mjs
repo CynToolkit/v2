@@ -8,7 +8,7 @@ const desktopDir = path.resolve(path.dirname(scriptPath), "..");
 const repoDir = path.resolve(desktopDir, "../..");
 const stageRoot = path.join(repoDir, ".desktop-stage");
 const stageDir = path.join(stageRoot, "app");
-const stagedForgeOutput = path.join(stageRoot, "out");
+const stagedOutput = path.join(stageRoot, "out");
 const cliSource = path.join(repoDir, "apps", "cli", "dist");
 const desktopOutput = path.join(desktopDir, "out");
 
@@ -99,7 +99,9 @@ export async function verifyStageLinks(stage) {
       if (entryStats.isSymbolicLink()) {
         const target = await realpath(entryPath);
         if (!isWithin(stage, target)) {
-          throw new Error(`Deployed dependency points outside the stage: ${entryPath} -> ${target}`);
+          throw new Error(
+            `Deployed dependency points outside the stage: ${entryPath} -> ${target}`,
+          );
         }
       } else if (entryStats.isDirectory()) {
         await visit(entryPath);
@@ -128,11 +130,10 @@ async function prepareStage() {
 
   await copyTreeWithoutSymlinks(cliSource, path.join(stageDir, "dist", "cli"));
   await verifyBundledCli(path.join(stageDir, "dist", "cli"));
-  await rm(stagedForgeOutput, { recursive: true, force: true });
+  await rm(stagedOutput, { recursive: true, force: true });
 }
 
 async function moveOutputBack() {
-  const stagedOutput = stagedForgeOutput;
   await stat(stagedOutput);
   await rm(desktopOutput, { recursive: true, force: true });
 
@@ -145,18 +146,37 @@ async function moveOutputBack() {
   }
 }
 
+function builderArgs(args) {
+  const archFlags = { x64: "--x64", arm64: "--arm64" };
+  const archArg = args.find((arg) => arg.startsWith("--arch="))?.slice("--arch=".length);
+  const arch = archArg || process.env.TARGET_ARCH || process.arch;
+  if (!archFlags[arch]) throw new Error(`Unsupported architecture: ${arch}`);
+  process.env.TARGET_ARCH = arch;
+  return [archFlags[arch], ...args.filter((arg) => !arg.startsWith("--arch="))];
+}
+
 async function main() {
-  const [mode, ...rawForgeArgs] = process.argv.slice(2);
-  const forgeArgs = rawForgeArgs[0] === "--" ? rawForgeArgs.slice(1) : rawForgeArgs;
-  if (mode !== "make" && mode !== "package") {
-    throw new Error("Usage: run-forge-deployed.mjs <make|package> [Forge arguments...]");
-  }
+  const rawArgs = process.argv.slice(2);
+  const args = builderArgs(rawArgs[0] === "--" ? rawArgs.slice(1) : rawArgs);
 
   await prepareStage();
   await rm(desktopOutput, { recursive: true, force: true });
 
   try {
-    await run(pnpmCommand, ["run", `${mode}:forge`, ...forgeArgs], stageDir);
+    await run(pnpmCommand, ["run", "build:vite"], stageDir);
+    await run(
+      pnpmCommand,
+      [
+        "exec",
+        "electron-builder",
+        "--config",
+        "electron-builder.config.mjs",
+        "--publish",
+        "never",
+        ...args,
+      ],
+      stageDir,
+    );
     await moveOutputBack();
     await rm(stageRoot, { recursive: true, force: true });
   } catch (error) {

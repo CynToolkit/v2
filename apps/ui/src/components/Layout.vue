@@ -200,6 +200,15 @@
             Update v{{ updateVersion }}
           </span>
         </button>
+        <button
+          v-else-if="updateStatus === 'update-downloaded'"
+          class="sidebar-update-btn"
+          @click="shell.installUpdate()"
+          v-tooltip.right="isSidebarCollapsed ? 'Restart to update' : undefined"
+        >
+          <i class="mdi mdi-restart nav-icon" />
+          <span v-show="!isSidebarCollapsed" class="status-text">Restart to update</span>
+        </button>
         <div
           v-else-if="updateStatusText"
           class="sidebar-status-item muted"
@@ -591,6 +600,7 @@ const toggleSidebar = () => {
 const updateStatus = ref<UpdateStatus>("update-not-available");
 const updateDownloadUrl = ref<string | undefined>(undefined);
 const updateVersion = ref<string | undefined>(undefined);
+const updateProgress = ref<number | undefined>(undefined);
 
 const appVersion = ref(window.version);
 const agentVersion = computed(() => appStore.version || "...");
@@ -676,10 +686,10 @@ const updateStatusText = computed(() => {
   switch (updateStatus.value) {
     case "update-not-available":
       return "";
+    case "update-downloading":
+      return `Downloading update… ${updateProgress.value ?? 0}%`;
     case "update-available":
-      return "Update available, downloading...";
-    case "update-downloaded":
-      return "Update downloaded";
+      return "Update available";
     case "checking-for-update":
       return "Checking for update...";
     case "error":
@@ -873,13 +883,11 @@ const deleteActiveProject = () => {
 
 const isSettingsModalVisible = ref(false);
 
-handle("update:set-status", async (event, { value }) => {
-  console.log("event", event);
-  console.log("value", value);
-
+handle("update:set-status", async (_event, { value }) => {
   updateStatus.value = value.status;
   updateDownloadUrl.value = value.downloadUrl;
   updateVersion.value = value.version;
+  updateProgress.value = value.progress;
 });
 </script>
 

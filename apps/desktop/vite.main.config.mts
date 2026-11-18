@@ -1,23 +1,19 @@
-import type { ConfigEnv, UserConfig } from "vite";
+import type { UserConfig } from "vite";
 import { defineConfig, loadEnv, mergeConfig } from "vite";
-import { getBuildConfig, external, pluginHotRestart } from "./vite.base.config.mts";
+import { getBuildConfig, external } from "./vite.base.config.mts";
 import { resolve } from "path";
 
 // https://vitejs.dev/config
 export default defineConfig((env) => {
-  const forgeEnv = env as ConfigEnv<"build">;
-  const { forgeConfigSelf } = forgeEnv;
   const rootPath = resolve(__dirname, "../../");
   const environment = loadEnv(env.mode, rootPath, "");
-
-  const plugins = [pluginHotRestart()];
 
   const config: UserConfig = {
     envDir: rootPath,
     build: {
       sourcemap: true,
       rollupOptions: {
-        input: forgeConfigSelf?.entry || "src/main.ts",
+        input: "src/main.ts",
         output: {
           format: "cjs",
           entryFileNames: "[name].js",
@@ -25,13 +21,7 @@ export default defineConfig((env) => {
           assetFileNames: "[name].[ext]",
         },
         external: [
-          ...external.filter((dep) => {
-            const isPipelab = dep.startsWith("@pipelab/");
-            const isElectronToolkit = dep.startsWith("@electron-toolkit/");
-            const isSquirrel = dep === "electron-squirrel-startup";
-            const isPosthog = dep === "posthog-node";
-            return !isPipelab && !isElectronToolkit && !isSquirrel && !isPosthog;
-          }),
+          ...external,
           "bufferutil",
           "utf-8-validate",
           "playwright",
@@ -42,12 +32,10 @@ export default defineConfig((env) => {
         ],
       },
     },
-    plugins,
     define: {
       "process.env.POSTHOG_API_KEY": JSON.stringify(environment.POSTHOG_API_KEY),
       "process.env.SUPABASE_URL": JSON.stringify(environment.SUPABASE_URL),
-      // Electron Forge loads this config from staged node_modules under Node 24,
-      // which cannot type-strip a TypeScript helper package entrypoint.
+      // Keep the key fallback inline: the staged config cannot import TypeScript helpers.
       "process.env.SUPABASE_PUBLISHABLE_KEY": JSON.stringify(
         environment.SUPABASE_PUBLISHABLE_KEY || environment.SUPABASE_ANON_KEY || "",
       ),
@@ -61,5 +49,5 @@ export default defineConfig((env) => {
     },
   };
 
-  return mergeConfig(getBuildConfig(forgeEnv), config);
+  return mergeConfig(getBuildConfig(), config);
 });

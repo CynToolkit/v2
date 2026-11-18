@@ -4,6 +4,7 @@ import { showExistingItemInFolder } from "./show-existing-item";
 
 export const registerIpcHandlers = (
   relaunch: () => Promise<void>,
+  installUpdate: () => Promise<void>,
   readWorkflowEnvironment: (workflowId: unknown) => Promise<Record<string, string>>,
 ) => {
   console.log("[Main] Registering IPC handlers");
@@ -84,4 +85,5 @@ export const registerIpcHandlers = (
   });
 
   ipcMain.handle("app:relaunch", () => relaunch());
+  ipcMain.handle("app:install-update", () => installUpdate());
 };

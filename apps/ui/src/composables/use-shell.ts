@@ -136,6 +136,13 @@ export const useShell = () => {
     }
   };
 
+  /**
+   * Quit and install the downloaded update
+   */
+  const installUpdate = async () => {
+    await (window as any).pipelab?.installUpdate();
+  };
+
   return {
     openFile,
     openDirectory,
@@ -143,5 +150,6 @@ export const useShell = () => {
     openExternal,
     showItemInFolder,
     relaunch,
+    installUpdate,
   };
 };
