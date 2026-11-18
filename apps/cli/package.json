@@ -39,7 +39,7 @@
     "dotenv": "18.0.10",
     "execa": "10.2.1",
     "listr2": "11.1.0",
-    "nanoid": "5.1.16",
+    "nanoid": "6.0.2",
     "posthog-node": "6.0.2",
     "serve-handler": "6.1.7"
   },
