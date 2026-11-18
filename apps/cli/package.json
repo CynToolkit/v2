@@ -36,7 +36,7 @@
     "@pipelab/shared": "workspace:*",
     "@pipelab/workflow-runtime": "workspace:*",
     "commander": "^15.1.0",
-    "dotenv": "17.4.2",
+    "dotenv": "18.0.10",
     "execa": "9.5.1",
     "listr2": "11.1.0",
     "nanoid": "5.1.16",
