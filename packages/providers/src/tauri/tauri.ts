@@ -202,33 +202,6 @@ export const tauri = async (
   });
   if (all) log(all);
 
-  // override tauri version
-  // if (completeConfiguration.electronVersion && completeConfiguration.electronVersion !== '') {
-  //   log(`Installing tauri@${completeConfiguration.electronVersion}`)
-  //   await runWithLiveLogs(
-  //     process.execPath,
-  //     [pnpm, 'install', `tauri@${completeConfiguration.electronVersion}`, '--prefer-offline'],
-  //     {
-  //       cwd: destinationFolder,
-  //       env: {
-  //         // DEBUG: '*',
-  //         PATH: `${dirname(node)}${delimiter}${process.env.PATH}`,
-  //         PNPM_HOME: pnpmHome
-  //       },
-  //       cancelSignal: abortSignal
-  //     },
-  //     log,
-  //     {
-  //       onStderr(data) {
-  //         log(data)
-  //       },
-  //       onStdout(data) {
-  //         log(data)
-  //       }
-  //     }
-  //   )
-  // }
-
   const inputPlatform =
     inputs.platform === "win32" || inputs.platform === "linux" || inputs.platform === "darwin"
       ? inputs.platform
@@ -415,12 +388,6 @@ export const tauri = async (
       // continue
     } else {
       throw new Error("Unsupported action");
-      // const output = join(destinationFolder, 'out', 'make')
-      // setOutput('output', output)
-      // return {
-      //   folder: output,
-      //   binary: undefined
-      // }
     }
   } catch (e) {
     if (e instanceof Error) {

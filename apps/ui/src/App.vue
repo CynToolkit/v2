@@ -165,14 +165,6 @@ watch(isReady, (ready) => {
 
 handle("log:message", async (event, { value, send }) => {
   console.log("value", value);
-  // console.log('log:message: Received value:', {
-  //   value,
-  //   type: typeof value,
-  //   hasValue: !!value,
-  //   isObject: typeof value === 'object',
-  //   hasMeta: value?._meta,
-  //   metaType: typeof value?._meta
-  // })
 
   // Validate that value exists and is an object before accessing properties
   if (!value || typeof value !== "object") {
