@@ -26,13 +26,9 @@ bridge for native operations such as file dialogs. The CLI server is
 implemented by `@pipelab/core-node`; `pipelab serve` binds to loopback at
 `127.0.0.1:33753` by default.
 
-Pipelab has two execution models:
-
-- A **pipeline** is the graph editor model. The legacy evaluator runs its
-  enabled action blocks in saved order and records outputs for later blocks.
-- A **Release workflow** is planned from a source, producers, destinations,
-  artifacts, and dependencies. The compiled task workflow runs through
-  `@pipelab/workflow-runtime`; ready steps may run concurrently.
+A Release workflow is planned from a source, producers, destinations,
+artifacts, and dependencies. The compiled task workflow runs through
+`@pipelab/workflow-runtime`; ready steps may run concurrently.
 
 ## Package imports
 

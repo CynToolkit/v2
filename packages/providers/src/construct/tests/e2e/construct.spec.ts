@@ -48,8 +48,6 @@ describe("Construct native workflow task", () => {
     exportMock.mockImplementation(async (_file, execution) => {
       execution.log("Construct export complete");
       return {
-        folder: "/output/project.zip",
-        parentFolder: "/output",
         zipFile: "/output/project.zip",
       };
     });
@@ -63,8 +61,6 @@ describe("Construct native workflow task", () => {
     });
 
     expect(result.outputs).toEqual({
-      folder: "/output/project.zip",
-      parentFolder: "/output",
       zipFile: "/output/project.zip",
     });
     expect(result.artifacts).toHaveLength(1);
@@ -79,8 +75,6 @@ describe("Construct native workflow task", () => {
     exportMock.mockImplementation(async (_file, execution) => {
       execution.log("Construct login inputs", execution.inputs.username, execution.inputs.password);
       return {
-        folder: "/output/project.zip",
-        parentFolder: "/output",
         zipFile: "/output/project.zip",
       };
     });
@@ -109,8 +103,6 @@ describe("Construct native workflow task", () => {
     const username = "construct-user@example.test";
     const password = "construct-password-secret";
     exportMock.mockResolvedValue({
-      folder: "/output/project.zip",
-      parentFolder: "/output",
       zipFile: "/output/project.zip",
     });
 
@@ -134,8 +126,6 @@ describe("Construct native workflow task", () => {
   it("stops an aliased Construct export before calling the exporter when credentials are missing", async () => {
     const { root, file } = await makeSandbox();
     exportMock.mockResolvedValue({
-      folder: "/output/project.zip",
-      parentFolder: "/output",
       zipFile: "/output/project.zip",
     });
 
@@ -157,8 +147,6 @@ describe("Construct native workflow task", () => {
     exportMock.mockImplementation(async (_file, execution) => {
       execution.log('"Next" clicked');
       return {
-        folder: "/output/project.zip",
-        parentFolder: "/output",
         zipFile: "/output/project.zip",
       };
     });

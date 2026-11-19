@@ -9,7 +9,6 @@
       "entry": [
         "scripts/*.mjs",
         "scripts/setup/*.mjs",
-        "tests/*.mjs",
         "supabase/tests/*.mjs",
         "supabase/functions/*/index.ts",
         "supabase/functions/**/*.test.ts"
