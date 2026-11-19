@@ -61,7 +61,6 @@ const effectiveStatus = computed(() => ({
 }));
 
 const setOverride = (benefit: string, value: string) => {
-  console.log(`[DevBenefitsOverride] Setting override for ${benefit} to ${value}`);
   auth.setDevOverride(benefit, value);
 };
 </script>

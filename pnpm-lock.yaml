@@ -460,11 +460,7 @@ importers:
         specifier: ^3.1.5
         version: 3.3.1(typescript@5.9.3)
 
-  assets/asset-discord: {}
-
   assets/asset-electron: {}
-
-  assets/asset-netlify: {}
 
   assets/asset-tauri: {}
 

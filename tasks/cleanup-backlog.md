@@ -56,3 +56,24 @@ migrated; backup in the session scratchpad.
 - [x] `save-data-folder` test moved into `assets/asset-electron` with a `test` script
 - [x] Decided: keep `apps/mini-c3-electron`
 - [x] Commented-out code removed (`Settings.vue`, `export-shared.ts`)
+
+---
+
+# Audit pass 2
+
+## Done
+
+- [x] Empty `HelloWorld.spec.ts` placeholder test removed
+- [x] Commented-out code removed (`Settings.vue` versions tab, `tauri.ts`, `App.vue`, docs theme)
+- [x] `asset-netlify` and `asset-discord` removed (no provider references them), plus root `netlify.toml` and `.netlify` ignore; docs deploy to Cloudflare Pages
+- [x] `scripts/network-interceptor.mjs` (unreferenced) and `.vscode/launch.json` (points at a missing electron-forge script) removed
+- [x] `mise docs-generate-mermaid` no longer targets three missing `.mermaid` files
+
+- [x] `.devcontainer` removed
+- [x] `mise.toml` local tasks read only the Supabase CLI output names (`API_URL`, `PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`/`SECRET_KEY`), no inherited env fallbacks
+- [x] Leftover debug `console.log`/`console.debug` removed (UI, shared, desktop preload/IPC, tauri, Node/PNPM setup timings); CLI command output and server/websocket diagnostics kept on purpose
+
+## Open
+
+- [ ] 🟢 Open `TODO` comments: `desktop/src/preload.ts`, `providers/electron/forge.ts`, `providers/tauri/tauri.ts`, `asset-electron` steam handlers
+- [ ] 🟡 `docs/expression.md` is a stub at the repo root and not linked from anywhere

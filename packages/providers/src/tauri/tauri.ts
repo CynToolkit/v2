@@ -103,8 +103,6 @@ export const tauri = async (
   { cwd, log, inputs, setOutput, paths, abortSignal, context }: TauriExecutionContext,
   completeConfiguration: DesktopApp.Config,
 ): Promise<{ folder: string; binary: string | undefined } | undefined> => {
-  console.log("appFolder", appFolder);
-
   log("Building tauri");
 
   if (action !== "preview") {
@@ -166,11 +164,9 @@ export const tauri = async (
   const cargoTomlContent = await readFilePromise(cargoTomlPath, "utf8");
   const cargoToml = parseTOML(cargoTomlContent) as { name: string; version: string };
   log("Setting name to", sanitizedName);
-  console.log("cargoToml", cargoToml);
   cargoToml.name = sanitizedName;
   log("Setting version to", completeConfiguration.appVersion);
   cargoToml.version = completeConfiguration.appVersion;
-  console.log("cargoToml", stringifyTOML(cargoToml));
   await writeFilePromise(cargoTomlPath, stringifyTOML(cargoToml));
 
   // tauri.conf.json update
@@ -201,33 +197,6 @@ export const tauri = async (
     context,
   });
   if (all) log(all);
-
-  // override tauri version
-  // if (completeConfiguration.electronVersion && completeConfiguration.electronVersion !== '') {
-  //   log(`Installing tauri@${completeConfiguration.electronVersion}`)
-  //   await runWithLiveLogs(
-  //     process.execPath,
-  //     [pnpm, 'install', `tauri@${completeConfiguration.electronVersion}`, '--prefer-offline'],
-  //     {
-  //       cwd: destinationFolder,
-  //       env: {
-  //         // DEBUG: '*',
-  //         PATH: `${dirname(node)}${delimiter}${process.env.PATH}`,
-  //         PNPM_HOME: pnpmHome
-  //       },
-  //       cancelSignal: abortSignal
-  //     },
-  //     log,
-  //     {
-  //       onStderr(data) {
-  //         log(data)
-  //       },
-  //       onStdout(data) {
-  //         log(data)
-  //       }
-  //     }
-  //   )
-  // }
 
   const inputPlatform =
     inputs.platform === "win32" || inputs.platform === "linux" || inputs.platform === "darwin"
@@ -265,7 +234,6 @@ export const tauri = async (
     const cargoBinDir = dirname(cargo);
 
     log("cargoBinDir", cargoBinDir);
-    console.log("cargo", cargo);
 
     log("destinationFolder", destinationFolder);
 
@@ -415,12 +383,6 @@ export const tauri = async (
       // continue
     } else {
       throw new Error("Unsupported action");
-      // const output = join(destinationFolder, 'out', 'make')
-      // setOutput('output', output)
-      // return {
-      //   folder: output,
-      //   binary: undefined
-      // }
     }
   } catch (e) {
     if (e instanceof Error) {

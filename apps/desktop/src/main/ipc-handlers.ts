@@ -7,8 +7,6 @@ export const registerIpcHandlers = (
   installUpdate: () => Promise<void>,
   readWorkflowEnvironment: (workflowId: unknown) => Promise<Record<string, string>>,
 ) => {
-  console.log("[Main] Registering IPC handlers");
-
   const OPEN_DIALOG_CHANNEL = "dialog:showOpenDialog";
   const SAVE_DIALOG_CHANNEL = "dialog:showSaveDialog";
 

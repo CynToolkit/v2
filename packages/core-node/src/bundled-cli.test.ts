@@ -6,9 +6,7 @@ import { resolveBundledAsset, resolveBundledCli, resolveBundledUiFolder } from "
 
 describe("resolveBundledCli", () => {
   test("resolves the UI beside the CLI entrypoint", () => {
-    expect(resolveBundledUiFolder("/resources/cli")).toBe(
-      join("/resources/cli", "ui"),
-    );
+    expect(resolveBundledUiFolder("/resources/cli")).toBe(join("/resources/cli", "ui"));
   });
 
   test("resolves the extracted CLI from its generated manifest", async () => {
@@ -71,14 +69,14 @@ describe("resolveBundledCli", () => {
 
   test("resolves an asset template from the CLI distribution", async () => {
     const cliDir = await mkdtemp(join(tmpdir(), "pipelab-cli-"));
-    const assetDir = join(cliDir, "assets", "asset-discord");
+    const assetDir = join(cliDir, "assets", "asset-electron");
     await mkdir(assetDir, { recursive: true });
     await writeFile(
       join(assetDir, "package.json"),
-      JSON.stringify({ name: "@pipelab/asset-discord" }),
+      JSON.stringify({ name: "@pipelab/asset-electron" }),
     );
 
-    expect(resolveBundledAsset("@pipelab/asset-discord", cliDir)).toBe(assetDir);
+    expect(resolveBundledAsset("@pipelab/asset-electron", cliDir)).toBe(assetDir);
   });
 
   test("rejects asset packages that are not staged in the CLI", async () => {

@@ -36,7 +36,6 @@ if (process.contextIsolated) {
       node: process.versions.node,
       app: version,
     };
-    console.log("[Preload] Exposing versions:", versions);
 
     contextBridge.exposeInMainWorld("pipelab", {
       versions,

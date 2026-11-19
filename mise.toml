@@ -65,9 +65,6 @@ depends = ["docs-install", "docs-generate-mermaid"]
 [tasks.docs-generate-mermaid]
 run = [
   "pnpm exec mmdc -i assets/architecture/architecture.mermaid -o assets/architecture/architecture.svg",
-  "pnpm exec mmdc -i assets/roadmap.mermaid -o assets/roadmap.svg",
-  "pnpm exec mmdc -i assets/engine-choose.mermaid -o assets/engine-choose.svg",
-  "pnpm exec mmdc -i assets/graph-processing-flow.mermaid -o assets/graph-processing-flow.svg",
 ]
 dir = "apps/documentation"
 depends = ["docs-install"]
@@ -93,9 +90,9 @@ description = "Run the Pipelab Cloud Worker against local Supabase and R2"
 run = '''
 set -eu
 eval "$(supabase status --output env)"
-export SUPABASE_URL="${API_URL:-${SUPABASE_URL:-}}"
-export SUPABASE_PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}"
-export SUPABASE_SERVICE_ROLE_KEY="${SERVICE_ROLE_KEY:-${SECRET_KEY:-${SUPABASE_SERVICE_ROLE_KEY:-}}}"
+export SUPABASE_URL="${API_URL:-}"
+export SUPABASE_PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-}"
+export SUPABASE_SERVICE_ROLE_KEY="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
 : "${SUPABASE_URL:?Could not read local Supabase URL; run mise run local:setup first}"
 : "${SUPABASE_PUBLISHABLE_KEY:?Could not read local Supabase publishable key}"
 : "${SUPABASE_SERVICE_ROLE_KEY:?Could not read local Supabase service key}"
@@ -134,9 +131,9 @@ description = "Run the desktop app against local Supabase and Pipelab Cloud"
 run = '''
 set -eu
 eval "$(supabase status --output env)"
-local_supabase_url="${API_URL:-${SUPABASE_URL:-}}"
-local_publishable_key="${PUBLISHABLE_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}"
-local_service_role_key="${SERVICE_ROLE_KEY:-${SECRET_KEY:-${SUPABASE_SERVICE_ROLE_KEY:-}}}"
+local_supabase_url="${API_URL:-}"
+local_publishable_key="${PUBLISHABLE_KEY:-}"
+local_service_role_key="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
 : "${local_supabase_url:?Could not read local Supabase URL; run mise run local:setup first}"
 : "${local_publishable_key:?Could not read local Supabase publishable key}"
 : "${local_service_role_key:?Could not read local Supabase service key}"
@@ -149,8 +146,8 @@ description = "Run the standalone UI and CLI backend through Turbo"
 run = '''
 set -eu
 eval "$(supabase status --output env)"
-export SUPABASE_URL="${API_URL:-${SUPABASE_URL:-}}"
-export SUPABASE_PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}"
+export SUPABASE_URL="${API_URL:-}"
+export SUPABASE_PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-}"
 export PIPELAB_CLOUD_WORKER_URL="http://127.0.0.1:8788"
 : "${SUPABASE_URL:?Could not read local Supabase URL; run mise run local:setup first}"
 : "${SUPABASE_PUBLISHABLE_KEY:?Could not read local Supabase publishable key}"

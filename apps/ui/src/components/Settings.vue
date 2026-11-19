@@ -1149,50 +1149,6 @@ const restartTour = async () => {
 
 const toast = useToast();
 
-// [DISABLED] Versions tab hidden in bundled mode — one bundle, one version.
-// Connection/update status already live in the sidebar. Re-enable: uncomment.
-// (App/UI versions resolve real values, no pseudo-versions: window.version via
-// preload --app-version, UI_VERSION define-injected from npm_package_version.)
-// const appVersion = ref(window.version || "1.0.0");
-// const agentVersion = ref("...");
-// const uiVersion = process.env.UI_VERSION || "1.0.0";
-// const electronVersion = window.pipelab?.versions?.electron || "N/A";
-
-// const formatVersion = (version: string) => {
-//   if (!version || version === "N/A" || version === "..." || version === "Unknown") {
-//     return version;
-//   }
-//   return version.startsWith("v") ? version : `v${version}`;
-// };
-
-// const updateVersions = async () => {
-//   if (websocketManager.isConnected()) {
-//     try {
-//       const response = await websocketManager.send("agent:version:get");
-//       if (response.type === "success") {
-//         agentVersion.value = response.result.version;
-//       }
-//     } catch (error) {
-//       console.error("Failed to fetch agent version in Settings:", error);
-//       agentVersion.value = "Unknown";
-//     }
-//   } else {
-//     agentVersion.value = "...";
-//   }
-// };
-
-// websocketManager.onStateChange((state) => {
-//   if (state === "connected") {
-//     updateVersions();
-//   } else {
-//     agentVersion.value = "...";
-//   }
-// });
-
-// if (websocketManager.isConnected()) {
-//   updateVersions();
-// }
-
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
   toast.add({

@@ -15,7 +15,6 @@ export const variableToFormattedVariable = async (
 ) => {
   const result: Record<string, string> = {};
   for (const variable of variables) {
-    console.log("variable.value", variable.value);
     const variableResult = await vm.run(variable.value, {
       params: {},
     });
