@@ -72,12 +72,6 @@ export const useAuth = defineStore("auth", () => {
     return url.toString();
   };
 
-  const clearLegacyPostHogIdentity = () => {
-    // Older app versions identified PostHog with the Supabase user ID.
-    // Reset only that persisted identified state, keeping anonymous visitor IDs.
-    if (posthog.get_property("$user_state") === "identified") posthog.reset();
-  };
-
   const setUser = (nextUser?: User) => {
     const previousId = user.value?.id;
     user.value = nextUser;
@@ -105,7 +99,6 @@ export const useAuth = defineStore("auth", () => {
       // Auth events may carry session-related data. Keep payloads out of logs.
       if (data.type === "end" && data.data.type === "success" && data.data.result.user) {
         setUser(data.data.result.user);
-        clearLegacyPostHogIdentity();
         authState.value = "SIGNED_IN";
         if (isReady.value) void fetchSubscription();
       } else {
@@ -286,7 +279,6 @@ export const useAuth = defineStore("auth", () => {
     const nextUser = session?.user;
     setUser(nextUser);
     if (nextUser) {
-      clearLegacyPostHogIdentity();
       authState.value = "SIGNED_IN";
       queueMicrotask(() => void fetchSubscription());
       return;
@@ -376,7 +368,6 @@ export const useAuth = defineStore("auth", () => {
         if (result.type === "success" && result.result.user) {
           const currentUser = result.result.user;
           logger.logger().info("[Auth] Found existing user during init.");
-          clearLegacyPostHogIdentity();
           setUser(currentUser);
           authState.value = "SIGNED_IN";
           if (isReady.value) void fetchSubscription();
