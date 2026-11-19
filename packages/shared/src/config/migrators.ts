@@ -1,36 +1,8 @@
-import {
-  createMigration as createMigrationBase,
-  createMigrator,
-  finalVersion,
-  OmitVersion,
-  SemVer,
-  Awaitable,
-  MigrationSchema,
-} from "@pipelab/migration";
-import {
-  AppConfig,
-  AppConfigV1,
-  AppConfigV2,
-  AppConfigV3,
-  AppConfigV4,
-  AppConfigV5,
-  AppConfigV6,
-  AppConfigV7,
-  AppConfigV8,
-  ConnectionsConfig,
-  ConnectionsConfigV1,
-} from "../config.schema";
-
-import { FileRepoV1, FileRepoV2, FileRepoV3, FileRepoV4, FileRepo } from "./projects-types";
+import { createMigration, createMigrator, finalVersion, SemVer } from "@pipelab/migration";
+import { AppConfig, ConnectionsConfig } from "../config.schema";
+import { FileRepo } from "./projects-definition";
 
 // --- Types ---
-
-export type Additive<T, P> = OmitVersion<T> & OmitVersion<P>;
-
-const createMigration = <From extends MigrationSchema, To extends MigrationSchema>(config: {
-  version: SemVer;
-  up: (state: OmitVersion<From>, targetVersion: string) => Awaitable<OmitVersion<To>>;
-}) => createMigrationBase<From, To>(config);
 
 export interface Migrator<T> {
   migrate: (data: any, options?: any) => Promise<T>;
@@ -39,12 +11,12 @@ export interface Migrator<T> {
 
 // --- Settings Migrator ---
 
-const settingsMigratorInternal = createMigrator<AppConfigV1, AppConfig>();
+const settingsMigratorInternal = createMigrator<AppConfig, AppConfig>();
 
 export const defaultAppSettings = settingsMigratorInternal.createDefault({
   locale: "en-US",
   theme: "light",
-  version: "8.0.0",
+  version: "1.0.0",
   autosave: true,
   agents: [],
   tours: {
@@ -62,67 +34,8 @@ export const defaultAppSettings = settingsMigratorInternal.createDefault({
 export const appSettingsMigrator = settingsMigratorInternal.createMigrations({
   defaultValue: defaultAppSettings,
   migrations: [
-    createMigration<AppConfigV1, AppConfigV2>({
+    createMigration<AppConfig, never>({
       version: "1.0.0" as SemVer,
-      up: (state) => state,
-    }),
-    createMigration<AppConfigV2, AppConfigV3>({
-      version: "2.0.0" as SemVer,
-      up: (state) => {
-        return {
-          ...state,
-          clearTemporaryFoldersOnPipelineEnd: false,
-        };
-      },
-    }),
-    createMigration<AppConfigV3, AppConfigV4>({
-      version: "3.0.0" as SemVer,
-      up: (state) => ({
-        ...state,
-        locale: "en-US" as const,
-      }),
-    }),
-    createMigration<AppConfigV4, AppConfigV5>({
-      version: "4.0.0" as SemVer,
-      up: (state) => ({
-        ...state,
-        tours: {
-          dashboard: {
-            step: 0,
-            completed: false,
-          },
-          editor: {
-            step: 0,
-            completed: false,
-          },
-        },
-      }),
-    }),
-    createMigration<AppConfigV5, AppConfigV6>({
-      version: "5.0.0" as SemVer,
-      up: (state) => ({
-        ...state,
-        autosave: true,
-      }),
-    }),
-    createMigration<AppConfigV6, AppConfigV7>({
-      version: "6.0.0" as SemVer,
-      up: (state) => {
-        const { cacheFolder, clearTemporaryFoldersOnPipelineEnd: __, ...rest } = state;
-        return {
-          ...rest,
-          cacheFolder,
-          agents: [],
-          plugins: [],
-        };
-      },
-    }),
-    createMigration<AppConfigV7, AppConfigV8>({
-      version: "7.0.0" as SemVer,
-      up: ({ plugins: _, ...state }) => state,
-    }),
-    createMigration<AppConfigV8, never>({
-      version: "8.0.0" as SemVer,
       up: finalVersion,
     }),
   ],
@@ -130,7 +43,7 @@ export const appSettingsMigrator = settingsMigratorInternal.createMigrations({
 
 // --- Connections Migrator ---
 
-const connectionsMigratorInternal = createMigrator<ConnectionsConfigV1, ConnectionsConfig>();
+const connectionsMigratorInternal = createMigrator<ConnectionsConfig, ConnectionsConfig>();
 
 export const defaultConnections = connectionsMigratorInternal.createDefault({
   version: "1.0.0",
@@ -140,7 +53,7 @@ export const defaultConnections = connectionsMigratorInternal.createDefault({
 export const connectionsMigrator = connectionsMigratorInternal.createMigrations({
   defaultValue: defaultConnections,
   migrations: [
-    createMigration<ConnectionsConfigV1, never>({
+    createMigration<ConnectionsConfig, never>({
       version: "1.0.0" as SemVer,
       up: finalVersion,
     }),
@@ -149,10 +62,10 @@ export const connectionsMigrator = connectionsMigratorInternal.createMigrations(
 
 // --- Projects Migrator ---
 
-const fileRepoMigratorInternal = createMigrator<FileRepoV1, FileRepo>();
+const fileRepoMigratorInternal = createMigrator<FileRepo, FileRepo>();
 
 export const defaultFileRepo = fileRepoMigratorInternal.createDefault({
-  version: "4.0.0",
+  version: "1.0.0",
   projects: [
     {
       id: "main",
@@ -166,31 +79,8 @@ export const defaultFileRepo = fileRepoMigratorInternal.createDefault({
 export const fileRepoMigrations = fileRepoMigratorInternal.createMigrations({
   defaultValue: defaultFileRepo,
   migrations: [
-    createMigration<FileRepoV1, FileRepoV2>({
+    createMigration<FileRepo, never>({
       version: "1.0.0",
-      up: () => ({
-        projects: [
-          {
-            id: "main",
-            name: "Default project",
-            description: "The initial default project",
-          },
-        ],
-      }),
-    }),
-    createMigration<FileRepoV2, FileRepoV3>({
-      version: "2.0.0",
-      up: (state) => ({ projects: state.projects, workflows: [] }),
-    }),
-    createMigration<FileRepoV3, FileRepoV4>({
-      version: "3.0.0",
-      up: (state) => ({
-        projects: state.projects,
-        workflows: state.workflows || [],
-      }),
-    }),
-    createMigration<FileRepoV4, never>({
-      version: "4.0.0",
       up: finalVersion,
     }),
   ],

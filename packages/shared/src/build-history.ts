@@ -380,32 +380,11 @@ const assertEntry: (value: unknown, path: string) => asserts value is BuildHisto
 
 const parseEntry = (value: unknown, path: string): BuildHistoryEntry => {
   if (!isRecord(value)) throw new BuildHistoryParseError(path, "run entry must be an object");
-
-  // Earlier build-history files called this value pipelineId even though it
-  // has always been the owning project ID. Read that persisted shape while
-  // normalizing all in-memory and newly written entries to projectId.
-  const legacyProjectId = value.pipelineId;
-  if (
-    legacyProjectId !== undefined &&
-    value.projectId !== undefined &&
-    legacyProjectId !== value.projectId
-  )
-    throw new BuildHistoryParseError(path, "projectId conflicts with legacy pipelineId");
-  const { pipelineId: _legacyProjectId, ...rest } = value;
-  const normalized = {
-    ...rest,
-    projectId: value.projectId ?? legacyProjectId,
-  };
-  assertEntry(normalized, path);
-  return normalized;
+  assertEntry(value, path);
+  return value;
 };
 
 export const parseBuildHistoryDocument = (value: unknown): BuildHistoryDocument => {
-  if (Array.isArray(value))
-    return {
-      version: BUILD_HISTORY_VERSION,
-      entries: value.map((entry, index) => parseEntry(entry, `entries.${index}`)),
-    };
   if (!isRecord(value) || value.version !== BUILD_HISTORY_VERSION || !Array.isArray(value.entries))
     throw new BuildHistoryParseError("history", "unsupported version or invalid document");
   return {

@@ -9,7 +9,7 @@ import { chromium, type Browser, type Page } from "@playwright/test";
 const desktopDir = path.resolve(__dirname, "..", "..");
 
 // `electron-builder --dir` writes the unpacked app under apps/desktop/out/make.
-export const findPackagedExecutable = (): string => {
+const findPackagedExecutable = (): string => {
   const make = path.join(desktopDir, "out", "make");
   for (const productName of ["PipelabBeta", "Pipelab"]) {
     const candidates = [

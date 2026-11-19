@@ -3,7 +3,7 @@ import type { ReleaseConfig } from "@pipelab/shared";
 const PIPELAB_CLOUD_DESTINATION = "@pipelab/pipelab-cloud/destination";
 
 /** Pipelab Cloud features exist only when the deployment configures a Cloud Worker. */
-export const isPipelabCloudConfigured = (env: NodeJS.ProcessEnv = process.env): boolean =>
+const isPipelabCloudConfigured = (env: NodeJS.ProcessEnv = process.env): boolean =>
   Boolean(env.PIPELAB_CLOUD_WORKER_URL?.trim());
 
 /**

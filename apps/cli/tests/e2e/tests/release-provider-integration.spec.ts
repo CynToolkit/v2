@@ -8,7 +8,7 @@ describe("release provider integration wiring", () => {
   it("maps real provider validation issues to indexed UI fields", () => {
     const plan = planRelease(
       {
-        version: "3.0.0",
+        version: "3.1.0",
         id: "invalid-release",
         project: "project",
         name: "Invalid release",
@@ -41,7 +41,7 @@ describe("release provider integration wiring", () => {
 
   it("reports the unresolved Construct to Steam output without inventing a producer", () => {
     const config: ReleaseConfig = {
-      version: "3.0.0",
+      version: "3.1.0",
       id: "construct-steam",
       project: "project",
       name: "Construct Steam",
@@ -75,7 +75,7 @@ describe("release provider integration wiring", () => {
 
   it("connects Construct web output to Electron and Steam", () => {
     const config: ReleaseConfig = {
-      version: "3.0.0",
+      version: "3.1.0",
       id: "construct-release",
       project: "project",
       name: "Construct release",
@@ -141,7 +141,7 @@ describe("release provider integration wiring", () => {
 
   it("connects Godot web output to Poki", () => {
     const config: ReleaseConfig = {
-      version: "3.0.0",
+      version: "3.1.0",
       id: "godot-release",
       project: "project",
       name: "Godot release",
@@ -181,7 +181,7 @@ describe("release provider integration wiring", () => {
 
   it("connects a Web folder source directly to Poki", () => {
     const config: ReleaseConfig = {
-      version: "3.0.0",
+      version: "3.1.0",
       id: "web-direct",
       project: "project",
       name: "Web direct",
@@ -210,7 +210,7 @@ describe("release provider integration wiring", () => {
 
   it("keeps a generic ZIP source semantically generic", () => {
     const config: ReleaseConfig = {
-      version: "3.0.0",
+      version: "3.1.0",
       id: "zip-direct",
       project: "project",
       name: "ZIP direct",

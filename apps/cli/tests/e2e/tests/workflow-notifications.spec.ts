@@ -41,7 +41,7 @@ const persist = async (
   await writeFile(
     join(configRoot, "projects.json"),
     JSON.stringify({
-      version: "4.0.0",
+      version: "1.0.0",
       projects: [{ id: config.project, name: "Notify test", description: "" }],
       workflows: [
         {

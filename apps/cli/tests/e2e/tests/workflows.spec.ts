@@ -40,7 +40,7 @@ const persistWorkflowFixture = async (
   await writeFile(
     join(configRoot, "projects.json"),
     JSON.stringify({
-      version: "4.0.0",
+      version: "1.0.0",
       projects: [{ id: config.project, name: "CLI test", description: "" }],
       workflows: [
         {
@@ -789,7 +789,7 @@ describe("workflow CLI result output", () => {
     await writeFile(
       join(configRoot, "projects.json"),
       JSON.stringify({
-        version: "4.0.0",
+        version: "1.0.0",
         projects: [{ id: "main", name: "Main", description: "CLI output test" }],
         workflows: [
           {
@@ -872,7 +872,7 @@ describe("workflow CLI result output", () => {
     await writeFile(
       join(configRoot, "projects.json"),
       JSON.stringify({
-        version: "4.0.0",
+        version: "1.0.0",
         projects: [{ id: "main", name: "Main", description: "CLI connection test" }],
         workflows: [
           {

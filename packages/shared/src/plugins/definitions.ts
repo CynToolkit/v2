@@ -223,17 +223,6 @@ export const createProviderDefinition = <
   definition: TDefinition & ProviderDefinition<TServices>,
 ): TDefinition => definition;
 
-/** @deprecated Use ProviderIdentity for provider metadata. */
-export interface PluginDefinition {
-  packageName?: string;
-}
-
-/** @deprecated Compatibility alias for RendererProviderMetadata. */
-export interface RendererPluginMetadata extends RendererProviderMetadata {}
-
-/** @deprecated Use RendererProviderMetadata. */
-export type RendererPluginDefinition = RendererPluginMetadata;
-
 export interface MainPluginDefinition<TServices = unknown> extends ProviderDefinition<TServices> {
   validators?: Array<{
     id: string;
@@ -246,11 +235,6 @@ export type ParamsToInput<PARAMS extends InputsDefinition> = {
   [index in keyof PARAMS]: PARAMS[index]["required"] extends true
     ? PARAMS[index]["value"]
     : PARAMS[index]["value"] | null;
-};
-
-/** @deprecated Use createProviderDefinition for provider contributions. */
-export const createDefinition = <T extends MainPluginDefinition>(definition: T) => {
-  return definition satisfies T;
 };
 
 export const createStringParam = (

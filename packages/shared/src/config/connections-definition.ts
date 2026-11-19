@@ -1,11 +1,6 @@
-import type {
-  ConnectionsConfig,
-  ConnectionsConfigV1,
-  Connection,
-  WorkflowConnectionBinding,
-} from "../config.schema";
+import type { ConnectionsConfig, Connection, WorkflowConnectionBinding } from "../config.schema";
 
-export type { ConnectionsConfig, ConnectionsConfigV1, Connection, WorkflowConnectionBinding };
+export type { ConnectionsConfig, Connection, WorkflowConnectionBinding };
 
 export interface ConnectionsParseIssue {
   code:

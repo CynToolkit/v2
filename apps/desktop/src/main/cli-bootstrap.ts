@@ -26,7 +26,7 @@ interface BootstrapReadyMessage {
   sessionId: string;
 }
 
-export interface DesktopBootstrapIdentity {
+interface DesktopBootstrapIdentity {
   identity: string;
   protocolVersion: number;
   version: string;
@@ -357,7 +357,7 @@ const signedPayload = (identity: Omit<DesktopBootstrapIdentity, "proof">): strin
     challenge: identity.challenge,
   });
 
-export function verifyDesktopBootstrapIdentity(
+function verifyDesktopBootstrapIdentity(
   value: unknown,
   options: {
     secret: Buffer;

@@ -73,7 +73,7 @@ const releaseWith = (
   builds: ReleaseBuildProfileConfig[],
   destinations: ReleaseDestinationConfig[] = [],
 ): ReleaseConfig => ({
-  version: "3.0.0",
+  version: "3.1.0",
   id: "bundle-release",
   project: "project",
   name: "Bundle release",

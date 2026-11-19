@@ -101,8 +101,7 @@ compatibility identifiers.
 
 Use **provider** for Release/Workflow contributions and **integration** for
 credentials and accounts. Reserve **plugin** for a future external extension
-system. Settings schema 8 removes the ineffective plugin enablement list; the
-version 7 schema is retained solely for automatic migration.
+system.
 
 External plugin loading, a marketplace, provider manifests, independent provider
 versioning, lazy provider installation, sandboxing and trust/security design are

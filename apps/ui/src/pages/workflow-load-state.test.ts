@@ -7,7 +7,7 @@ import {
 
 const entry = { id: "w1", project: "p1", lastModified: "2026-01-01", configName: "workflows/w1" };
 const config = {
-  version: "3.0.0" as const,
+  version: "3.1.0" as const,
   id: "w1",
   project: "p1",
   name: "Release",

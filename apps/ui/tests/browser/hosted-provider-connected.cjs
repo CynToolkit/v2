@@ -42,11 +42,11 @@ const {
           result = { version: "test", channel: "stable" };
           break;
         case "settings:load":
-          result = { version: "8.0.0", theme: "light", locale: "en-US", agents: [] };
+          result = { version: "1.0.0", theme: "light", locale: "en-US", agents: [] };
           break;
         case "projects:load":
           result = {
-            version: "4.0.0",
+            version: "1.0.0",
             projects: [{ id: "connected-project", name: "Connected project", description: "" }],
             workflows: [],
           };

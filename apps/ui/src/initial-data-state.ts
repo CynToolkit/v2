@@ -6,13 +6,9 @@ export type InitialDataSection =
   | "auth"
   | "subscription";
 
-export type InitialDataFailureKind =
-  | "backend-disconnected"
-  | "project-config"
-  | "connections"
-  | "other";
+type InitialDataFailureKind = "backend-disconnected" | "project-config" | "connections" | "other";
 
-export interface InitialDataFailure {
+interface InitialDataFailure {
   kind: InitialDataFailureKind;
   message: string;
 }

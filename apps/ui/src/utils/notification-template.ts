@@ -4,7 +4,7 @@ import {
   type BuildHistoryEntry,
 } from "@pipelab/shared";
 
-export type NotificationVariableName = (typeof NOTIFICATION_TEMPLATE_VARIABLES)[number];
+type NotificationVariableName = (typeof NOTIFICATION_TEMPLATE_VARIABLES)[number];
 
 export interface NotificationVariableInfo {
   name: NotificationVariableName;

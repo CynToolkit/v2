@@ -52,6 +52,3 @@ export const createPipelabWorkflowTasks = <TServices = unknown>(
 };
 
 export { releaseBeforeBuildWorkflowTask } from "./workflow-tasks/release-before-build";
-
-/** @deprecated Use ProviderServices. */
-export type PipelabPluginServices = ProviderServices;

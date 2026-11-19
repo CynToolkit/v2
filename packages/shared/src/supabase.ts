@@ -1,13 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "./database.types";
-import { resolveSupabasePublishableKey } from "./supabase-key";
 
 const getSupabaseConfig = () => {
   const url = process.env.SUPABASE_URL || "";
-  const publishableKey = resolveSupabasePublishableKey({
-    SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-  });
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || "";
   return { url, publishableKey };
 };
 

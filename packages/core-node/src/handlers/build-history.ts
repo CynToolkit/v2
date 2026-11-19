@@ -14,8 +14,7 @@ import { getFolderSize } from "../utils/fs-extras";
 import { SandboxFolder } from "@pipelab/constants";
 import { serializeFileMutation } from "../release-persistence-lock";
 
-// One history file per project. The legacy `pipelines` directory and filename
-// pattern are retained so existing user history remains available.
+// One history file per project, stored under the `history` config directory.
 
 export class BuildHistoryStorage implements IBuildHistoryStorage {
   private logger = useLogger();
@@ -25,8 +24,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
   }
 
   private getStoragePath() {
-    // Preserve the existing on-disk location for backward compatibility.
-    return this.context.getConfigPath("pipelines");
+    return this.context.getConfigPath("history");
   }
 
   private getProjectPath(projectId: string): string {
@@ -328,7 +326,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       force: true,
     });
 
-    const runCachePath = this.context.getCachePath(CacheFolder.Pipelines, projectId, entry.id);
+    const runCachePath = this.context.getCachePath(CacheFolder.Projects, projectId, entry.id);
     await rm(runCachePath, { recursive: true, force: true });
   }
 

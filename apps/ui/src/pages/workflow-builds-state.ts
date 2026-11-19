@@ -16,7 +16,7 @@ export const persistBuildChangesBeforeNavigation = async (
 
 export type WorkflowSaveState = "saving" | "saved" | "error";
 
-export const structurallyEqual = (left: unknown, right: unknown): boolean => {
+const structurallyEqual = (left: unknown, right: unknown): boolean => {
   if (Object.is(left, right)) return true;
   if (typeof left !== "object" || left === null || typeof right !== "object" || right === null)
     return false;

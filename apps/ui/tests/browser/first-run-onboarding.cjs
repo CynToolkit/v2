@@ -474,7 +474,7 @@ async function journey(
   let historyEntries = [];
   let quickRunEntry;
   let projectConfig = {
-    version: "4.0.0",
+    version: "1.0.0",
     projects: [
       { id: projectId, name: "Journey project", description: "" },
       { id: "second-project", name: "Second project", description: "" },
@@ -483,7 +483,7 @@ async function journey(
   };
   if (quickShipReady) {
     saved = {
-      version: "4.0.0",
+      version: "1.0.0",
       id: "quick-ship-workflow",
       project: projectId,
       name: "Quick Ship workflow",
@@ -546,7 +546,7 @@ async function journey(
           break;
         case "settings:load":
           result = {
-            version: "8.0.0",
+            version: "1.0.0",
             theme: expectedTheme,
             locale: "en-US",
             agents: [],
@@ -816,7 +816,7 @@ async function journey(
             writeFileSync(
               join(configPath, "projects.json"),
               JSON.stringify({
-                version: "3.0.0",
+                version: "3.1.0",
                 projects: [{ id: projectId, name: "Journey project", description: "" }],
                 workflows: workflowMetadata,
               }),

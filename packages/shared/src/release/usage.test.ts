@@ -3,7 +3,7 @@ import { forEachUsedValue, usedSelectionFromConfig, usedTargetKeys } from "./usa
 import type { ReleaseConfig } from "./types";
 
 const base = (): ReleaseConfig => ({
-  version: "3.0.0",
+  version: "3.1.0",
   id: "release",
   project: "project",
   name: "Release",

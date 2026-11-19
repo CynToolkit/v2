@@ -107,7 +107,7 @@ const registry: ReleaseRegistry = {
 };
 
 const config = (overrides: Partial<ReleaseConfig> = {}): ReleaseConfig => ({
-  version: "3.0.0",
+  version: "3.1.0",
   id: "release",
   project: "project",
   name: "Release",
@@ -743,7 +743,7 @@ describe("generic release compiler", () => {
     };
     const workflow = compileWorkflow(
       {
-        version: "3.0.0",
+        version: "3.1.0",
         id: "transform",
         project: "project",
         name: "Transform",

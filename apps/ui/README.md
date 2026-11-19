@@ -99,8 +99,7 @@ for the existing inline bootstrap script/styles and any runtime style
 injection; avoid `unsafe-inline` and `unsafe-eval` where possible.
 
 Deployment must provide the hosted-mode build, its Supabase URL and public
-publishable key (`SUPABASE_PUBLISHABLE_KEY`, with a temporary
-`SUPABASE_ANON_KEY` fallback), an SPA fallback for `/auth/callback`, and
+publishable key (`SUPABASE_PUBLISHABLE_KEY`), an SPA fallback for `/auth/callback`, and
 matching Supabase Auth allowed redirect URLs and email templates. No backend
 service is required for SPA authentication; billing uses the existing Supabase
 Edge Functions when explicitly enabled. Migration is limited to preserving the

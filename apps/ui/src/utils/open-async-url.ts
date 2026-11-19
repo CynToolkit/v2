@@ -1,4 +1,4 @@
-export type OpenAsyncUrlResult = "opened" | "blocked" | "failed";
+type OpenAsyncUrlResult = "opened" | "blocked" | "failed";
 
 const safeHttpUrl = (url: string): string | undefined => {
   try {

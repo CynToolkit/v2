@@ -20,11 +20,6 @@
     </Dialog>
     <DevBenefitsOverride v-if="isDevMode" />
     <WebFilePicker v-if="uiStore.isFilePickerVisible" />
-    <MigrationModal
-      v-if="isMigrationModalVisible"
-      v-model:visible="isMigrationModalVisible"
-      :source-channel="migrationSourceChannel"
-    />
     <Toast />
   </div>
 </template>
@@ -33,13 +28,13 @@
 import { defineAsyncComponent, onMounted, onUnmounted, ref, provide, watch } from "vue";
 import { useRouter } from "vue-router";
 import { handle } from "./composables/handlers";
-import { useLogger, MigrationChannel, MessageSchema, Locales } from "@pipelab/shared";
+import { useLogger, MessageSchema, Locales } from "@pipelab/shared";
 import { useI18n } from "vue-i18n";
 import Layout from "./components/Layout.vue";
 import ConnectingPage from "./components/ConnectingPage.vue";
 import Dialog from "primevue/dialog";
 import Toast from "primevue/toast";
-import { OpenMigrationModalKey, OpenUpgradeDialogKey } from "./utils/injection-keys";
+import { OpenUpgradeDialogKey } from "./utils/injection-keys";
 import { useAgentAvailability } from "./composables/useAgentAvailability";
 import {
   pendingRouteCount,
@@ -58,7 +53,6 @@ const DevBenefitsOverride = defineAsyncComponent(
   () => import("./components/DevBenefitsOverride.vue"),
 );
 const WebFilePicker = defineAsyncComponent(() => import("./components/WebFilePicker.vue"));
-const MigrationModal = defineAsyncComponent(() => import("./components/MigrationModal.vue"));
 
 const { logger } = useLogger();
 const { start, isReady, status: agentStatus } = useAgentAvailability();
@@ -122,14 +116,6 @@ watch(
 onUnmounted(() => {
   if (routeTimeout) clearTimeout(routeTimeout);
 });
-
-const isMigrationModalVisible = ref(false);
-const migrationSourceChannel = ref<MigrationChannel | undefined>(undefined);
-const openMigrationModal = (sourceChannel?: MigrationChannel) => {
-  migrationSourceChannel.value = sourceChannel;
-  isMigrationModalVisible.value = true;
-};
-provide(OpenMigrationModalKey, openMigrationModal);
 
 const openUpgradeDialog = () => {
   hasOpenedUpgradeDialog.value = true;

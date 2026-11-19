@@ -46,19 +46,7 @@ const authRoot = account ? join(thirdParty, "poki-accounts", account.toLowerCase
 const authDirectory = join(authRoot, process.platform === "win32" ? "Poki" : "poki");
 const authPath = join(authDirectory, "auth.json");
 
-// A login saved earlier under Pipelab's third-party directory is still honoured.
-const legacyAuthPath = join(
-  configRoot,
-  "@pipelab",
-  "app-dev",
-  "thirdparty",
-  process.platform === "win32" ? "Poki" : "poki",
-  "auth.json",
-);
-const existing = (account ? [authPath] : [authPath, legacyAuthPath]).find((path) =>
-  existsSync(path),
-);
-if (existing) {
+if (existsSync(authPath)) {
   console.log("Poki login already saved. Delete the saved login to sign in again.");
   process.exit(0);
 }

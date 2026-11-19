@@ -314,7 +314,7 @@ export const runAfterSuccessfulSave = async <T>(
   return run();
 };
 
-export const buildTypesFor = (catalog: ReleaseCatalog) => catalog.buildTypes;
+const buildTypesFor = (catalog: ReleaseCatalog) => catalog.buildTypes;
 
 export const buildEnginesFor = (catalog: ReleaseCatalog, type: string) =>
   catalog.producers.filter(

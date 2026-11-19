@@ -80,7 +80,7 @@ const registry: ReleaseRegistry = {
 };
 
 const config = (builds: ReleaseConfig["builds"]): ReleaseConfig => ({
-  version: "3.0.0",
+  version: "3.1.0",
   id: "release",
   project: "project",
   name: "Release",

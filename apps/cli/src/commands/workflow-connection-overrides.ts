@@ -1,4 +1,4 @@
-export type WorkflowConnectionOverrideValue =
+type WorkflowConnectionOverrideValue =
   | { kind: "environment"; name: string }
   | { kind: "literal"; value: string };
 

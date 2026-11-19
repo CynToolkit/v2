@@ -10,7 +10,7 @@ import {
 } from "./export-c3p.js";
 
 vi.mock("./export-shared.js", () => ({
-  exportc3p: vi.fn(async () => ({ folder: "", parentFolder: "", zipFile: "/out/project.zip" })),
+  exportc3p: vi.fn(async () => ({ zipFile: "/out/project.zip" })),
 }));
 
 vi.mock("./saved-version.js", async (importOriginal) => ({

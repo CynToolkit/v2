@@ -48,8 +48,7 @@ Free plan. Allow pop-ups in
 the browser to open the billing portal or continue to checkout.
 
 Browser deployments need `SUPABASE_URL` and the public
-`SUPABASE_PUBLISHABLE_KEY` at UI build time. `SUPABASE_ANON_KEY` remains a
-temporary fallback for older build environments. Every Editor build uses the
+`SUPABASE_PUBLISHABLE_KEY` at UI build time. Every Editor build uses the
 same billing behavior; public Supabase values must be configured for browser
 account and billing requests to succeed.
 Configure the deployed HTTPS origin as an allowed Supabase Auth redirect URL

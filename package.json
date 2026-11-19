@@ -20,7 +20,8 @@
     "docs:build": "pnpm --filter @pipelab/documentation build",
     "docs:preview": "pnpm --filter @pipelab/documentation preview",
     "prepare": "husky",
-    "release": "pnpm exec turbo build --filter=@pipelab/cli... --concurrency=2 && pnpm --filter @pipelab/cli exec npm pack ./dist --dry-run && pnpm changeset publish"
+    "release": "pnpm exec turbo build --filter=@pipelab/cli... --concurrency=2 && pnpm --filter @pipelab/cli exec npm pack ./dist --dry-run && pnpm changeset publish",
+    "knip": "knip"
   },
   "devDependencies": {
     "@changesets/changelog-github": "1.0.1",
@@ -35,6 +36,7 @@
     "cross-env": "10.1.0",
     "execa": "10.2.1",
     "husky": "^9.1.7",
+    "knip": "6.46.1",
     "lint-staged": "^17.6.1",
     "nanoid": "6.0.2",
     "oxfmt": "0.40.0",

@@ -7,5 +7,5 @@ export const electronPhases = definePhases([
   { id: "patch", title: "Patch executable" },
 ] as const);
 
-export type ElectronPhaseId = PhaseIds<typeof electronPhases>;
+type ElectronPhaseId = PhaseIds<typeof electronPhases>;
 export type ElectronPhaseRunner = WorkflowPhaseRunner<ElectronPhaseId>;

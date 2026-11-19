@@ -54,7 +54,7 @@ function findProjectRoot(startDir: string): string | null {
 export const projectRoot = findProjectRoot(_dirname);
 
 export const CacheFolder = {
-  Pipelines: "pipelines",
+  Projects: "projects",
   Pacote: "pacote",
 } as const;
 

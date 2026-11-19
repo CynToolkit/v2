@@ -82,7 +82,7 @@ describe("Desktop workflow submission to Itch provider integration", () => {
     await writeFile(
       context.getProjectsPath(),
       JSON.stringify({
-        version: "4.0.0",
+        version: "1.0.0",
         projects: [{ id: config.project, name: "Desktop game", description: "" }],
         workflows: [],
       }),

@@ -462,7 +462,7 @@ export const exportc3p = async (
     context: ctx,
     projectId,
   }: ConstructExportExecutionContext,
-): Promise<{ folder: string; parentFolder: string; zipFile: string }> => {
+): Promise<{ zipFile: string }> => {
   const logElapsed = (label: string, startedAt: number) => {
     log(label, `${Date.now() - startedAt} ms`);
   };
@@ -666,11 +666,7 @@ export const exportc3p = async (
 
     log("Setting output result to ", result);
 
-    return {
-      folder: result, // deprecated output retained for existing workflows
-      parentFolder: dirname(result),
-      zipFile: result,
-    };
+    return { zipFile: result };
   } catch (e: any) {
     log("error, no result, crashed", e);
     // Playwright finalizes the video when its context closes. Close it before
@@ -689,7 +685,7 @@ export const exportc3p = async (
   }
 };
 
-export const constructVersionValidator = (options: any) => {
+const constructVersionValidator = (options: any) => {
   void options;
   return v.pipe(v.string(), v.regex(/^\d+(-\d+)?$/, "Invalid version"));
 };

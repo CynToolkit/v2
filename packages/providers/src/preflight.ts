@@ -1,7 +1,7 @@
 import type { PreflightResult } from "@pipelab/shared";
 
 /** A preflight must never hang a run: a slow answer is simply unknown. */
-export const PREFLIGHT_TIMEOUT_MS = 8_000;
+const PREFLIGHT_TIMEOUT_MS = 8_000;
 
 export const verified = (): PreflightResult => ({ status: "verified" });
 export const unverifiable = (reason: string): PreflightResult => ({

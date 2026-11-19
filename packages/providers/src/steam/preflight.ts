@@ -68,7 +68,7 @@ const notLoggedInMessage = (username: string) =>
  * prompt and no session invalidation. A missing login fails a run's preflight, but only
  * "cannot verify" when testing a connection, since the login can follow saving it.
  */
-export const verifySteamAccount = async (
+const verifySteamAccount = async (
   username: string,
   context: PipelabContext,
   loginMissing: "failed" | "unverifiable",
@@ -159,7 +159,7 @@ const lookupSteamApp = (
   return lookup;
 };
 
-export const verifySteamApp = async (
+const verifySteamApp = async (
   username: string,
   appId: string,
   depotId: string,

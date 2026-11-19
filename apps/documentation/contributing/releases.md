@@ -84,7 +84,7 @@ Actions secrets. Production Supabase client values are passed into release
 builds; never put secret values in this documentation:
 
 - `SUPABASE_URL`
-- `SUPABASE_PUBLISHABLE_KEY` (falls back to the legacy `SUPABASE_ANON_KEY` while migrating)
+- `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_PROJECT_ID`
 - `POSTHOG_API_KEY`
 - `CERTIFICATE_OSX_APPLICATION`
@@ -128,11 +128,10 @@ repository metadata required by npm. A new trust configuration must complete
 its first successful publish within two days; recreate it if it expires.
 
 The workflow passes
-`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (falling back to
-`SUPABASE_ANON_KEY`), `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the
+`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the
 bundle build. Desktop packaging starts after successful CLI publication.
 
-For the Supabase key-name rollout, add `SUPABASE_PUBLISHABLE_KEY` to Doppler and GitHub Actions secrets first. Production builds on `main` prefer it and temporarily fall back to `SUPABASE_ANON_KEY`; `develop` and PR preview builds omit production Supabase values. Verify Editor, Website, Desktop, and CLI authentication before removing the old secret in a separate approved change. Do not put service-role or secret keys in browser build variables.
+Production builds on `main` read `SUPABASE_PUBLISHABLE_KEY` from Doppler and GitHub Actions secrets; `develop` and PR preview builds omit production Supabase values. Do not put service-role or secret keys in browser build variables.
 
 Desktop update selection uses the v2 repository and filters releases to the
 installed app major. Stable builds exclude prereleases; beta builds may use

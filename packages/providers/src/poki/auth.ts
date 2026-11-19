@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
 
 /** Where the Poki CLI itself keeps its login: `$XDG_CONFIG_HOME/poki` (or `%LOCALAPPDATA%\\Poki`). */
-export const pokiUserConfigRoot = (env: NodeJS.ProcessEnv = process.env): string =>
+const pokiUserConfigRoot = (env: NodeJS.ProcessEnv = process.env): string =>
   process.platform === "win32"
     ? env.LOCALAPPDATA || join(homedir(), "AppData", "Local")
     : env.XDG_CONFIG_HOME || join(homedir(), ".config");

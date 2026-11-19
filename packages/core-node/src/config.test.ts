@@ -34,53 +34,6 @@ describe("setupConfigFile & Backup Creation", () => {
     context = new PipelabContext({ userDataPath: tempDir });
   });
 
-  test("should migrate config and create backup files on disk", async () => {
-    // 1. Setup V1 configuration file in the context's config path
-    const configDir = context.getConfigPath();
-    await fs.mkdir(configDir, { recursive: true });
-
-    const projectsFilePath = context.getProjectsPath();
-
-    const v1Config = {
-      version: "1.0.0",
-      data: {
-        "pipeline-1": {
-          project: "main",
-          type: "internal",
-          configName: "pipeline-1",
-          lastModified: "2026-06-04",
-        },
-      },
-    };
-
-    await fs.writeFile(projectsFilePath, JSON.stringify(v1Config));
-
-    // 2. Initialize setupConfigFile
-    const configInstance = await setupProjectsConfigFile(context);
-
-    // Verify file exists
-    expect(existsSync(projectsFilePath)).toBe(true);
-
-    // 3. Retrieve config (this triggers the migration process and onStep callback)
-    const migratedConfig = await configInstance.getConfig();
-
-    // 4. Assert legacy Pipeline metadata is removed from the current index.
-    expect(migratedConfig.version).toBe("4.0.0");
-
-    const updatedContent = JSON.parse(await fs.readFile(projectsFilePath, "utf8"));
-    expect(updatedContent.version).toBe("4.0.0");
-    expect(updatedContent).not.toHaveProperty("pipelines");
-
-    // 5. Assert that the intermediate backup file was created on disk
-    const backupFilePath = path.join(configDir, "projects.v2.0.0.json");
-    expect(existsSync(backupFilePath)).toBe(true);
-
-    const backupContent = JSON.parse(await fs.readFile(backupFilePath, "utf8"));
-    expect(backupContent.version).toBe("2.0.0");
-    expect(backupContent.projects).toHaveLength(1);
-    expect(backupContent).not.toHaveProperty("pipelines");
-  });
-
   test("should create default config file if missing on setup", async () => {
     const configDir = context.getConfigPath();
     const projectsFilePath = context.getProjectsPath();
@@ -93,7 +46,7 @@ describe("setupConfigFile & Backup Creation", () => {
     // Should create file with default value
     expect(existsSync(projectsFilePath)).toBe(true);
     const content = JSON.parse(await fs.readFile(projectsFilePath, "utf8"));
-    expect(content.version).toBe("4.0.0");
+    expect(content.version).toBe("1.0.0");
     expect(content.projects).toHaveLength(1);
     expect(content).not.toHaveProperty("pipelines");
   });
@@ -108,7 +61,7 @@ describe("setupConfigFile & Backup Creation", () => {
     const configInstance = await setupProjectsConfigFile(context);
     const config = await configInstance.getConfig();
 
-    expect(config.version).toBe("4.0.0");
+    expect(config.version).toBe("1.0.0");
     expect(config.projects).toHaveLength(1);
     expect(config).not.toHaveProperty("pipelines");
 

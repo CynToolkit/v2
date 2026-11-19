@@ -4,13 +4,10 @@ import type { IconType, RendererProviderMetadata } from "../plugins/definitions"
 export type { ArtifactDescriptor, ArtifactKind } from "@pipelab/workflow-runtime";
 
 export const RELEASE_CONFIG_VERSION = "3.1.0" as const;
-export const LEGACY_RELEASE_CONFIG_VERSION = "3.0.0" as const;
 
 export const RELEASE_BEFORE_BUILD_TASK_ID = "@pipelab/core/release/before-build" as const;
 
-export type ReleaseConfigVersion =
-  | typeof RELEASE_CONFIG_VERSION
-  | typeof LEGACY_RELEASE_CONFIG_VERSION;
+export type ReleaseConfigVersion = typeof RELEASE_CONFIG_VERSION;
 
 export interface ReleaseBeforeBuildHook {
   id: string;
@@ -533,6 +530,3 @@ export interface ReleasePlan {
   issues: ValidationIssue[];
   graph: ReleasePlanGraph;
 }
-
-/** @deprecated Use ProviderReleaseDefinition. */
-export type PluginReleaseDefinition = ProviderReleaseDefinition;

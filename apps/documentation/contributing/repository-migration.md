@@ -34,7 +34,7 @@ project and account with its owner before adding values.
 | `CLOUDFLARE_PAGES_PROJECT_NAME`                                       | Website Pages project.                                                                    |
 | `CLOUDFLARE_DOCS_PROJECT_NAME`                                        | Documentation Pages project.                                                              |
 | `SUPABASE_URL`                                                        | Production main builds and deploys.                                                       |
-| `SUPABASE_PUBLISHABLE_KEY`                                            | Production client builds; workflows temporarily accept `SUPABASE_ANON_KEY` as a fallback. |
+| `SUPABASE_PUBLISHABLE_KEY`                                            | Production client builds;. |
 | `SUPABASE_PROJECT_ID`                                                 | Production client builds.                                                                 |
 | `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                              |
 | `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | Optional for macOS prereleases; required for stable signed builds.                       |

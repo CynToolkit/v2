@@ -8,14 +8,14 @@ import { failed, preflightSignal, unverifiable, verified } from "../preflight";
 
 export const WORKFLOW_TASK_ID = "@pipelab/plugin-itch/itch-upload";
 
-export interface ButlerJSONOutputLog {
+interface ButlerJSONOutputLog {
   level: "info";
   message: string;
   time: number;
   type: "log";
 }
 
-export interface ButlerJSONOutputProgress {
+interface ButlerJSONOutputProgress {
   bps: number;
   eta: number;
   progress: number;
@@ -46,7 +46,7 @@ const sanitizeApiKeyError = (error: unknown, apiKey: string): Error => {
   return sanitizedError;
 };
 
-export type ButlerJSONOutput = ButlerJSONOutputLog | ButlerJSONOutputProgress;
+type ButlerJSONOutput = ButlerJSONOutputLog | ButlerJSONOutputProgress;
 
 export interface ItchTaskServices {
   context: PipelabContext;
@@ -132,10 +132,7 @@ export const createItchUploadTask =
   };
 
 /** Only a rejected key fails; network trouble or a server error stays unverifiable. */
-export const verifyItchApiKey = async (
-  apiKey: string,
-  signal?: AbortSignal,
-): Promise<PreflightResult> => {
+const verifyItchApiKey = async (apiKey: string, signal?: AbortSignal): Promise<PreflightResult> => {
   if (!apiKey) return failed("The Itch account connection has no API key.");
   let response: Response;
   try {
@@ -160,7 +157,7 @@ export const verifyItchApiKey = async (
 };
 
 /** The account's own games are the ones butler may push to; a missing one is definitive. */
-export const verifyItchGame = async (
+const verifyItchGame = async (
   apiKey: string,
   project: string,
   signal?: AbortSignal,
