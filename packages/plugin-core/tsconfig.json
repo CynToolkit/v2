@@ -9,13 +9,13 @@
   "include": ["src"],
   "references": [
     {
-      "path": "../../packages/constants"
+      "path": "../constants"
     },
     {
-      "path": "../../packages/shared"
+      "path": "../shared"
     },
     {
-      "path": "../../packages/workflow-runtime"
+      "path": "../workflow-runtime"
     }
   ]
 }

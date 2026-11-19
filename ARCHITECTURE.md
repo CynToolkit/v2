@@ -15,7 +15,7 @@ and [Contributor architecture](apps/documentation/contributing/architecture.md).
 | `packages/core-node` | Node context, HTTP/WebSocket server, handlers, persistence, plugin registry, and workflow host adapters. |
 | `packages/shared` | Shared types, schemas, configuration, plugin definitions, and Release planning/compiler contracts. |
 | `packages/workflow-runtime` | Host-abstracted task workflow types, local host, and execution runtime. |
-| `plugins/*` | Provider-specific actions, workflow producers, sources, and destinations. Core-node statically registers the built-in plugins. |
+| `packages/providers`, `packages/plugin-core` | Provider implementations (actions, workflow producers, sources, destinations) and the shared execution helpers below them. Core-node statically registers the built-in providers. |
 | `workers/*`, `supabase/` | Cloudflare Worker services and database migrations/functions for cloud features. |
 
 ## Runtime paths

@@ -10,7 +10,7 @@
     { "path": "./apps/ui" },
     { "path": "./apps/cli" },
     { "path": "./apps/desktop" },
-    { "path": "./plugins/plugin-core" },
+    { "path": "./packages/plugin-core" },
     { "path": "./packages/providers" }
   ]
 }

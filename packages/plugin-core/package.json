@@ -14,7 +14,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/CynToolkit/v2.git",
-    "directory": "plugins/plugin-core"
+    "directory": "packages/plugin-core"
   },
   "files": [
     "src"

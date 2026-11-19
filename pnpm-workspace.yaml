@@ -2,7 +2,6 @@ packages:
   - "apps/*"
   - "packages/*"
   - "assets/*"
-  - "plugins/*"
   - "workers"
 
 overrides:
