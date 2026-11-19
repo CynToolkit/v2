@@ -4,7 +4,6 @@ export {
   defaultAppSettings,
   fileRepoMigrations,
   defaultFileRepo,
-  configRegistry,
   connectionsMigrator,
   defaultConnections,
 } from "./config/migrators";
