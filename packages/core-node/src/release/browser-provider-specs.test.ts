@@ -1,8 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import * as ts from "typescript";
 import { buildBrowserProviderSpecs } from "./browser-provider-specs";
 
 const artifactPath = resolve(
@@ -11,43 +10,17 @@ const artifactPath = resolve(
 );
 const artifact = readFileSync(artifactPath, "utf8");
 
-const generatedValue = (node: ts.Expression): unknown => {
-  if (ts.isSatisfiesExpression(node)) return generatedValue(node.expression);
-  if (ts.isObjectLiteralExpression(node))
-    return Object.fromEntries(
-      node.properties.map((property) => {
-        if (!ts.isPropertyAssignment(property)) throw new Error("Unexpected generated property");
-        const name = property.name;
-        if (!ts.isIdentifier(name) && !ts.isStringLiteral(name))
-          throw new Error("Unexpected generated property name");
-        return [name.text, generatedValue(property.initializer)];
-      }),
-    );
-  if (ts.isArrayLiteralExpression(node)) return node.elements.map(generatedValue);
-  if (ts.isStringLiteral(node)) return node.text;
-  if (ts.isNumericLiteral(node)) return Number(node.text);
-  if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
-  if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
-  if (node.kind === ts.SyntaxKind.NullKeyword) return null;
-  throw new Error(`Unexpected generated expression: ${node.getText()}`);
-};
-
-const readGeneratedSpecs = () => {
-  const source = ts.createSourceFile(artifactPath, artifact, ts.ScriptTarget.Latest, true);
-  const declaration = source.statements
-    .filter(ts.isVariableStatement)
-    .flatMap((statement) => statement.declarationList.declarations)
-    .find(
-      (candidate) =>
-        ts.isIdentifier(candidate.name) && candidate.name.text === "browserProviderSpecs",
-    );
-  if (!declaration?.initializer) throw new Error("Generated browser provider specs are missing");
-  return generatedValue(declaration.initializer);
+const readGeneratedSpecs = async () => {
+  const generated: { default?: unknown } = await import(
+    /* @vite-ignore */ pathToFileURL(artifactPath).href
+  );
+  if (!generated.default) throw new Error("Generated browser provider specs are missing");
+  return generated.default;
 };
 
 describe("browser provider specs", () => {
-  it("matches the generated artifact to the current built-in registry", () => {
-    expect(readGeneratedSpecs()).toEqual(buildBrowserProviderSpecs());
+  it("matches the generated artifact to the current built-in registry", async () => {
+    expect(await readGeneratedSpecs()).toEqual(buildBrowserProviderSpecs());
   });
 
   it("contains only renderer-safe metadata and never guesses host availability", () => {
