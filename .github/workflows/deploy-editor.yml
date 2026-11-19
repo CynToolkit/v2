@@ -36,6 +36,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
           SUPABASE_PROJECT_ID: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SUPABASE_PROJECT_ID || '' }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          PRIME_UI_KEY: ${{ secrets.PRIME_UI_KEY }}
         run: pnpm --filter @pipelab/ui build
 
       - name: Validate Cloudflare deployment configuration

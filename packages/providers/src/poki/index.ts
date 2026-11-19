@@ -8,6 +8,7 @@ import {
 
 import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseDestinationDefinition } from "@pipelab/shared";
+import { pokiProviderLogo } from "../provider-icons";
 
 export { createPokiUploadTask, WORKFLOW_TASK_ID };
 
@@ -59,7 +60,7 @@ export const provider = createProviderDefinition({
   packageName: "@pipelab/plugin-poki",
   name: "Poki",
   description: "Pipelab provider for publishing HTML5 games to Poki",
-  icon: { type: "icon", icon: "pi-globe" },
+  icon: { type: "image", image: pokiProviderLogo },
   isOfficial: true,
   integrations: [
     {

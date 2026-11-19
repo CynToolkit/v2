@@ -87,6 +87,13 @@ export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] =
       severity: "error",
       path: "destinations",
     });
+  if (value.notifications !== undefined && !Array.isArray(value.notifications))
+    issues.push({
+      code: "release.notifications.invalid",
+      message: "Notifications must be an array.",
+      severity: "error",
+      path: "notifications",
+    });
   const ids = new Map<string, string>();
   const addId = (scope: string, id: unknown, path: string) => {
     if (!requiredString(id)) return;
@@ -248,6 +255,50 @@ export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] =
             path: `${slotPath}.name`,
           });
       }
+    }
+  }
+  for (const [index, notification] of (Array.isArray(value.notifications)
+    ? value.notifications
+    : []
+  ).entries()) {
+    const path = `notifications.${index}`;
+    if (
+      !isRecord(notification) ||
+      !requiredString(notification.id) ||
+      !requiredString(notification.provider) ||
+      typeof notification.enabled !== "boolean" ||
+      !isRecord(notification.config) ||
+      (notification.name !== undefined && !requiredString(notification.name))
+    ) {
+      issues.push({
+        code: "release.notification.invalid",
+        message: "Notifications require id, provider, enabled, and config.",
+        severity: "error",
+        path,
+      });
+      continue;
+    }
+    addId("notification", notification.id, `${path}.id`);
+    if (notification.triggers !== undefined) {
+      const triggerKinds = ["success", "failure", "destination-completed", "destination-failed"];
+      const valid =
+        Array.isArray(notification.triggers) &&
+        notification.triggers.every(
+          (trigger) =>
+            isRecord(trigger) &&
+            typeof trigger.on === "string" &&
+            triggerKinds.includes(trigger.on) &&
+            (trigger.on === "success" ||
+              trigger.on === "failure" ||
+              requiredString(trigger.destinationId)),
+        );
+      if (!valid)
+        issues.push({
+          code: "release.notification.triggers",
+          message: "Notification triggers must be success, failure, or a destination outcome.",
+          severity: "error",
+          path: `${path}.triggers`,
+        });
     }
   }
   if (value.continueOnError !== undefined && typeof value.continueOnError !== "boolean")
@@ -470,5 +521,11 @@ export const validateReleaseConnectionReferences = (
         `destinations.${config.destinations.indexOf(destination)}.slots.${destination.slots.indexOf(slot)}.config`,
       );
   }
+  for (const [index, notification] of (config.notifications ?? []).entries())
+    check(
+      registry.notifications?.find((candidate) => candidate.id === notification.provider)?.fields,
+      notification.config,
+      `notifications.${index}.config`,
+    );
   return issues;
 };

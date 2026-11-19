@@ -7,6 +7,7 @@ import {
   itchProvider,
   pokiProvider,
   pipelabCloudProvider,
+  notificationsProvider,
 } from "@pipelab/providers";
 import type { ProviderDefinition } from "@pipelab/shared";
 import type { ProviderServices } from "./workflow-tasks";
@@ -21,6 +22,7 @@ export const builtInProviders: ProviderDefinition<ProviderServices>[] = [
   tauriProvider,
   godotProvider,
   pipelabCloudProvider,
+  notificationsProvider,
 ];
 
 export const assertUniqueProviderIds = <TServices>(

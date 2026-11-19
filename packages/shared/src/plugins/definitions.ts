@@ -186,6 +186,24 @@ export type ConnectionTest<TServices> = (
 /** Connection tests keyed by the connection's plugin name, e.g. "@pipelab/plugin-itch". */
 export type ConnectionTestRegistry<TServices> = Record<string, ConnectionTest<TServices>>;
 
+export interface NotificationSendContext {
+  /** The target's saved config merged with the Connection's field values. */
+  values: Record<string, string>;
+  /** The rendered message. */
+  message: string;
+  /** The message again with each substituted value passed through `escape`, for structured bodies. */
+  render(escape?: (value: string) => string): string;
+  /** Renders any other text of the target, such as an email subject, with the same variables. */
+  renderTemplate(template: string, escape?: (value: string) => string): string;
+  signal?: AbortSignal;
+}
+
+/** Delivers one rendered message. Throws on failure; the engine retries and never fails the run. */
+export type NotificationSender = (context: NotificationSendContext) => Promise<void>;
+
+/** Senders keyed by the notification definition ID in `release.notifications`. */
+export type NotificationSenderRegistry = Record<string, NotificationSender>;
+
 /** Complete built-in provider contribution consumed by Pipelab hosts. */
 export interface ProviderDefinition<TServices = unknown> extends RendererProviderMetadata {
   workflowTasks?: WorkflowTaskFactoryRegistry<TServices>;
@@ -193,6 +211,8 @@ export interface ProviderDefinition<TServices = unknown> extends RendererProvide
   preflights?: PreflightCheckRegistry<TServices>;
   /** Read-only credential checks keyed by connection plugin name, run from the Connections page. */
   connectionTests?: ConnectionTestRegistry<TServices>;
+  /** Delivery for each `release.notifications` definition this provider contributes. */
+  notificationSenders?: NotificationSenderRegistry;
 }
 
 /** Validates provider contributions while preserving the supplied definition's concrete type. */

@@ -2,6 +2,7 @@ import { createSteamUploadTask, WORKFLOW_TASK_ID, type SteamTaskServices } from 
 import { checkSteamPreflight, testSteamConnection } from "./preflight";
 import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseDestinationDefinition } from "@pipelab/shared";
+import { steamProviderLogo } from "../provider-icons";
 
 export { createSteamUploadTask, WORKFLOW_TASK_ID };
 
@@ -100,7 +101,7 @@ export const provider = createProviderDefinition({
   packageName: "@pipelab/plugin-steam",
   name: "Steam",
   description: "Pipelab provider for publishing games to Steam via SteamCMD",
-  icon: { type: "icon", icon: "mdi-steam" },
+  icon: { type: "image", image: steamProviderLogo },
   isOfficial: true,
   integrations: [
     {

@@ -2,7 +2,7 @@
 
 ![logo](./readme/full_white_bg_black_text.png)
 
-Pipelab is a visual automation tool designed to create task automation workflows and cross-platform desktop applications.
+Pipelab is a desktop app and command-line tool for preparing and shipping game projects. Build Release workflows that take a project (Construct, Godot, Electron, Tauri), produce cross-platform builds, and deliver them to destinations such as Steam, itch.io, and Poki.
 
 ## 🏗️ Orchestration Overview
 
@@ -32,7 +32,7 @@ graph TD
     class UI,Electron,CLI main;
 ```
 
-- **The Engine (@pipelab/cli)**: A standalone Node.js server that handles workflow execution, manages plugin logic, and exposes a WebSocket API.
+- **The Engine (@pipelab/cli)**: A standalone Node.js server that handles workflow execution, runs provider tasks, and exposes a WebSocket API.
 - **The Interface (@pipelab/ui)**: A Vue 3 application that provides the Release workflow editor. It connects to the CLI via WebSockets for real-time execution feedback.
 - **The Container (@pipelab/app)**: An Electron wrapper that provides native OS integration (file dialogs, system tray). In production, it automatically manages the CLI as a "sidecar" process.
 
@@ -110,7 +110,7 @@ Both commands build the CLI bundle and include it with the desktop application a
 - **`apps/cli`**: The headless engine and WebSocket server.
 - **`apps/desktop`**: The Electron lifecycle and IPC handlers.
 - **`apps/ui`**: Rendering and visual graph interaction.
-- **`packages/*`**: Shared logic, standard constants, and modular plugins (Steam, Discord, etc.).
+- **`packages/*`**: Shared logic, constants, and built-in providers (`packages/providers`: Construct, Godot, Electron, Tauri, Steam, itch.io, Poki).
 
 ---
 

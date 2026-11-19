@@ -162,6 +162,7 @@ export default defineConfig(({ mode }) => {
       "process.env.SUPABASE_ANON_KEY": JSON.stringify(env.SUPABASE_ANON_KEY),
       "process.env.SUPABASE_PROJECT_ID": JSON.stringify(env.SUPABASE_PROJECT_ID),
       "process.env.POSTHOG_API_KEY": JSON.stringify(env.POSTHOG_API_KEY),
+      "process.env.PRIME_UI_KEY": JSON.stringify(env.PRIME_UI_KEY),
       "process.env.PIPELAB_CLOUD_WORKER_URL": JSON.stringify(cloudWorkerUrl),
       "process.env.UI_VERSION": JSON.stringify(env.npm_package_version || "1.0.0"),
     },
