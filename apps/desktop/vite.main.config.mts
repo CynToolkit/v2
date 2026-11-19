@@ -33,6 +33,11 @@ export default defineConfig((env) => {
       },
     },
     define: {
+      // Vite replaces `process.env` with `{}` in non-library builds, which would blank every
+      // runtime environment read in the Electron main process. Keep the real environment.
+      "process.env": "process.env",
+      "global.process.env": "global.process.env",
+      "globalThis.process.env": "globalThis.process.env",
       "process.env.POSTHOG_API_KEY": JSON.stringify(environment.POSTHOG_API_KEY),
       "process.env.SUPABASE_URL": JSON.stringify(environment.SUPABASE_URL),
       // Keep the key fallback inline: the staged config cannot import TypeScript helpers.
