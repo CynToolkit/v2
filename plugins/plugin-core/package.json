@@ -34,7 +34,7 @@
     "@pipelab/workflow-runtime": "workspace:*",
     "@types/node": "^24.12.2",
     "archiver": "8.0.0",
-    "electron": "39.8.10",
+    "electron": "45.4.1",
     "execa": "10.2.1",
     "pacote": "22.0.1",
     "semver": "^7.7.4",
