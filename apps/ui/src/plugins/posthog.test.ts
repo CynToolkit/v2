@@ -1,12 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { init, getProperty, reset } = vi.hoisted(() => ({
-  init: vi.fn(),
-  getProperty: vi.fn(),
-  reset: vi.fn(),
-}));
+const { init } = vi.hoisted(() => ({ init: vi.fn() }));
 vi.mock("posthog-js", () => ({
-  default: { init, get_property: getProperty, reset },
+  default: { init },
 }));
 
 import posthogPlugin from "./posthog";
@@ -25,10 +21,6 @@ const setLocation = (url: string) =>
 describe("PostHog auth callback privacy", () => {
   beforeEach(() => {
     init.mockReset();
-    getProperty.mockReset();
-    reset.mockReset();
-    init.mockReturnValue({ get_property: getProperty, reset });
-    getProperty.mockReturnValue("anonymous");
     vi.stubEnv("POSTHOG_API_KEY", "test-api-key");
   });
 
@@ -61,31 +53,6 @@ describe("PostHog auth callback privacy", () => {
 
     expect(init).toHaveBeenCalledWith("test-api-key", {
       api_host: "https://eu.i.posthog.com",
-      loaded: expect.any(Function),
     });
-  });
-
-  it("resets legacy authenticated identity before the initial pageview", () => {
-    setLocation("/dashboard");
-    getProperty.mockReturnValue("identified");
-
-    install();
-
-    const [, options] = init.mock.calls[0];
-    options.loaded({ get_property: getProperty, reset });
-
-    expect(getProperty).toHaveBeenCalledWith("$user_state");
-    expect(reset).toHaveBeenCalledOnce();
-  });
-
-  it("preserves anonymous visitor identity during PostHog initialization", () => {
-    setLocation("/dashboard");
-
-    install();
-
-    const [, options] = init.mock.calls[0];
-    options.loaded({ get_property: getProperty, reset });
-
-    expect(reset).not.toHaveBeenCalled();
   });
 });

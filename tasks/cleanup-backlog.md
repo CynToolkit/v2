@@ -32,17 +32,11 @@ migrated; backup in the session scratchpad.
 
 ## 4. Backward-compat code still in the tree
 
-- [ ] 🔴 `packages/shared/src/build-history.ts` `parseArtifact`: "legacy artifact" shape
-      (name + type, no descriptor). Check whether anything still writes it.
-- [ ] 🔴 PostHog identity reset: `apps/ui/src/store/auth.ts` (`clearLegacyPostHogIdentity`)
-      and `apps/ui/src/plugins/posthog.ts` (`loaded` hook). It is a privacy guard and tests
-      count `posthog.reset` calls.
-- [ ] 🔴 `assets/asset-electron/template/src/preload.js`: deprecated `isElectron` global.
-      Exported games might read it.
-- [ ] 🔴 `supabase/functions/_shared/billing.ts` (+ test): falls back to `SUPABASE_ANON_KEY`.
-      Supabase injects that variable into edge functions, so verify before removing.
-- [ ] 🔴 Persisted connection key `pluginName` and `@pipelab/plugin-*` IDs, documented as
-      "compatibility identifiers" in `apps/documentation/contributing/architecture.md`.
+- [ ] 🟡 `build-history.ts` `parseArtifact` legacy artifact shape (name + type, no descriptor). **Still written:** `WorkflowResult.artifacts` in `packages/workflow-runtime/src/types.ts` is `WorkflowArtifact | WorkflowArtifactInstance`, and `historyArtifacts` (core-node `handlers/workflow.ts`) and `run-detail-state.ts` (ui) map the descriptor-less variant. Remove the `WorkflowArtifact` variant from the runtime first, then narrow `BuildHistoryEntry.artifacts` and the parser.
+- [x] PostHog legacy identity reset removed (`clearLegacyPostHogIdentity`, `loaded` hook); the normal reset on sign-out stays
+- [x] Decided: keep the `isElectron` global in the exported-game preload
+- [ ] 🔴 `supabase/functions/_shared/billing.ts` (+ test): falls back to `SUPABASE_ANON_KEY`. Wanted: `SUPABASE_PUBLISHABLE_KEY` only. **Blocked:** Supabase injects only `SUPABASE_ANON_KEY` into edge functions and the CLI rejects custom secrets whose name starts with `SUPABASE_`, so the new name cannot be set as a function secret. Needs a different approach (read `SUPABASE_ANON_KEY` only, or a non-prefixed secret name).
+- [x] Decided: keep persisted `pluginName` and `@pipelab/plugin-*` IDs (public provider IDs, not a shim)
 - [ ] 🟡 `packages/shared/src/config/migrators.ts`: `Migrator<T>` interface uses `any`;
       each document still carries a one-step migrator.
 - [x] Old graph-pipeline JSON fixtures removed (provider e2e fixtures, desktop `start:args` script pointing at a missing file)
@@ -62,6 +56,5 @@ migrated; backup in the session scratchpad.
 
 - [x] `scripts/delete_tags.sh`, `scripts/upload-windows.sh` removed
 - [x] `save-data-folder` test moved into `assets/asset-electron` with a `test` script
-- [ ] 🔴 `apps/mini-c3-electron`: no consumers found but it is in `.changeset/pre.json`.
-      Is it still shipped?
+- [x] Decided: keep `apps/mini-c3-electron`
 - [x] Commented-out code removed (`Settings.vue`, `export-shared.ts`)

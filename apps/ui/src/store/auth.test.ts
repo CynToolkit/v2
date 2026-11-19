@@ -41,7 +41,6 @@ const {
     posthog: {
       identify: vi.fn(),
       reset: vi.fn(),
-      get_property: vi.fn(() => "anonymous"),
     },
   };
 });
@@ -109,7 +108,6 @@ describe("auth startup and subscription loading", () => {
     createBrowserClient.mockReturnValue(browserClient);
     posthog.identify.mockReset();
     posthog.reset.mockReset();
-    posthog.get_property.mockReset().mockReturnValue("anonymous");
   });
 
   afterEach(() => {
@@ -437,22 +435,6 @@ describe("hosted browser authentication", () => {
 
     expect(auth.getActualBenefit("cloud-save")).toBe(false);
     expect(auth.hasBenefit("cloud-save")).toBe(false);
-  });
-
-  it("clears a legacy authenticated PostHog identity while restoring a browser session", async () => {
-    posthog.get_property.mockReturnValue("identified");
-    browserClient.auth.getSession.mockResolvedValue({
-      data: { session: { user: makeUser("browser-user"), access_token: "access-token" } },
-      error: null,
-    });
-
-    const auth = useAuth();
-    activeAuthStore = auth;
-
-    await vi.waitFor(() => expect(auth.authState).toBe("SIGNED_IN"));
-
-    expect(posthog.reset).toHaveBeenCalledOnce();
-    expect(posthog.identify).not.toHaveBeenCalled();
   });
 
   it("keeps browser account and subscription state across optional agent changes", async () => {
@@ -847,7 +829,6 @@ describe("Desktop auth transport compatibility", () => {
   });
 
   it("keeps Desktop auth sessions anonymous in PostHog", async () => {
-    posthog.get_property.mockReturnValue("identified");
     const user = makeUser("desktop-user");
     execute.mockResolvedValue({ type: "success", result: { user } });
     const auth = useAuth();
@@ -857,6 +838,6 @@ describe("Desktop auth transport compatibility", () => {
     await vi.waitFor(() => expect(auth.authState).toBe("SIGNED_IN"));
 
     expect(posthog.identify).not.toHaveBeenCalled();
-    expect(posthog.reset).toHaveBeenCalledOnce();
+    expect(posthog.reset).not.toHaveBeenCalled();
   });
 });

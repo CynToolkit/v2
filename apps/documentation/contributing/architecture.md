@@ -96,8 +96,8 @@ Low-level Forge and executable patch tests remain in the Electron provider folde
 contributions and native Workflow task registration derive from it; there is no
 mutable plugin store or background provider loading. Built-in implementations
 are versioned together in `@pipelab/providers`, with isolated provider folders.
-Legacy `@pipelab/plugin-*` IDs and the persisted connection key `pluginName` are
-compatibility identifiers.
+The `@pipelab/plugin-*` IDs and the persisted connection key `pluginName` are
+stable provider identifiers used by saved workflows and connections.
 
 Use **provider** for Release/Workflow contributions and **integration** for
 credentials and accounts. Reserve **plugin** for a future external extension
