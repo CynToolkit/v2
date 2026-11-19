@@ -654,7 +654,7 @@ Deno.test("preflight returns a narrow non-credentialed CORS policy", async () =>
 Deno.test("Supabase resolver validates access tokens using the Auth user endpoint", async () => {
   const variables: Record<string, string | undefined> = {
     SUPABASE_URL: "http://127.0.0.1:54321",
-    SUPABASE_PUBLISHABLE_KEY: "public-key",
+    SUPABASE_PUBLISHABLE_KEYS: JSON.stringify({ default: "public-key" }),
     SUPABASE_ANON_KEY: "legacy-key",
   };
   const env = (name: string) => variables[name];
@@ -833,7 +833,7 @@ Deno.test("Supabase resolver treats invalid or expired JWTs as unauthenticated",
     (
       ({
         SUPABASE_URL: "http://kong:8000",
-        SUPABASE_ANON_KEY: "legacy-key",
+        SUPABASE_PUBLISHABLE_KEYS: JSON.stringify({ default: "public-key" }),
       }) as Record<string, string | undefined>
     )[name];
   const calls: Array<{ url: URL; init: RequestInit }> = [];
@@ -843,4 +843,24 @@ Deno.test("Supabase resolver treats invalid or expired JWTs as unauthenticated",
   );
   assertEquals(await resolver("expired-token"), null);
   assertEquals(calls[0].init.redirect, "error");
+});
+
+Deno.test("Supabase resolver requires the default publishable key and ignores the legacy anon key", async () => {
+  for (const variables of [
+    { SUPABASE_URL: "http://kong:8000", SUPABASE_ANON_KEY: "legacy-key" },
+    { SUPABASE_URL: "http://kong:8000", SUPABASE_PUBLISHABLE_KEYS: "not json" },
+    { SUPABASE_URL: "http://kong:8000", SUPABASE_PUBLISHABLE_KEYS: '{"other":"k"}' },
+  ] as Array<Record<string, string | undefined>>) {
+    const resolver = createSupabaseUserResolver(
+      (name) => variables[name],
+      mockFetch(() => json({ id: USER_A })),
+    );
+    let thrown: unknown;
+    try {
+      await resolver("token");
+    } catch (error) {
+      thrown = error;
+    }
+    assertEquals(thrown instanceof Error, true);
+  }
 });

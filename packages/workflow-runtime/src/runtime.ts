@@ -1,7 +1,6 @@
 import {
   WORKFLOW_VERSION,
   type Workflow,
-  type WorkflowArtifact,
   type WorkflowArtifactInstance,
   type WorkflowError,
   type WorkflowEventInput,
@@ -494,7 +493,7 @@ const resolveInputs = (
 
 const resolveArtifactInputs = (
   step: WorkflowStep,
-  artifacts: Array<WorkflowArtifact | WorkflowArtifactInstance>,
+  artifacts: Array<WorkflowArtifactInstance>,
 ): Record<string, string> => {
   const resolved: Record<string, string> = {};
   for (const [inputName, reference] of Object.entries(step.artifactInputs ?? {})) {
@@ -700,13 +699,10 @@ const dependenciesFor = (workflow: Workflow, step: WorkflowStep): readonly strin
 
 const artifactForDelivery = (
   reference: WorkflowArtifactReference,
-  artifacts: Array<WorkflowArtifact | WorkflowArtifactInstance>,
+  artifacts: Array<WorkflowArtifactInstance>,
 ): WorkflowArtifactInstance | undefined => {
   return artifacts.find(
-    (artifact): artifact is WorkflowArtifactInstance =>
-      "descriptor" in artifact &&
-      artifact.stepId === reference.stepId &&
-      artifact.artifact === reference.artifact,
+    (artifact) => artifact.stepId === reference.stepId && artifact.artifact === reference.artifact,
   );
 };
 
@@ -730,7 +726,7 @@ export const runWorkflow = async <TServices = unknown>(
   const services = context.services ?? ({} as TServices);
   const outputs: Record<string, Record<string, unknown>> = {};
   const steps: Record<string, WorkflowStepResult> = {};
-  const artifacts: Array<WorkflowArtifact | WorkflowArtifactInstance> = [];
+  const artifacts: Array<WorkflowArtifactInstance> = [];
   let artifactSequence = 0;
   const startedAt = Date.now();
   const emit = (event: WorkflowEventInput): void => {
@@ -746,7 +742,7 @@ export const runWorkflow = async <TServices = unknown>(
 
     const runStep = async (step: WorkflowStep): Promise<void> => {
       const stepStartedAt = Date.now();
-      const stepArtifacts: Array<WorkflowArtifact | WorkflowArtifactInstance> = [];
+      const stepArtifacts: Array<WorkflowArtifactInstance> = [];
       const phaseResults = new Map<string, WorkflowPhaseResult>(
         (step.phases ?? []).map((phase) => [
           phase.id,
@@ -1035,10 +1031,7 @@ export const runWorkflow = async <TServices = unknown>(
                 );
               if (
                 stepArtifacts.some(
-                  (artifact) =>
-                    "descriptor" in artifact &&
-                    artifact.artifact === outputId &&
-                    artifact.path === path,
+                  (artifact) => artifact.artifact === outputId && artifact.path === path,
                 )
               )
                 return;
@@ -1070,7 +1063,7 @@ export const runWorkflow = async <TServices = unknown>(
         if (resolvedDeliveryArtifact && cloud && typeof cloud.hostedArtifactId === "string") {
           const updatedArtifact = Object.freeze({ ...resolvedDeliveryArtifact, cloud });
           const artifactIndex = artifacts.findIndex(
-            (artifact) => "descriptor" in artifact && artifact.id === resolvedDeliveryArtifact.id,
+            (artifact) => artifact.id === resolvedDeliveryArtifact.id,
           );
           if (artifactIndex >= 0) artifacts[artifactIndex] = updatedArtifact;
           stepArtifacts.push(updatedArtifact);
@@ -1105,12 +1098,7 @@ export const runWorkflow = async <TServices = unknown>(
         outputs[step.id] = result;
         steps[step.id] = stepResult;
         for (const artifact of stepArtifacts) {
-          const existingIndex =
-            "descriptor" in artifact
-              ? artifacts.findIndex(
-                  (existing) => "descriptor" in existing && existing.id === artifact.id,
-                )
-              : -1;
+          const existingIndex = artifacts.findIndex((existing) => existing.id === artifact.id);
           if (existingIndex >= 0) artifacts[existingIndex] = artifact;
           else artifacts.push(artifact);
         }

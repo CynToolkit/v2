@@ -456,7 +456,14 @@ describe("runFailureArtifactSummary", () => {
     expect(runFailureArtifactSummary(run)).toBe("No artifacts were recorded for this run.");
 
     run.artifacts = [
-      { id: "package", name: "package.zip", path: "/tmp/package.zip", size: 1, type: "file" },
+      {
+        id: "package",
+        path: "/tmp/package.zip",
+        size: 1,
+        descriptor: { kind: "files", container: "archive" },
+        stepId: "package",
+        artifact: "package.zip",
+      },
     ];
     expect(runFailureArtifactSummary(run)).toBe("1 artifact available in the Artifacts tab.");
   });
@@ -482,7 +489,14 @@ describe("reconcileRunEntry", () => {
       source: "build",
     });
     persisted.artifacts = [
-      { id: "artifact", name: "bundle", path: "/tmp/bundle", size: 1, type: "file" },
+      {
+        id: "artifact",
+        path: "/tmp/bundle",
+        size: 1,
+        descriptor: { kind: "files", container: "archive" },
+        stepId: "package",
+        artifact: "bundle",
+      },
     ];
 
     const merged = reconcileRunEntry(live, persisted);

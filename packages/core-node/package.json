@@ -34,8 +34,6 @@
   },
   "dependencies": {
     "@napi-rs/keyring": "2.0.0",
-    "@pipelab/asset-electron": "workspace:*",
-    "@pipelab/asset-tauri": "workspace:*",
     "@pipelab/constants": "workspace:*",
     "@pipelab/plugin-core": "workspace:*",
     "@pipelab/providers": "workspace:*",

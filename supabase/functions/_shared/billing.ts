@@ -44,13 +44,25 @@ class PolarApiError extends Error {
 }
 class PolarPayloadError extends Error {}
 
+/** Supabase injects publishable keys as a JSON dictionary keyed by name; `default` is the project key. */
+function readPublishableKey(env: BillingDependencies["env"]): string | undefined {
+  const raw = env("SUPABASE_PUBLISHABLE_KEYS");
+  if (!raw) return undefined;
+  try {
+    const key = (JSON.parse(raw) as Record<string, unknown> | null)?.default;
+    return typeof key === "string" && key ? key : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function createSupabaseUserResolver(
   env: BillingDependencies["env"],
   fetcher: typeof fetch,
 ): BillingDependencies["resolveUser"] {
   return async (accessToken) => {
     const supabaseUrl = env("SUPABASE_URL");
-    const publishableKey = env("SUPABASE_PUBLISHABLE_KEY") || env("SUPABASE_ANON_KEY");
+    const publishableKey = readPublishableKey(env);
     if (!supabaseUrl || !publishableKey) throw new BillingConfigurationError();
 
     let endpoint: URL;

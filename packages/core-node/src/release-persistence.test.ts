@@ -992,7 +992,13 @@ describe("ReleasePersistence", () => {
     });
     await mkdir(context.getConfigPath("workflows"), { recursive: true });
     await writeFile(context.getConfigPath("workflows", "workflow-1.json"), JSON.stringify(config));
-    const artifact = { name: "published", path: secretPath };
+    const artifact = {
+      id: "artifact-1",
+      path: secretPath,
+      stepId: "publish",
+      artifact: "published",
+      descriptor: { kind: "files", container: "archive" },
+    } as const;
     const result = {
       status: "completed",
       outputs: { publish: { path: secretPath } },

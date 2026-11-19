@@ -580,13 +580,11 @@ const formatSize = (bytes?: number) => {
 const artifactTitle = (artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number]) =>
   artifactDisplayName(artifact);
 const artifactCloud = (artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number]) =>
-  "cloud" in artifact ? artifact.cloud : undefined;
+  artifact.cloud;
 const artifactDescription = (artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number]) =>
   artifactDisplayDescription(artifact, entry.value?.steps || []);
 const artifactKind = (artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number]) =>
-  "descriptor" in artifact && artifact.descriptor
-    ? artifact.descriptor.format || artifact.descriptor.kind
-    : artifact.type;
+  artifact.descriptor.format || artifact.descriptor.kind;
 const openArtifact = async (path: string) => {
   try {
     const response = await api.openPath(path);

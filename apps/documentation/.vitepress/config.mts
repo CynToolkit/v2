@@ -86,7 +86,7 @@ export default defineConfig({
             { text: 'Development setup', link: '/contributing/development' },
             { text: 'Architecture and packages', link: '/contributing/architecture' },
             { text: 'Release process', link: '/contributing/releases' },
-            { text: 'Repository migration', link: '/contributing/repository-migration' },
+            { text: 'CI and deployment setup', link: '/contributing/ci-and-deployment' },
           ],
         },
       ],
