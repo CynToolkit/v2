@@ -119,19 +119,6 @@ export const sharedParams = {
     },
     label: "Custom profile",
   }),
-  // addonsFolder: {
-  //   description: 'Folder containing addons to import in the editor',
-  //   required: false,
-  //   control: {
-  //     type: 'path',
-  //     options: {
-  //       buttonLabel: 'Addons folder',
-  //       properties: ['openDirectory']
-  //     }
-  //   },
-  //   value: '',
-  //   label: 'Addons folder'
-  // }
 } satisfies InputsDefinition;
 
 type Inputs = ParamsToInput<typeof sharedParams>;
@@ -490,7 +477,6 @@ export const exportc3p = async (
 
   try {
     throwIfAborted(abortSignal);
-    // const { addonsFolder } = newInputs
 
     const { thirdparty, node } = paths;
 
@@ -661,7 +647,6 @@ export const exportc3p = async (
       exportTimeoutMs,
       useConnectionAccountSession && managedProfileInitialized,
       exportType,
-      // addonsFolder,
     );
 
     log("Setting output result to ", result);

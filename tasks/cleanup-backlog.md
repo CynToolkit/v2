@@ -15,73 +15,20 @@ migrated; backup in the session scratchpad.
 
 ## 1. Tooling
 
-- [ ] 🟢 Wire `pnpm knip` into CI (`turbo.json` task or a GitHub workflow)
-- [ ] 🟡 Turn on the remaining knip checks once the groups below are clean.
-      Remove `"include"` from `knip.json`, or preview with:
-      `pnpm knip --include files,dependencies,devDependencies,unlisted,binaries`
-- [ ] 🟡 Add knip entries for false positives: `supabase/functions/*/index.ts`,
-      `supabase/tests/*.mjs`, `packages/core-node/scripts/*.ts`
+- [x] Wire `pnpm knip` into CI (lint job in `release.yml`)
+- [x] Turn on the remaining knip checks (files, dependencies, unlisted, binaries)
+- [x] Knip entries for supabase functions/tests, core-node scripts, desktop builder config
 
-## 2. Unused files (knip)
+## 2. Unused files
 
-### `apps/ui` 🟡
-- [ ] `src/agent/log.ts`, `src/agent/trpc.ts`, `src/agent/utils/json.ts`
-- [ ] `src/components/ArtifactsQuickView.vue`
-- [ ] `src/components/BuildStatusBadge.vue`
-- [ ] `src/components/ColorPicker.vue`
-- [ ] `src/components/DisconnectedPage.vue`
-- [ ] `src/components/FileInput.vue`
-- [ ] `src/components/SubscriptionLoadingIndicator.vue`
-- [ ] `src/composables/middleware.ts`, `usePostHog.ts`, `useTour.ts`
-- [ ] `src/models/constants.ts`, `src/models/error.ts`
-- [ ] `src/store/user.ts`, `src/style/main.ts`, `src/utils/code-editor.ts`
-
-### `apps/website` 🟢 (Vue starter leftovers)
-- [ ] `src/components/icons/Icon{Community,Documentation,Ecosystem,Support,Tooling}.vue`
-- [ ] `src/components/TheWelcome.vue`, `WelcomeItem.vue`
-- [ ] `src/stores/counter.ts`
-- [ ] `src/views/docs/[...slug].vue`
-
-### Packages and desktop 🟡
-- [ ] `packages/core-node/src/handlers.ts`
-- [ ] `packages/providers/src/steam/utils.ts`
-- [ ] `packages/providers/.construct-benchmark.ts`
-- [ ] `packages/workflow-runtime/src/phase-types.typecheck.ts` (may be a type-test: check before deleting)
-- [ ] `apps/desktop/electron-builder.config.mjs`
-- [ ] `apps/desktop/scripts/headless-electron-tester.mts`, `test-github-releases.mts`
+- [x] Removed in batch 2: unused `apps/ui`, `apps/website` and package files reported by knip
 
 ## 3. Dependencies
 
-### Unused dependencies (`package.json`) 🟡
-- [ ] `apps/ui` (≈25): `@codemirror/lang-liquid`, `@codemirror/lint`, `@floating-ui/vue`,
-      `@jitl/quickjs-wasmfile-release-sync`, `@trpc/client`, `@vuelidate/core`,
-      `@vuelidate/validators`, `@vueuse/components`, `@vueuse/router`, `change-case`,
-      `dompurify`, `es-toolkit`, `fancy-ansi`, `get-value`, `path-browserify`, `polished`,
-      `semver`, `set-value`, `slash`, `string-strip-html`, `thememirror`, `tinykeys`,
-      `ts-pattern`, `tslog`, `type-fest`
-- [ ] `apps/cli`: `execa`, `nanoid`, `serve-handler`
-- [ ] `apps/website`: `@pipelab/shared`, `@vueuse/core`, `@vueuse/router`
-- [ ] `packages/core-node`: `@pipelab/asset-electron`, `@pipelab/asset-tauri`
-      (check: may be needed at build/bundle time), `adm-zip`, `es-toolkit`, `execa`, `type-fest`
-- [ ] `packages/providers`: `electron`, `es-toolkit`
-- [ ] `packages/shared`: `klona`
-- [ ] `plugins/plugin-core`: `electron`, `type-fest`
-
-### Unused devDependencies 🟡
-- [ ] Root: `@pipelab/constants`, `@pipelab/core-node`, `@pipelab/shared`, `@pipelab/tsconfig`,
-      `@types/tar`, `cross-env`, `execa`, `nanoid`, `vitest`
-- [ ] `@pipelab/tsconfig` in every package (probably referenced via `extends`, which knip
-      may not see: likely a false positive, add config)
-- [ ] `apps/ui`: `@types/semver`; `apps/desktop`: `electron-builder`
-- [ ] `packages/core-node`: `@types/adm-zip`, `@types/tar`; `packages/providers`: `msw`;
-      `packages/shared`: `esbuild-plugin-wasm`; `plugins/plugin-core`: `@pipelab/constants`, `@types/tar`
-
-### Missing / undeclared 🟡
-- [ ] Unlisted dependencies: `playwright` (cli e2e, `scripts/setup`), `@electron-toolkit/preload` (ui),
-      `@supabase/supabase-js` (ui), `serve-handler` (core-node), `change-case`, `semver`,
-      `confbox` (providers), `electron` and `ws` (shared), `esbuild` (`scripts/pipelab-dev.mjs`),
-      `tslib` (`packages/tsconfig/vue.json`)
-- [ ] Unlisted binaries: `tsx`, `supabase`, `doppler` (declare or ignore in knip)
+- [x] Unused dependencies and devDependencies removed (ui, cli, website, core-node, providers, shared, plugin-core, root)
+- [x] Undeclared imports now declared (`change-case`, `semver`, `confbox`, `serve-handler`, `@supabase/supabase-js`, `@electron-toolkit/preload`, `ws`, `electron` types, `esbuild`, `playwright`)
+- [ ] 🟡 `@pipelab/asset-electron` / `asset-tauri` in core-node are knip-ignored; confirm whether they are needed at bundle time
+- [ ] 🟢 Add the Vue `tslib` / `@pipelab/tsconfig` knip ignores to the owning packages instead of globally
 
 ## 4. Backward-compat code still in the tree
 
@@ -105,9 +52,9 @@ migrated; backup in the session scratchpad.
 
 ## 5. Stale docs and planning files
 
-- [ ] 🟢 `TODO_MONOREPO.md` (stale roadmap, stray note at the top)
-- [ ] 🟢 `tasks/todo.md` (unchecked "Generic Release Architecture" list)
-- [ ] 🟢 `docs/auth.drawio`, `docs/auth.png` (unreferenced)
+- [x] `TODO_MONOREPO.md` removed
+- [x] `tasks/todo.md` removed
+- [x] `docs/auth.drawio`, `docs/auth.png` removed
 - [ ] 🟡 `apps/documentation/contributing/repository-migration.md`: finished one-off runbook.
       Linked from `.vitepress/config.mts` and `contributing/releases.md` (lines ~45, ~152).
 - [ ] 🟡 `ARCHITECTURE.md` mentions a "legacy evaluator": confirm it still exists.
@@ -116,10 +63,9 @@ migrated; backup in the session scratchpad.
 
 ## 6. Scripts, tests and apps
 
-- [ ] 🟢 `scripts/delete_tags.sh`, `scripts/upload-windows.sh` (no references)
+- [x] `scripts/delete_tags.sh`, `scripts/upload-windows.sh` removed
 - [ ] 🟡 `tests/save-data-folder.test.mjs` is not wired to any test script. Wire it or move it
       next to `assets/asset-electron/template/src/handlers/user/save-data-folder.js`.
 - [ ] 🔴 `apps/mini-c3-electron`: no consumers found but it is in `.changeset/pre.json`.
       Is it still shipped?
-- [ ] 🟢 Commented-out code: `apps/ui/src/components/Settings.vue` (`// const isElectron`),
-      `packages/providers/src/construct/export-shared.ts` (`// addonsFolder`)
+- [x] Commented-out code removed (`Settings.vue`, `export-shared.ts`)

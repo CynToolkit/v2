@@ -206,6 +206,10 @@ jobs:
         with:
           deno-version: v2.1.9
 
+      - name: Check for dead code
+        if: matrix.task == 'lint'
+        run: pnpm knip
+
       - name: Run verification
         if: matrix.task != 'build'
         run: pnpm ${{ matrix.task }} --concurrency=2

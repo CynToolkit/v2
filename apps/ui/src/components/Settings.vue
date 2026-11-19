@@ -1157,7 +1157,6 @@ const toast = useToast();
 // const agentVersion = ref("...");
 // const uiVersion = process.env.UI_VERSION || "1.0.0";
 // const electronVersion = window.pipelab?.versions?.electron || "N/A";
-// const isElectron = !!window.electron;
 
 // const formatVersion = (version: string) => {
 //   if (!version || version === "N/A" || version === "..." || version === "Unknown") {
