@@ -49,6 +49,7 @@ export default defineConfig({
             { text: 'Steam', link: '/guide/publishing/steam' },
             { text: 'itch.io', link: '/guide/publishing/itch' },
             { text: 'Poki', link: '/guide/publishing/poki' },
+            { text: 'Notifications', link: '/guide/integrations/notifications' },
           ],
         },
         {

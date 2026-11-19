@@ -234,6 +234,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY) || '' }}
           SUPABASE_PROJECT_ID: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SUPABASE_PROJECT_ID || '' }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          PRIME_UI_KEY: ${{ secrets.PRIME_UI_KEY }}
         run: pnpm build --concurrency=2
 
       - name: Package Linux desktop smoke
@@ -394,6 +395,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          PRIME_UI_KEY: ${{ secrets.PRIME_UI_KEY }}
 
       - name: Read published version
         id: version
@@ -461,6 +463,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          PRIME_UI_KEY: ${{ secrets.PRIME_UI_KEY }}
         run: pnpm exec turbo build --filter=@pipelab/app... --filter=@pipelab/cli... --concurrency=2
 
       - name: Import Apple Code Signing Certificate
@@ -477,6 +480,7 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
+          PRIME_UI_KEY: ${{ secrets.PRIME_UI_KEY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

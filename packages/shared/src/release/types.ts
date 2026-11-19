@@ -106,6 +106,22 @@ export interface ReleaseDestinationConfig {
   slots: ReleaseDestinationSlot[];
 }
 
+/** What makes a notification target fire. A destination trigger names a destination of the workflow. */
+export type ReleaseNotificationTrigger =
+  | { on: "success" | "failure" }
+  | { on: "destination-completed" | "destination-failed"; destinationId: string };
+
+/** A place a finished run is announced, such as a Discord channel. Runs in the engine for every host. */
+export interface ReleaseNotificationConfig {
+  id: string;
+  provider: string;
+  name?: string;
+  enabled: boolean;
+  /** Absent means a finished run, whether it succeeded or failed. */
+  triggers?: ReleaseNotificationTrigger[];
+  config: Record<string, unknown>;
+}
+
 /** How long a workflow keeps its runs. A rule that is absent is not applied. */
 export interface ReleaseRetentionPolicy {
   /** Run history. Pruning a run also removes its artifacts. */
@@ -125,7 +141,10 @@ export interface ReleaseWorkflowSettings {
   /** Keep what a failed run's completed steps produced. Default: true. */
   keepFailedArtifacts?: boolean;
   retention?: ReleaseRetentionPolicy;
-  /** Desktop notification when a run started from the app finishes. Both default: true. */
+  /**
+   * Which finished runs announce themselves, to the desktop (UI-started runs) and to every
+   * notification target (any host). Cancelled runs never notify. Both default: true.
+   */
   notifications?: { onSuccess?: boolean; onFailure?: boolean };
 }
 
@@ -138,6 +157,8 @@ export interface ReleaseConfig {
   source: ReleaseSourceConfig;
   builds: ReleaseBuildProfileConfig[];
   destinations: ReleaseDestinationConfig[];
+  /** Where a finished run is announced. Absent means none. */
+  notifications?: ReleaseNotificationConfig[];
   continueOnError?: boolean;
   settings?: ReleaseWorkflowSettings;
 }
@@ -228,6 +249,8 @@ export interface ReleaseFieldDefinition {
    * that may not exist yet, such as an output file.
    */
   pathMode?: "open" | "save";
+  /** For `text` fields: the longest value the destination accepts; longer text is cut when sent. */
+  maxLength?: number;
 }
 
 export interface ReleaseFieldOption {
@@ -351,6 +374,47 @@ export interface ReleaseDestinationDefinition {
   acceptsWhen?(artifact: ArtifactDescriptor, context: ReleaseAcceptanceContext): ArtifactAcceptance;
 }
 
+/** What a notification message can say about a finished run. */
+export interface ReleaseNotificationEvent {
+  workflow: string;
+  /** `success`, or `failure` for a failed run or one that completed with errors. */
+  status: "success" | "failure";
+  version: string;
+  /** Run time in milliseconds. */
+  durationMs: number;
+  /** One entry per delivery the run attempted. */
+  destinations: Array<{
+    /** The workflow destination this delivery went to, so a trigger can name it. */
+    destinationId?: string;
+    name: string;
+    status: "completed" | "failed";
+    url?: string;
+    error?: string;
+  }>;
+  /** Redacted summary of what failed, when something did. */
+  error?: string;
+}
+
+/** The variables a notification template may use, as `{{name}}`. */
+export const NOTIFICATION_TEMPLATE_VARIABLES = [
+  "workflow",
+  "status",
+  "duration",
+  "version",
+  "destinations",
+  "error",
+] as const;
+
+export interface ReleaseNotificationDefinition {
+  id: string;
+  label: string;
+  description?: string;
+  icon?: IconType;
+  fields?: ReleaseFieldDefinition[];
+  createDefaultConfig(): Record<string, unknown>;
+  validate(config: ReleaseNotificationConfig): ValidationIssue[];
+}
+
 export interface ReleaseBuildTypeDefinition {
   id: string;
   label: string;
@@ -362,12 +426,14 @@ export interface ProviderReleaseDefinition {
   sources?: ReleaseSourceDefinition[];
   producers?: ReleaseProducerDefinition[];
   destinations?: ReleaseDestinationDefinition[];
+  notifications?: ReleaseNotificationDefinition[];
 }
 
 export interface ReleaseRegistry {
   sources: ReleaseSourceDefinition[];
   producers: ReleaseProducerDefinition[];
   destinations: ReleaseDestinationDefinition[];
+  notifications?: ReleaseNotificationDefinition[];
 }
 
 export interface ReleaseCatalogTarget {
@@ -421,11 +487,21 @@ export interface ReleaseCatalogDestination {
   defaultConfig: Record<string, unknown>;
 }
 
+export interface ReleaseCatalogNotification {
+  id: string;
+  label: string;
+  description?: string;
+  icon?: IconType;
+  fields?: ReleaseFieldDefinition[];
+  defaultConfig: Record<string, unknown>;
+}
+
 export interface ReleaseCatalog {
   buildTypes: ReleaseBuildTypeDefinition[];
   sources: ReleaseCatalogSource[];
   producers: ReleaseCatalogProducer[];
   destinations: ReleaseCatalogDestination[];
+  notifications?: ReleaseCatalogNotification[];
 }
 
 export const BROWSER_PROVIDER_SPECS_SCHEMA_VERSION = 1 as const;

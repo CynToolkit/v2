@@ -7,6 +7,7 @@ export const buildReleaseRegistry = (
   sources: providers.flatMap((provider) => provider.release?.sources ?? []),
   producers: providers.flatMap((provider) => provider.release?.producers ?? []),
   destinations: providers.flatMap((provider) => provider.release?.destinations ?? []),
+  notifications: providers.flatMap((provider) => provider.release?.notifications ?? []),
 });
 
 export const buildReleaseCatalog = (
@@ -66,6 +67,14 @@ export const buildReleaseCatalog = (
     accepts: destination.accepts,
     requiresBuild: destination.requiresBuild,
     defaultConfig: destination.createDefaultConfig(),
+  })),
+  notifications: (registry.notifications ?? []).map((notification) => ({
+    id: notification.id,
+    label: notification.label,
+    description: notification.description,
+    icon: notification.icon,
+    fields: notification.fields,
+    defaultConfig: notification.createDefaultConfig(),
   })),
 });
 
@@ -141,6 +150,11 @@ export const mergeReleaseCatalog = (
       (base, current) => ({
         ...mergeDefinition(base, current),
       }),
+    ),
+    notifications: mergeCatalogItems(
+      bundled.notifications ?? [],
+      runtime.notifications ?? [],
+      mergeDefinition,
     ),
   };
 };

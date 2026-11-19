@@ -4,6 +4,7 @@ import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { electronWorkflowTaskFactories } from "./package-v2";
 import { electronPhases } from "./phases";
 import { requiresMacHostForMacTargets } from "../host-matrix";
+import { electronProviderLogo } from "../provider-icons";
 
 export const electronTargetInputs = (
   targetId: string,
@@ -83,7 +84,7 @@ export const provider = createProviderDefinition({
   packageName: "@pipelab/plugin-electron",
   name: "Electron",
   description: "Pipelab provider for packaging apps with Electron",
-  icon: { type: "icon", icon: "pi-desktop" },
+  icon: { type: "image", image: electronProviderLogo },
   isOfficial: true,
   release: { producers: [electronProducer] },
   workflowTasks: electronWorkflowTaskFactories,

@@ -1,11 +1,6 @@
 <template>
   <div class="workflow-shell pl-workflow">
     <header class="workflow-header">
-      <nav class="workflow-breadcrumb" aria-label="Breadcrumb">
-        <RouterLink to="/workflows" class="workflow-back">
-          <i class="mdi mdi-arrow-left" aria-hidden="true" />{{ $t("home.workflows") }}
-        </RouterLink>
-      </nav>
       <div class="workflow-titlebar">
         <div class="workflow-identity">
           <div class="workflow-icon"><i class="mdi mdi-rocket-launch-outline" /></div>
@@ -234,27 +229,6 @@ onUnmounted(() => window.removeEventListener("resize", placeIndicator));
   gap: 14px;
   margin-bottom: 28px;
 }
-.workflow-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  padding: 3px 8px 3px 4px;
-  margin-left: -4px;
-  border-radius: 8px;
-  color: var(--pl-muted);
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition:
-    color 0.15s var(--pl-ease),
-    background 0.15s var(--pl-ease);
-}
-.workflow-back:hover {
-  color: var(--p-text-color);
-  background: var(--pl-hover);
-}
-.workflow-back:focus-visible,
 .workflow-nav a:focus-visible {
   outline: 2px solid var(--pl-focus);
   outline-offset: -2px;

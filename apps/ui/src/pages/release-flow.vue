@@ -4,7 +4,7 @@
     <div v-if="!dashboardMode" class="workflow-page">
       <Teleport v-if="actionsTarget" :to="actionsTarget">
         <span
-          v-if="flow && workflowReadinessState !== 'ready'"
+          v-if="flow && workflowReadinessState !== 'ready' && !planErrorCount"
           class="workflow-readiness"
           :class="`state-${workflowReadinessState}`"
           role="status"
@@ -337,6 +337,11 @@
             </div>
           </article>
         </section>
+        <NotificationTargets
+          :flow="flow"
+          :catalog="appStore.releaseCatalog"
+          :project-id="projectId"
+        />
       </main>
       <main v-else class="release-page">
         <Message v-if="loadError" severity="error" role="alert">
@@ -847,6 +852,7 @@ import {
 } from "../utils/run-notifications";
 import { useAppStore } from "../store/app";
 import NewBuildDialog from "../components/NewBuildDialog.vue";
+import NotificationTargets from "../components/NotificationTargets.vue";
 import ReleaseStatus from "../components/ReleaseStatus.vue";
 import { useConnectionsStore } from "../store/connections";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
@@ -1074,6 +1080,10 @@ const connectionDraft = ref({
 const dialogStyle = { width: "560px", maxWidth: "94vw" };
 const saveStateLabel = computed(() =>
   saveState.value === "saving" ? "Saving…" : saveState.value === "error" ? "Error" : "Saved",
+);
+// The header already shows an issue chip for plan errors; this chip covers the other states.
+const planErrorCount = computed(
+  () => workflowDoc.plan.value?.issues.filter((issue) => issue.severity === "error").length ?? 0,
 );
 const workflowReadinessState = computed(() =>
   releaseReadinessState({

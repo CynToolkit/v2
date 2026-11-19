@@ -101,6 +101,7 @@ describe("provider compatibility and composition", () => {
       "@pipelab/plugin-electron",
       "@pipelab/plugin-godot",
       "@pipelab/plugin-itch",
+      "@pipelab/plugin-notifications",
       "@pipelab/plugin-poki",
       "@pipelab/plugin-steam",
       "@pipelab/plugin-tauri",

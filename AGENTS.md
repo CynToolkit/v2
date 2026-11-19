@@ -11,8 +11,9 @@ procedures, not competing repository policy.
   projects.
 - `packages/`: shared libraries, configuration, migrations, runtime support,
   and test utilities.
-- `plugins/`: integrations and workflow plugins. Keep provider-specific logic
-  here instead of adding integration branches to generic packages.
+- `plugins/`: `plugin-core`, shared execution utilities for providers. Provider
+  logic lives in `packages/providers/src/<provider>`; keep it there instead of
+  adding integration branches to generic packages.
 - `workers/`: Cloudflare Worker entrypoints and shared worker code.
 - `supabase/`: local configuration and database migrations/functions.
 - `assets/`: templates and release assets.
@@ -141,8 +142,10 @@ hosts.
 
 ## Area-specific guidance
 
-- Plugin changes: preserve the plugin registry and public exports; put
-  integration behavior in the owning plugin and add focused tests.
+- Provider changes: preserve the provider registry, public exports, and
+  `@pipelab/plugin-*` IDs (needed for saved workflows); put integration
+  behavior in the owning folder under `packages/providers/src` and add focused
+  tests.
 - Editor UI changes follow the [Editor design-system instructions](apps/ui/AGENTS.md),
   including work that begins elsewhere in the monorepo. Verify affected
   behavior in `apps/ui` rather than through Electron.
