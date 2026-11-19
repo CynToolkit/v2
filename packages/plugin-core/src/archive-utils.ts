@@ -51,7 +51,7 @@ export async function extractZip(archivePath: string, destinationDir: string): P
       zipfile.on("entry", (entry) => {
         const entryPath = join(destinationDir, entry.fileName);
 
-        if (entry.fileName.endsWith('/')) {
+        if (entry.fileName.endsWith("/")) {
           // It's a directory
           mkdirP(entryPath, { recursive: true })
             .then(() => zipfile.readEntry())

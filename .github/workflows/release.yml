@@ -308,8 +308,8 @@ jobs:
           common='^(package[.]json|pnpm-lock[.]yaml|pnpm-workspace[.]yaml|turbo[.]json|[.]npmrc|[.]github/workflows/.*[.]yml|[.]github/actions/)'
           for app in editor website documentation; do
             case "$app" in
-              editor) paths='^(apps/ui/|packages/|plugins/)' ;;
-              website) paths='^(apps/website/|packages/|plugins/)' ;;
+              editor) paths='^(apps/ui/|packages/)' ;;
+              website) paths='^(apps/website/|packages/)' ;;
               documentation) paths='^apps/documentation/' ;;
             esac
             changed=false

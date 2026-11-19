@@ -23,7 +23,7 @@
       "path": "../workflow-runtime"
     },
     {
-      "path": "../../plugins/plugin-core"
+      "path": "../plugin-core"
     }
   ]
 }

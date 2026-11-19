@@ -10,10 +10,9 @@ procedures, not competing repository policy.
 - `apps/`: desktop Electron shell, CLI, UI, documentation, and small app
   projects.
 - `packages/`: shared libraries, configuration, migrations, runtime support,
-  and test utilities.
-- `plugins/`: `plugin-core`, shared execution utilities for providers. Provider
-  logic lives in `packages/providers/src/<provider>`; keep it there instead of
-  adding integration branches to generic packages.
+  and test utilities. `packages/plugin-core` holds shared execution utilities
+  for providers. Provider logic lives in `packages/providers/src/<provider>`;
+  keep it there instead of adding integration branches to generic packages.
 - `workers/`: Cloudflare Worker entrypoints and shared worker code.
 - `supabase/`: local configuration and database migrations/functions.
 - `assets/`: templates and release assets.

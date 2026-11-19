@@ -13,7 +13,7 @@ const sourceFiles = (folder: string): string[] =>
   });
 
 describe("provider dependency direction", () => {
-  it.each(["packages/providers", "plugins/plugin-core"])("%s has no host dependency", (folder) => {
+  it.each(["packages/providers", "packages/plugin-core"])("%s has no host dependency", (folder) => {
     const manifest = JSON.parse(readFileSync(join(root, folder, "package.json"), "utf8"));
     for (const field of [
       "dependencies",

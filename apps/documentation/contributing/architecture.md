@@ -13,7 +13,7 @@ This is an implementation map for contributors, not a promise of a stable public
 | `packages/shared`           | Shared types, schemas, configuration, provider definitions, and Release workflow planning/compiler contracts.                               |
 | `packages/workflow-runtime` | Host-abstracted version 1 task execution contracts and runtime.                                                                             |
 | `packages/providers`        | Construct, Electron, Godot, Tauri, Steam, Itch, and Poki implementations and tests, isolated in provider folders and versioned together.    |
-| `plugins/plugin-core`       | Generic filesystem, archive, download, process and package helpers below providers; no core-node dependency.                                |
+| `packages/plugin-core`      | Generic filesystem, archive, download, process and package helpers below providers; no core-node dependency.                                |
 | `workers/*`, `supabase/`    | Cloudflare Worker APIs and database migrations/functions for cloud services.                                                                |
 
 Core-node's single `builtInProviders` list drives renderer metadata, Release definitions, and native Workflow task registration. Each module exports one `ProviderDefinition` combining its metadata, integrations, Release contributions, and task factories. See [Workflow runtime](/reference/workflow-runtime).
