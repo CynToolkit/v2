@@ -29,7 +29,7 @@ describe("parseBuildHistoryDocument", () => {
   });
 
   it("rejects malformed persisted artifacts and deliveries", () => {
-    const legacyArtifact = {
+    const descriptorlessArtifact = {
       id: "artifact-1",
       name: "build.zip",
       path: "/tmp/build.zip",
@@ -62,17 +62,12 @@ describe("parseBuildHistoryDocument", () => {
         entries: [{ ...entry, deliveries: [{ id: "delivery-1", status: "pending" }] }],
       }),
     ).toThrow("delivery");
-    expect(
+    expect(() =>
       parseBuildHistoryDocument({
         version: "1.0.0",
-        entries: [
-          {
-            ...entry,
-            artifacts: [legacyArtifact],
-          },
-        ],
-      }).entries[0]?.artifacts,
-    ).toHaveLength(1);
+        entries: [{ ...entry, artifacts: [descriptorlessArtifact] }],
+      }),
+    ).toThrow("artifact requires id, path, stepId, and artifact");
     expect(
       parseBuildHistoryDocument({
         version: "1.0.0",
@@ -201,10 +196,10 @@ describe("parseBuildHistoryDocument", () => {
               artifacts: [
                 {
                   id: "artifact-1",
-                  name: "build.zip",
                   path: "/tmp/build.zip",
                   size: 12,
-                  type: "file",
+                  stepId: "step-1",
+                  artifact: "output",
                   descriptor: { kind: "files", container: "archive", [field]: 1 },
                 },
               ],
@@ -230,7 +225,18 @@ describe("parseBuildHistoryDocument", () => {
     ["error timestamp", { error: { message: "failed", timestamp: Number.NEGATIVE_INFINITY } }],
     [
       "artifact size",
-      { artifacts: [{ id: "a", name: "a", path: "/a", size: Number.NaN, type: "file" }] },
+      {
+        artifacts: [
+          {
+            id: "a",
+            path: "/a",
+            size: Number.NaN,
+            stepId: "s",
+            artifact: "a",
+            descriptor: { kind: "files", container: "archive" },
+          },
+        ],
+      },
     ],
     [
       "delivery start",
@@ -292,9 +298,10 @@ describe("parseBuildHistoryDocument", () => {
   it("accepts artifact records whose size was not measured", () => {
     const artifact = {
       id: "artifact-1",
-      name: "build.zip",
       path: "/tmp/build.zip",
-      type: "file",
+      stepId: "step-1",
+      artifact: "output",
+      descriptor: { kind: "files", container: "archive" },
     };
     const document = parseBuildHistoryDocument({
       version: "1.0.0",

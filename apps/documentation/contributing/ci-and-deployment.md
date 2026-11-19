@@ -1,24 +1,19 @@
-# Repository migration operations
+# CI and deployment setup
 
-This runbook covers the move from `CynToolkit/pipelab` to `CynToolkit/v2`. The
-imported Git history came from legacy `develop` at
-`d497fd91fa4611d232ae458245b8b9da841926f1`; v2 `main` now contains that history
-and the repository-migration follow-up. Legacy `main` at
-`04bb8a77e1e35dac405fc3174637e720fa9a4804` was not the import source. No tags
-were imported. Git history does not transfer repository settings, issues, PRs,
-releases, Actions history, secrets, or integrations.
+This page covers the repository, secrets, and Cloudflare configuration the CI
+and deployment workflows depend on. No deployment, billing operation, or
+release is performed by changing these settings.
 
-## Configure v2 before enabling Actions
+## Configure the repository
 
 Configure the required secrets, Cloudflare targets, permissions, and branch
-protections below before enabling deployments in a new environment. No deployment, billing operation, or release is performed by this
-runbook.
+protections below before enabling deployments in a new environment.
 
 Create a `main` ruleset or branch protection rule. Set required reviews and
 required CI checks after the first safe CI run reports its exact check names.
 Review who can push, bypass reviews, and create release tags. Confirm Actions
 workflow permissions, fork-PR policy, Dependabot, webhooks, GitHub Apps, and
-organization policies. These settings are not part of the Git import.
+organization policies. 
 
 ### Actions secrets
 
@@ -41,9 +36,8 @@ project and account with its owner before adding values.
 | `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | Optional for macOS prereleases; required for stable signed and notarized builds.         |
 | `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                                     |
 
-The destination project identifiers and secret values have not been migrated.
-Set the three Pages project-name secrets to the intended v2 projects; do not
-reuse a legacy value without confirming its target. Deploy jobs fail with a
+Set the three Pages project-name secrets to the intended projects and confirm
+each target with its owner. Deploy jobs fail with a
 clear missing-secret error when required Cloudflare values are absent.
 
 For macOS releases, either leave all five Apple secrets unset for ad-hoc-signed
@@ -79,20 +73,18 @@ use `pull_request_target`. A fork PR still receives the general CI checks and
 documentation build, without Cloudflare or production Supabase credentials.
 
 Cloudflare project names and domains are not encoded in these workflows. The
-existing Pages projects and their current and required production branches are:
+Pages projects and their production branches are:
 
-| App | Pages project | Current branch → required production branch | Known domain |
+| App | Pages project | Production branch | Known domain |
 | --- | --- | --- | --- |
-| Editor | `pipelab` | `develop` → `main` | `editor.pipelab.app` |
-| Website | `pipelab-website` | `main` → `main` | — |
-| Documentation | `pipelab-docs` | `main` → `main` | — |
+| Editor | `pipelab` | `main` | `editor.pipelab.app` |
+| Website | `pipelab-website` | `main` | — |
+| Documentation | `pipelab-docs` | `main` | — |
 
-Before enabling Actions, change the existing editor Pages project's production
-branch from `develop` to `main`; the website and documentation projects already
-use `main`. Cloudflare Pages Direct Upload does not expose this setting in the
+The editor Pages project's production branch must be `main`, like the website
+and documentation projects. Cloudflare Pages Direct Upload does not expose this setting in the
 dashboard; update the project through the [Cloudflare Pages project API](https://developers.cloudflare.com/pages/get-started/direct-upload/)
-with a token that has Pages Edit permission. This runbook does not perform that
-configuration change. Attach any additional custom domains and DNS records
+with a token that has Pages Edit permission. Attach any additional custom domains and DNS records
 manually in Cloudflare. Deployments
 only upload build output to the configured project and branch; they never
 create or modify Pages custom domains or DNS records. PR preview branches are
@@ -129,23 +121,3 @@ The website download page and desktop release links now point to v2. Users
 needing older releases should continue to use the legacy repository until the
 bridge and release decisions are complete. Historical changelog entries and
 their old PR/commit links intentionally remain pointed at the old repository.
-
-## Deferred pull requests and remaining work
-
-The import does not move open PRs, reviews, comments, draft state, or branch
-metadata. Legacy PRs #135, #112, and #52 remain to be dispositioned. Review
-each diff against v2 `main`; preserve desired changes by adapting them on a v2
-branch and opening a new v2 PR. Close or mark the old PR with its replacement
-link when appropriate. Do not assume old branches merge cleanly or that
-comments and reviews transfer.
-
-Before enabling Actions, configure the v2 secrets and Cloudflare Pages projects
-above, review the automatic triggers and `main` ruleset, and decide how to
-handle those three legacy PRs. After Actions are enabled, verify CI and the
-automatic PR preview on a same-repository PR. Confirm production deployment
-targets and Supabase billing configuration with their owners before merging
-deployment changes to `main`. Test the old-client bridge before retiring
-legacy release access.
-
-Archiving or deleting the old repository is a separate owner decision and is
-not an automatic migration step.

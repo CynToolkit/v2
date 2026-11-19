@@ -68,8 +68,9 @@ For the production Supabase project, configure these Edge Function values:
 - `POLAR_ALLOWED_ORIGINS` as the comma-separated exact HTTPS origins allowed
   to call browser billing functions
 
-Supabase supplies `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and
-`SUPABASE_SERVICE_ROLE_KEY` to Edge Functions. Authenticate the Supabase CLI,
+Supabase supplies `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS` (a JSON
+dictionary; billing reads its `default` key), and `SUPABASE_SERVICE_ROLE_KEY` to
+Edge Functions. Authenticate the Supabase CLI,
 set `SUPABASE_PROJECT_REF` to the approved project, then deploy all Edge
 Functions in this checkout, including billing and Cloud reconciliation:
 

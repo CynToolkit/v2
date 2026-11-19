@@ -61,10 +61,7 @@
     ]
   },
   "ignoreDependencies": [
-    "@pipelab/tsconfig",
-    "@pipelab/asset-electron",
-    "@pipelab/asset-tauri",
-    "tslib"
+    "@pipelab/tsconfig"
   ],
   "ignoreBinaries": [
     "tsx",

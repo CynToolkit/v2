@@ -21,15 +21,8 @@ const toArtifactViewModel = (
   run: BuildHistoryEntry,
   artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number],
 ): WorkflowArtifactViewModel => {
-  const explicitName =
-    typeof artifact.name === "string"
-      ? artifact.name
-      : typeof artifact.artifact === "string"
-        ? artifact.artifact
-        : "Artifact";
-  const kind =
-    artifact.descriptor?.kind ??
-    (artifact.type === "file" || artifact.type === "folder" ? artifact.type : undefined);
+  const explicitName = artifact.artifact;
+  const kind = artifact.descriptor.kind;
 
   return {
     id: `${run.id}:${artifact.id}`,
@@ -41,11 +34,9 @@ const toArtifactViewModel = (
     runDate: run.startTime,
     displayName: explicitName,
     releaseVersion: run.version ?? artifact.version,
-    ...(artifact.descriptor?.platform ? { platform: artifact.descriptor.platform } : {}),
-    ...(artifact.descriptor?.architecture
-      ? { architecture: artifact.descriptor.architecture }
-      : {}),
-    ...(artifact.descriptor?.format ? { format: artifact.descriptor.format } : {}),
+    ...(artifact.descriptor.platform ? { platform: artifact.descriptor.platform } : {}),
+    ...(artifact.descriptor.architecture ? { architecture: artifact.descriptor.architecture } : {}),
+    ...(artifact.descriptor.format ? { format: artifact.descriptor.format } : {}),
     ...(kind ? { kind } : {}),
     ...(typeof artifact.size === "number" && artifact.size > 0 ? { size: artifact.size } : {}),
     ...(artifact.path ? { localPath: artifact.path } : {}),

@@ -31,10 +31,11 @@ describe("aggregateWorkflowArtifacts", () => {
         artifacts: [
           {
             id: "old-artifact",
-            name: "old.zip",
             path: "/artifacts/old.zip",
             size: 12,
-            type: "file",
+            descriptor: { kind: "files", container: "archive" },
+            stepId: "package",
+            artifact: "old.zip",
           },
         ],
       }),
@@ -46,10 +47,11 @@ describe("aggregateWorkflowArtifacts", () => {
         artifacts: [
           {
             id: "wrong-project-artifact",
-            name: "ignore",
             path: "/artifacts/ignore",
             size: 1,
-            type: "file",
+            descriptor: { kind: "files", container: "archive" },
+            stepId: "package",
+            artifact: "ignore",
           },
         ],
       }),
@@ -85,10 +87,11 @@ describe("aggregateWorkflowArtifacts", () => {
         artifacts: [
           {
             id: "wrong-workflow-artifact",
-            name: "ignore",
             path: "/artifacts/ignore",
             size: 1,
-            type: "file",
+            descriptor: { kind: "files", container: "archive" },
+            stepId: "package",
+            artifact: "ignore",
           },
         ],
       }),
@@ -124,10 +127,11 @@ describe("aggregateWorkflowArtifacts", () => {
           artifacts: [
             {
               id: "legacy",
-              name: "windows-x64-installer.dmg",
               path: "/artifacts/windows-x64-installer.dmg",
               size: 7,
-              type: "file",
+              descriptor: { kind: "files", container: "archive" },
+              stepId: "package",
+              artifact: "windows-x64-installer.dmg",
             },
           ],
         }),
@@ -136,7 +140,7 @@ describe("aggregateWorkflowArtifacts", () => {
       "project-1",
     );
 
-    expect(artifact).toMatchObject({ displayName: "windows-x64-installer.dmg", kind: "file" });
+    expect(artifact).toMatchObject({ displayName: "windows-x64-installer.dmg", kind: "files" });
     expect(artifact).not.toHaveProperty("platform");
     expect(artifact).not.toHaveProperty("architecture");
     expect(artifact).not.toHaveProperty("format");
@@ -153,10 +157,8 @@ describe("aggregateWorkflowArtifacts", () => {
           artifacts: [
             {
               id: "runtime-artifact",
-              name: "linux-package",
               path: "/artifacts/linux-package",
               size: 0,
-              type: "file",
               descriptor: { kind: "application", container: "directory" },
               stepId: "package",
               artifact: "output",

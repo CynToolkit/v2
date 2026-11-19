@@ -42,7 +42,7 @@ within the same workflow. Pushing a tag alone does not start a release.
 
 All builds use Node 24.15.0 and frozen pnpm installs. Review the release target,
 signing credentials, and old-client update bridge before merging a version PR.
-See the [repository migration runbook](/contributing/repository-migration) for
+See the [CI and deployment setup](/contributing/ci-and-deployment) for
 required secrets and repository setup.
 
 The **CI & Release** workflow is the single entry point for PRs targeting
@@ -148,7 +148,7 @@ migration look for Squirrel feeds (`RELEASES`, `.nupkg`) that releases no longer
 contain. Those installs cannot self-update to the first electron-builder
 release; preserve the legacy release assets until
 the old-client bridge is built and verified; see the
-[repository migration runbook](/contributing/repository-migration).
+[CI and deployment setup](/contributing/ci-and-deployment).
 
 Changesets selects npm dist-tags from its prerelease state (`beta` while the
 repository is in beta mode, and `latest` for stable releases). Desktop GitHub

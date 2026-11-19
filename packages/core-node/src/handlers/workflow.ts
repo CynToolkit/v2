@@ -216,20 +216,11 @@ export const applyWorkflowEventToHistory = (
 const historyArtifacts = (
   result: Pick<WorkflowResult, "artifacts">,
 ): NonNullable<BuildHistoryEntry["artifacts"]> =>
-  result.artifacts.map((artifact, index) => {
-    if (!("descriptor" in artifact))
-      return {
-        id: `workflow-artifact-${index}`,
-        name: artifact.name,
-        path: artifact.path,
-        type: "file" as const,
-      };
+  result.artifacts.map((artifact) => {
     return {
       id: artifact.id,
-      name: artifact.artifact,
       path: artifact.path,
       ...(typeof artifact.size === "number" && artifact.size > 0 ? { size: artifact.size } : {}),
-      type: "file" as const,
       descriptor: artifact.descriptor,
       version: artifact.version,
       stepId: artifact.stepId,

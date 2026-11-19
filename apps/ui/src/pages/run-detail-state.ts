@@ -6,21 +6,11 @@ type WorkflowEvent = Extract<Events<"workflow:execute">, { type: "workflow-event
 const workflowArtifacts = (
   artifacts: Extract<WorkflowEvent, { type: "workflow.completed" }>["result"]["artifacts"],
 ): NonNullable<BuildHistoryEntry["artifacts"]> =>
-  artifacts.map((artifact, index) => {
-    if (!("descriptor" in artifact)) {
-      return {
-        id: `workflow-artifact-${index}`,
-        name: artifact.name,
-        path: artifact.path,
-        type: "file" as const,
-      };
-    }
+  artifacts.map((artifact) => {
     return {
       id: artifact.id,
-      name: artifact.artifact,
       path: artifact.path,
       ...(typeof artifact.size === "number" && artifact.size > 0 ? { size: artifact.size } : {}),
-      type: "file" as const,
       descriptor: artifact.descriptor,
       version: artifact.version,
       stepId: artifact.stepId,
@@ -558,17 +548,12 @@ export const applyWorkflowEventToRunEntry = (entry: BuildHistoryEntry, event: Wo
 export const artifactDisplayName = (
   artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number],
 ) =>
-  "descriptor" in artifact && artifact.descriptor
-    ? `${artifact.descriptor.platform || artifact.descriptor.kind}${artifact.descriptor.format ? ` · ${artifact.descriptor.format}` : ""}`
-    : artifact.name;
+  `${artifact.descriptor.platform || artifact.descriptor.kind}${artifact.descriptor.format ? ` · ${artifact.descriptor.format}` : ""}`;
 
 export const artifactDisplayDescription = (
   artifact: NonNullable<BuildHistoryEntry["artifacts"]>[number],
   steps: ExecutionStep[],
-) =>
-  "stepId" in artifact
-    ? steps.find((step) => step.id === artifact.stepId)?.name || "Generated artifact"
-    : artifact.name;
+) => steps.find((step) => step.id === artifact.stepId)?.name || "Generated artifact";
 
 export const deliveryDisplayMetadata = (
   delivery: NonNullable<BuildHistoryEntry["deliveries"]>[number],

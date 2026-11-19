@@ -45,23 +45,6 @@ export interface LogEntry {
   data?: Record<string, unknown>;
 }
 
-export interface Artifact {
-  id: string;
-  name: string;
-  path: string;
-  size?: number;
-  type: "file" | "folder";
-  descriptor?: ArtifactDescriptor;
-  version?: string;
-  stepId?: string;
-  artifact?: string;
-  checksum?: string;
-  cloud?: {
-    hostedArtifactId: string;
-    uploadedAt: string;
-  };
-}
-
 export interface BuildHistoryEntry {
   id: string;
   projectId: string;
@@ -87,7 +70,7 @@ export interface BuildHistoryEntry {
   userId?: string;
   createdAt: number;
   updatedAt: number;
-  artifacts?: Array<Artifact | WorkflowArtifactInstance>;
+  artifacts?: Array<WorkflowArtifactInstance>;
   deliveries?: WorkflowDeliveryResult[];
 }
 
@@ -206,38 +189,14 @@ const parseArtifactCloud = (value: unknown, path: string): void => {
 const parseArtifact = (value: unknown, path: string): void => {
   if (!isRecord(value)) throw new BuildHistoryParseError(path, "artifact must be an object");
 
-  // Legacy persisted artifacts have a human-readable name and file type, but
-  // no runtime step/artifact reference. Runtime artifacts are identified by
-  // their descriptor and require those execution references.
-  const isRuntimeArtifact =
-    value.descriptor !== undefined &&
-    isNonEmptyString(value.stepId) &&
-    isNonEmptyString(value.artifact);
-  if (isRuntimeArtifact) {
-    if (
-      !isNonEmptyString(value.id) ||
-      !isNonEmptyString(value.path) ||
-      !isNonEmptyString(value.stepId) ||
-      !isNonEmptyString(value.artifact)
-    )
-      throw new BuildHistoryParseError(
-        path,
-        "runtime artifact requires id, path, stepId, and artifact",
-      );
-    parseArtifactDescriptor(value.descriptor, `${path}.descriptor`);
-  } else if (
+  if (
     !isNonEmptyString(value.id) ||
-    !isNonEmptyString(value.name) ||
     !isNonEmptyString(value.path) ||
-    !["file", "folder"].includes(String(value.type))
-  ) {
-    throw new BuildHistoryParseError(
-      path,
-      "legacy artifact requires id, name, path, size, and type",
-    );
-  }
-  if (!isRuntimeArtifact && value.descriptor !== undefined)
-    parseArtifactDescriptor(value.descriptor, `${path}.descriptor`);
+    !isNonEmptyString(value.stepId) ||
+    !isNonEmptyString(value.artifact)
+  )
+    throw new BuildHistoryParseError(path, "artifact requires id, path, stepId, and artifact");
+  parseArtifactDescriptor(value.descriptor, `${path}.descriptor`);
   for (const key of ["version", "stepId", "artifact", "checksum"])
     if (value[key] !== undefined && typeof value[key] !== "string")
       throw new BuildHistoryParseError(`${path}.${key}`, "must be a string");

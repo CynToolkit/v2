@@ -127,11 +127,6 @@ export interface Logger {
 
 export type WorkflowLogStream = "stdout" | "stderr";
 
-export interface WorkflowArtifact {
-  name: string;
-  path: string;
-}
-
 export interface WorkflowTaskContext<TServices = unknown> {
   step: WorkflowStep;
   inputs: Record<string, unknown>;
@@ -140,7 +135,7 @@ export interface WorkflowTaskContext<TServices = unknown> {
   /** Outputs already produced by steps in this workflow run. */
   outputs: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
   /** Artifacts already produced by steps in this workflow run. */
-  artifacts: readonly (WorkflowArtifact | WorkflowArtifactInstance)[];
+  artifacts: readonly WorkflowArtifactInstance[];
   /** Host-provided services for plugin tasks. */
   services: TServices;
   delivery?: WorkflowTaskDeliveryContext;
@@ -204,7 +199,7 @@ export interface WorkflowStepResult {
   uses: string;
   status: "completed" | "failed" | "skipped";
   outputs: Record<string, unknown>;
-  artifacts: Array<WorkflowArtifact | WorkflowArtifactInstance>;
+  artifacts: Array<WorkflowArtifactInstance>;
   startedAt: number;
   completedAt: number;
   duration: number;
@@ -233,7 +228,7 @@ export interface WorkflowResult {
   status: "completed" | "completed-with-errors";
   version?: string;
   outputs: Record<string, Record<string, unknown>>;
-  artifacts: Array<WorkflowArtifact | WorkflowArtifactInstance>;
+  artifacts: Array<WorkflowArtifactInstance>;
   deliveries: WorkflowDeliveryResult[];
   steps: Record<string, WorkflowStepResult>;
 }
@@ -260,7 +255,7 @@ export type WorkflowEventInput =
       stepId: string;
       uses: string;
       outputs: Record<string, unknown>;
-      artifacts: Array<WorkflowArtifact | WorkflowArtifactInstance>;
+      artifacts: Array<WorkflowArtifactInstance>;
       duration: number;
     }
   | {

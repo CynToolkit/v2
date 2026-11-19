@@ -27,15 +27,15 @@ migrated; backup in the session scratchpad.
 
 - [x] Unused dependencies and devDependencies removed (ui, cli, website, core-node, providers, shared, plugin-core, root)
 - [x] Undeclared imports now declared (`change-case`, `semver`, `confbox`, `serve-handler`, `@supabase/supabase-js`, `@electron-toolkit/preload`, `ws`, `electron` types, `esbuild`, `playwright`)
-- [ ] 🟡 `@pipelab/asset-electron` / `asset-tauri` in core-node are knip-ignored; confirm whether they are needed at bundle time
-- [ ] 🟢 Add the Vue `tslib` / `@pipelab/tsconfig` knip ignores to the owning packages instead of globally
+- [x] `@pipelab/asset-electron` / `asset-tauri` dropped from core-node (assets are resolved by path under the CLI `assets/` dir, not via node_modules)
+- [x] `tslib` declared in `packages/tsconfig`; `@pipelab/tsconfig` stays in the global knip ignore (consumed through `extends`, which knip cannot see)
 
 ## 4. Backward-compat code still in the tree
 
-- [ ] 🟡 `build-history.ts` `parseArtifact` legacy artifact shape (name + type, no descriptor). **Still written:** `WorkflowResult.artifacts` in `packages/workflow-runtime/src/types.ts` is `WorkflowArtifact | WorkflowArtifactInstance`, and `historyArtifacts` (core-node `handlers/workflow.ts`) and `run-detail-state.ts` (ui) map the descriptor-less variant. Remove the `WorkflowArtifact` variant from the runtime first, then narrow `BuildHistoryEntry.artifacts` and the parser.
+- [x] Legacy artifact shape removed: `WorkflowArtifact` dropped from workflow-runtime; history stores the runtime artifact instance; parser and UI no longer branch on the old shape
 - [x] PostHog legacy identity reset removed (`clearLegacyPostHogIdentity`, `loaded` hook); the normal reset on sign-out stays
 - [x] Decided: keep the `isElectron` global in the exported-game preload
-- [ ] 🔴 `supabase/functions/_shared/billing.ts` (+ test): falls back to `SUPABASE_ANON_KEY`. Wanted: `SUPABASE_PUBLISHABLE_KEY` only. **Blocked:** Supabase injects only `SUPABASE_ANON_KEY` into edge functions and the CLI rejects custom secrets whose name starts with `SUPABASE_`, so the new name cannot be set as a function secret. Needs a different approach (read `SUPABASE_ANON_KEY` only, or a non-prefixed secret name).
+- [x] Edge function reads `SUPABASE_PUBLISHABLE_KEYS` (JSON dictionary, `default` key) injected by Supabase; `SUPABASE_ANON_KEY` fallback removed
 - [x] Decided: keep persisted `pluginName` and `@pipelab/plugin-*` IDs (public provider IDs, not a shim)
 - [x] `Migrator<T>` interface typed (no `any`), unused `configRegistry` removed
 - [x] Old graph-pipeline JSON fixtures removed (provider e2e fixtures, desktop `start:args` script pointing at a missing file)
@@ -46,7 +46,7 @@ migrated; backup in the session scratchpad.
 - [x] `TODO_MONOREPO.md` removed
 - [x] `tasks/todo.md` removed
 - [x] `docs/auth.drawio`, `docs/auth.png` removed
-- [ ] 🟡 `apps/documentation/contributing/repository-migration.md`: still linked for required secrets/setup in `releases.md`; fold that content into `releases.md`, then delete.
+- [x] `repository-migration.md` became `ci-and-deployment.md` (import history and deferred-PR notes dropped)
 - [x] `ARCHITECTURE.md` no longer describes the removed legacy evaluator
 - [x] READMEs re-read: migration README rewritten in batch 1; `apps/ui/README.md` mentions are about auth sessions and still accurate
 
