@@ -1,11 +1,17 @@
-import { createMigration, createMigrator, finalVersion, SemVer } from "@pipelab/migration";
+import {
+  createMigration,
+  createMigrator,
+  finalVersion,
+  type MigrateOptions,
+  SemVer,
+} from "@pipelab/migration";
 import { AppConfig, ConnectionsConfig } from "../config.schema";
 import { FileRepo } from "./projects-definition";
 
 // --- Types ---
 
 export interface Migrator<T> {
-  migrate: (data: any, options?: any) => Promise<T>;
+  migrate: (data: { version: SemVer }, options?: MigrateOptions) => Promise<T>;
   defaultValue: T;
 }
 
@@ -85,11 +91,3 @@ export const fileRepoMigrations = fileRepoMigratorInternal.createMigrations({
     }),
   ],
 });
-
-// --- Registry ---
-
-export const configRegistry: Record<string, Migrator<any>> = {
-  settings: appSettingsMigrator,
-  projects: fileRepoMigrations,
-  connections: connectionsMigrator,
-};

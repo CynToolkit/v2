@@ -1,6 +1,7 @@
 export * from "./models/createMigration";
 export * from "./models/createMigrator";
 export type {
+  MigrateOptions,
   MigrationSchema,
   Migrator,
   MigratorConfig,
