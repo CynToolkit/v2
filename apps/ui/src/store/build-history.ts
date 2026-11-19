@@ -47,7 +47,6 @@ export const useBuildHistory = defineStore("build-history", () => {
       const result = await api.execute("build-history:get-all", {
         query,
       });
-      console.log("result", result);
       if (result.type === "error") {
         throw new Error(result.ipcError || "Failed to get build history entries");
       }

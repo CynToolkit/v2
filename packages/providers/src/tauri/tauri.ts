@@ -103,8 +103,6 @@ export const tauri = async (
   { cwd, log, inputs, setOutput, paths, abortSignal, context }: TauriExecutionContext,
   completeConfiguration: DesktopApp.Config,
 ): Promise<{ folder: string; binary: string | undefined } | undefined> => {
-  console.log("appFolder", appFolder);
-
   log("Building tauri");
 
   if (action !== "preview") {
@@ -166,11 +164,9 @@ export const tauri = async (
   const cargoTomlContent = await readFilePromise(cargoTomlPath, "utf8");
   const cargoToml = parseTOML(cargoTomlContent) as { name: string; version: string };
   log("Setting name to", sanitizedName);
-  console.log("cargoToml", cargoToml);
   cargoToml.name = sanitizedName;
   log("Setting version to", completeConfiguration.appVersion);
   cargoToml.version = completeConfiguration.appVersion;
-  console.log("cargoToml", stringifyTOML(cargoToml));
   await writeFilePromise(cargoTomlPath, stringifyTOML(cargoToml));
 
   // tauri.conf.json update
@@ -238,7 +234,6 @@ export const tauri = async (
     const cargoBinDir = dirname(cargo);
 
     log("cargoBinDir", cargoBinDir);
-    console.log("cargo", cargo);
 
     log("destinationFolder", destinationFolder);
 

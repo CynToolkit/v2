@@ -69,10 +69,11 @@ migrated; backup in the session scratchpad.
 - [x] `scripts/network-interceptor.mjs` (unreferenced) and `.vscode/launch.json` (points at a missing electron-forge script) removed
 - [x] `mise docs-generate-mermaid` no longer targets three missing `.mermaid` files
 
-## Open (needs a decision)
+- [x] `.devcontainer` removed
+- [x] `mise.toml` local tasks read only the Supabase CLI output names (`API_URL`, `PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`/`SECRET_KEY`), no inherited env fallbacks
+- [x] Leftover debug `console.log`/`console.debug` removed (UI, shared, desktop preload/IPC, tauri, Node/PNPM setup timings); CLI command output and server/websocket diagnostics kept on purpose
 
-- [ ] 🔴 `.devcontainer/devcontainer.json` pins Node 22.4 and a universal image; repo is on Node 24. Update or delete?
-- [ ] 🟡 `mise.toml` local tasks chain env fallbacks (`PUBLISHABLE_KEY` -> `SUPABASE_PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY` -> `SECRET_KEY` -> ...). Simplify once the supabase CLI output is checked.
-- [ ] 🟢 47 `console.log/debug` calls in UI and package sources (e.g. `App.vue` `log:message` handler)
+## Open
+
 - [ ] 🟢 Open `TODO` comments: `desktop/src/preload.ts`, `providers/electron/forge.ts`, `providers/tauri/tauri.ts`, `asset-electron` steam handlers
 - [ ] 🟡 `docs/expression.md` is a stub at the repo root and not linked from anywhere

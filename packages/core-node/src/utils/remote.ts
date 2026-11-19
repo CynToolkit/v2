@@ -45,15 +45,11 @@ async function withLock(key: string, fn: () => Promise<string>): Promise<string>
  * Installs a specific version of Node.js if not already present.
  */
 export async function ensureNodeJS(context: PipelabContext, version = DEFAULT_NODE_VERSION) {
-  const checkStart = Date.now();
   const isWindows = process.platform === "win32";
   const nodeDir = context.getThirdPartyPath("node", version);
   const finalNodePath = join(nodeDir, isWindows ? "node.exe" : "bin/node");
 
   if (isNodeJSComplete(finalNodePath)) {
-    console.debug(
-      `[Environment] Node.js check took ${Date.now() - checkStart}ms (found at ${finalNodePath})`,
-    );
     return finalNodePath;
   }
 
@@ -73,13 +69,10 @@ export async function ensureNodeJS(context: PipelabContext, version = DEFAULT_NO
 
     sendStartupProgress(`Downloading Node.js v${version}...`);
     console.log(`Downloading Node.js from ${downloadUrl}...`);
-    const dlStart = Date.now();
     await downloadFile(downloadUrl, archivePath);
-    console.debug(`[Environment] Node.js download took ${Date.now() - dlStart}ms`);
 
     sendStartupProgress(`Extracting Node.js v${version}...`);
     console.log(`Extracting Node.js to ${tempDir}...`);
-    const extStart = Date.now();
     const extractTempDir = join(tempDir, "extracted");
     await mkdir(extractTempDir, { recursive: true });
 
@@ -118,18 +111,15 @@ export async function ensureNodeJS(context: PipelabContext, version = DEFAULT_NO
         await rename(tempNodeDir, nodeDir);
       } catch (err) {
         if (isNodeJSComplete(finalNodePath)) {
-          console.debug(`[Fetcher] Node.js directory already exists and is valid.`);
         } else {
           throw err;
         }
       }
-      console.debug(`[Environment] Node.js extraction took ${Date.now() - extStart}ms`);
     } finally {
       await rm(tempNodeDir, { recursive: true, force: true }).catch(() => {});
       await rm(tempDir, { recursive: true, force: true }).catch(() => {});
     }
 
-    console.debug(`[Environment] Node.js set up complete in ${Date.now() - checkStart}ms`);
     return finalNodePath;
   });
 }
@@ -138,14 +128,10 @@ export async function ensureNodeJS(context: PipelabContext, version = DEFAULT_NO
  * Installs the PNPM package from npm if not already present.
  */
 export async function ensurePNPM(context: PipelabContext, version = DEFAULT_PNPM_VERSION) {
-  const checkStart = Date.now();
   const pnpmDir = context.getPackagesPath("pnpm", version);
   const pnpmPath = join(pnpmDir, "bin", "pnpm.cjs");
 
   if (existsSync(pnpmPath)) {
-    console.debug(
-      `[Environment] PNPM check took ${Date.now() - checkStart}ms (found at ${pnpmPath})`,
-    );
     return pnpmPath;
   }
 
@@ -156,7 +142,6 @@ export async function ensurePNPM(context: PipelabContext, version = DEFAULT_PNPM
     const { packageDir } = await fetchPackage("pnpm", version, {
       context,
     });
-    console.debug(`[Environment] PNPM set up complete in ${Date.now() - checkStart}ms`);
     return join(packageDir, "bin", "pnpm.cjs");
   });
 }
