@@ -23,6 +23,7 @@ import {
   type ExecutionStep,
   type LogEntry,
   type ReleaseConfig,
+  type ReleaseNotificationEvent,
   parseReleaseConfig,
   useLogger,
 } from "@pipelab/shared";
@@ -42,6 +43,7 @@ import { planReleaseForHost, releaseConfigForHost } from "../release/plan-for-ho
 import { builtInProviders } from "../providers-registry";
 import { testConnection } from "./connection-test";
 import { applyRetention } from "../release/apply-retention";
+import { dispatchRunNotifications } from "../release/notifications";
 import { PreflightFailedError, runPreflights, type PreflightOutcome } from "../release/preflight";
 
 const host = () => ({ platform: process.platform, architecture: process.arch });
@@ -407,6 +409,34 @@ export const executeWorkflow = async (
       logger().warn(`Failed to apply retention for workflow ${config.id}:`, error);
     }
   };
+  const destinationLabels = new Map(
+    config.destinations.map((destination) => [
+      destination.id,
+      destination.name?.trim() || destination.provider,
+    ]),
+  );
+  /** Announces how the run ended to the workflow's notification targets; it never throws. */
+  const announce = (
+    outcome: "success" | "failure" | "cancelled",
+    details: Pick<ReleaseNotificationEvent, "destinations" | "error">,
+  ) =>
+    dispatchRunNotifications({
+      config,
+      registry: prepared.registry,
+      providers: builtInProviders,
+      connectionValues: valueResolver.connectionValues,
+      outcome,
+      event: {
+        workflow: config.name,
+        status: outcome === "success" ? "success" : "failure",
+        version,
+        durationMs: Date.now() - startTime,
+        ...details,
+        ...(details.error ? { error: valueResolver.redactString(details.error) } : {}),
+      },
+      redactString: valueResolver.redactString,
+      warn: (message) => logger().warn(message),
+    });
   let result: WorkflowResult;
   let preflightOutcomes: PreflightOutcome[] | undefined;
   let preflightFailure: PreflightFailedError | undefined;
@@ -603,6 +633,23 @@ export const executeWorkflow = async (
       );
     }
     await pruneOldRuns();
+    await announce(finalStatus === "cancelled" ? "cancelled" : "failure", {
+      error: errorMessage,
+      destinations: steps.flatMap((step) =>
+        step.destinationId && (step.status === "completed" || step.status === "failed")
+          ? [
+              {
+                destinationId: step.destinationId,
+                name: destinationLabels.get(step.destinationId) ?? step.destinationId,
+                status: step.status,
+                ...(step.status === "failed" && step.error?.message
+                  ? { error: step.error.message }
+                  : {}),
+              },
+            ]
+          : [],
+      ),
+    });
     const safeError = new Error(errorMessage);
     if (error instanceof Error) safeError.name = valueResolver.redactString(error.name);
     throw safeError;
@@ -649,6 +696,27 @@ export const executeWorkflow = async (
     await history.update(buildId, historyUpdate, projectId);
   }
   await pruneOldRuns();
+  const failedSteps = Object.values(result.steps).filter((step) => step.status === "failed");
+  await announce(result.status === "completed" ? "success" : "failure", {
+    destinations: result.deliveries.map((delivery) => ({
+      destinationId: delivery.destinationId,
+      name:
+        delivery.destinationName ??
+        destinationLabels.get(delivery.destinationId) ??
+        delivery.destinationId,
+      status: delivery.status,
+      ...(delivery.error ? { error: delivery.error } : {}),
+    })),
+    ...(result.status === "completed"
+      ? {}
+      : {
+          error:
+            failedSteps
+              .map((step) => step.error?.message)
+              .filter(Boolean)
+              .join("\n") || "The run completed with errors.",
+        }),
+  });
   return {
     result,
     safeResult: valueResolver.redactObject(result),

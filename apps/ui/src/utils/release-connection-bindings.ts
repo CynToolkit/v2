@@ -65,6 +65,13 @@ const releaseConnectionReferences = (
       collectConnectionReferences(definition?.slotFields, slot.config, references);
   }
 
+  for (const notification of config.notifications ?? []) {
+    const definition = catalog.notifications?.find(
+      (candidate) => candidate.id === notification.provider,
+    );
+    collectConnectionReferences(definition?.fields, notification.config, references);
+  }
+
   return [...references].flatMap(([alias, integrations]) =>
     [...integrations].map((integration) => ({ alias, integration })),
   );
@@ -391,6 +398,34 @@ export const resolveDesktopWorkflowConnectionValues = (
     values[alias] = connectionValues(connection, integrationForReference(integration, providers));
   }
 
+  // A notification target is announced after the run, so one without a usable Connection is
+  // skipped here (the engine reports it) instead of stopping the run from starting.
+  for (const notification of (config.notifications ?? []).filter((target) => target.enabled)) {
+    const definition = catalog.notifications?.find(
+      (candidate) => candidate.id === notification.provider,
+    );
+    for (const field of definition?.fields ?? []) {
+      const alias = notification.config[field.key];
+      if (field.type !== "connection" || typeof alias !== "string" || !alias || values[alias])
+        continue;
+      const binding = connections.workflowBindings?.find(
+        (candidate) => candidate.workflowId === config.id && candidate.alias === alias,
+      );
+      const connection = binding ? connectionsById.get(binding.connectionId) : undefined;
+      if (
+        !connection ||
+        (field.integration &&
+          connection.pluginName !== field.integration &&
+          connection.integrationName !== field.integration)
+      )
+        continue;
+      values[alias] = connectionValues(
+        connection,
+        integrationForReference(field.integration, providers),
+      );
+    }
+  }
+
   return values;
 };
 
@@ -501,6 +536,12 @@ export const renameWorkflowConnectionAlias = (
     updated += renameFieldAlias(definition?.fields, destination.config, from, to);
     for (const slot of destination.slots)
       updated += renameFieldAlias(definition?.slotFields, slot.config, from, to);
+  }
+  for (const notification of renamedConfig.notifications ?? []) {
+    const definition = catalog.notifications?.find(
+      (candidate) => candidate.id === notification.provider,
+    );
+    updated += renameFieldAlias(definition?.fields, notification.config, from, to);
   }
 
   if (

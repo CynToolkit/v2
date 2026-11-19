@@ -8,6 +8,7 @@ import {
 
 import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseDestinationDefinition } from "@pipelab/shared";
+import { itchProviderLogo } from "../provider-icons";
 
 export { createItchUploadTask, WORKFLOW_TASK_ID };
 
@@ -91,7 +92,7 @@ export const provider = createProviderDefinition({
   packageName: "@pipelab/plugin-itch",
   name: "Itch.io",
   description: "Pipelab provider for publishing games to itch.io",
-  icon: { type: "icon", icon: "pi-palette" },
+  icon: { type: "image", image: itchProviderLogo },
   isOfficial: true,
   integrations: [
     {

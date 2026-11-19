@@ -3,7 +3,7 @@ import { builtInReleaseDefinitions } from "./builtins";
 import { builtInProviders } from "../providers-registry";
 
 export const assertUniqueReleaseIds = (
-  contributionType: "source" | "producer" | "destination",
+  contributionType: "source" | "producer" | "destination" | "notification",
   ids: readonly string[],
 ): void => {
   const seen = new Set<string>();
@@ -24,6 +24,7 @@ export const buildCoreReleaseRegistry = (): ReleaseRegistry => {
     sources: definitions.flatMap((release) => release.sources ?? []),
     producers: definitions.flatMap((release) => release.producers ?? []),
     destinations: definitions.flatMap((release) => release.destinations ?? []),
+    notifications: definitions.flatMap((release) => release.notifications ?? []),
   };
 
   assertUniqueReleaseIds(
@@ -37,6 +38,11 @@ export const buildCoreReleaseRegistry = (): ReleaseRegistry => {
   assertUniqueReleaseIds(
     "destination",
     registry.destinations.map((destination) => destination.id),
+  );
+
+  assertUniqueReleaseIds(
+    "notification",
+    (registry.notifications ?? []).map((notification) => notification.id),
   );
 
   return registry;

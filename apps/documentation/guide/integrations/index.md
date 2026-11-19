@@ -30,6 +30,8 @@ Pipelab; see [Folder and ZIP providers](./folder-zip). Provider details:
   provides optional revocable share links.
 - [Steam](../publishing/steam), [itch.io](../publishing/itch), and
   [Poki](../publishing/poki) document account and destination setup.
+- [Notifications](./notifications) announce a finished run to Discord or any
+  webhook, from the app or the CLI.
 
 For workflow setup and execution, see
 [Build and ship with a Release workflow](../release-workflows).

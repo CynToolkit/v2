@@ -248,6 +248,7 @@ const onTabKeydown = (event: KeyboardEvent) => {
 const workflowDoc = useWorkflowDocument({ flowId, projectId });
 const { flow, loadError, saveError, saveState } = workflowDoc;
 const notificationsBlocked = ref(false);
+
 useRouteReadiness(computed(() => !agent.isReady.value || !!flow.value || !!loadError.value));
 
 const settings = (): ReleaseWorkflowSettings => (flow.value!.settings ??= {});

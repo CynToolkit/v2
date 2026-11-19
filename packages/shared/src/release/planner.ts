@@ -756,6 +756,47 @@ export const planRelease = (
     destinations.push({ ...destination, slots });
   }
   // A target is used when the finished plan consumes it, including implicitly wired inputs.
+  for (const [index, notification] of (config.notifications ?? []).entries()) {
+    if (!notification.enabled) continue;
+    const definition = registry.notifications?.find(
+      (candidate) => candidate.id === notification.provider,
+    );
+    if (!definition) {
+      issues.push(
+        error(
+          "release.notification.unknown",
+          `Unknown notification provider: ${notification.provider}`,
+          `notifications.${index}.provider`,
+        ),
+      );
+      continue;
+    }
+    for (const issue of definition.validate(notification))
+      issues.push({
+        ...issue,
+        path: `notifications.${index}.${issue.path ?? ""}`.replace(/\.$/, ""),
+      });
+    if (notification.triggers && notification.triggers.length === 0)
+      issues.push(
+        error(
+          "release.notification.no-trigger",
+          "Choose at least one event that sends this notification.",
+          `notifications.${index}.triggers`,
+        ),
+      );
+    for (const [triggerIndex, trigger] of (notification.triggers ?? []).entries())
+      if (
+        "destinationId" in trigger &&
+        !config.destinations.some((destination) => destination.id === trigger.destinationId)
+      )
+        issues.push(
+          error(
+            "release.notification.unknown-destination",
+            "This trigger names a destination that is not in the workflow.",
+            `notifications.${index}.triggers.${triggerIndex}.destinationId`,
+          ),
+        );
+  }
   const plan: ReleasePlan = { producers, outputs, destinations, issues, graph };
   const consumed = consumedOutputKeys(plan);
   for (const producer of producers) {

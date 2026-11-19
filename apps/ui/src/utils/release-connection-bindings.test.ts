@@ -1011,3 +1011,87 @@ describe("Desktop workflow connection bindings", () => {
     );
   });
 });
+
+describe("notification target connections", () => {
+  const notificationCatalog: ReleaseCatalog = {
+    ...catalog,
+    sources: [],
+    destinations: [],
+    notifications: [
+      {
+        id: "notify/hook",
+        label: "Hook",
+        defaultConfig: {},
+        fields: [{ key: "webhook", type: "connection", label: "Webhook", integration: "hook" }],
+      },
+    ],
+  };
+  const hookProviders: RendererProviderMetadata[] = [
+    {
+      id: "hook",
+      packageName: "hook",
+      name: "hook",
+      description: "hook provider",
+      icon: { type: "icon", icon: "hook" },
+      isOfficial: true,
+      integrations: [{ name: "hook", fields: [{ key: "url", label: "URL", type: "password" }] }],
+    },
+  ];
+  const notifying = (enabled = true): ReleaseConfig => ({
+    ...workflow(),
+    id: "notify-release",
+    source: { provider: "source/none", config: {} },
+    destinations: [],
+    notifications: [{ id: "n1", provider: "notify/hook", enabled, config: { webhook: "team" } }],
+  });
+  const hookConnections = (bound: boolean): ConnectionsConfig => ({
+    version: "1.0.0",
+    connections: [{ ...connection("hook-1", "hook", ""), url: "https://example.test/secret" }],
+    workflowBindings: bound
+      ? [{ workflowId: "notify-release", alias: "team", connectionId: "hook-1" }]
+      : [],
+  });
+
+  it("resolves a bound target's connection for the run", () => {
+    expect(
+      resolveDesktopWorkflowConnectionValues(
+        notifying(),
+        notificationCatalog,
+        hookConnections(true),
+        hookProviders,
+      ),
+    ).toEqual({ team: { url: "https://example.test/secret" } });
+  });
+
+  it("skips a target with no remembered connection instead of blocking the run", () => {
+    expect(
+      resolveDesktopWorkflowConnectionValues(
+        notifying(),
+        notificationCatalog,
+        hookConnections(false),
+        hookProviders,
+      ),
+    ).toEqual({});
+    expect(
+      resolveDesktopWorkflowConnectionValues(
+        notifying(false),
+        notificationCatalog,
+        hookConnections(true),
+        hookProviders,
+      ),
+    ).toEqual({});
+  });
+
+  it("counts the target's alias and renames it with the workflow", () => {
+    expect(releaseWorkflowConnectionAliases(notifying(), notificationCatalog)).toEqual(["team"]);
+    const renamed = renameWorkflowConnectionAlias(
+      notifying(),
+      notificationCatalog,
+      hookConnections(true).workflowBindings,
+      "team",
+      "chat",
+    );
+    expect(renamed.config.notifications?.[0]?.config.webhook).toBe("chat");
+    expect(renamed.workflowBindings[0]?.alias).toBe("chat");
+  });
+});

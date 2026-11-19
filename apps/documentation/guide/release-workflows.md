@@ -231,7 +231,7 @@ The **Settings** tab of a workflow holds options that apply to every run of that
   - **Failed runs:** delete failed runs (and runs completed with errors) older than N days, independently of the history rules.
   - **Always keep the latest successful run** (on by default) protects the newest successful run from every rule above. The run that just finished and runs in progress are never pruned. Run counts include the run that just finished.
   - A **Preview** below the rules updates as you edit them, and its **Apply now** button (with a confirmation) applies the saved policy immediately. It lists the runs that would be deleted, the runs that would only lose their files, any run kept by the latest-successful protection, and the space that would be freed, measured against the workflow's current history.
-- **Notifications:** a desktop notification when a run succeeds and when it fails, both on by default. A run that completes with errors counts as a failure. Notifications only fire for runs started from the app while it is open; the CLI does not send them. Pipelab asks for notification permission the first time you ship.
+- **Notifications:** which finished runs are announced, both on by default: when a run succeeds and when it fails. A run that completes with errors counts as a failure and a cancelled run never notifies. Pipelab shows a desktop notification for runs started from the app while it is open (it asks for permission the first time you ship), and sends a message to every [notification target](/guide/integrations/notifications) you add, for runs started from the app or the CLI.
 
 Release workflows are not scheduled by Pipelab's current workflow format. The
 workflow runs when you choose **Ship** in the editor or on the dashboard, or

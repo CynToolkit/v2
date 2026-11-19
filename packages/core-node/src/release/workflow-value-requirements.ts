@@ -174,6 +174,20 @@ export const getReleaseWorkflowValueRequirements = (
     connectionReferences.push({ alias: value, integration: field.integration, required: true });
   });
 
+  // A notification target is announced after the run, so a Connection it lacks must not stop the
+  // run from starting: it is referenced but never required.
+  for (const notification of config.notifications ?? []) {
+    if (!notification.enabled) continue;
+    const definition = registry.notifications?.find(
+      (candidate) => candidate.id === notification.provider,
+    );
+    for (const field of definition?.fields ?? []) {
+      const value = notification.config[field.key];
+      if (field.type !== "connection" || typeof value !== "string" || value.length === 0) continue;
+      connectionReferences.push({ alias: value, integration: field.integration, required: false });
+    }
+  }
+
   return {
     connectionRequirements: resolveWorkflowConnectionRequirements(connectionReferences, providers),
     requiredEnvironmentVariables: requiredEnvironmentBindings(config, plan, registry),

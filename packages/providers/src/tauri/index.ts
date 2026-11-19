@@ -3,6 +3,7 @@ import { createProviderDefinition } from "@pipelab/shared";
 import { requiresHostOfSamePlatform } from "../host-matrix";
 import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { tauriWorkflowTaskFactories } from "./package";
+import { tauriProviderLogo } from "../provider-icons";
 
 export const tauriTargetInputs = (
   targetId: string,
@@ -77,7 +78,7 @@ export const provider = createProviderDefinition({
   packageName: "@pipelab/plugin-tauri",
   name: "Tauri",
   description: "Pipelab provider for packaging apps with Tauri",
-  icon: { type: "icon", icon: "pi-box" },
+  icon: { type: "image", image: tauriProviderLogo },
   isOfficial: true,
   release: { producers: [tauriProducer] },
   workflowTasks: tauriWorkflowTaskFactories,

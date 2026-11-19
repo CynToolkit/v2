@@ -118,6 +118,8 @@ app.use(router);
 app.use(pinia);
 app.use(VueDOMPurifyHTML as any);
 app.use(PrimeVue, {
+  // PrimeVue 5 verifies a PrimeUI license; without a key it shows an "Invalid PrimeUI License" banner.
+  license: process.env.PRIME_UI_KEY || undefined,
   theme: {
     preset: PipelabPreset,
     options: {

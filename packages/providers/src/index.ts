@@ -6,6 +6,7 @@ export { provider as steamProvider } from "./steam";
 export { provider as itchProvider } from "./itch";
 export { provider as pokiProvider } from "./poki";
 export { provider as pipelabCloudProvider } from "./pipelab-cloud";
+export { provider as notificationsProvider } from "./notifications";
 
 // Host-facing helpers and existing public task factory aliases.
 export { discoverBrowserProfiles, inspectChromiumProfile } from "./construct";
