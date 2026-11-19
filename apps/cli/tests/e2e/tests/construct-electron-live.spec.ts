@@ -178,7 +178,7 @@ describe("authenticated local Construct to Electron CI acceptance", () => {
         await writeFile(
           join(configPath, "projects.json"),
           JSON.stringify({
-            version: "3.1.0",
+            version: "1.0.0",
             projects: [{ id: "ci-project", name: "CI local release", description: "" }],
             workflows: [
               {
