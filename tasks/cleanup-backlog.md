@@ -73,7 +73,10 @@ migrated; backup in the session scratchpad.
 - [x] `mise.toml` local tasks read only the Supabase CLI output names (`API_URL`, `PUBLISHABLE_KEY`, `SERVICE_ROLE_KEY`/`SECRET_KEY`), no inherited env fallbacks
 - [x] Leftover debug `console.log`/`console.debug` removed (UI, shared, desktop preload/IPC, tauri, Node/PNPM setup timings); CLI command output and server/websocket diagnostics kept on purpose
 
+- [x] `docs/expression.md` removed
+- [x] Stale suppressions removed (website icon `@ts-ignore` x7, `context.ts`, ui `env.d.ts`, `ipc.types.ts`); `serve-handler` now has `@types/serve-handler` instead of a `@ts-expect-error`; remaining `@ts-expect-error` comments explain their reason
+- Kept on purpose: `no-control-regex` disable in `deployment-folder.ts` (rule still fires), test-only `@ts-expect-error`, `asset-electron` template JS comments
+
 ## Open
 
 - [ ] 🟢 Open `TODO` comments: `desktop/src/preload.ts`, `providers/electron/forge.ts`, `providers/tauri/tauri.ts`, `asset-electron` steam handlers
-- [ ] 🟡 `docs/expression.md` is a stub at the repo root and not linked from anywhere

@@ -5,7 +5,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdir, realpath, mkdtemp } from "node:fs/promises";
 import { SandboxFolder, DEFAULT_NODE_VERSION, DEFAULT_PNPM_VERSION } from "@pipelab/constants";
 
-// @ts-ignore import.meta is only allowed in ES Modules
 const metaUrl = typeof import.meta !== "undefined" ? import.meta.url : undefined;
 
 const _dirname =

@@ -164,19 +164,12 @@ import AnimatedArrow from "@/components/AnimatedArrow.vue";
 import TestimonialSection from "@/components/TestimonialSection.vue";
 import { testimonials } from "@/data/testimonials";
 import PlatformBadge from "@/components/PlatformBadge.vue";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import SimpleIconsSteam from "~icons/simple-icons/steam";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import SimpleIconsWindows from "~icons/simple-icons/windows";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import SimpleIconsApple from "~icons/simple-icons/apple";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import SimpleIconsLinux from "~icons/simple-icons/linux";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import SimpleIconsItchdotio from "~icons/simple-icons/itchdotio";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import MdiImageSizeSelectActual from "~icons/mdi/image-size-select-actual";
-// @ts-ignore - Iconify icons don't have TypeScript declarations
 import MdiPackage from "~icons/mdi/package";
 
 const features = ref([

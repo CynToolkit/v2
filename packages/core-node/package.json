@@ -58,6 +58,7 @@
     "@types/pacote": "11.1.8",
     "@types/proper-lockfile": "4.1.4",
     "@types/semver": "^7.7.1",
+    "@types/serve-handler": "6.1.4",
     "@types/ws": "8.18.1",
     "@types/yauzl": "3.4.0",
     "memfs": "4.57.6",

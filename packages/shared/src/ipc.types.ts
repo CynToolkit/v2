@@ -18,7 +18,6 @@ export interface UpdateState {
   progress?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type IpcEvent<TYPE extends string, DATA> = { type: TYPE; data: DATA };
 export type EndEvent<DATA> = {
   type: "end";
