@@ -48,7 +48,7 @@
     "@types/node": "24.12.2",
     "@types/semver": "7.7.1",
     "cross-env": "10.1.0",
-    "electron": "39.8.10",
+    "electron": "45.4.1",
     "electron-builder": "26.18.0",
     "electron-updater": "6.8.11",
     "posthog-node": "6.0.2",
