@@ -13,7 +13,7 @@ const release = (
   builds: ReleaseConfig["builds"] = [],
   destinations: ReleaseConfig["destinations"] = [],
 ): ReleaseConfig => ({
-  version: "3.0.0",
+  version: "3.1.0",
   id: "filesystem-release",
   project: "project",
   name: "Filesystem Release",

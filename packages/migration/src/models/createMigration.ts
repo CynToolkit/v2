@@ -13,11 +13,8 @@ export function createMigration<Current extends MigrationSchema, Up extends Migr
   return {
     version: migration.version,
     up: async (state, nextVersion) => {
-      const newState = migration.up
-        ? ((await migration.up(state, nextVersion)) as unknown as Up)
-        : (state as unknown as Up);
-      newState.version = nextVersion as SemVer;
-      return newState;
+      const migrated = (await migration.up(state, nextVersion)) as unknown as Up;
+      return { ...migrated, version: nextVersion as SemVer };
     },
   };
 }

@@ -49,7 +49,6 @@ import worker, { handleRequest, handleScheduled } from "./index";
 const env = {
   SUPABASE_URL: "http://127.0.0.1:54321",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_local",
-  SUPABASE_ANON_KEY: "legacy-anon-key",
   SUPABASE_SERVICE_ROLE_KEY: "local-service-role-key",
   R2_ENDPOINT_URL: "http://127.0.0.1:8787",
   R2_ACCESS_KEY_ID: "local",
@@ -296,31 +295,6 @@ describe("Pipelab Cloud Worker", () => {
       env.SUPABASE_URL,
       env.SUPABASE_SERVICE_ROLE_KEY,
       expect.any(Object),
-    );
-  });
-
-  it("continues to accept the legacy key when the publishable key is absent", async () => {
-    const legacyEnv = { ...env, SUPABASE_PUBLISHABLE_KEY: undefined };
-    const response = await handleRequest(
-      authorizedRequest({
-        action: "prepareUpload",
-        artifactId: "build-1",
-        artifactOutputId: "electron.windows",
-        version: "1.4.0",
-        size: 42,
-        checksum: "a".repeat(64),
-      }),
-      legacyEnv,
-    );
-
-    expect(response.status).toBe(200);
-    expect(mocks.createClient).toHaveBeenNthCalledWith(
-      1,
-      env.SUPABASE_URL,
-      env.SUPABASE_ANON_KEY,
-      expect.objectContaining({
-        global: { headers: { Authorization: "Bearer user-token" } },
-      }),
     );
   });
 

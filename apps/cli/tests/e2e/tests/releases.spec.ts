@@ -128,7 +128,7 @@ describe("CLI release dry-run", () => {
     await writeFile(
       join(configPath, "projects.json"),
       JSON.stringify({
-        version: "3.0.0",
+        version: "1.0.0",
         projects: [{ id: "main", name: "Main", description: "CLI test" }],
         workflows: [
           {
@@ -195,7 +195,7 @@ describe("CLI release dry-run", () => {
       await writeFile(
         join(configPath, "projects.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "1.0.0",
           projects: [{ id: "main", name: "Main", description: "CLI test" }],
           workflows: [
             {
@@ -227,7 +227,7 @@ describe("CLI release dry-run", () => {
       await writeFile(
         join(configPath, "projects.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "1.0.0",
           projects: [{ id: "main", name: "Main", description: "CLI test" }],
           workflows: [
             {
@@ -243,7 +243,7 @@ describe("CLI release dry-run", () => {
       await writeFile(
         join(configPath, "workflows", `${workflowId}.json`),
         JSON.stringify({
-          version: "3.0.0",
+          version: "3.1.0",
           id: workflowId,
           project: "main",
           name: "Command workflow",
@@ -299,7 +299,7 @@ describe("CLI release dry-run", () => {
       await writeFile(
         join(configPath, "projects.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "1.0.0",
           projects: [{ id: "main", name: "Main", description: "CLI test" }],
           workflows: [
             {
@@ -315,7 +315,7 @@ describe("CLI release dry-run", () => {
       await writeFile(
         join(configPath, "workflows", "release-dry-run.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "3.1.0",
           id: "release-dry-run",
           project: "main",
           name: "Release dry run",
@@ -383,7 +383,7 @@ describe("CLI release dry-run", () => {
 
       const folderResult = await executeCoreRelease(
         {
-          version: "3.0.0",
+          version: "3.1.0",
           id: "core-folder-release",
           project: "main",
           name: "Core Folder Release",
@@ -429,7 +429,7 @@ describe("CLI release dry-run", () => {
 
       const zipResult = await executeCoreRelease(
         {
-          version: "3.0.0",
+          version: "3.1.0",
           id: "core-zip-release",
           project: "main",
           name: "Core ZIP Release",
@@ -484,7 +484,7 @@ describe("CLI release dry-run", () => {
       if (!electronPlugin) throw new Error("Electron Release provider is not bundled");
       const registry = buildCoreReleaseRegistry();
       const config: ReleaseConfig = {
-        version: "3.0.0",
+        version: "3.1.0",
         id: "web-zip-electron-core-unzip",
         project: "main",
         name: "Web ZIP Electron Release",
@@ -573,7 +573,7 @@ describe("CLI release dry-run", () => {
       if (!electronPlugin) throw new Error("Electron Release provider is not bundled");
       const registry = buildCoreReleaseRegistry();
       const config: ReleaseConfig = {
-        version: "3.0.0",
+        version: "3.1.0",
         id: "web-zip-cancel-unzip",
         project: "main",
         name: "Cancel Web ZIP extraction",
@@ -627,7 +627,7 @@ describe("CLI release dry-run", () => {
     "routes Construct directly to Poki without a Desktop build",
     async () => {
       const result = await runDryRun({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "construct-poki",
         project: "main",
         name: "Construct Poki",
@@ -667,7 +667,7 @@ describe("CLI release dry-run", () => {
       await expect(
         runDryRun(
           {
-            version: "3.0.0",
+            version: "3.1.0",
             id: "construct-poki-empty",
             project: "main",
             name: "Construct Poki empty slot",
@@ -686,7 +686,7 @@ describe("CLI release dry-run", () => {
     "passes a Construct version override to the export task",
     async () => {
       const result = await runDryRun({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "construct-version-override",
         project: "main",
         name: "Construct version override",
@@ -712,7 +712,7 @@ describe("CLI release dry-run", () => {
     "resolves Construct to one Electron Desktop build for Steam",
     async () => {
       const result = await runDryRun({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "construct-steam",
         project: "main",
         name: "Construct Steam",
@@ -834,7 +834,7 @@ describe("CLI release dry-run", () => {
     "reuses an existing compatible Desktop build",
     async () => {
       const result = await runDryRun({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "construct-existing-build",
         project: "main",
         name: "Construct existing build",
@@ -875,7 +875,7 @@ describe("CLI release dry-run", () => {
     "shares one Desktop build between Steam and Poki",
     async () => {
       const result = await runDryRun({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "construct-steam-poki",
         project: "main",
         name: "Construct Steam and Poki",
@@ -919,7 +919,7 @@ describe("CLI release dry-run", () => {
       const configPath = join(sandbox.paths.userData, "config");
       await mkdir(join(configPath, "workflows"), { recursive: true });
       const config = {
-        version: "3.0.0",
+        version: "3.1.0",
         id: "godot-steam",
         project: "main",
         name: "Godot Steam",
@@ -930,7 +930,7 @@ describe("CLI release dry-run", () => {
       await writeFile(
         join(configPath, "projects.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "1.0.0",
           projects: [{ id: "main", name: "Main", description: "CLI test" }],
           workflows: [
             {
@@ -963,7 +963,7 @@ describe("CLI release dry-run", () => {
     "inserts the automatic unzip transform before an Electron build",
     async () => {
       const result = await runDryRun({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "zip-electron",
         project: "main",
         name: "ZIP Poki",

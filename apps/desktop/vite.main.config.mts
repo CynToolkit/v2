@@ -40,11 +40,9 @@ export default defineConfig((env) => {
       "globalThis.process.env": "globalThis.process.env",
       "process.env.POSTHOG_API_KEY": JSON.stringify(environment.POSTHOG_API_KEY),
       "process.env.SUPABASE_URL": JSON.stringify(environment.SUPABASE_URL),
-      // Keep the key fallback inline: the staged config cannot import TypeScript helpers.
       "process.env.SUPABASE_PUBLISHABLE_KEY": JSON.stringify(
-        environment.SUPABASE_PUBLISHABLE_KEY || environment.SUPABASE_ANON_KEY || "",
+        environment.SUPABASE_PUBLISHABLE_KEY || "",
       ),
-      "process.env.SUPABASE_ANON_KEY": JSON.stringify(environment.SUPABASE_ANON_KEY),
       "process.env.PIPELAB_CLOUD_WORKER_URL": JSON.stringify(environment.PIPELAB_CLOUD_WORKER_URL),
     },
     resolve: {

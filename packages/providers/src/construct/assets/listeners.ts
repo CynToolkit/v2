@@ -81,7 +81,7 @@ export const registerDeprecatedFeatures = (page: Page, log: typeof console.log) 
     });
 };
 
-export const registerMissingAddonErrorListener = (page: Page, log: typeof console.log) => {
+const registerMissingAddonErrorListener = (page: Page, log: typeof console.log) => {
   const okDialog = page.locator("#missingAddonsDialog");
   const webglErrorButton = okDialog.locator(".okButton");
   webglErrorButton

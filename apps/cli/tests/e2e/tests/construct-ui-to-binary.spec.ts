@@ -200,7 +200,7 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           JSON.stringify({
             locale: "en-US",
             theme: "light",
-            version: "8.0.0",
+            version: "1.0.0",
             autosave: true,
             agents: [],
             tours: {

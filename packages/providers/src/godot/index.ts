@@ -12,7 +12,6 @@ import {
   hasGodotTemplates,
 } from "./export";
 import { godotProviderLogo } from "../provider-icons";
-export { godotPresetMatchesTarget } from "./export";
 
 const targetDescriptors = {
   "windows-x64": {

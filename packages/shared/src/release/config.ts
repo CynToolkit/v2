@@ -1,5 +1,4 @@
 import {
-  LEGACY_RELEASE_CONFIG_VERSION,
   RELEASE_CONFIG_VERSION,
   type ReleaseConfig,
   type ReleaseRegistry,
@@ -24,10 +23,10 @@ export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] =
     ];
   }
   const value = config as Record<string, unknown>;
-  if (value.version !== RELEASE_CONFIG_VERSION && value.version !== LEGACY_RELEASE_CONFIG_VERSION)
+  if (value.version !== RELEASE_CONFIG_VERSION)
     issues.push({
       code: "release.config.version",
-      message: `Only release configuration versions ${LEGACY_RELEASE_CONFIG_VERSION} and ${RELEASE_CONFIG_VERSION} are supported.`,
+      message: `Only release configuration version ${RELEASE_CONFIG_VERSION} is supported.`,
       severity: "error",
       path: "version",
     });
@@ -180,13 +179,6 @@ export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] =
         });
         continue;
       }
-      if (build.beforeBuild.length > 0 && value.version === LEGACY_RELEASE_CONFIG_VERSION)
-        issues.push({
-          code: "release.config.before-build.version",
-          message: `Build Profile hooks require Release configuration version ${RELEASE_CONFIG_VERSION}.`,
-          severity: "error",
-          path: `${path}.beforeBuild`,
-        });
       for (const [hookIndex, hook] of build.beforeBuild.entries()) {
         if (
           !isRecord(hook) ||
@@ -399,31 +391,9 @@ const assertReleaseConfigShape: (value: unknown) => asserts value is ReleaseConf
   if (issues.length > 0) throw new ReleaseConfigParseError(issues);
 };
 
-/** Older files marked each build and target enabled or not; now a target is used when something reads it. */
-const dropLegacyTargetFlags = (value: unknown): unknown => {
-  if (!isRecord(value) || !Array.isArray(value.builds)) return value;
-  return {
-    ...value,
-    builds: value.builds.map((build) => {
-      if (!isRecord(build)) return build;
-      const { enabled: _buildEnabled, ...rest } = build;
-      if (!Array.isArray(rest.targets)) return rest;
-      return {
-        ...rest,
-        targets: rest.targets.map((target) => {
-          if (!isRecord(target) || !("enabled" in target)) return target;
-          const { enabled: _enabled, ...others } = target;
-          return others;
-        }),
-      };
-    }),
-  };
-};
-
 export const parseReleaseConfig = (input: unknown): ReleaseConfig => {
-  const value = dropLegacyTargetFlags(input);
-  assertReleaseConfigShape(value);
-  return value;
+  assertReleaseConfigShape(input);
+  return input;
 };
 
 export const createReleaseConfig = (

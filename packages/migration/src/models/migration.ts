@@ -2,7 +2,7 @@ import * as semver from "semver";
 import { coerce } from "semver";
 import { objectKeys } from "../utils/object-keys";
 import { klona } from "klona";
-import { custom, InferOutput, object, ObjectEntries } from "valibot";
+import { custom, InferOutput, object } from "valibot";
 
 export type Awaitable<T> = Promise<T> | T;
 
@@ -14,21 +14,9 @@ export type MigrateOptions = {
   onStep?: (state: any, version: SemVer) => Promise<void> | void;
 };
 
-const SemverValidator = custom<SemVer>((input) =>
-  typeof input === "string" ? /^\d+\.\d+\.\d+$/.test(input) : false,
-);
-
-export const SemverVersionValidator = SemverValidator;
-// export const SemverVersionValidator = optional(SemverValidator, '1.0.0')
-
-export const MigrationSchemaValidator = object({
-  version: SemverVersionValidator,
+const MigrationSchemaValidator = object({
+  version: custom<SemVer>((input) => typeof input === "string" && /^\d+\.\d+\.\d+$/.test(input)),
 });
-
-export const createVersionSchema = <OBJECTENTRIES extends ObjectEntries>(schema: OBJECTENTRIES) =>
-  object({
-    ...schema,
-  });
 
 export type MigrationSchema = InferOutput<typeof MigrationSchemaValidator>;
 
@@ -61,7 +49,13 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
   defaultValue: OutputState;
 
   constructor(config: MigratorConfig<InitialState, OutputState>) {
+    if (config.migrations.length === 0) {
+      throw new Error("A migrator needs at least one migration");
+    }
     config.migrations.forEach((migration) => {
+      if (this.migrations[migration.version]) {
+        throw new Error(`Duplicate migration for version "${migration.version}"`);
+      }
       this.migrations[migration.version] = migration;
     });
 
@@ -95,6 +89,15 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
     const targetIndex = versions.indexOf(targetVersion);
 
     if (currentIndex === -1) {
+      if (
+        !options?.target &&
+        semver.valid(currentVersion) &&
+        semver.gt(currentVersion, this.current)
+      ) {
+        throw new Error(
+          `Current version "${currentVersion}" is newer than the latest known version "${this.current}"`,
+        );
+      }
       throw new Error(`Current version "${currentVersion}" not found in migrations`);
     }
     if (targetIndex === -1) {
@@ -129,7 +132,7 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
       const { version: _, ...stateWithoutVersion } = finalState;
 
       // Perform migration
-      const migratedState = await migration.up(stateWithoutVersion, currentVersion);
+      const migratedState = await migration.up(stateWithoutVersion, nextVersion);
 
       // Add new version
       finalState = {

@@ -10,7 +10,7 @@ export interface ConstructPreflightServices {
 const LOGIN_URL = "https://account.construct.net/login.json";
 
 /** Signs in with the account's credentials, which is the same request the export makes. Stores nothing. */
-export const verifyConstructAccount = async (
+const verifyConstructAccount = async (
   username: string,
   password: string,
   signal?: AbortSignal,
@@ -41,7 +41,7 @@ export const verifyConstructAccount = async (
 };
 
 /** Reads the browser profile's Construct session in a throwaway copy of the profile. */
-export const verifyConstructProfile = async (
+const verifyConstructProfile = async (
   profilePath: string,
   context: ProviderHostContext,
   signal?: AbortSignal,

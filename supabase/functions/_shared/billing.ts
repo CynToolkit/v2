@@ -11,7 +11,7 @@ export type BillingOperation =
   | "polar-user-plan"
   | "customer-portal"
   | "checkout";
-export type BillingUser = { id: string };
+type BillingUser = { id: string };
 
 export type BillingDependencies = {
   env: (name: string) => string | undefined;

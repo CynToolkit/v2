@@ -1,21 +1,13 @@
-// 1. Critical Migrators - Explicitly imported then exported to satisfy Node.js ESM scanner
-import {
-  appSettingsMigrator as _appSettingsMigrator,
-  defaultAppSettings as _defaultAppSettings,
-  fileRepoMigrations as _fileRepoMigrations,
-  defaultFileRepo as _defaultFileRepo,
-  configRegistry as _configRegistry,
-  connectionsMigrator as _connectionsMigrator,
-  defaultConnections as _defaultConnections,
+// 1. Config migrators
+export {
+  appSettingsMigrator,
+  defaultAppSettings,
+  fileRepoMigrations,
+  defaultFileRepo,
+  configRegistry,
+  connectionsMigrator,
+  defaultConnections,
 } from "./config/migrators";
-
-export const appSettingsMigrator = _appSettingsMigrator;
-export const defaultAppSettings = _defaultAppSettings;
-export const fileRepoMigrations = _fileRepoMigrations;
-export const defaultFileRepo = _defaultFileRepo;
-export const configRegistry = _configRegistry;
-export const connectionsMigrator = _connectionsMigrator;
-export const defaultConnections = _defaultConnections;
 
 // 2. Types
 export type { Migrator } from "./config/migrators";
@@ -23,21 +15,6 @@ export type { IpcDefinition } from "./apis";
 export type { IpcDefinition as RendererIpcDefinition } from "./ipc.types";
 export type { RequestId } from "./apis";
 export type { RequestId as RendererRequestId } from "./ipc.types";
-export type {
-  FileRepo,
-  FileRepoV1,
-  FileRepoV2,
-  FileRepoV3,
-  FileRepoV4,
-} from "./config/projects-definition";
-export {
-  FileRepoValidator,
-  FileRepoValidatorV1,
-  FileRepoValidatorV2,
-  FileRepoValidatorV3,
-  FileRepoValidatorV4,
-  FileRepoProjectValidatorV2,
-} from "./config/projects-definition";
 
 // 3. Core Library exports (Systematic restoration)
 export * from "./apis";
@@ -50,7 +27,7 @@ export * from "./fmt";
 export * from "./i18n-utils";
 export * from "./ipc.types";
 export * from "./logger";
-export * from "./plugins/definitions"; // <-- RE-ADDED
+export * from "./plugins/definitions";
 export * from "./quickjs";
 export * from "./supabase";
 export * from "./types";
@@ -74,8 +51,7 @@ export * from "./release/host-availability";
 export * from "./release/retention";
 
 // 4. Configuration Sub-packages
-export * from "./config/projects-definition"; // <-- RE-ADDED
-export * from "./config/settings-definition"; // <-- RE-ADDED
+export * from "./config/projects-definition";
 export * from "./config/connections-definition";
 
 // NOTE: We avoid "export * from './config'" to prevent nested re-export circles.

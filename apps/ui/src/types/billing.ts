@@ -3,7 +3,7 @@
  * (see supabase/functions/_shared/billing.ts). These are intentionally not the Polar SDK
  * models: the functions return a trimmed camelCase projection, not the raw Polar API payload.
  */
-export type BillingPlanPrice = {
+type BillingPlanPrice = {
   amountType: string;
   priceAmount: number | null;
   priceCurrency: string;

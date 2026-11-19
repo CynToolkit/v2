@@ -22,7 +22,7 @@ import {
 } from "./send";
 import { discordLogo } from "./icons";
 
-export const PROVIDER_ID = "@pipelab/plugin-notifications";
+const PROVIDER_ID = "@pipelab/plugin-notifications";
 export const DISCORD_NOTIFICATION_ID = `${PROVIDER_ID}/discord`;
 export const WEBHOOK_NOTIFICATION_ID = `${PROVIDER_ID}/webhook`;
 export const SLACK_NOTIFICATION_ID = `${PROVIDER_ID}/slack`;
@@ -343,5 +343,3 @@ export const provider = createProviderDefinition({
       sendGeneric(values.url ?? "", values.contentType ?? "", render, signal),
   },
 });
-
-export default provider;

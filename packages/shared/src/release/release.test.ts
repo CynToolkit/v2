@@ -146,7 +146,7 @@ describe("release descriptors", () => {
     );
     expect(
       validateReleaseConfigShape({
-        version: "3.0.0",
+        version: "3.1.0",
         id: "r",
         project: "p",
         name: "n",
@@ -155,39 +155,6 @@ describe("release descriptors", () => {
         destinations: [],
       }),
     ).toEqual([]);
-  });
-
-  it("requires the hook-capable Release version when a Build Profile has hooks", () => {
-    const config = {
-      version: "3.0.0",
-      id: "r",
-      project: "p",
-      name: "n",
-      source: { provider: "fake", config: {} },
-      builds: [
-        {
-          id: "electron-a",
-          type: "desktop",
-          engine: "electron",
-          config: {},
-          targets: [{ id: "windows", enabled: true, config: {} }],
-          beforeBuild: [
-            {
-              id: "sdk-wrapper",
-              enabled: true,
-              command: "node ./setSDKEnabled.js 0",
-            },
-          ],
-        },
-      ],
-      destinations: [] as unknown[],
-    };
-
-    expect(validateReleaseConfigShape(config)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ code: "release.config.before-build.version" }),
-      ]),
-    );
   });
 
   it("rejects empty Build Profile hook commands and malformed hook IDs", () => {
@@ -419,40 +386,6 @@ describe("release descriptors", () => {
       },
     ];
     expect(parseReleaseConfig(JSON.parse(JSON.stringify(config)))).toEqual(config);
-  });
-
-  it("keeps every build and target and strips legacy enabled flags when parsing", () => {
-    const config = createReleaseConfig({
-      id: "wf",
-      project: "proj",
-      name: "Workflow",
-      source: { provider: "src", config: {} },
-    });
-    const legacy = {
-      ...config,
-      builds: [
-        {
-          id: "build",
-          type: "desktop",
-          engine: "@new/provider/producer",
-          enabled: false,
-          config: {},
-          targets: [
-            { id: "windows", enabled: true, config: { a: 1 } },
-            { id: "linux", enabled: false, config: { b: 2 } },
-            { id: "macos", config: {} },
-          ],
-        },
-      ],
-    };
-    const parsed = parseReleaseConfig(JSON.parse(JSON.stringify(legacy)));
-    expect(parsed.builds).toHaveLength(1);
-    expect("enabled" in parsed.builds[0]).toBe(false);
-    expect(parsed.builds[0].targets).toEqual([
-      { id: "windows", config: { a: 1 } },
-      { id: "linux", config: { b: 2 } },
-      { id: "macos", config: {} },
-    ]);
   });
 
   it("validates workflow settings", () => {
@@ -810,7 +743,7 @@ describe("release descriptors", () => {
       destinations: [] as ReleaseRegistry["destinations"],
     };
     const valid: ReleaseConfig = {
-      version: "3.0.0",
+      version: "3.1.0",
       id: "chain",
       project: "p",
       name: "Chain",

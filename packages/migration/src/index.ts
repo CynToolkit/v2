@@ -9,4 +9,3 @@ export type {
   OmitVersion,
   Awaitable,
 } from "./models/migration";
-export { createVersionSchema } from "./models/migration";

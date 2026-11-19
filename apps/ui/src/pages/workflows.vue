@@ -68,16 +68,6 @@
                 :disabled="!isBrowser && (!filesReady || !agent.isReady.value || !activeProjectId)"
                 @click="openWorkflowWizard"
               />
-              <Button
-                severity="secondary"
-                variant="outlined"
-                :disabled="!filesReady || !agent.isReady.value"
-                @click="toggleImportMenu"
-              >
-                <i class="mdi mdi-folder-open-outline mr-2" aria-hidden="true" />
-                {{ $t("home.import") }}
-                <i class="mdi mdi-chevron-down ml-2" aria-hidden="true" />
-              </Button>
             </div>
           </div>
         </div>
@@ -216,7 +206,6 @@
       </section>
     </main>
     <Menu ref="workflowMenu" :model="workflowMenuItems" :popup="true" />
-    <Menu ref="importMenu" :model="importMenuItems" :popup="true" />
     <ReleaseFlowWizard
       v-if="isWorkflowWizardVisible"
       v-model:visible="isWorkflowWizardVisible"
@@ -227,13 +216,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, inject, watch, defineAsyncComponent } from "vue";
+import { computed, ref, watch, defineAsyncComponent } from "vue";
 import { useToast } from "primevue/usetoast";
 import { storeToRefs } from "pinia";
 import Menu from "primevue/menu";
 import type { ReleaseCatalog, ReleaseConfig } from "@pipelab/shared";
 import { RouterLink, useRoute, useRouter } from "vue-router";
-import { OpenMigrationModalKey } from "../utils/injection-keys";
 import { useAPI } from "@renderer/composables/api";
 import { useFiles } from "@renderer/store/files";
 
@@ -258,7 +246,6 @@ const ReleaseFlowWizard = defineAsyncComponent(
 const router = useRouter();
 const route = useRoute();
 const api = useAPI();
-const openMigrationModal = inject(OpenMigrationModalKey);
 const confirm = useConfirm();
 const toast = useToast();
 const appStore = useAppStore();
@@ -533,43 +520,6 @@ const deleteWorkflow = (id: string) => {
     },
   });
 };
-
-const importMenu = ref();
-const toggleImportMenu = (event: Event) => {
-  importMenu.value.toggle(event);
-};
-
-const importMenuItems = computed(() => {
-  if (appStore.channel === "dev") {
-    return [
-      {
-        label: t("home.import-from-stable"),
-        icon: "mdi mdi-auto-fix",
-        command: () => {
-          openMigrationModal?.("stable");
-        },
-      },
-      {
-        label: t("home.import-from-beta"),
-        icon: "mdi mdi-auto-fix",
-        command: () => {
-          openMigrationModal?.("beta");
-        },
-      },
-    ];
-  }
-
-  return [
-    {
-      label:
-        appStore.channel === "stable" ? t("home.import-from-beta") : t("home.import-from-stable"),
-      icon: "mdi mdi-auto-fix",
-      command: () => {
-        openMigrationModal?.(appStore.channel === "stable" ? "beta" : "stable");
-      },
-    },
-  ];
-});
 
 const workflowMenuItems = computed(() => [
   {

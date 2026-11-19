@@ -75,14 +75,6 @@ export const useAPI = () => {
     }
   };
 
-  /**
-   * Send an order (for backwards compatibility)
-   */
-  const send = <KEY extends Channels>(channel: KEY, data?: Data<KEY>) => {
-    logger().warn("useAPI.send() is deprecated. Use useAPI.execute() instead.");
-    return execute(channel, data);
-  };
-
   const openPath = async (path: string): Promise<End<"shell:openPath">> => {
     if (window.pipelab?.showItemInFolder) {
       await window.pipelab.showItemInFolder(path);
@@ -102,7 +94,6 @@ export const useAPI = () => {
   };
 
   return {
-    send,
     on,
     execute,
     openPath,
@@ -110,4 +101,4 @@ export const useAPI = () => {
   };
 };
 
-export type UseAPI = ReturnType<typeof useAPI>;
+type UseAPI = ReturnType<typeof useAPI>;

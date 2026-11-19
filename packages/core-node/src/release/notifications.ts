@@ -7,7 +7,7 @@ import type {
 import { notificationTargetFires, renderNotificationTemplate } from "@pipelab/shared";
 
 /** Waits before the second and third attempts. */
-export const DEFAULT_NOTIFICATION_RETRY_DELAYS_MS = [500, 2000] as const;
+const DEFAULT_NOTIFICATION_RETRY_DELAYS_MS = [500, 2000] as const;
 
 export interface DispatchRunNotificationsInput {
   config: ReleaseConfig;

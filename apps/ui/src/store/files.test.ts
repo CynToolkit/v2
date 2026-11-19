@@ -7,7 +7,7 @@ const execute = vi.fn();
 const save = vi.fn();
 const load = vi.fn();
 const files = ref<FileRepo>({
-  version: "4.0.0",
+  version: "1.0.0",
   projects: [{ id: "project-1", name: "Project", description: "" }],
   workflows: [],
 });
@@ -25,7 +25,7 @@ describe("useFiles persistence boundaries", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     files.value = {
-      version: "4.0.0",
+      version: "1.0.0",
       projects: [{ id: "project-1", name: "Project", description: "" }],
       workflows: [],
     };

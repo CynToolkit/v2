@@ -73,7 +73,7 @@ describe("built-in provider flow audit", () => {
           ]
         : [];
       const config: ReleaseConfig = {
-        version: "3.0.0",
+        version: "3.1.0",
         id: "provider-audit",
         project: "main",
         name: "Provider audit",

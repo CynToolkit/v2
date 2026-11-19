@@ -27,7 +27,7 @@ const setup = async () => {
   await writeFile(
     context.getProjectsPath(),
     JSON.stringify({
-      version: "4.0.0",
+      version: "1.0.0",
       projects: [{ id: "project-1", name: "Project", description: "" }],
       workflows: [
         {
@@ -415,7 +415,7 @@ describe("ReleasePersistence", () => {
           config: { path: context.getConfigPath() },
         },
       }),
-      version: "3.0.0" as const,
+      version: "3.1.0" as const,
       destinations: [
         {
           id: "itch-production",
@@ -1407,7 +1407,7 @@ describe("ReleasePersistence", () => {
     await writeFile(
       context.getProjectsPath(),
       JSON.stringify({
-        version: "4.0.0",
+        version: "1.0.0",
         projects: [{ id: "other", name: "Other", description: "" }],
         workflows: [
           {

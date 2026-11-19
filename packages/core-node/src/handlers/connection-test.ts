@@ -2,7 +2,7 @@ import type { PreflightResult, ProviderDefinition } from "@pipelab/shared";
 import type { PipelabContext } from "../context";
 import type { ProviderServices } from "../workflow-tasks";
 
-export const CONNECTION_TEST_TIMEOUT_MS = 12_000;
+const CONNECTION_TEST_TIMEOUT_MS = 12_000;
 
 const REDACTION = "***";
 

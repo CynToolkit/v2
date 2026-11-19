@@ -1,8 +1,6 @@
 import {
   defaultConnections,
   defaultFileRepo,
-  fileRepoMigrations,
-  parseVersionedFileRepo,
   parseConnectionsConfig,
   parseFileRepo,
   type ConnectionsConfig,
@@ -17,15 +15,9 @@ import {
 } from "./utils/atomic-json";
 import { serializeFileMutation } from "./release-persistence-lock";
 
-const migratedProject = async (raw: unknown): Promise<FileRepo> => {
-  const versioned = parseVersionedFileRepo(raw);
-  if (versioned.version === "4.0.0") return parseFileRepo(versioned);
-  return parseFileRepo(await fileRepoMigrations.migrate(versioned, { debug: false }));
-};
-
 export const loadStrictProjects = async (context: PipelabContext): Promise<FileRepo> => {
   try {
-    return await migratedProject(await readJsonFile(context.getProjectsPath()));
+    return parseFileRepo(await readJsonFile(context.getProjectsPath()));
   } catch (error) {
     if (error instanceof JsonFileMissingError) {
       const created = await writeJsonFileAtomicallyIfMissing(
@@ -33,7 +25,7 @@ export const loadStrictProjects = async (context: PipelabContext): Promise<FileR
         defaultFileRepo,
       );
       if (created) return defaultFileRepo;
-      return migratedProject(await readJsonFile(context.getProjectsPath()));
+      return parseFileRepo(await readJsonFile(context.getProjectsPath()));
     }
     throw error;
   }

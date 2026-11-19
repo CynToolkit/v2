@@ -1,14 +1,7 @@
-import { object, string, optional, InferInput, literal, array, parse, unknown } from "valibot";
+import { object, string, optional, InferInput, literal, array } from "valibot";
 import { isSafePersistedId } from "../persisted-id";
 
-export const FileRepoValidatorV1 = object({
-  version: literal("1.0.0"),
-  // V1 `data` held only Pipeline entries. Keep the property opaque so corrupt
-  // obsolete metadata cannot block migration of newer project metadata.
-  data: optional(unknown()),
-});
-
-export const FileRepoProjectValidatorV2 = object({
+export const FileRepoProjectValidator = object({
   id: string(),
   name: string(),
   description: string(),
@@ -22,57 +15,14 @@ export const SaveLocationWorkflowValidator = object({
   configName: string(),
 });
 
-export const FileRepoValidatorV2 = object({
-  version: literal("2.0.0"),
-  projects: array(FileRepoProjectValidatorV2),
-});
-
-export const FileRepoValidatorV3 = object({
-  version: literal("3.0.0"),
-  projects: array(FileRepoProjectValidatorV2),
-  workflows: optional(array(SaveLocationWorkflowValidator), []),
-});
-
-// V4 retains project/workflow metadata and intentionally drops the old
-// Pipeline index. V1–V3 validators remain only so existing project files can
-// be migrated without losing their project or workflow entries.
-export const FileRepoValidatorV4 = object({
-  version: literal("4.0.0"),
-  projects: array(FileRepoProjectValidatorV2),
+export const FileRepoValidator = object({
+  version: literal("1.0.0"),
+  projects: array(FileRepoProjectValidator),
   workflows: optional(array(SaveLocationWorkflowValidator), []),
 });
 
 export type SaveLocationWorkflow = InferInput<typeof SaveLocationWorkflowValidator>;
-
-export type FileRepoV1 = InferInput<typeof FileRepoValidatorV1>;
-export type FileRepoV2 = InferInput<typeof FileRepoValidatorV2>;
-export type FileRepoV3 = InferInput<typeof FileRepoValidatorV3>;
-export type FileRepoV4 = InferInput<typeof FileRepoValidatorV4>;
-
-export const FileRepoValidator = FileRepoValidatorV4;
 export type FileRepo = InferInput<typeof FileRepoValidator>;
-
-export const parseVersionedFileRepo = (
-  value: unknown,
-): FileRepoV1 | FileRepoV2 | FileRepoV3 | FileRepoV4 => {
-  if (typeof value !== "object" || value === null || Array.isArray(value))
-    throw new FileRepoParseError(["Project index must be an object."]);
-  const version = (value as Record<string, unknown>).version;
-  switch (version) {
-    case "1.0.0":
-      return parse(FileRepoValidatorV1, value);
-    case "2.0.0":
-      return parse(FileRepoValidatorV2, value);
-    case "3.0.0":
-      return parse(FileRepoValidatorV3, value);
-    case "4.0.0":
-      return parse(FileRepoValidatorV4, value);
-    default:
-      throw new FileRepoParseError([
-        `Unsupported project index version '${String(version)}'. Supported versions are 1.0.0, 2.0.0, 3.0.0, and 4.0.0.`,
-      ]);
-  }
-};
 
 export class FileRepoParseError extends Error {
   constructor(public readonly issues: string[]) {
@@ -86,7 +36,7 @@ const assertFileRepo: (value: unknown) => asserts value is FileRepo = (value) =>
   if (typeof value !== "object" || value === null || Array.isArray(value))
     throw new FileRepoParseError(["Project index must be an object."]);
   const record = value as Record<string, unknown>;
-  if (record.version !== "4.0.0") issues.push("Only project index version 4.0.0 is supported.");
+  if (record.version !== "1.0.0") issues.push("Only project index version 1.0.0 is supported.");
   if (!Array.isArray(record.projects)) issues.push("projects must be an array.");
   if (record.workflows !== undefined && !Array.isArray(record.workflows))
     issues.push("workflows must be an array.");
@@ -145,7 +95,7 @@ const assertFileRepo: (value: unknown) => asserts value is FileRepo = (value) =>
 export const parseFileRepo = (value: unknown): FileRepo => {
   assertFileRepo(value);
   return {
-    version: "4.0.0",
+    version: "1.0.0",
     projects: value.projects,
     workflows: value.workflows || [],
   };

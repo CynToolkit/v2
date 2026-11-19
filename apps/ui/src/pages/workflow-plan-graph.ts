@@ -5,7 +5,7 @@ import { destinationIcon, providerMetadataIcon, sourceIcon } from "../utils/prov
 
 export type PlanNodeKind = "source" | "build" | "automatic" | "destination";
 
-export interface PlanGraphNode {
+interface PlanGraphNode {
   id: string;
   kind: PlanNodeKind;
   label: string;
@@ -15,7 +15,7 @@ export interface PlanGraphNode {
   y: number;
 }
 
-export interface PlanGraphEdge {
+interface PlanGraphEdge {
   id: string;
   from: string;
   to: string;

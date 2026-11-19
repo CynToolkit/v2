@@ -16,7 +16,7 @@ import {
 import { websocketPort } from "@pipelab/constants";
 import { nanoid } from "nanoid";
 
-export type WebSocketSendFn<KEY extends Channels> = WebSocketSendFunction<KEY>;
+type WebSocketSendFn<KEY extends Channels> = WebSocketSendFunction<KEY>;
 
 export function resolveDefaultWebSocketUrl(
   location: Pick<Location, "protocol" | "host" | "hostname" | "search"> | undefined,

@@ -472,7 +472,7 @@ export const executeWorkflow = async (
       },
       workflowCachePath: temporaryRunRoot
         ? join(temporaryRunRoot, "cache")
-        : context.getCachePath(CacheFolder.Pipelines, config.project, buildId),
+        : context.getCachePath(CacheFolder.Projects, config.project, buildId),
     };
     const tasks = createPipelabWorkflowTasks(
       services,

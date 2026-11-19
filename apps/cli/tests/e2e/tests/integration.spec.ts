@@ -28,7 +28,7 @@ describe("End-to-End: Multi-Plugin Integration Test", () => {
       await writeFile(
         join(configPath, "projects.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "1.0.0",
           projects: [{ id: "main", name: "Main", description: "CLI test" }],
           workflows: [
             {
@@ -44,7 +44,7 @@ describe("End-to-End: Multi-Plugin Integration Test", () => {
       await writeFile(
         join(configPath, "workflows", "release-e2e.json"),
         JSON.stringify({
-          version: "3.0.0",
+          version: "3.1.0",
           id: "release-e2e",
           project: "main",
           name: "CLI release",

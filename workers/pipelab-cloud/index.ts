@@ -23,8 +23,6 @@ const corsHeaders = {
 type Env = {
   SUPABASE_URL?: string;
   SUPABASE_PUBLISHABLE_KEY?: string;
-  /** @deprecated Keep the old deployment variable during the migration window. */
-  SUPABASE_ANON_KEY?: string;
   SUPABASE_PUBLISHABLE_KEYS?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
   SUPABASE_SECRET_KEYS?: string;
@@ -146,9 +144,7 @@ function getDefaultKey(value: string | undefined): string | undefined {
 function getSupabaseConfig(env: Env) {
   const url = env.SUPABASE_URL;
   const publishableKey =
-    env.SUPABASE_PUBLISHABLE_KEY ||
-    env.SUPABASE_ANON_KEY ||
-    getDefaultKey(env.SUPABASE_PUBLISHABLE_KEYS);
+    env.SUPABASE_PUBLISHABLE_KEY || getDefaultKey(env.SUPABASE_PUBLISHABLE_KEYS);
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY ?? getDefaultKey(env.SUPABASE_SECRET_KEYS);
   if (!url || !publishableKey || !serviceRoleKey) {
     throw new Error("Pipelab Cloud Supabase configuration is missing");

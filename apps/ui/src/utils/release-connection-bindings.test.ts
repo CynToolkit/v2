@@ -704,7 +704,7 @@ describe("Desktop workflow connection bindings", () => {
 
   it("does not infer a saved local Connection for a legacy workflow field", () => {
     const currentWorkflow = workflow();
-    currentWorkflow.version = "3.0.0";
+    currentWorkflow.version = "3.1.0";
     currentWorkflow.source.config.sourceAccount = "git-prod";
     const noSourceBinding = {
       ...connections,

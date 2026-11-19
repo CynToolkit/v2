@@ -20,13 +20,13 @@ export const parseWebhookUrl = (value: string): URL => {
 export const isDiscordWebhook = (url: URL): boolean =>
   /(^|\.)discord(app)?\.com$/.test(url.hostname) && url.pathname.startsWith("/api/webhooks/");
 
-export const truncate = (message: string, limit: number): string =>
+const truncate = (message: string, limit: number): string =>
   message.length <= limit ? message : `${message.slice(0, limit - 1)}…`;
 
 const REQUEST_TIMEOUT_MS = 8000;
 
 /** Never includes the URL or response body in the error: both can carry the secret. */
-export const postWebhook = async (
+const postWebhook = async (
   url: URL,
   body: string,
   contentType: string,
@@ -81,11 +81,11 @@ export const sendGeneric = async (
 
 const SLACK_MESSAGE_LIMIT = 40000;
 
-export const isSlackWebhook = (url: URL): boolean =>
+const isSlackWebhook = (url: URL): boolean =>
   /(^|\.)slack(-gov)?\.com$/.test(url.hostname) && url.pathname.startsWith("/");
 
 /** Slack reads `&`, `<` and `>` in text as markup, so a substituted value must not carry them. */
-export const escapeSlack = (value: string): string =>
+const escapeSlack = (value: string): string =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export const sendSlack = async (

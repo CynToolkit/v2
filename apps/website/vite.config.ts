@@ -3,7 +3,6 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig, loadEnv, type Plugin, type PluginOption } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Icons from "unplugin-icons/vite";
-import { resolveSupabasePublishableKey } from "@pipelab/shared/supabase-key";
 
 function cspConnectOrigins(supabaseUrl: string | undefined) {
   const origins = new Set([
@@ -62,7 +61,7 @@ function reportOnlyCsp(supabaseUrl: string | undefined): Plugin {
 // https://vitejs.dev/config/
 export default defineConfig((env) => {
   const environment = loadEnv(env.mode, process.cwd(), "");
-  const supabasePublishableKey = resolveSupabasePublishableKey(environment);
+  const supabasePublishableKey = environment.SUPABASE_PUBLISHABLE_KEY;
   const plugins = [
     vue(),
     Icons(),

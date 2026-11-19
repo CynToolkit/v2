@@ -14,11 +14,11 @@ import type { ElectronPhaseRunner } from "./phases";
 
 // TODO: https://js.electronforge.io/modules/_electron_forge_core.html
 
-export const IDMake = "electron:make";
-export const IDPackage = "electron:package";
-export const IDPackageV2 = "electron:package:v2";
-export const IDPackageV3 = "electron:package:v3";
-export const IDPreview = "electron:preview";
+const IDMake = "electron:make";
+const IDPackage = "electron:package";
+const IDPackageV2 = "electron:package:v2";
+const IDPackageV3 = "electron:package:v3";
+const IDPreview = "electron:preview";
 
 export interface ForgeExecutionContext {
   cwd: string;

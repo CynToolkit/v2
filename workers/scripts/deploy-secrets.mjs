@@ -13,18 +13,10 @@ const names = [
   "R2_BUCKET_NAME",
 ];
 const secrets = Object.fromEntries(names.map((name) => [name, process.env[name]]));
-secrets.SUPABASE_PUBLISHABLE_KEY ||= process.env.SUPABASE_ANON_KEY;
 const missing = names.filter((name) => !secrets[name]);
 
 if (missing.length) {
-  const label = missing.includes("SUPABASE_PUBLISHABLE_KEY")
-    ? missing.map((name) =>
-        name === "SUPABASE_PUBLISHABLE_KEY"
-          ? "SUPABASE_PUBLISHABLE_KEY (or legacy SUPABASE_ANON_KEY)"
-          : name,
-      )
-    : missing;
-  console.error(`Missing Doppler secrets: ${label.join(", ")}`);
+  console.error(`Missing Doppler secrets: ${missing.join(", ")}`);
   process.exit(1);
 }
 

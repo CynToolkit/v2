@@ -39,7 +39,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     workspaces.push(root);
     const context = new PipelabContext({ userDataPath: root });
     const storage = new BuildHistoryStorage(context);
-    const historyDirectory = context.getConfigPath("pipelines");
+    const historyDirectory = context.getConfigPath("history");
     await mkdir(historyDirectory, { recursive: true });
     const badEntry = { ...entry("run-bad", "workflow-a", 10), logs: [{ message: "no id" }] };
     await writeFile(
@@ -54,31 +54,6 @@ describe("BuildHistoryStorage workflow runs", () => {
 
     await storage.save(entry("run-new", "workflow-a", 20));
     expect((await storage.getByProject("project-1")).map((run) => run.id)).toEqual(["run-new"]);
-  });
-
-  it("reads legacy pipelineId entries from the existing project history file", async () => {
-    const root = await mkdtemp(join(tmpdir(), "pipelab-runs-"));
-    workspaces.push(root);
-    const context = new PipelabContext({ userDataPath: root });
-    const storage = new BuildHistoryStorage(context);
-    const historyDirectory = context.getConfigPath("pipelines");
-    await mkdir(historyDirectory, { recursive: true });
-    const { projectId: _projectId, ...legacyEntryFields } = entry("run-legacy", "workflow-a", 10);
-    const legacyEntry = { ...legacyEntryFields, pipelineId: "project-1" };
-    await writeFile(
-      join(historyDirectory, "project-1.history.json"),
-      JSON.stringify({ version: "1.0.0", entries: [legacyEntry] }),
-    );
-
-    expect((await storage.getByProject("project-1")).map((run) => run.id)).toEqual(["run-legacy"]);
-
-    await storage.save(entry("run-new", "workflow-a", 20));
-    const persisted = JSON.parse(
-      await readFile(join(historyDirectory, "project-1.history.json"), "utf-8"),
-    ) as { entries: Array<Record<string, unknown>> };
-    expect(persisted.entries.map((run) => run.id)).toEqual(["run-legacy", "run-new"]);
-    expect(persisted.entries.map((run) => run.projectId)).toEqual(["project-1", "project-1"]);
-    expect(persisted.entries[0]).not.toHaveProperty("pipelineId");
   });
 
   it("marks persisted running entries interrupted during startup recovery", async () => {
@@ -257,12 +232,12 @@ describe("BuildHistoryStorage workflow runs", () => {
     const root = await mkdtemp(join(tmpdir(), "pipelab-runs-"));
     workspaces.push(root);
     const storage = new BuildHistoryStorage(new PipelabContext({ userDataPath: root }));
-    const historyPath = join(root, "config", "pipelines", "project-1.history.json");
-    await mkdir(join(root, "config", "pipelines"), { recursive: true });
+    const historyPath = join(root, "config", "history", "project-1.history.json");
+    await mkdir(join(root, "config", "history"), { recursive: true });
     await writeFile(historyPath, "{ incomplete", "utf8");
 
     await expect(storage.get("run-1", "project-1")).resolves.toBeUndefined();
-    const files = await readdir(join(root, "config", "pipelines"));
+    const files = await readdir(join(root, "config", "history"));
     expect(files).toHaveLength(1);
     expect(files[0]).toMatch(/^project-1\.history\.json\.invalid-\d+$/);
   });
@@ -271,7 +246,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     const root = await mkdtemp(join(tmpdir(), "pipelab-runs-"));
     workspaces.push(root);
     await mkdir(join(root, "config"), { recursive: true });
-    await writeFile(join(root, "config", "pipelines"), "not a directory", "utf8");
+    await writeFile(join(root, "config", "history"), "not a directory", "utf8");
     const storage = new BuildHistoryStorage(new PipelabContext({ userDataPath: root }));
 
     await expect(storage.getAll()).rejects.toThrow("EEXIST");
@@ -282,7 +257,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     workspaces.push(root);
     const storage = new BuildHistoryStorage(new PipelabContext({ userDataPath: root }));
     await storage.save(entry("run-valid", "workflow-a", 10));
-    const historyPath = join(root, "config", "pipelines", "project-1.history.json");
+    const historyPath = join(root, "config", "history", "project-1.history.json");
     const original = await readFile(historyPath, "utf8");
 
     await expect(
@@ -359,7 +334,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     workspaces.push(root);
     const context = new PipelabContext({ userDataPath: root });
     const storage = new BuildHistoryStorage(context);
-    const firstRunCache = context.getCachePath("pipelines", "project-1", "run-project-1");
+    const firstRunCache = context.getCachePath("projects", "project-1", "run-project-1");
     await storage.save({
       ...entry("run-project-1", "workflow-a", 10),
       cachePath: firstRunCache,
@@ -424,7 +399,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     workspaces.push(root);
     const context = new PipelabContext({ userDataPath: root });
     const storage = new BuildHistoryStorage(context);
-    const runCache = context.getCachePath("pipelines", "project-1", "run-a");
+    const runCache = context.getCachePath("projects", "project-1", "run-a");
     await storage.save({
       ...entry("run-a", "workflow-a", 10),
       status: "failed",
@@ -442,7 +417,7 @@ describe("BuildHistoryStorage workflow runs", () => {
       "keep.txt",
     );
     const unrelatedCacheArtifact = join(
-      context.getCachePath("pipelines", "project-1", "keep"),
+      context.getCachePath("projects", "project-1", "keep"),
       "keep.txt",
     );
     for (const path of [

@@ -160,7 +160,7 @@ export interface PokiPreflightServices {
  * fails a run's preflight, but only "cannot verify" when testing a connection, since the login can
  * follow saving it.
  */
-export const verifyPokiAccount = async (
+const verifyPokiAccount = async (
   account: string | undefined,
   services: PokiPreflightServices,
   loginMissing: "failed" | "unverifiable",

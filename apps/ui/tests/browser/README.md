@@ -160,7 +160,6 @@ SUPABASE_URL=http://127.0.0.1:54321 VITE_PIPELAB_MODE=hosted \
   pnpm --filter @pipelab/ui dev --host 127.0.0.1 --port 5185
 ```
 
-The app retains `SUPABASE_ANON_KEY` as a temporary compatibility fallback.
 Never pass a service-role or secret key to the UI.
 
 Then run the browser journey:

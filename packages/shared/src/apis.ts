@@ -45,52 +45,7 @@ type EndEvent<DATA> = {
       };
 };
 
-export type StableDataReport = {
-  sourceChannel: "Stable" | "Beta" | "Dev";
-  targetChannel: "Stable" | "Beta" | "Dev";
-
-  // Settings
-  settingsExists: boolean;
-  settingsVersion: string | null;
-  settingsVersionTarget: string | null;
-  settingsMtimeSource: number;
-  settingsMtimeTarget: number;
-  settingsImportable: boolean;
-
-  // Connections
-  connectionsExists: boolean;
-  connectionsCount: number;
-  connectionsVersion: string | null;
-  connectionsVersionTarget: string | null;
-  connectionsMtimeSource: number;
-  connectionsMtimeTarget: number;
-  connectionsImportable: boolean;
-
-  // Projects
-  projectsExists: boolean;
-  projectsVersion: string | null;
-  projectsVersionTarget: string | null;
-  projectsMtimeSource: number;
-  projectsMtimeTarget: number;
-  projectsImportable: boolean;
-
-  projects: Array<{
-    id: string;
-    name: string;
-    description: string;
-  }>;
-};
-
 export type ReleaseChannel = "stable" | "beta" | "dev";
-export type MigrationChannel = "stable" | "beta";
-
-export type MigrationOptions = {
-  migrateSettings: boolean;
-  migrateConnections: boolean;
-  selectedProjects: string[];
-  sourceChannel?: MigrationChannel;
-};
-
 export type IpcDefinition = {
   "fs:read": [
     // input
@@ -250,8 +205,6 @@ export type IpcDefinition = {
   "agent:version:get": [void, EndEvent<{ version: string; channel: ReleaseChannel }>];
   "system:packages:cleanup": [void, EndEvent<boolean>];
   "startup:progress": [void, { type: "progress"; data: { message: string } } | { type: "done" }];
-  "migration:scan-stable": [{ sourceChannel?: MigrationChannel }, EndEvent<StableDataReport>];
-  "migration:perform": [MigrationOptions, EndEvent<{ result: "ok" }>];
 };
 
 export type Channels = keyof IpcDefinition;

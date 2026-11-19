@@ -6,7 +6,7 @@ Cloudflare Workers under the repository's root `workers/` directory own the auth
 
 1. Apply the artifact migrations in order: `20260916000000_pipelab_cloud_artifacts.sql`, `20261026000000_pipelab_cloud_artifact_identity.sql`, `20261027000000_pipelab_cloud_warning_claim_fix.sql`, `20261028000000_pipelab_cloud_reconcile_before_deletion.sql`, `20261029000000_pipelab_cloud_lifecycle_retries.sql`, and `20261030000000_pipelab_cloud_indie_plan_limit.sql`.
 2. Deploy all Supabase Edge Functions in this checkout, including browser billing and `pipelab-cloud-reconcile`, to the approved project with `SUPABASE_PROJECT_REF` set. Configure the existing production Polar credentials and endpoint values listed below in the target project's Edge Function environment.
-3. Configure these server-only Doppler secrets: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `PIPELAB_CLOUD_LINK_ENCRYPTION_KEY`, `RESEND_API_KEY`, and `PIPELAB_CLOUD_FROM_EMAIL`. During the key migration window, the deploy script still accepts `SUPABASE_ANON_KEY` when the publishable variable is absent. Configure `CLOUDFLARE_API_TOKEN` for Wrangler deployment.
+3. Configure these server-only Doppler secrets: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `PIPELAB_CLOUD_LINK_ENCRYPTION_KEY`, `RESEND_API_KEY`, and `PIPELAB_CLOUD_FROM_EMAIL`. Configure `CLOUDFLARE_API_TOKEN` for Wrangler deployment.
 4. The last migration seeds a Basic allowance for the production Polar Indie product ID `4f3a3e6f-5195-4583-9488-e06108ac7547`: `quota_bytes = 1073741824` (1 GiB) and 30-day history retention. It leaves an existing row for that product unchanged; verify any existing row has the intended values. The owner approved the allowance using the internal four-target Electron sample as synthetic quota evidence. Its ZIPs total 575,081,265 bytes, leaving 498,660,559 bytes of headroom. This confirms packaged-byte accounting but does not represent customer game sizes. Higher-tier numeric values remain unset. Configure production endpoint URLs for hosted functions so production subscriptions match the seeded production product row. Uploads fail closed without a matching enabled row.
 5. Run `mise run deploy:artifacts`. Wrangler deploys the Worker and uploads those Doppler values as Worker secrets.
 6. Set `PIPELAB_CLOUD_WORKER_URL` in Doppler to the deployed Worker origin, then build/package Pipelab with Doppler so Desktop, the UI, and the local CLI use that origin.
@@ -17,8 +17,6 @@ The Worker owns upload, private listing, download, share-link, revoke, and delet
 Share links use an unguessable random token. The database stores its SHA-256 hash for public lookup and an AES-GCM encrypted copy so the owner can retrieve it. Generate `PIPELAB_CLOUD_LINK_ENCRYPTION_KEY` as 32 random bytes encoded as unpadded base64url (for example, `openssl rand -base64 32 | tr '/+' '_-' | tr -d '='`), and retain the same value across Worker deployments. Rotating this key makes existing links impossible to retrieve; revoke and recreate those links before rotating it.
 
 Subscription grace begins at the actual paid-through date and lasts 30 days. Existing artifacts and links remain accessible during grace; uploads and new links require an active paid period. Seven days before cleanup, the Worker adds an in-app notice and sends an email through Resend. The sender address must be authorized in the Resend account.
-
-For key migration, add `SUPABASE_PUBLISHABLE_KEY` in Doppler, deploy and verify the Worker and client builds, then remove the legacy `SUPABASE_ANON_KEY` alias in a separately reviewed change. The Worker and build configuration prefer the publishable key whenever both names exist.
 
 ## Local development
 
@@ -56,8 +54,7 @@ Billing and entitlement reconciliation read endpoint URLs from the server-side S
 ### Browser billing deployment
 
 Billing is available in every Editor build, including `develop` and previews.
-The UI needs `SUPABASE_URL` plus `SUPABASE_PUBLISHABLE_KEY` (or the temporary
-`SUPABASE_ANON_KEY` fallback) as GitHub secrets. These are public client
+The UI needs `SUPABASE_URL` plus `SUPABASE_PUBLISHABLE_KEY` as GitHub secrets. These are public client
 configuration values. The Polar token is never added to the browser build.
 
 For the production Supabase project, configure these Edge Function values:

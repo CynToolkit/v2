@@ -1,0 +1,46 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreWorkspaces": [
+    "assets/*",
+    "apps/mini-c3-electron"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/*.mjs",
+        "scripts/setup/*.mjs",
+        "tests/*.mjs"
+      ]
+    },
+    "apps/ui": {
+      "entry": [
+        "tests/browser/*.cjs"
+      ]
+    },
+    "apps/cli": {
+      "entry": [
+        "tests/e2e/**/*.spec.ts"
+      ]
+    },
+    "workers": {
+      "entry": [
+        "pipelab-cloud/index.ts",
+        "local-r2/worker.ts",
+        "scripts/*.mjs"
+      ]
+    }
+  },
+  "ignore": [
+    "apps/website/src/database.types.ts"
+  ],
+  "ignoreIssues": {
+    "packages/providers/src/*/index.ts": [
+      "duplicates"
+    ]
+  },
+  "include": [
+    "exports",
+    "types",
+    "duplicates"
+  ]
+}

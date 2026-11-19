@@ -207,7 +207,7 @@ export const releaseDestinationLocalName = (
   return targetName || "Destination 1";
 };
 
-export const releaseDestinationDisplayLabel = (providerLabel: string, localName: string) =>
+const releaseDestinationDisplayLabel = (providerLabel: string, localName: string) =>
   `${providerLabel} — ${localName}`;
 
 // Older workflows persisted generated names such as "Destination 1"; they carry no information.

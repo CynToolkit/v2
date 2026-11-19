@@ -6,7 +6,6 @@ import { registerEngineHandlers } from "./engine";
 import { registerAgentsHandlers } from "./agents";
 import { registerAuthHandlers } from "./auth";
 import { registerSystemHandlers } from "./system";
-import { registerMigrationHandlers } from "./migration";
 import { registerWorkflowHandlers } from "./workflow";
 import { BuildHistoryStorage } from "./build-history";
 import { PipelabContext } from "../context";
@@ -28,7 +27,6 @@ export const registerAllHandlers = async (options: {
   registerAgentsHandlers(context);
   registerAuthHandlers(context);
   registerSystemHandlers(options);
-  registerMigrationHandlers(context);
 
   // Background, once per start: age-based rules also move for workflows that are never run.
   void sweepRetention(context);

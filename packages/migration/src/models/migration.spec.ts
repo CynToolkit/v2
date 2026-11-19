@@ -2,14 +2,6 @@ import { describe, test, expect, beforeAll, beforeEach, afterEach, vi } from "vi
 import { createMigration, finalVersion } from "./createMigration";
 import { createMigrator, MigratorFactory } from "./createMigrator";
 import { Migrator, MigrationSchema } from "./migration";
-import { z } from "zod";
-
-export const withMigration = (obj: z.ZodObject<any>) =>
-  z
-    .object({
-      version: z.string(),
-    })
-    .merge(obj);
 
 interface V1 extends MigrationSchema {
   dummyV1: string;
@@ -155,6 +147,47 @@ describe("migrator", () => {
     expect(steps[0]).toEqual(expect.objectContaining({ dummyV2: "aaa", version: "2.0.0" }));
     expect(steps[1]).toEqual(expect.objectContaining({ dummyV3: "aaa", version: "3.0.0" }));
     expect(steps[2]).toEqual(expect.objectContaining({ dummy: "aaa", version: "4.0.0" }));
+  });
+
+  test("should pass the next version to each migration", async () => {
+    const seen: string[] = [];
+    const migrator = createMigrator<V1, V3>().createMigrations({
+      migrations: [
+        createMigration<V1, V2>({
+          version: "1.0.0",
+          up: (state, next) => {
+            seen.push(next);
+            return { dummyV2: state.dummyV1 };
+          },
+        }),
+        createMigration<V2, V3>({
+          version: "2.0.0",
+          up: (state, next) => {
+            seen.push(next);
+            return { dummyV3: state.dummyV2 };
+          },
+        }),
+        createMigration<V3, never>({ version: "3.0.0", up: finalVersion }),
+      ],
+    });
+    await migrator.migrate(outputV1);
+    expect(seen).toEqual(["2.0.0", "3.0.0"]);
+  });
+
+  test("should reject duplicate and empty migration lists", () => {
+    const dup = createMigration<V1, V2>({ version: "1.0.0", up: (s) => ({ dummyV2: s.dummyV1 }) });
+    expect(() => createMigrator<V1, V2>().createMigrations({ migrations: [dup, dup] })).toThrow(
+      "Duplicate migration",
+    );
+    expect(() => createMigrator<V1, V2>().createMigrations({ migrations: [] })).toThrow(
+      "at least one migration",
+    );
+  });
+
+  test("should throw a clear error for a state newer than the latest version", async () => {
+    await expect(
+      migratorMigrations.migrate({ dummy: "aaa", version: "5.0.0" } as V4),
+    ).rejects.toThrow("newer than the latest known version");
   });
 
   test("should throw if target is not in migrations", async () => {

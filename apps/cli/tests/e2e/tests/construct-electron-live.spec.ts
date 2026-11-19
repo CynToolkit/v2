@@ -178,7 +178,7 @@ describe("authenticated local Construct to Electron CI acceptance", () => {
         await writeFile(
           join(configPath, "projects.json"),
           JSON.stringify({
-            version: "3.0.0",
+            version: "1.0.0",
             projects: [{ id: "ci-project", name: "CI local release", description: "" }],
             workflows: [
               {
@@ -301,7 +301,7 @@ describe("authenticated local Construct to Electron CI acceptance", () => {
         for (const artifact of run.artifacts) await access(artifact.path);
       }
 
-      const historyFile = join(configPath, "pipelines", "ci-project.history.json");
+      const historyFile = join(configPath, "history", "ci-project.history.json");
       await readFile(historyFile, "utf8");
       const baselinePath = join(userDataPath, "construct-electron-baseline.json");
       if (runNumber === 1) {

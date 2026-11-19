@@ -19,25 +19,6 @@ const entry = {
 };
 
 describe("parseBuildHistoryDocument", () => {
-  it("migrates the legacy raw-array format", () => {
-    expect(parseBuildHistoryDocument([entry])).toEqual({ version: "1.0.0", entries: [entry] });
-  });
-
-  it("normalizes the persisted pipelineId field to projectId", () => {
-    const { projectId, ...legacyFields } = entry;
-    const parsed = parseBuildHistoryDocument([{ ...legacyFields, pipelineId: projectId }])
-      .entries[0];
-
-    expect(parsed?.projectId).toBe(projectId);
-    expect(parsed).not.toHaveProperty("pipelineId");
-  });
-
-  it("rejects conflicting current and legacy project identifiers", () => {
-    expect(() =>
-      parseBuildHistoryDocument([{ ...entry, pipelineId: "different-project" }]),
-    ).toThrow("projectId conflicts with legacy pipelineId");
-  });
-
   it("rejects malformed entries and unsupported documents", () => {
     expect(() => parseBuildHistoryDocument({ version: "2.0.0", entries: [] })).toThrow(
       "unsupported version",
@@ -126,14 +107,20 @@ describe("parseBuildHistoryDocument", () => {
       ],
     };
 
-    expect(parseBuildHistoryDocument([historyEntry]).entries[0]?.steps[0]?.phases).toEqual(phases);
+    expect(
+      parseBuildHistoryDocument({ version: "1.0.0", entries: [historyEntry] }).entries[0]?.steps[0]
+        ?.phases,
+    ).toEqual(phases);
     expect(() =>
-      parseBuildHistoryDocument([
-        {
-          ...historyEntry,
-          steps: [{ ...historyEntry.steps[0], phases: [{ ...phases[0], status: "unknown" }] }],
-        },
-      ]),
+      parseBuildHistoryDocument({
+        version: "1.0.0",
+        entries: [
+          {
+            ...historyEntry,
+            steps: [{ ...historyEntry.steps[0], phases: [{ ...phases[0], status: "unknown" }] }],
+          },
+        ],
+      }),
     ).toThrow("phases.0");
   });
 
