@@ -251,7 +251,8 @@ onUnmounted(() => {
 
 <style scoped>
 .artifacts-page {
-  color: var(--text-color);
+  container: artifact-history / inline-size;
+  color: var(--p-text-color);
 }
 .list-heading {
   display: flex;
@@ -266,11 +267,11 @@ onUnmounted(() => {
 }
 .list-heading p {
   margin: 4px 0 0;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.8rem;
 }
 .artifact-count {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.8rem;
 }
 .state-copy {
@@ -296,9 +297,9 @@ onUnmounted(() => {
   gap: 16px;
   min-width: 0;
   padding: 14px 16px;
-  border: 1px solid var(--p-surface-200, var(--surface-border));
-  border-radius: 8px;
-  background: var(--p-surface-0, var(--surface-card));
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-sm);
+  background: var(--pl-card);
 }
 .artifact-main {
   display: flex;
@@ -309,7 +310,7 @@ onUnmounted(() => {
 .artifact-icon {
   flex: 0 0 auto;
   margin-top: 2px;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 1.15rem;
 }
 .artifact-content {
@@ -326,7 +327,7 @@ onUnmounted(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px 10px;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.78rem;
 }
 .artifact-provenance :deep(.p-tag) {
@@ -346,18 +347,18 @@ onUnmounted(() => {
 }
 .skeleton-row {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) 160px 96px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24%) minmax(0, 16%);
   align-items: center;
   gap: 16px;
   height: 66px;
   padding: 12px 16px;
-  border: 1px solid var(--p-surface-200, var(--surface-border));
-  border-radius: 8px;
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-sm);
 }
 .skeleton-row span {
   height: 10px;
   border-radius: 4px;
-  background: var(--p-surface-100, var(--surface-ground));
+  background: var(--pl-skeleton);
 }
 .skeleton-row span:first-child {
   max-width: 320px;
@@ -370,37 +371,26 @@ onUnmounted(() => {
   border: 1px dashed var(--pl-border-strong);
   border-radius: var(--pl-radius);
   background: var(--pl-sunken);
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   text-align: center;
 }
 .empty-state > i {
   font-size: 1.75rem;
 }
 .empty-state strong {
-  color: var(--text-color);
+  color: var(--p-text-color);
 }
-:root.dark .artifact-row {
-  border-color: var(--p-surface-700, #3f3f46);
-  background: var(--p-surface-900, #18181b);
-}
-:root.dark .skeleton-row {
-  border-color: var(--p-surface-700, #3f3f46);
-}
-:root.dark .skeleton-row span {
-  background: var(--p-surface-800, #27272a);
-}
-@media (max-width: 720px) {
+@container artifact-history (width < 600px) {
   .artifact-row {
     align-items: flex-start;
     flex-direction: column;
   }
   .artifact-actions {
-    width: 100%;
     justify-content: flex-start;
-    margin-left: 28px;
+    padding-left: 28px;
   }
 }
-@media (max-width: 420px) {
+@container artifact-history (width < 380px) {
   .list-heading {
     align-items: flex-start;
     flex-direction: column;
@@ -409,7 +399,7 @@ onUnmounted(() => {
     padding: 12px;
   }
   .artifact-actions {
-    margin-left: 0;
+    padding-left: 0;
   }
 }
 </style>

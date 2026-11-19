@@ -16,14 +16,14 @@
   </div>
   <div v-else class="settings-container" :inert="!isBrowser && !isReady">
     <!-- Left Sidebar -->
-    <div class="settings-sidebar">
+    <nav class="settings-sidebar" aria-label="Settings sections">
       <!-- Options Group -->
       <div class="sidebar-group">
         <div class="sidebar-group-header">Options</div>
         <button
           type="button"
           class="sidebar-item"
-          :class="{ active: currentSection === 'general' }"
+          :aria-current="currentSection === 'general' ? 'true' : undefined"
           @click="currentSection = 'general'"
         >
           <i class="mdi mdi-tune mr-2"></i>
@@ -32,7 +32,7 @@
         <button
           type="button"
           class="sidebar-item"
-          :class="{ active: currentSection === 'advanced' }"
+          :aria-current="currentSection === 'advanced' ? 'true' : undefined"
           @click="currentSection = 'advanced'"
         >
           <i class="mdi mdi-server mr-2"></i>
@@ -53,22 +53,24 @@
       <!-- Account Group -->
       <div v-if="user" class="sidebar-group">
         <div class="sidebar-group-header">Account</div>
-        <div
+        <button
+          type="button"
           class="sidebar-item"
-          :class="{ active: currentSection === 'profile' }"
+          :aria-current="currentSection === 'profile' ? 'true' : undefined"
           @click="currentSection = 'profile'"
         >
           <i class="mdi mdi-account-outline mr-2"></i>
           <span>Profile</span>
-        </div>
-        <div
+        </button>
+        <button
+          type="button"
           class="sidebar-item"
-          :class="{ active: currentSection === 'billing' }"
+          :aria-current="currentSection === 'billing' ? 'true' : undefined"
           @click="currentSection = 'billing'"
         >
           <i class="mdi mdi-credit-card mr-2"></i>
           <span>Billing</span>
-        </div>
+        </button>
         <!-- <div
           class="sidebar-item"
           :class="{ active: currentSection === 'team' }"
@@ -78,7 +80,7 @@
           <span>Team</span>
         </div> -->
       </div>
-    </div>
+    </nav>
 
     <!-- Right Content Panel -->
     <div class="settings-content">
@@ -1217,18 +1219,18 @@ const logout = async () => {
 .settings-container {
   display: flex;
   width: 100%;
-  height: 65vh;
-  border-radius: 12px;
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
+  height: 100%;
+  min-height: 0;
+  border-radius: var(--pl-radius);
+  background: var(--pl-card);
+  border: 1px solid var(--pl-border);
   overflow: hidden;
 }
 
 .settings-sidebar {
-  width: 250px;
-  min-width: 250px;
-  background: var(--surface-section);
-  border-right: 1px solid var(--surface-border);
+  flex: 0 0 clamp(9rem, 23%, 13rem);
+  background: var(--pl-sunken);
+  border-right: 1px solid var(--pl-border);
   display: flex;
   flex-direction: column;
   padding: 1rem 0.6rem;
@@ -1243,7 +1245,7 @@ const logout = async () => {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: var(--surface-border);
+    background: var(--pl-border);
     border-radius: 3px;
   }
 }
@@ -1259,9 +1261,8 @@ const logout = async () => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-color-secondary);
-  opacity: 0.6;
-  padding: 0 0.5rem 0.35rem 0.5rem;
+  color: var(--pl-muted);
+  padding: 0 0.5rem 0.35rem;
 }
 
 .sidebar-item {
@@ -1270,15 +1271,17 @@ const logout = async () => {
   width: 100%;
   padding: 0.4rem 0.6rem;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--pl-radius-sm);
   background: transparent;
   font-weight: 500;
   font-size: 0.85rem;
   font-family: inherit;
-  color: var(--text-color-secondary);
+  color: var(--pl-muted);
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.15s var(--pl-ease),
+    color 0.15s var(--pl-ease);
   user-select: none;
   white-space: nowrap;
 
@@ -1288,29 +1291,37 @@ const logout = async () => {
     transition: transform 0.2s ease;
   }
 
-  &:hover:not(.active) {
-    background: var(--surface-hover);
-    color: var(--text-color);
+  &:hover:not([aria-current]) {
+    background: var(--pl-hover);
+    color: var(--p-text-color);
   }
 
-  &.active {
-    background: var(--primary-color);
-    color: var(--primary-color-text);
+  &[aria-current] {
+    background: var(--pl-card);
+    color: var(--p-text-color);
+    box-shadow: var(--pl-selected-shadow);
     font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pl-focus);
+    outline-offset: -2px;
   }
 }
 
 .settings-preference-error {
   margin: 0.5rem 0;
-  color: var(--p-red-500, #ef4444);
+  color: var(--pl-danger);
   font-size: 0.8rem;
 }
 
 .settings-content {
   flex: 1;
+  min-width: 0;
+  min-height: 0;
   padding: 1rem 1.5rem;
   overflow-y: auto;
-  background: var(--surface-card);
+  background: var(--pl-card);
 
   /* Custom scrollbar for content */
   &::-webkit-scrollbar {
@@ -1320,7 +1331,7 @@ const logout = async () => {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: var(--surface-border);
+    background: var(--pl-border);
     border-radius: 4px;
   }
 }
@@ -1335,9 +1346,9 @@ const logout = async () => {
 .settings-group {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--surface-border);
+  border: 1px solid var(--pl-border);
   border-radius: 8px;
-  background: var(--surface-card);
+  background: var(--pl-card);
   overflow: hidden;
 }
 
@@ -1348,7 +1359,7 @@ const logout = async () => {
   padding: 0.65rem 0.85rem;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--pl-border);
   border-radius: 0;
   transition: all 0.2s ease;
 
@@ -1357,7 +1368,7 @@ const logout = async () => {
   }
 
   &:hover {
-    background: var(--surface-hover);
+    background: var(--pl-hover);
   }
 }
 
@@ -1373,14 +1384,14 @@ const logout = async () => {
   .setting-title {
     font-size: 0.92rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--p-text-color);
     cursor: default;
     margin: 0;
   }
 
   .setting-description {
     font-size: 0.8rem;
-    color: var(--text-color-secondary);
+    color: var(--pl-muted);
     line-height: 1.4;
     opacity: 0.85;
   }
@@ -1400,8 +1411,8 @@ const logout = async () => {
 }
 
 .storage-card {
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
+  background: var(--pl-card);
+  border: 1px solid var(--pl-border);
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
@@ -1428,12 +1439,12 @@ const logout = async () => {
     font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: -0.01em;
-    color: var(--text-color);
+    color: var(--p-text-color);
 
     i {
       font-size: 14px;
       line-height: 1;
-      color: var(--primary-color);
+      color: var(--pl-accent);
     }
 
     span {
@@ -1462,7 +1473,7 @@ const logout = async () => {
   .card-header-right {
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text-color-secondary);
+    color: var(--pl-muted);
     opacity: 0.8;
     white-space: nowrap;
   }
@@ -1501,15 +1512,15 @@ const logout = async () => {
 
   .detail-item {
     padding: 0.55rem 0.75rem;
-    background: var(--surface-card);
+    background: var(--pl-card);
     border-radius: 12px;
-    border: 1px solid var(--surface-border);
+    border: 1px solid var(--pl-border);
     transition: all 0.2s ease;
     cursor: default;
 
     &:hover {
-      border-color: var(--surface-border);
-      background: var(--surface-hover);
+      border-color: var(--pl-border);
+      background: var(--pl-hover);
     }
   }
 
@@ -1537,7 +1548,7 @@ const logout = async () => {
 
   .sandbox-breakdown-container {
     padding-top: 0.85rem;
-    border-top: 1px solid var(--surface-border);
+    border-top: 1px solid var(--pl-border);
   }
 
   .pipelab-dot {
@@ -1552,22 +1563,21 @@ const logout = async () => {
 }
 
 .section-header {
-  margin-bottom: 1rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--pl-border);
 
   h3 {
     margin: 0 0 0.35rem 0;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-color);
+    color: var(--p-text-color);
     letter-spacing: -0.01em;
   }
 
   .description {
     margin: 0;
     font-size: 0.9rem;
-    color: var(--text-color-secondary);
+    color: var(--pl-muted);
   }
 }
 
@@ -1575,5 +1585,45 @@ const logout = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+@media (max-width: 760px) {
+  .settings-container {
+    flex-direction: column;
+  }
+
+  .settings-sidebar {
+    flex: 0 0 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--pl-border);
+  }
+
+  .sidebar-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex: 1 1 12rem;
+  }
+
+  .sidebar-group-header {
+    grid-column: 1 / -1;
+  }
+
+  .settings-content {
+    padding: 0.9rem;
+  }
+
+  .setting-item {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+
+    .setting-content {
+      flex: 1 0 min(100%, 7rem);
+      min-width: 0;
+      padding-right: 0;
+    }
+  }
 }
 </style>

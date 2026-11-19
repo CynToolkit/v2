@@ -413,7 +413,7 @@ onMounted(() => {
 .path-input {
   width: 100%;
   padding-left: 2.4rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--pl-font-mono);
   font-size: 0.82rem;
 }
 .picker-body {

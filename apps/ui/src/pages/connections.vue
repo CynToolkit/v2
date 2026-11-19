@@ -31,6 +31,7 @@
             <InputText
               v-model="searchQuery"
               placeholder="Filter connections..."
+              aria-label="Filter connections"
               class="w-full"
               size="small"
             />
@@ -47,31 +48,34 @@
             agent.isReady.value
           "
         >
-          <div
+          <button
+            type="button"
             v-for="account in filteredConnections"
             :key="account.id"
             class="plugin-item"
-            :class="{ active: selectedConnectionId === account.id }"
+            :aria-current="selectedConnectionId === account.id ? 'true' : undefined"
             @click="selectedConnectionId = account.id"
           >
-            <div class="plugin-item-content">
+            <span class="plugin-item-content">
               <template v-if="getPluginIcon(account.pluginName)">
                 <img
                   v-if="getPluginIcon(account.pluginName)?.type === 'image'"
                   :src="getPluginIconImage(account.pluginName)"
                   class="plugin-icon"
+                  alt=""
                 />
                 <i
                   v-else
                   :class="getIconClass(getPluginIcon(account.pluginName))"
                   class="plugin-icon-pi"
+                  aria-hidden="true"
                 ></i>
               </template>
-              <i v-else class="pi pi-user plugin-icon-pi"></i>
+              <i v-else class="pi pi-user plugin-icon-pi" aria-hidden="true"></i>
               <span class="plugin-label">{{ account.name }}</span>
-            </div>
-            <span class="status-dot enabled"></span>
-          </div>
+            </span>
+            <span class="status-dot enabled" aria-hidden="true"></span>
+          </button>
 
           <div
             v-if="!connectionDataReady"
@@ -503,6 +507,7 @@
             <InputText
               v-model="addSearchQuery"
               placeholder="Search integrations..."
+              aria-label="Search integrations"
               class="w-full"
               size="small"
             />
@@ -510,29 +515,32 @@
         </div>
 
         <div class="integrations-selection-list">
-          <div
+          <button
+            type="button"
             v-for="target in filteredConnectionTargets"
             :key="target.displayName"
             class="integration-selection-row"
             @click="selectTargetToConnect(target)"
           >
-            <div class="flex items-center gap-3 min-w-0 flex-grow-1">
-              <div class="plugin-icon-wrapper">
+            <span class="flex items-center gap-3 min-w-0 flex-grow-1">
+              <span class="plugin-icon-wrapper">
                 <template v-if="getPluginIcon(target.pluginName)">
                   <img
                     v-if="getPluginIcon(target.pluginName)?.type === 'image'"
                     :src="getPluginIconImage(target.pluginName)"
                     class="plugin-row-icon"
+                    alt=""
                   />
                   <i
                     v-else
                     :class="getIconClass(getPluginIcon(target.pluginName))"
                     class="text-sm text-primary"
+                    aria-hidden="true"
                   ></i>
                 </template>
-                <i v-else class="pi pi-box text-primary text-sm"></i>
-              </div>
-              <div class="flex flex-column gap-0.5 min-w-0">
+                <i v-else class="pi pi-box text-primary text-sm" aria-hidden="true"></i>
+              </span>
+              <span class="flex flex-column gap-0.5 min-w-0">
                 <span class="plugin-row-title">{{ target.displayName }}</span>
                 <span class="plugin-row-desc">
                   {{
@@ -540,10 +548,10 @@
                     "Configure connection profile"
                   }}
                 </span>
-              </div>
-            </div>
-            <i class="pi pi-chevron-right plugin-row-chevron"></i>
-          </div>
+              </span>
+            </span>
+            <i class="pi pi-chevron-right plugin-row-chevron" aria-hidden="true"></i>
+          </button>
 
           <div
             v-if="filteredConnectionTargets.length === 0"
@@ -1272,6 +1280,7 @@ watch(selectedConnectionId, (id) => {
 
 <style lang="scss" scoped>
 .connections-page {
+  container: connections / inline-size;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -1339,12 +1348,18 @@ watch(selectedConnectionId, (id) => {
     align-items: center;
     justify-content: space-between;
     padding: 8px 10px;
+    border: 0;
     border-radius: var(--pl-radius-sm);
+    background: transparent;
+    font-family: inherit;
+    text-align: left;
     font-size: 0.84rem;
     font-weight: 500;
     color: var(--p-text-muted-color);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition:
+      background-color 0.15s var(--pl-ease),
+      color 0.15s var(--pl-ease);
     user-select: none;
 
     &:hover {
@@ -1352,13 +1367,16 @@ watch(selectedConnectionId, (id) => {
       color: var(--p-text-color);
     }
 
-    &.active {
+    &[aria-current] {
       background: var(--pl-card);
       color: var(--p-text-color);
       font-weight: 600;
-      box-shadow:
-        0 0 0 1px var(--pl-border),
-        var(--pl-shadow-xs);
+      box-shadow: var(--pl-selected-shadow);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pl-focus);
+      outline-offset: -2px;
     }
 
     .plugin-item-content {
@@ -1398,11 +1416,8 @@ watch(selectedConnectionId, (id) => {
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  background: var(--p-surface-0);
-
-  :root.dark & {
-    background: var(--p-surface-900);
-  }
+  min-width: 0;
+  background: var(--pl-card);
 }
 
 .empty-pane {
@@ -1520,13 +1535,13 @@ watch(selectedConnectionId, (id) => {
   margin: 0;
   font-size: 0.8rem;
   &.connection-test-verified {
-    color: var(--p-green-500, #22c55e);
+    color: var(--pl-ok);
   }
   &.connection-test-failed {
-    color: var(--p-red-500, #ef4444);
+    color: var(--pl-danger);
   }
   &.connection-test-unverifiable {
-    color: var(--p-amber-500, #f59e0b);
+    color: var(--pl-warn);
   }
 }
 
@@ -1559,6 +1574,8 @@ watch(selectedConnectionId, (id) => {
 }
 
 .integration-selection-row {
+  font-family: inherit;
+  text-align: left;
   background: var(--pl-card);
   border: 1px solid var(--pl-border);
   border-radius: 12px;
@@ -1574,13 +1591,13 @@ watch(selectedConnectionId, (id) => {
     border-color: var(--pl-border-strong);
   }
 
-  &:active {
-    background: var(--p-surface-100);
-    transform: scale(0.995);
+  &:focus-visible {
+    outline: 2px solid var(--pl-focus);
+    outline-offset: -2px;
+  }
 
-    :root.dark & {
-      background: var(--p-surface-800);
-    }
+  &:active {
+    background: var(--pl-selected);
   }
 }
 
@@ -1639,5 +1656,29 @@ watch(selectedConnectionId, (id) => {
   transform: translateX(2px);
   color: var(--p-primary-color);
   opacity: 0.95;
+}
+@container connections (width < 640px) {
+  .main-layout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .drawer {
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: min(17rem, 40dvh);
+    border-right: 0;
+    border-bottom: 1px solid var(--pl-border);
+  }
+
+  .content-area {
+    flex: 1 0 auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .connection-edit-form {
+    padding: 16px;
+  }
 }
 </style>
