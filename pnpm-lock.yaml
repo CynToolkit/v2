@@ -549,6 +549,9 @@ importers:
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
+      '@types/serve-handler':
+        specifier: 6.1.4
+        version: 6.1.4
       '@types/ws':
         specifier: 8.18.1
         version: 8.18.1
@@ -4540,6 +4543,9 @@ packages:
 
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
+
+  '@types/serve-handler@6.1.4':
+    resolution: {integrity: sha512-aXy58tNie0NkuSCY291xUxl0X+kGYy986l4kqW6Gi4kEXgr6Tx0fpSH7YwUSa5usPpG3s9DBeIR6hHcDtL2IvQ==}
 
   '@types/set-cookie-parser@2.4.10':
     resolution: {integrity: sha512-GGmQVGpQWUe5qglJozEjZV/5dyxbOOZ0LHe/lqyWssB88Y4svNfst0uqBVscdDeIKl5Jy5+aPSvy7mI9tYRguw==}
@@ -12639,6 +12645,10 @@ snapshots:
   '@types/retry@0.12.5': {}
 
   '@types/semver@7.7.1': {}
+
+  '@types/serve-handler@6.1.4':
+    dependencies:
+      '@types/node': 24.12.4
 
   '@types/set-cookie-parser@2.4.10':
     dependencies:

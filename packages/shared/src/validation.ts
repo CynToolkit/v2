@@ -11,6 +11,6 @@ export const isRenderer = () => {
   // node-integration is disabled
   if (!process) return true;
 
-  // @ts-expect-error
+  // @ts-expect-error `browser` is only set by bundled browser builds
   return process.browser === true || process.title === "browser";
 };

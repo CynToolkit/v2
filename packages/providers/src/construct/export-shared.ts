@@ -626,7 +626,7 @@ export const exportc3p = async (
 
     // this exact sequn=ence make it work
     await page.addInitScript(() => {
-      // @ts-expect-error dds
+      // @ts-expect-error the File System Access picker is not in the lib typings
       delete self.showOpenFilePicker;
     });
     page.on("filechooser", (worker) => {
