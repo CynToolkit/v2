@@ -371,8 +371,8 @@ importers:
         specifier: 1.215.0
         version: 1.215.0
       primeflex:
-        specifier: 4.0.0
-        version: 4.0.0
+        specifier: 1.0.0
+        version: 1.0.0
       primeicons:
         specifier: 8.0.2
         version: 8.0.2
@@ -7561,6 +7561,9 @@ packages:
   pretty-ms@9.3.1:
     resolution: {integrity: sha512-HzMy3Geq23nVALD/M2LliU+F+M+gVNsvkQWWqeBZ8HDiCgzo6YPJ/Omrmtq24EFrIsk0a3EkQGEd7bDOo+IhGA==}
     engines: {node: '>=18'}
+
+  primeflex@1.0.0:
+    resolution: {integrity: sha512-/K9iHXm5wu6gZycQDP/gsfX7BpJKSNVhxTOZAJBLH88idPtC2lMgUXm28qfXFqsbxaTI49oBuMYBFlg/DBmUMg==}
 
   primeflex@4.0.0:
     resolution: {integrity: sha512-UOEZCRjR36+sm5bUpDhS1xbA068l9VC6y1aTNVqQPtXuKIdPTqAWHRUxj3mKAoPrQ9W373ooJJMgNVXfiaw04g==}
@@ -16418,6 +16421,8 @@ snapshots:
   pretty-ms@9.3.1:
     dependencies:
       parse-ms: 4.0.0
+
+  primeflex@1.0.0: {}
 
   primeflex@4.0.0: {}
 
