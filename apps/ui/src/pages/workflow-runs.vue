@@ -51,46 +51,47 @@
         role="list"
         aria-label="Workflow runs"
       >
-        <button
-          v-for="entry in entries"
-          :key="entry.id"
-          class="run-row"
-          :class="{ 'is-running': entry.status === 'running' }"
-          role="listitem"
-          @click="openRun(entry)"
-        >
-          <span
-            class="status-mark"
-            :class="`status-${entry.status}`"
-            :aria-label="statusLabel(entry.status)"
+        <div v-for="entry in entries" :key="entry.id" role="listitem">
+          <button
+            type="button"
+            class="run-row"
+            :class="{ 'is-running': entry.status === 'running' }"
+            @click="openRun(entry)"
           >
-            <i :class="statusIcon(entry.status)" aria-hidden="true" />
-          </span>
-          <span class="run-main">
-            <strong>{{
-              entry.version
-                ? `Release ${entry.version}`
-                : entry.workflowName || entry.projectName || "Workflow run"
-            }}</strong>
-            <small
-              ><span class="run-id">#{{ shortId(entry.id) }}</span
-              ><span>{{ entry.workflowName || entry.projectName }}</span></small
+            <span
+              class="status-mark"
+              :class="`status-${entry.status}`"
+              role="img"
+              :aria-label="statusLabel(entry.status)"
             >
-          </span>
-          <span class="run-time"
-            ><strong>{{ formatDate(entry.startTime) }}</strong
-            ><small>{{ formatTime(entry.startTime) }}</small></span
-          >
-          <span class="run-duration">{{ formatDuration(entry) }}</span>
-          <span class="run-summary"
-            ><strong>{{ entry.completedSteps }}/{{ entry.totalSteps }} steps</strong
-            ><small
-              >{{ entry.artifacts?.length || 0 }} artifacts ·
-              {{ entry.deliveries?.length || 0 }} deliveries</small
-            ></span
-          >
-          <i class="mdi mdi-chevron-right row-chevron" aria-hidden="true" />
-        </button>
+              <i :class="statusIcon(entry.status)" aria-hidden="true" />
+            </span>
+            <span class="run-main">
+              <strong>{{
+                entry.version
+                  ? `Release ${entry.version}`
+                  : entry.workflowName || entry.projectName || "Workflow run"
+              }}</strong>
+              <small
+                ><span class="run-id">#{{ shortId(entry.id) }}</span
+                ><span>{{ entry.workflowName || entry.projectName }}</span></small
+              >
+            </span>
+            <span class="run-time"
+              ><strong>{{ formatDate(entry.startTime) }}</strong
+              ><small>{{ formatTime(entry.startTime) }}</small></span
+            >
+            <span class="run-duration">{{ formatDuration(entry) }}</span>
+            <span class="run-summary"
+              ><strong>{{ entry.completedSteps }}/{{ entry.totalSteps }} steps</strong
+              ><small
+                >{{ entry.artifacts?.length || 0 }} artifacts ·
+                {{ entry.deliveries?.length || 0 }} deliveries</small
+              ></span
+            >
+            <i class="mdi mdi-chevron-right row-chevron" aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </main>
   </div>
@@ -229,7 +230,8 @@ onUnmounted(() => {
 
 <style scoped>
 .runs-page {
-  color: var(--text-color);
+  container: run-history / inline-size;
+  color: var(--p-text-color);
 }
 .list-heading {
   display: flex;
@@ -244,15 +246,15 @@ onUnmounted(() => {
 }
 .list-heading p {
   margin: 4px 0 0;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.8rem;
 }
 .run-count {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.8rem;
 }
 .run-list {
-  border-top: 1px solid var(--p-surface-200, var(--surface-border));
+  border-top: 1px solid var(--pl-border);
 }
 .run-row {
   display: grid;
@@ -264,25 +266,25 @@ onUnmounted(() => {
   gap: 14px;
   padding: 13px 10px;
   border: 0;
-  border-bottom: 1px solid var(--p-surface-200, var(--surface-border));
+  border-bottom: 1px solid var(--pl-border);
   background: transparent;
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: background-color 0.15s var(--pl-ease);
+}
+.run-row.is-running {
+  background: color-mix(in srgb, var(--pl-info) 6%, transparent);
 }
 .run-row:hover {
-  background: var(--p-surface-50, var(--surface-ground));
+  background: var(--pl-hover);
 }
 .run-row:focus-visible {
   position: relative;
   z-index: 1;
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--pl-focus);
   outline-offset: -2px;
   border-radius: 4px;
-}
-.run-row.is-running {
-  background: color-mix(in srgb, var(--primary-color) 4%, transparent);
 }
 .run-main,
 .run-time,
@@ -291,6 +293,7 @@ onUnmounted(() => {
   gap: 3px;
   min-width: 0;
 }
+.run-main small > span:last-child,
 .run-main strong {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -305,14 +308,14 @@ onUnmounted(() => {
   gap: 7px;
   min-width: 0;
   overflow: hidden;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.75rem;
 }
 .run-id {
-  color: var(--primary-color);
-  font-family: var(--font-family-monospace, monospace);
+  flex: none;
+  font-family: var(--pl-font-mono);
 }
 .run-time strong,
 .run-summary strong {
@@ -322,7 +325,7 @@ onUnmounted(() => {
 .run-duration {
   font-variant-numeric: tabular-nums;
   font-size: 0.8rem;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
 }
 .status-mark {
   display: grid;
@@ -330,25 +333,13 @@ onUnmounted(() => {
   width: 20px;
   height: 20px;
   font-size: 18px;
-}
-.status-completed {
-  color: var(--green-500, #22c55e);
-}
-.status-failed {
-  color: var(--red-500, #ef4444);
-}
-.status-completed-with-errors {
-  color: var(--orange-500, #f97316);
-}
-.status-cancelled {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-status-color, var(--pl-muted));
 }
 .status-running {
-  color: var(--primary-color);
   animation: spin 1.3s linear infinite;
 }
 .row-chevron {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
 }
 .empty-state {
   display: grid;
@@ -359,14 +350,14 @@ onUnmounted(() => {
   border-radius: var(--pl-radius);
   background: var(--pl-sunken);
   text-align: center;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
 }
 .empty-state > i {
   font-size: 30px;
-  color: var(--primary-color);
+  color: var(--pl-accent);
 }
 .empty-state strong {
-  color: var(--text-color);
+  color: var(--p-text-color);
   font-size: 0.95rem;
 }
 .empty-state span {
@@ -380,20 +371,20 @@ onUnmounted(() => {
   font-size: 0.85rem;
 }
 .history-skeleton {
-  border-top: 1px solid var(--p-surface-200, var(--surface-border));
+  border-top: 1px solid var(--pl-border);
 }
 .skeleton-row {
   display: flex;
   gap: 18px;
   align-items: center;
   height: 60px;
-  border-bottom: 1px solid var(--p-surface-200, var(--surface-border));
+  border-bottom: 1px solid var(--pl-border);
 }
 .skeleton-row span {
   width: 90px;
   height: 10px;
   border-radius: 8px;
-  background: var(--p-surface-100, var(--surface-ground));
+  background: var(--pl-skeleton);
   animation: pulse 1.3s ease-in-out infinite;
 }
 .skeleton-row span:nth-child(2) {
@@ -413,10 +404,13 @@ onUnmounted(() => {
     opacity: 0.45;
   }
 }
-@media (max-width: 760px) {
+@container run-history (width < 650px) {
   .run-row {
     grid-template-columns: 22px minmax(0, 1fr) auto 18px;
     gap: 10px;
+  }
+  .run-main {
+    grid-column: 2 / 4;
   }
   .run-time {
     grid-column: 2;

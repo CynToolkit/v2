@@ -1562,7 +1562,7 @@ onUnmounted(() => {
   padding-bottom: 48px;
 }
 .autosave-state {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.75rem;
 }
 .autosave-state i {
@@ -1582,7 +1582,7 @@ onUnmounted(() => {
   margin-bottom: 14px;
 }
 .eyebrow {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1603,7 +1603,7 @@ onUnmounted(() => {
   font-size: 0.82rem;
 }
 .build-count {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.8rem;
   white-space: nowrap;
 }
@@ -1633,11 +1633,7 @@ onUnmounted(() => {
   box-shadow: var(--pl-shadow-sm);
 }
 .build-row.build-invalid {
-  border-color: color-mix(
-    in srgb,
-    var(--p-orange-500, #f97316) 40%,
-    var(--p-surface-200, var(--surface-border))
-  );
+  border-color: color-mix(in srgb, var(--p-orange-500, #f97316) 40%, var(--pl-border));
 }
 .build-header {
   display: flex;
@@ -1675,11 +1671,11 @@ onUnmounted(() => {
   letter-spacing: -0.01em;
 }
 .build-copy span {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.78rem;
 }
 .build-copy small {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.72rem;
   overflow-wrap: anywhere;
 }
@@ -1688,7 +1684,7 @@ onUnmounted(() => {
   margin: 0;
   margin-top: 10px;
   padding: 9px 0 0 74px;
-  border-top: 1px solid var(--p-surface-100, var(--surface-border));
+  border-top: 1px solid var(--pl-border);
   color: var(--p-orange-700, #c2410c);
   font-size: 0.75rem;
 }
@@ -1717,7 +1713,7 @@ onUnmounted(() => {
 }
 .choice-copy span,
 .inline-state {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.75rem;
 }
 .empty-state {
@@ -1730,7 +1726,7 @@ onUnmounted(() => {
   text-align: center;
 }
 .empty-state > i {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 1.6rem;
 }
 .empty-state strong {
@@ -1738,7 +1734,7 @@ onUnmounted(() => {
 }
 .empty-state span {
   max-width: 340px;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.78rem;
 }
 .state-copy {
@@ -1754,21 +1750,21 @@ onUnmounted(() => {
   grid-column: 1 / -1;
   gap: 5px;
   padding: 10px 12px;
-  border: 1px solid color-mix(in srgb, var(--primary-color) 35%, var(--surface-border));
+  border: 1px solid color-mix(in srgb, var(--pl-accent) 35%, var(--pl-border));
   border-radius: 7px;
-  background: var(--p-surface-50, var(--surface-ground));
+  background: var(--pl-sunken);
   font-size: 0.75rem;
 }
 .build-issue-context span {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
 }
 .build-issue-context code {
   overflow-wrap: anywhere;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.68rem;
 }
 .issue-focus {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--pl-focus);
   outline-offset: 3px;
 }
 .settings-footer {
@@ -1810,16 +1806,16 @@ onUnmounted(() => {
   gap: 8px;
   min-height: 38px;
   padding: 7px 9px;
-  border: 1px solid var(--p-surface-200, var(--surface-border));
+  border: 1px solid var(--pl-border);
   border-radius: 6px;
-  background: var(--p-surface-0, var(--surface-card));
-  color: var(--text-color);
+  background: var(--pl-card);
+  color: var(--p-text-color);
   text-align: left;
   cursor: pointer;
 }
 .target-row.selected {
-  border-color: var(--primary-color);
-  background: var(--p-primary-50, var(--p-surface-50, var(--surface-ground)));
+  border-color: var(--pl-accent);
+  background: var(--p-primary-50, var(--pl-sunken));
 }
 .target-row:disabled {
   cursor: not-allowed;
@@ -1827,13 +1823,13 @@ onUnmounted(() => {
 }
 .target-row small {
   justify-self: end;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.68rem;
   text-align: right;
 }
 .field-note,
 .inline-state {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.72rem;
 }
 .field-issue-error {
@@ -1853,7 +1849,7 @@ onUnmounted(() => {
   background: var(--p-surface-800, #27272a);
 }
 :root.dark .target-row.selected {
-  border-color: var(--primary-color);
+  border-color: var(--pl-accent);
   background: var(--p-surface-800, #27272a);
 }
 :root.dark .build-issues {

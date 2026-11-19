@@ -334,7 +334,7 @@ const load = () => void workflowDoc.refreshPlan();
   --node-accent: var(--pl-accent, var(--p-primary-color));
 }
 .kind-destination {
-  --node-accent: var(--p-green-500, #22c55e);
+  --node-accent: var(--pl-ok);
 }
 .legend {
   display: flex;
@@ -359,11 +359,14 @@ const load = () => void workflowDoc.refreshPlan();
   border: 1.5px solid var(--node-accent);
   border-radius: 3px;
 }
+.legend .kind-source::before {
+  border-style: dashed;
+}
 .legend .kind-build {
   --node-accent: var(--pl-accent, var(--p-primary-color));
 }
 .legend .kind-destination {
-  --node-accent: var(--p-green-500, #22c55e);
+  --node-accent: var(--pl-ok);
 }
 .plan-issues {
   display: grid;
@@ -374,10 +377,10 @@ const load = () => void workflowDoc.refreshPlan();
   font-size: 0.85rem;
 }
 .plan-issues .error {
-  color: var(--p-red-500, #ef4444);
+  color: var(--pl-danger);
 }
 .plan-issues .warning {
-  color: var(--p-orange-500, #f97316);
+  color: var(--pl-warn);
 }
 .state-copy {
   color: var(--p-text-muted-color);

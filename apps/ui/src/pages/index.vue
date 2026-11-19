@@ -157,11 +157,10 @@
             {{ $t("home.recent-executions") }}
           </h2>
           <div class="execution-list" role="list" :aria-label="$t('home.recent-executions')">
-            <template v-for="entry in olderExecutions" :key="entry.id">
+            <div v-for="entry in olderExecutions" :key="entry.id" role="listitem">
               <RouterLink
                 v-if="entry.workflowId"
                 class="execution-row"
-                role="listitem"
                 :to="executionPath(entry)"
                 :aria-label="
                   $t('home.open-execution', {
@@ -181,7 +180,7 @@
                 </time>
                 <i class="mdi mdi-chevron-right" aria-hidden="true" />
               </RouterLink>
-              <div v-else class="execution-row execution-row-static" role="listitem">
+              <div v-else class="execution-row execution-row-static">
                 <span class="execution-status" :class="`status-${entry.status}`">
                   {{ statusLabel(entry.status) }}
                 </span>
@@ -192,7 +191,7 @@
                   {{ formatExecutionDate(entry.startTime) }}
                 </time>
               </div>
-            </template>
+            </div>
           </div>
         </section>
       </template>
@@ -478,7 +477,7 @@ watch(
   font-weight: 600;
 
   span {
-    color: var(--primary-color);
+    color: var(--pl-accent);
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
@@ -507,7 +506,7 @@ watch(
   align-self: flex-start;
   padding-inline: 0;
   border: 0;
-  color: var(--primary-color);
+  color: var(--pl-accent);
 
   &:hover {
     background: transparent;
@@ -581,7 +580,7 @@ watch(
   text-decoration: none;
 
   &:hover {
-    color: var(--primary-color);
+    color: var(--pl-accent);
   }
 }
 
@@ -647,21 +646,17 @@ watch(
   align-items: center;
   gap: 12px;
   min-height: 54px;
-  border-top: 1px solid var(--p-surface-200);
+  border-top: 1px solid var(--pl-border);
   color: inherit;
   text-decoration: none;
 
-  :root.dark & {
-    border-top-color: var(--p-surface-800);
-  }
-
   &:hover .execution-name {
-    color: var(--primary-color);
+    color: var(--pl-accent);
   }
 
   &:focus-visible {
     position: relative;
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
   }
 
@@ -679,32 +674,13 @@ watch(
 .execution-status {
   justify-self: start;
   padding: 4px 8px;
-  border: 1px solid var(--p-surface-300);
+  border: 1px solid color-mix(in srgb, currentColor 33%, transparent);
   border-radius: 999px;
-  color: var(--p-text-muted-color);
+  color: var(--pl-status-color, var(--pl-muted));
+  background: color-mix(in srgb, currentColor 7%, transparent);
   font-size: 0.7rem;
   font-weight: 650;
   white-space: nowrap;
-}
-
-.status-running {
-  border-color: color-mix(in srgb, var(--p-blue-500, #3b82f6) 30%, transparent);
-  color: var(--p-blue-600, #2563eb);
-}
-
-.status-completed {
-  border-color: color-mix(in srgb, var(--p-green-500, #22c55e) 30%, transparent);
-  color: var(--p-green-600, #16a34a);
-}
-
-.status-failed,
-.status-completed-with-errors {
-  border-color: color-mix(in srgb, var(--p-red-500, #ef4444) 30%, transparent);
-  color: var(--p-red-600, #dc2626);
-}
-
-.status-cancelled {
-  border-color: var(--p-surface-400);
 }
 
 .execution-name {
@@ -718,7 +694,7 @@ watch(
 }
 
 .dashboard-page :deep(.p-button:focus-visible) {
-  outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+  outline: 2px solid var(--pl-focus);
   outline-offset: 2px;
 }
 

@@ -404,16 +404,11 @@ const performMigration = async () => {
 }
 
 .migration-card {
-  background: var(--surface-card, var(--p-surface-800, #ffffff));
-  border: 1px solid var(--p-surface-border, #e2e8f0);
-  border-radius: 8px;
+  background: var(--pl-card);
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-sm);
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-  :root.dark & {
-    background: var(--surface-card, var(--p-surface-800, #1e1e1e));
-    border-color: var(--surface-border, var(--p-surface-700, #333333));
-  }
+  box-shadow: var(--pl-shadow-xs);
 
   .item-title {
     font-weight: 600;
@@ -425,63 +420,47 @@ const performMigration = async () => {
   .item-desc {
     margin: 4px 0 0 0;
     font-size: 0.8rem;
-    color: var(--p-text-muted-color, #64748b);
+    color: var(--pl-muted);
   }
 }
 
 .warning-badge {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #f59e0b;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.75rem;
-
-  &.small {
-    padding: 1px 4px;
-    font-size: 0.7rem;
-  }
+  color: var(--pl-warn);
 }
 
 .error-badge {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  color: var(--pl-danger);
+}
+
+.new-badge {
+  color: var(--pl-ok);
+}
+
+.warning-badge,
+.error-badge,
+.new-badge {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
   font-size: 0.75rem;
-
-  &.small {
-    padding: 1px 4px;
-    font-size: 0.7rem;
-  }
 }
 
+.warning-badge.small,
+.error-badge.small,
 .new-badge {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #10b981;
   padding: 1px 4px;
-  border-radius: 4px;
-  font-weight: 600;
   font-size: 0.7rem;
 }
 
 .meta-comparison {
-  background: var(--p-surface-50, #f8fafc);
+  background: var(--pl-sunken);
   padding: 8px;
   border-radius: 6px;
   font-size: 0.75rem;
-  border: 1px solid var(--p-surface-border, #e2e8f0);
-  color: var(--p-text-color, #334155);
-
-  :root.dark & {
-    background: var(--p-surface-900, #1e293b);
-    border-color: var(--p-surface-800, #334155);
-    color: var(--p-text-muted-color, #94a3b8);
-  }
+  border: 1px solid var(--pl-border);
+  color: var(--p-text-color);
 }
 
 .projects-section {
@@ -490,32 +469,22 @@ const performMigration = async () => {
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--p-text-muted-color, #64748b);
+    color: var(--pl-muted);
   }
 }
 
 .project-card {
-  border: 1px solid var(--surface-border, var(--p-surface-border, #e2e8f0));
-  border-radius: 8px;
-  background: var(--surface-ground, var(--p-surface-ground, #f8fafc));
+  border: 1px solid var(--pl-border);
+  border-radius: var(--pl-radius-sm);
+  background: var(--pl-sunken);
   overflow: hidden;
 
-  :root.dark & {
-    background: var(--surface-ground, var(--p-surface-900, #121212));
-    border-color: var(--surface-border, var(--p-surface-700, #333333));
-  }
-
   .project-header {
-    background: var(--surface-card, var(--p-surface-card, #ffffff));
-
-    :root.dark & {
-      background: var(--surface-card, var(--p-surface-800, #1e1e1e));
-    }
+    background: var(--pl-card);
   }
-
 }
 
 .border-top {
-  border-top: 1px solid var(--p-surface-border, #e2e8f0);
+  border-top: 1px solid var(--pl-border);
 }
 </style>

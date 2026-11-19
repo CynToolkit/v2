@@ -27,6 +27,9 @@ The run detail page shows:
 - artifacts produced by build steps;
 - destination delivery results.
 
+In a narrow window, the step list moves above the execution log. Select a step
+to filter the log, or select **All logs** to see the full run.
+
 When a run is still eligible for cancellation, the page can send a cancel
 request. While a run is active, its detail page refreshes persisted history so
 it remains current after a reload or when opened in another window. Live output
