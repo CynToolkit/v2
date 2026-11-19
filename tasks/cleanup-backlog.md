@@ -37,8 +37,7 @@ migrated; backup in the session scratchpad.
 - [x] Decided: keep the `isElectron` global in the exported-game preload
 - [ ] 🔴 `supabase/functions/_shared/billing.ts` (+ test): falls back to `SUPABASE_ANON_KEY`. Wanted: `SUPABASE_PUBLISHABLE_KEY` only. **Blocked:** Supabase injects only `SUPABASE_ANON_KEY` into edge functions and the CLI rejects custom secrets whose name starts with `SUPABASE_`, so the new name cannot be set as a function secret. Needs a different approach (read `SUPABASE_ANON_KEY` only, or a non-prefixed secret name).
 - [x] Decided: keep persisted `pluginName` and `@pipelab/plugin-*` IDs (public provider IDs, not a shim)
-- [ ] 🟡 `packages/shared/src/config/migrators.ts`: `Migrator<T>` interface uses `any`;
-      each document still carries a one-step migrator.
+- [x] `Migrator<T>` interface typed (no `any`), unused `configRegistry` removed
 - [x] Old graph-pipeline JSON fixtures removed (provider e2e fixtures, desktop `start:args` script pointing at a missing file)
 - [x] Construct spec mocks match the real export output (`zipFile` only)
 
@@ -49,8 +48,7 @@ migrated; backup in the session scratchpad.
 - [x] `docs/auth.drawio`, `docs/auth.png` removed
 - [ ] 🟡 `apps/documentation/contributing/repository-migration.md`: still linked for required secrets/setup in `releases.md`; fold that content into `releases.md`, then delete.
 - [x] `ARCHITECTURE.md` no longer describes the removed legacy evaluator
-- [ ] 🟡 `packages/migration/README.md` and `apps/ui/README.md` mention of migration handling:
-      re-read after batch 1.
+- [x] READMEs re-read: migration README rewritten in batch 1; `apps/ui/README.md` mentions are about auth sessions and still accurate
 
 ## 6. Scripts, tests and apps
 
