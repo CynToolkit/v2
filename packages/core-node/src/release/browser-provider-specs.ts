@@ -25,5 +25,7 @@ export const buildBrowserProviderSpecs = (): BrowserProviderSpecs => ({
   ),
 });
 
-const renderBrowserProviderSpecs = (specs: BrowserProviderSpecs = buildBrowserProviderSpecs()) =>
+export const renderBrowserProviderSpecs = (
+  specs: BrowserProviderSpecs = buildBrowserProviderSpecs(),
+) =>
   `import type { BrowserProviderSpecs } from "@pipelab/shared";\n\nconst browserProviderSpecs = ${JSON.stringify(specs, null, 2)} satisfies BrowserProviderSpecs;\n\nexport default browserProviderSpecs;\n`;
