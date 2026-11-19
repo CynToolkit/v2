@@ -35,18 +35,18 @@
     "@pipelab/workflow-runtime": "workspace:*",
     "@supabase/supabase-js": "2.99.3",
     "@types/node": "^24.12.2",
-    "klona": "2.0.6",
     "nanoid": "6.0.2",
     "quickjs-emscripten": "0.31.0",
     "quickjs-emscripten-core": "0.31.0",
     "quickjs-emscripten-sync": "1.6.0",
     "tslog": "5.5.0",
     "type-fest": "6.0.1",
-    "valibot": "1.4.2"
+    "valibot": "1.4.2",
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@pipelab/tsconfig": "workspace:*",
-    "esbuild-plugin-wasm": "1.1.0",
+    "electron": "45.4.1",
     "typescript": "5.9.3",
     "vitest": "5.1.1"
   }
