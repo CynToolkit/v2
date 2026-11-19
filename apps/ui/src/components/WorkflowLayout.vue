@@ -230,8 +230,8 @@ onUnmounted(() => window.removeEventListener("resize", placeIndicator));
   margin-bottom: 28px;
 }
 .workflow-nav a:focus-visible {
-  outline: none;
-  box-shadow: var(--pl-ring);
+  outline: 2px solid var(--pl-focus);
+  outline-offset: -2px;
 }
 .workflow-titlebar {
   display: flex;
@@ -382,8 +382,8 @@ onUnmounted(() => window.removeEventListener("resize", placeIndicator));
   background: var(--pl-hover);
 }
 .settings-link:focus-visible {
-  outline: none;
-  box-shadow: var(--pl-ring);
+  outline: 2px solid var(--pl-focus);
+  outline-offset: -2px;
 }
 .issue-chip {
   display: inline-flex;

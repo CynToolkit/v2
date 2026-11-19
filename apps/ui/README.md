@@ -19,9 +19,24 @@ When the UI starts, it attempts to connect to the Pipelab Engine (CLI process):
 ### Tech Stack
 
 - **Framework**: Vue 3 (Composition API)
-- **UI Library**: PrimeVue v4
+- **UI Library**: PrimeVue with the Lara preset
 - **State**: Pinia
 - **Icons**: PrimeIcons / Lucide
+
+### Editor design system
+
+The PrimeVue preset in `src/main.ts` controls the base theme. Use the shared
+roles in `src/style/workflow.scss` for custom Editor UI. Use card and recessed
+surface tokens for backgrounds, the shared border and radius tokens for
+containers, and `--pl-focus` for visible keyboard focus. Status colors express
+the same meaning across themes. Pair them with a label or a named icon.
+
+Use native links for navigation and buttons for actions. For dense views
+inside the app shell, adapt to the content container's width so the layout
+also works with an expanded sidebar.
+
+See [Editor design-system instructions](AGENTS.md) for token choices and
+examples from shipped screens.
 
 ### Commands
 

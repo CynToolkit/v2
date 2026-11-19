@@ -462,16 +462,12 @@
     <Dialog
       v-model:visible="isSettingsModalVisible"
       modal
-      :style="{ width: '75vw', height: '80%' }"
-      :breakpoints="{ '575px': '90vw' }"
+      header="Settings"
+      :style="{ width: 'min(75vw, 64rem)', height: '80%' }"
+      :breakpoints="{ '760px': '95vw' }"
+      :pt="{ content: { class: 'settings-dialog-content' } }"
     >
-      <template #header>
-        <div class="flex flex-column w-full">
-          <p class="text-xl text-center">Settings</p>
-        </div>
-      </template>
-
-      <Settings v-if="isSettingsModalVisible"></Settings>
+      <Settings v-if="isSettingsModalVisible" />
     </Dialog>
   </div>
 </template>
@@ -974,7 +970,7 @@ handle("update:set-status", async (_event, { value }) => {
   transition: all 0.15s ease;
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 60%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
   }
 
@@ -1042,21 +1038,21 @@ handle("update:set-status", async (_event, { value }) => {
 
   :deep(.p-button:focus-visible),
   :deep(.p-select:focus-visible) {
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
   }
 
   :deep(.p-select-label:focus-visible) {
     position: relative;
     z-index: 1;
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
     border-radius: 6px;
   }
 }
 
 :global(#sidebar-project-select:has(.p-select-label:focus-visible)) {
-  outline-color: var(--primary-color) !important;
+  outline-color: var(--pl-focus) !important;
   outline-style: solid !important;
   outline-width: 3px !important;
   outline-offset: 2px !important;
@@ -1271,7 +1267,7 @@ handle("update:set-status", async (_event, { value }) => {
   overflow: hidden;
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 60%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
   }
 
@@ -1294,9 +1290,7 @@ handle("update:set-status", async (_event, { value }) => {
     background: var(--pl-card);
     color: var(--p-text-color);
     font-weight: 600;
-    box-shadow:
-      0 0 0 1px var(--pl-border),
-      var(--pl-shadow-xs);
+    box-shadow: var(--pl-selected-shadow);
 
     .nav-icon {
       color: var(--pl-accent);
@@ -1651,9 +1645,15 @@ handle("update:set-status", async (_event, { value }) => {
   cursor: help;
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
   }
+}
+
+:global(.p-dialog-content.settings-dialog-content) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ─── Main Content ──────────────────────────────────────── */
@@ -1681,8 +1681,8 @@ handle("update:set-status", async (_event, { value }) => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 1rem;
-  background: var(--p-surface-100);
-  border-bottom: 1px solid var(--p-content-border-color);
+  background: var(--pl-sunken);
+  border-bottom: 1px solid var(--pl-border);
   font-size: 0.875rem;
 }
 

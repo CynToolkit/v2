@@ -146,8 +146,9 @@ hosts.
   `@pipelab/plugin-*` IDs (needed for saved workflows); put integration
   behavior in the owning folder under `packages/providers/src` and add focused
   tests.
-- UI changes: follow existing Vue/PrimeVue patterns, preserve accessible
-  states, and verify behavior in `apps/ui` rather than through Electron.
+- Editor UI changes follow the [Editor design-system instructions](apps/ui/AGENTS.md),
+  including work that begins elsewhere in the monorepo. Verify affected
+  behavior in `apps/ui` rather than through Electron.
 - Supabase changes: inspect the current schema and migration conventions,
   make migrations explicit and reversible where practical, and regenerate
   types only when the schema actually changes.

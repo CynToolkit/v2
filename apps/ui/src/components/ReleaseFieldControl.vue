@@ -396,13 +396,13 @@ const toggleEnvironmentBinding = () => {
 .release-field > label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
 }
 .required-mark {
   color: var(--p-red-500, #ef4444);
 }
 .field-help {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.7rem;
 }
 .field-control {
@@ -425,8 +425,8 @@ const toggleEnvironmentBinding = () => {
   gap: 6px;
 }
 .environment-prefix {
-  color: var(--p-text-muted-color, var(--text-color-secondary));
-  font-family: var(--font-mono, ui-monospace, monospace);
+  color: var(--pl-muted);
+  font-family: var(--pl-font-mono);
   font-size: 0.78rem;
 }
 /* Every trailing button in a field row (browse, environment variable) shares one size and shape. */
@@ -439,7 +439,7 @@ const toggleEnvironmentBinding = () => {
   justify-content: center;
 }
 .environment-toggle :deep(.p-button-label) {
-  font-family: var(--font-mono, ui-monospace, monospace);
+  font-family: var(--pl-font-mono);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -477,7 +477,7 @@ const toggleEnvironmentBinding = () => {
 .connection-alias > label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
 }
 .connection-field .field-control {
   grid-column: 1;
@@ -496,7 +496,7 @@ const toggleEnvironmentBinding = () => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--p-text-muted-color, var(--text-color-secondary));
+  color: var(--pl-muted);
   font-size: 0.72rem;
 }
 .alias-caption code {

@@ -617,7 +617,7 @@ watch(
   font-weight: 600;
 
   span {
-    color: var(--primary-color);
+    color: var(--pl-accent);
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
@@ -696,7 +696,7 @@ watch(
 
 .workflows-area :deep(.p-button:focus-visible),
 .workflows-area :deep(.p-inputtext:focus-visible) {
-  outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+  outline: 2px solid var(--pl-focus);
   outline-offset: 2px;
 }
 
@@ -768,7 +768,7 @@ watch(
   border-radius: 6px;
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 3px;
   }
 }
@@ -859,7 +859,7 @@ watch(
   }
 
   &:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--primary-color) 55%, transparent);
+    outline: 2px solid var(--pl-focus);
     outline-offset: 2px;
   }
 

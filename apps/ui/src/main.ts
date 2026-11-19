@@ -39,9 +39,9 @@ const PipelabPreset = definePreset(Lara, {
   semantic: {
     transitionDuration: "0.2s",
     focusRing: {
-      width: "1px",
+      width: "2px",
       style: "solid",
-      color: "{primary.color}",
+      color: "var(--pl-focus)",
       offset: "2px",
       shadow: "none",
     },
