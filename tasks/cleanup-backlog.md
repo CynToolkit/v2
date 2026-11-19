@@ -45,27 +45,23 @@ migrated; backup in the session scratchpad.
       "compatibility identifiers" in `apps/documentation/contributing/architecture.md`.
 - [ ] 🟡 `packages/shared/src/config/migrators.ts`: `Migrator<T>` interface uses `any`;
       each document still carries a one-step migrator.
-- [ ] 🟡 Old graph-pipeline JSON fixtures: `packages/providers/src/**/tests/e2e/fixtures/*.json`
-      (have `canvas`, version `3.0.0`). Check whether any test still loads them.
-- [ ] 🟡 `packages/providers/src/construct/tests/e2e/construct.spec.ts` still passes `parentFolder`
-      to a mock; confirm it is not the removed export output.
+- [x] Old graph-pipeline JSON fixtures removed (provider e2e fixtures, desktop `start:args` script pointing at a missing file)
+- [x] Construct spec mocks match the real export output (`zipFile` only)
 
 ## 5. Stale docs and planning files
 
 - [x] `TODO_MONOREPO.md` removed
 - [x] `tasks/todo.md` removed
 - [x] `docs/auth.drawio`, `docs/auth.png` removed
-- [ ] 🟡 `apps/documentation/contributing/repository-migration.md`: finished one-off runbook.
-      Linked from `.vitepress/config.mts` and `contributing/releases.md` (lines ~45, ~152).
-- [ ] 🟡 `ARCHITECTURE.md` mentions a "legacy evaluator": confirm it still exists.
+- [ ] 🟡 `apps/documentation/contributing/repository-migration.md`: still linked for required secrets/setup in `releases.md`; fold that content into `releases.md`, then delete.
+- [x] `ARCHITECTURE.md` no longer describes the removed legacy evaluator
 - [ ] 🟡 `packages/migration/README.md` and `apps/ui/README.md` mention of migration handling:
       re-read after batch 1.
 
 ## 6. Scripts, tests and apps
 
 - [x] `scripts/delete_tags.sh`, `scripts/upload-windows.sh` removed
-- [ ] 🟡 `tests/save-data-folder.test.mjs` is not wired to any test script. Wire it or move it
-      next to `assets/asset-electron/template/src/handlers/user/save-data-folder.js`.
+- [x] `save-data-folder` test moved into `assets/asset-electron` with a `test` script
 - [ ] 🔴 `apps/mini-c3-electron`: no consumers found but it is in `.changeset/pre.json`.
       Is it still shipped?
 - [x] Commented-out code removed (`Settings.vue`, `export-shared.ts`)

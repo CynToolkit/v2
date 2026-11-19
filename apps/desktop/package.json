@@ -33,7 +33,6 @@
     "smoke:electron:manual": "pnpm --filter @pipelab/cli build && pnpm run package && playwright test",
     "smoke:electron:run": "playwright test",
     "start": "pnpm build:vite && electron .",
-    "start:args": "pnpm build:vite && electron . --project ./tests/e2e/fixtures/folder-to-electron.json --action run",
     "test": "vitest run",
     "test:local-release-e2e": "node scripts/electron-local-release-test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false"

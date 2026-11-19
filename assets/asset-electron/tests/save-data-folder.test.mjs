@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
 
-import { resolveSaveDataFolder } from "../assets/asset-electron/template/src/handlers/user/save-data-folder.js";
+import { resolveSaveDataFolder } from "../template/src/handlers/user/save-data-folder.js";
 
 const appNameFolder = "com.example.game";
 
