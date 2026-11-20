@@ -106,7 +106,24 @@ export interface Agent {
 /** What a WebSocket handler receives: the request payload and a way to answer it. */
 export interface WebSocketHandlerArgs<KEY extends Channels> {
   value: Data<KEY>;
-  send: WebSocketSendFunction<KEY>;
+  /**
+   * Method syntax on purpose: it makes `WebSocketHandlerArgs<KEY>` assignable to
+   * `WebSocketHandlerArgs<Channels>`, which is what lets the server keep one entry per channel in a
+   * single map. The server only ever calls an entry with the payload of its own channel.
+   */
+  send(events: Events<KEY>): Promise<void>;
+}
+
+/** One registered channel handler. The method syntax is deliberate, see `WebSocketHandlerArgs`. */
+export interface WebSocketHandlerEntry<KEY extends Channels> {
+  channel: KEY;
+  run(event: WebSocketEvent, data: WebSocketHandlerArgs<KEY>): Promise<void>;
+}
+
+/** A client listener for the events a channel pushes. The method syntax is deliberate, see `WebSocketHandlerArgs`. */
+export interface EventSubscription<KEY extends Channels> {
+  channel: KEY;
+  notify(data: Events<KEY>): void;
 }
 
 export type WebSocketHandler<KEY extends Channels> = (

@@ -101,19 +101,21 @@ describe("Desktop workflow submission to Itch provider integration", () => {
 
     try {
       registerWorkflowHandlers(context);
-      await useAPI().handlers["workflow:execute"](
-        { sender: "desktop-renderer" },
-        {
-          value: {
-            name: `workflows/${config.id}`,
-            env: { PIPELAB_DESKTOP_SOURCE: sourceDirectory },
-            connectionValues: { [alias]: { apiKey } },
+      await useAPI()
+        .handlers.get("workflow:execute")
+        ?.run(
+          { sender: "desktop-renderer" },
+          {
+            value: {
+              name: `workflows/${config.id}`,
+              env: { PIPELAB_DESKTOP_SOURCE: sourceDirectory },
+              connectionValues: { [alias]: { apiKey } },
+            },
+            send: async (event) => {
+              events.push(event);
+            },
           },
-          send: async (event) => {
-            events.push(event);
-          },
-        },
-      );
+        );
     } finally {
       nodeSetup.mockRestore();
       pnpmSetup.mockRestore();

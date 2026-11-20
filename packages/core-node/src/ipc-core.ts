@@ -1,23 +1,25 @@
-import { Channels, Events, RequestMessageFor, WebSocketRequestMessage } from "@pipelab/shared";
+import { Channels, Events, WebSocketRequestMessage } from "@pipelab/shared";
 import { WebSocket as WSWebSocket } from "ws";
 import { useLogger } from "@pipelab/shared";
-import { WebSocketEvent, WebSocketHandler, WebSocketSendFunction } from "@pipelab/shared";
+import {
+  WebSocketEvent,
+  WebSocketHandler,
+  WebSocketHandlerEntry,
+  WebSocketSendFunction,
+} from "@pipelab/shared";
 
 export type HandleListenerSendFn<KEY extends Channels> = WebSocketSendFunction<KEY>;
 
 export type HandleListener<KEY extends Channels> = WebSocketHandler<KEY>;
 
-type HandlerRegistry = { [KEY in Channels]?: WebSocketHandler<KEY> };
-
-const handlers: HandlerRegistry = {};
+/** One entry per channel; an entry only ever receives the payload of its own channel. */
+const handlers = new Map<Channels, WebSocketHandlerEntry<Channels>>();
 
 export const useAPI = () => {
   const { logger } = useLogger();
 
   const handle = <KEY extends Channels>(channel: KEY, listener: WebSocketHandler<KEY>) => {
-    // Written by key, so each entry always matches its channel; TypeScript cannot express that
-    // correlation for a generic key on assignment, but reads below are fully typed.
-    Object.assign(handlers, { [channel]: listener });
+    handlers.set(channel, { channel, run: listener });
 
     return {
       channel,
@@ -25,9 +27,9 @@ export const useAPI = () => {
     };
   };
 
-  const dispatch = <KEY extends Channels>(ws: WSWebSocket, message: RequestMessageFor<KEY>) => {
+  const dispatch = (ws: WSWebSocket, message: WebSocketRequestMessage) => {
     const { channel, data, requestId } = message;
-    const handler = handlers[channel];
+    const handler = handlers.get(channel);
 
     if (!handler) {
       logger().warn("No handler found for channel:", channel);
@@ -38,7 +40,7 @@ export const useAPI = () => {
       sender: ws.url || "websocket-client",
     };
 
-    const send: HandleListenerSendFn<KEY> = (events: Events<KEY>) => {
+    const send: HandleListenerSendFn<Channels> = (events: Events<Channels>) => {
       const serialized = JSON.stringify(events);
       logger().debug(
         "sending response to",
@@ -66,7 +68,7 @@ export const useAPI = () => {
       return Promise.resolve();
     };
 
-    return handler(event, {
+    return handler.run(event, {
       send,
       value: data,
     });

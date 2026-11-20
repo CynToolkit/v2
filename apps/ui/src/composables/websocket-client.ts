@@ -4,7 +4,7 @@ import {
   End,
   Events,
   RequestId,
-  type EventMessageFor,
+  type EventSubscription,
   type OutgoingRequestMessage,
   type RequestMessageFor,
   type WebSocketEventMessage,
@@ -88,7 +88,8 @@ interface QueuedMessage {
 export class WebSocketClient {
   private ws: WebSocket | null = null;
   private listeners: Map<RequestId, (data: WebSocketMessage) => void> = new Map();
-  private eventListeners: { [KEY in Channels]?: Set<(data: Events<KEY>) => void> } = {};
+  /** One entry per `on()` call; an entry is only notified of events from its own channel. */
+  private eventListeners = new Set<EventSubscription<Channels>>();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = Infinity;
   private reconnectDelay = 1000;
@@ -264,10 +265,11 @@ export class WebSocketClient {
     }
   }
 
-  private emitEvent<KEY extends Channels>(message: EventMessageFor<KEY>) {
-    this.eventListeners[message.channel]?.forEach((listener) => {
+  private emitEvent(message: WebSocketEventMessage) {
+    this.eventListeners.forEach((subscription) => {
+      if (subscription.channel !== message.channel) return;
       try {
-        listener(message.data);
+        subscription.notify(message.data);
       } catch (error) {
         console.error(`Error in event listener for channel ${message.channel}:`, error);
       }
@@ -455,12 +457,10 @@ export class WebSocketClient {
     this.connect(url);
   }
   public on<KEY extends Channels>(channel: KEY, listener: (data: Events<KEY>) => void): () => void {
-    const listeners = this.eventListeners[channel] ?? new Set<(data: Events<KEY>) => void>();
-    // Keyed by channel, so the set only ever holds listeners for that channel's events.
-    Object.assign(this.eventListeners, { [channel]: listeners });
-    listeners.add(listener);
+    const subscription: EventSubscription<KEY> = { channel, notify: listener };
+    this.eventListeners.add(subscription);
     return () => {
-      listeners.delete(listener);
+      this.eventListeners.delete(subscription);
     };
   }
 }
