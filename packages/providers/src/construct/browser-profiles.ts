@@ -1,3 +1,4 @@
+import type { BrowserProfileAuthStatus, BrowserProfileCandidate } from "@pipelab/shared";
 import { access, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { homedir, platform, tmpdir } from "node:os";
@@ -7,20 +8,7 @@ import type { ProviderHostContext } from "@pipelab/plugin-core";
 import { loadConstructPlaywright } from "./playwright-runtime.js";
 import { preparePlaywrightProfile } from "./export-shared.js";
 
-export type BrowserProfileAuthStatus = "authenticated" | "not-authenticated" | "unknown";
-
-export type BrowserProfileCandidate = {
-  browser: string;
-  profileName: string;
-  path: string;
-  isDefault: boolean;
-  addonCount: number | null;
-  authStatus: BrowserProfileAuthStatus;
-  lastUpdatedAt: number | null;
-  score: number | null;
-  usable: boolean;
-  reason?: string;
-};
+export type { BrowserProfileAuthStatus, BrowserProfileCandidate };
 
 export type BrowserProfileOption = Pick<
   BrowserProfileCandidate,

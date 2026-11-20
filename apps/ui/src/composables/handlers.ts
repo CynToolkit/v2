@@ -1,11 +1,13 @@
 // renderer handler
 
 import { useLogger } from "@pipelab/shared";
-import { RendererChannels, RendererEvents, RendererData, RendererMessage } from "@pipelab/shared";
-
-type HandleListenerRendererSendFn<KEY extends RendererChannels> = (
-  events: RendererEvents<KEY>,
-) => void;
+import {
+  RendererChannels,
+  RendererEvents,
+  RendererData,
+  RendererMessage,
+  type HandleListenerRendererSendFn,
+} from "@pipelab/shared";
 
 export type HandleListenerRenderer<KEY extends RendererChannels> = (
   event: Electron.IpcRendererEvent,

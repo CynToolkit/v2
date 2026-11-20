@@ -12,11 +12,11 @@ export const gpupatchAssetName = (platform: NodeJS.Platform, arch: NodeJS.Archit
   throw new Error(`gpupatch is not available for ${platform}-${arch}`);
 };
 
-type PatchOptions = {
+interface PatchOptions {
   context: { getThirdPartyPath(...subpaths: string[]): string };
   log: typeof console.log;
   abortSignal?: AbortSignal;
-};
+}
 
 export const ensureGpupatch = async ({
   context,

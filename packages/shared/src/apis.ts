@@ -17,32 +17,22 @@ import type {
   WorkflowEvent,
   WorkflowResult,
 } from "@pipelab/workflow-runtime";
-export type BrowserProfileCandidate = {
+export type BrowserProfileAuthStatus = "authenticated" | "not-authenticated" | "unknown";
+
+export interface BrowserProfileCandidate {
   browser: string;
   profileName: string;
   path: string;
   isDefault: boolean;
   addonCount: number | null;
-  authStatus?: "authenticated" | "not-authenticated" | "unknown";
+  authStatus: BrowserProfileAuthStatus;
   lastUpdatedAt: number | null;
   score: number | null;
   usable: boolean;
   reason?: string;
-};
+}
 
-type EndEvent<DATA> = {
-  type: "end";
-  data:
-    | {
-        type: "success";
-        result: DATA;
-      }
-    | {
-        type: "error";
-        ipcError: string;
-        code?: string;
-      };
-};
+import type { EndEvent } from "./ipc.types";
 
 export type ReleaseChannel = "stable" | "beta" | "dev";
 export type IpcDefinition = {
@@ -218,11 +208,11 @@ export type Data<KEY extends Channels> = IpcDefinition[KEY][0];
 export type Events<KEY extends Channels> = IpcDefinition[KEY][1];
 export type End<KEY extends Channels> = Extract<IpcDefinition[KEY][1], { type: "end" }>["data"];
 
-export type IpcMessage = {
+export interface IpcMessage {
   // the channel to communicate
   requestId: RequestId;
   data: any;
-};
+}
 export type { RequestId } from "./ipc.types";
 import type { RequestId } from "./ipc.types";
 

@@ -1,7 +1,6 @@
 import type { BuildHistoryEntry, ExecutionStep, Events } from "@pipelab/shared";
 import { nanoid } from "nanoid";
-
-type WorkflowEvent = Extract<Events<"workflow:execute">, { type: "workflow-event" }>["data"];
+import type { WorkflowEvent } from "./run-events";
 
 const workflowArtifacts = (
   artifacts: Extract<WorkflowEvent, { type: "workflow.completed" }>["result"]["artifacts"],

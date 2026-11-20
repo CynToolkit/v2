@@ -19,7 +19,7 @@ export interface UpdateState {
 }
 
 export type IpcEvent<TYPE extends string, DATA> = { type: TYPE; data: DATA };
-export type EndEvent<DATA> = {
+export interface EndEvent<DATA> {
   type: "end";
   data:
     | {
@@ -29,8 +29,9 @@ export type EndEvent<DATA> = {
     | {
         type: "error";
         ipcError: string;
+        code?: string;
       };
-};
+}
 
 export type IpcDefinition = {
   "dialog:alert": [
@@ -63,11 +64,11 @@ export type RendererEnd<KEY extends RendererChannels> = Extract<
   { type: "end" }
 >["data"];
 
-export type RendererMessage = {
+export interface RendererMessage {
   // the channel to communicate
   requestId: RequestId;
   data: any;
-};
+}
 export type RequestId = Tagged<string, "request-id">;
 
 export type HandleListenerRendererSendFn<KEY extends RendererChannels> = (

@@ -7,12 +7,12 @@ import semver from "semver";
 import { execa } from "execa";
 import type { ProviderHostContext } from "./pipelab";
 
-type FetchedPackage = {
+interface FetchedPackage {
   packageDir: string;
   resolvedVersion: string;
   isLocal?: boolean;
   entryPoint?: string;
-};
+}
 
 function isPackageComplete(packageDir: string): boolean {
   return existsSync(join(packageDir, "package.json"));
@@ -75,11 +75,11 @@ export async function isOnline(): Promise<boolean> {
   return isOnlineCached;
 }
 
-export type FetchOptions = {
+export interface FetchOptions {
   installDeps?: boolean;
   signal?: AbortSignal;
   context: ProviderHostContext;
-};
+}
 
 function allowPrereleaseInRange(rangeStr: string): string {
   try {

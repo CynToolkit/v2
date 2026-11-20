@@ -10,7 +10,7 @@ import type {
 import type { WorkflowStep } from "@pipelab/workflow-runtime";
 import { constructExportInputs } from "./export-inputs";
 
-type ConstructExportType = "web" | "webview2" | "wkwebview" | "cef";
+import type { ConstructExportType } from "./assets/script";
 
 const desktopUnavailable: Availability = {
   available: false,

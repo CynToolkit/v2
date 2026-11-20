@@ -1,11 +1,11 @@
 import type { SupportedStorage } from "@supabase/supabase-js";
 import type { PipelabContext } from "../context";
 
-type KeyringEntry = {
+interface KeyringEntry {
   getPassword(): string | null | Promise<string | null>;
   setPassword(password: string): unknown;
   deletePassword(): unknown;
-};
+}
 
 /** Supabase Auth storage backed by the operating system credential store. */
 export class SecureCloudAuthStorage implements SupportedStorage {
