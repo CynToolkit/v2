@@ -10,7 +10,6 @@ export { provider as notificationsProvider } from "./notifications";
 
 // Host-facing helpers and existing public task factory aliases.
 export { discoverBrowserProfiles, inspectChromiumProfile } from "./construct";
-export type { BrowserProfileCandidate } from "./construct";
 export { loginToPoki } from "./poki/auth";
 export { loginToSteam } from "./steam/login";
 export { constructWorkflowTaskFactories } from "./construct";

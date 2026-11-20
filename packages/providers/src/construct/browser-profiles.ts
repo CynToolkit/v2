@@ -8,8 +8,6 @@ import type { ProviderHostContext } from "@pipelab/plugin-core";
 import { loadConstructPlaywright } from "./playwright-runtime.js";
 import { preparePlaywrightProfile } from "./export-shared.js";
 
-export type { BrowserProfileAuthStatus, BrowserProfileCandidate };
-
 export type BrowserProfileOption = Pick<
   BrowserProfileCandidate,
   "browser" | "profileName" | "path"

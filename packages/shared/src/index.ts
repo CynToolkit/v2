@@ -13,7 +13,6 @@ export type { Migrator } from "./config/migrators";
 export type { IpcDefinition } from "./apis";
 export type { IpcDefinition as RendererIpcDefinition } from "./ipc.types";
 export type { RequestId } from "./apis";
-export type { RequestId as RendererRequestId } from "./ipc.types";
 
 // 3. Core Library exports (Systematic restoration)
 export * from "./apis";
