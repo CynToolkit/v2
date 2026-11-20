@@ -1,9 +1,3 @@
-/** The retention limits of one policy group (run history or artifacts). */
-export interface RetentionRuleLimits {
-  maxRuns?: number;
-  maxAgeDays?: number;
-}
-
 interface RetentionRule {
   id: string;
   before: string;

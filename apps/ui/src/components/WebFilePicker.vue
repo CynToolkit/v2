@@ -76,8 +76,19 @@
           @keydown.enter="createDirectory"
           @keydown.esc="creatingDirectory = false"
         />
-        <Button label="Create" size="small" :disabled="!newDirectoryName.trim()" @click="createDirectory" />
-        <Button label="Cancel" size="small" text severity="secondary" @click="creatingDirectory = false" />
+        <Button
+          label="Create"
+          size="small"
+          :disabled="!newDirectoryName.trim()"
+          @click="createDirectory"
+        />
+        <Button
+          label="Cancel"
+          size="small"
+          text
+          severity="secondary"
+          @click="creatingDirectory = false"
+        />
       </div>
       <div class="picker-body">
         <nav class="roots-sidebar" aria-label="Locations">
@@ -169,21 +180,16 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useUIStore, type FilePickerOptions } from "../store/ui";
 import { useAPI } from "../composables/api";
 import { useLogger } from "@pipelab/shared";
-interface FileItem {
-  name: string;
-  isDirectory: boolean;
-  isSymbolicLink: boolean;
-  size: number;
-  mtime: number;
-}
+import type { FileRowDoubleClick } from "./WebFilePicker.types";
+import type { FsDirectoryEntry, FsRoot } from "@pipelab/shared";
 const uiStore = useUIStore();
 const api = useAPI();
 const { logger } = useLogger();
 const options = computed(() => uiStore.filePickerOptions);
 const currentPath = ref("");
-const files = ref<FileItem[]>([]);
-const roots = ref<{ name: string; path: string }[]>([]);
-const selection = ref<FileItem | FileItem[] | null>(null);
+const files = ref<FsDirectoryEntry[]>([]);
+const roots = ref<FsRoot[]>([]);
+const selection = ref<FsDirectoryEntry | FsDirectoryEntry[] | null>(null);
 const saveFileName = ref("");
 const isLoading = ref(false);
 const errorMessage = ref("");
@@ -210,7 +216,7 @@ const isAtRoot = computed(() => /^\/$|^[A-Za-z]:[\\/]?$/.test(currentPath.value)
 const canConfirm = computed(() =>
   isSave.value ? !!saveFileName.value.trim() : selectedFiles.value.length > 0,
 );
-const selectedFiles = computed<FileItem[]>(() =>
+const selectedFiles = computed<FsDirectoryEntry[]>(() =>
   Array.isArray(selection.value) ? selection.value : selection.value ? [selection.value] : [],
 );
 const isWindows = () => /^[A-Za-z]:[\\/]/.test(currentPath.value);
@@ -281,7 +287,7 @@ const goUp = async () => {
     await loadDirectory();
   }
 };
-const onRowDblClick = async ({ data }: { data: FileItem }) => {
+const onRowDblClick = async ({ data }: FileRowDoubleClick) => {
   if (data.isDirectory) {
     currentPath.value = joinPath(currentPath.value, data.name);
     await loadDirectory();
@@ -306,8 +312,7 @@ const createDirectory = async () => {
   if (r.type === "success") {
     creatingDirectory.value = false;
     await loadDirectory();
-  }
-  else errorMessage.value = r.ipcError || "Unable to create directory";
+  } else errorMessage.value = r.ipcError || "Unable to create directory";
 };
 const ensureExtension = (name: string) => {
   const ext = options.value?.filters?.[0]?.extensions?.[0];
@@ -353,7 +358,7 @@ const initialize = async (value: FilePickerOptions | null) => {
     await goToHome();
   else await loadDirectory();
 };
-const getFileIcon = (f: FileItem) =>
+const getFileIcon = (f: FsDirectoryEntry) =>
   f.isDirectory ? "pi pi-folder is-folder" : f.isSymbolicLink ? "pi pi-link" : "pi pi-file";
 const formatSize = (b: number) =>
   b === 0

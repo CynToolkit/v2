@@ -1,12 +1,3 @@
-export interface ListWorkflowsCommandOptions {
-  userData?: string;
-}
-
-export interface DeleteWorkflowCommandOptions {
-  force?: boolean;
-  userData?: string;
-}
-
 export interface RunWorkflowCommandOptions {
   userData?: string;
   output?: string;

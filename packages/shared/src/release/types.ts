@@ -120,9 +120,9 @@ export interface ReleaseNotificationConfig {
 /** How long a workflow keeps its runs. A rule that is absent is not applied. */
 export interface ReleaseRetentionPolicy {
   /** Run history. Pruning a run also removes its artifacts. */
-  history?: ReleaseRetentionPolicyHistory;
+  history?: ReleaseRetentionLimits;
   /** Artifacts only: the run stays in history, its files are removed. Usually stricter than history. */
-  artifacts?: ReleaseRetentionPolicyHistory;
+  artifacts?: ReleaseRetentionLimits;
   /** Failed and completed-with-errors runs are noise sooner than good ones. */
   failedMaxAgeDays?: number;
   /** Never prune the newest successful run, whatever the other rules say. Default: true. */
@@ -542,7 +542,7 @@ export interface ReleaseDestinationTrigger {
   destinationId: string;
 }
 
-export interface ReleaseRetentionPolicyHistory {
+export interface ReleaseRetentionLimits {
   maxRuns?: number;
   maxAgeDays?: number;
 }

@@ -20,6 +20,18 @@ export interface ProviderExecutables {
   pnpm: string;
 }
 
+/** A packaged desktop app: its folder, and the launchable binary once one was found. */
+export interface PackagedApp {
+  folder: string;
+  binary: string | undefined;
+}
+
+/** The platform and architecture a desktop target is built for. */
+export interface DesktopTargetInputs {
+  platform: "win32" | "linux" | "darwin";
+  arch: "x64" | "arm64";
+}
+
 /**
  * Provider-facing compatibility alias for ProviderHostContext.
  * This is a structural type, not the concrete PipelabContext class from core-node.

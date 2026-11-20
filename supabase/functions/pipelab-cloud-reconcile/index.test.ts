@@ -103,7 +103,7 @@ Deno.test("requires Polar endpoint settings before reconciliation requests", asy
 
   try {
     const handler = createReconcileHandler((name) =>
-      name === "POLAR_API_BASE_URL" ? undefined : env(name)
+      name === "POLAR_API_BASE_URL" ? undefined : env(name),
     );
     const response = await handler(
       new Request("http://worker/functions/pipelab-cloud-reconcile", {

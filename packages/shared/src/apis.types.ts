@@ -39,7 +39,7 @@ export interface FsRmInput {
   force: boolean;
 }
 
-interface FsListDirectoryEventFile {
+export interface FsDirectoryEntry {
   name: string;
   isDirectory: boolean;
   isSymbolicLink: boolean;
@@ -48,30 +48,20 @@ interface FsListDirectoryEventFile {
 }
 
 export interface FsListDirectoryEvent {
-  files: FsListDirectoryEventFile[];
+  files: FsDirectoryEntry[];
 }
 
-interface FsGetRootsEventRoot {
+export interface FsRoot {
   name: string;
   path: string;
 }
 
 export interface FsGetRootsEvent {
-  roots: FsGetRootsEventRoot[];
+  roots: FsRoot[];
 }
 
 export interface FsIsPathBlacklistedEvent {
   isBlacklisted: boolean;
-}
-
-export interface DialogShowOpenDialogEvent {
-  canceled: boolean;
-  filePaths: string[];
-}
-
-export interface DialogShowSaveDialogEvent {
-  canceled: boolean;
-  filePath: string | undefined;
 }
 
 export interface ProvidersMetadataGetEvent {

@@ -5,11 +5,6 @@ export interface IsWorkflowRouteContextValidWorkflow {
   project?: string;
 }
 
-export interface LoadResultError {
-  type: "error";
-  ipcError: string;
-}
-
 export interface ResolveWorkflowRunsStateHistory {
   entries: BuildHistoryEntry[];
 }

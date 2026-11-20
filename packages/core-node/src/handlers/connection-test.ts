@@ -1,7 +1,7 @@
 import type { PreflightResult, ProviderDefinition } from "@pipelab/shared";
 import type { PipelabContext } from "../context";
 import type { ProviderServices } from "../workflow-tasks";
-import type { TestConnectionRequest } from "./connection-test.types";
+import type { ConnectionTestInput } from "@pipelab/shared";
 
 const CONNECTION_TEST_TIMEOUT_MS = 12_000;
 
@@ -31,7 +31,7 @@ const redactResult = (result: PreflightResult, values: Record<string, string>): 
 export const testConnection = async (
   providers: readonly ProviderDefinition<ProviderServices>[],
   context: PipelabContext,
-  request: TestConnectionRequest,
+  request: ConnectionTestInput,
   timeoutMs = CONNECTION_TEST_TIMEOUT_MS,
 ): Promise<PreflightResult> => {
   const values = request.values ?? {};

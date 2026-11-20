@@ -222,7 +222,7 @@ import { uiEnvironment } from "@renderer/composables/ui-runtime";
 import { useAppStore } from "@renderer/store/app";
 import { useFiles } from "@renderer/store/files";
 import { partitionWorkflowLoads } from "./workflow-load-state";
-import type { WorkflowShortcuts, DashboardShipWorkflow } from "./index.types";
+import type { DashboardWorkflow } from "./index.types";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import ReleaseFlow from "./release-flow.vue";
@@ -247,8 +247,8 @@ const workflowCount = computed(() => projectWorkflows.value.length);
 const workflowEntryVersion = computed(() =>
   projectWorkflows.value.map((workflow) => `${workflow.id}:${workflow.lastModified}`).join("|"),
 );
-const workflowShortcuts = ref<Array<WorkflowShortcuts>>([]);
-const dashboardShipWorkflow = ref<DashboardShipWorkflow>();
+const workflowShortcuts = ref<Array<DashboardWorkflow>>([]);
+const dashboardShipWorkflow = ref<DashboardWorkflow>();
 const workflowShortcutsLoading = ref(false);
 let workflowShortcutRequest = 0;
 
@@ -344,7 +344,7 @@ const onShipClick = (event: Event) => {
 };
 
 const startWorkflowCreation = () => router.push({ path: "/workflows", query: { create: "new" } });
-const shipWorkflow = (workflow: WorkflowShortcuts) => {
+const shipWorkflow = (workflow: DashboardWorkflow) => {
   if (workflow.projectId !== selectedProjectId.value) return;
   if (!agent.isReady.value) {
     toast.add({

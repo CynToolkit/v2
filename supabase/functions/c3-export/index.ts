@@ -25,9 +25,11 @@ serve(async (req) => {
     // 1. Download base Electron zip for the selected platform
     let electronUrl = "";
     if (platform === "win32") {
-      electronUrl = "https://github.com/electron/electron/releases/download/v30.0.0/electron-v30.0.0-win32-x64.zip";
+      electronUrl =
+        "https://github.com/electron/electron/releases/download/v30.0.0/electron-v30.0.0-win32-x64.zip";
     } else if (platform === "linux") {
-      electronUrl = "https://github.com/electron/electron/releases/download/v30.0.0/electron-v30.0.0-linux-x64.zip";
+      electronUrl =
+        "https://github.com/electron/electron/releases/download/v30.0.0/electron-v30.0.0-linux-x64.zip";
     } else {
       throw new Error("Unsupported platform");
     }
@@ -44,11 +46,15 @@ serve(async (req) => {
     const c3Zip = await JSZip.loadAsync(c3ZipBytes);
 
     // 3. Inject C3 files into resources/app/
-    const packageJson = JSON.stringify({
-      name: name.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-      version: version,
-      main: "main.js",
-    }, null, 2);
+    const packageJson = JSON.stringify(
+      {
+        name: name.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+        version: version,
+        main: "main.js",
+      },
+      null,
+      2,
+    );
 
     const mainJs = `
 const { app, BrowserWindow } = require('electron');
@@ -108,7 +114,10 @@ app.on('window-all-closed', () => {
     }
 
     // 5. Generate the output zip file
-    const outputBytes = await electronZip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
+    const outputBytes = await electronZip.generateAsync({
+      type: "uint8array",
+      compression: "DEFLATE",
+    });
 
     return new Response(outputBytes, {
       headers: {

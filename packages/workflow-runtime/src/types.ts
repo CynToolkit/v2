@@ -245,6 +245,11 @@ export type WorkflowEventInput =
 
 export type WorkflowEvent = WorkflowEventInput & WorkflowEventTimestamp;
 
+/** A run context whose host services are present, as tasks that read services require. */
+export interface WorkflowRunServices<TServices> {
+  services: TServices;
+}
+
 export interface WorkflowRunContext<TServices = unknown> {
   host: WorkflowHost;
   version?: string;

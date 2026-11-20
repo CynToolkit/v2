@@ -9,7 +9,8 @@ import { homedir, platform as osPlatform, arch as osArch } from "node:os";
 import { execa } from "execa";
 import { kebabCase } from "change-case";
 import { parseTOML, stringifyTOML } from "confbox";
-import type { TauriExecutionContextPaths, TauriResult } from "./tauri.types";
+import type { TauriExecutionContextPaths } from "./tauri.types";
+import type { PackagedApp } from "@pipelab/plugin-core";
 
 /**
  * Searches for common cargo paths and resolves to a valid cargo executable path
@@ -104,7 +105,7 @@ export const tauri = async (
   appFolder: string | undefined,
   { cwd, log, inputs, setOutput, paths, abortSignal, context }: TauriExecutionContext,
   completeConfiguration: DesktopApp.Config,
-): Promise<TauriResult | undefined> => {
+): Promise<PackagedApp | undefined> => {
   log("Building tauri");
 
   if (action !== "preview") {

@@ -1,8 +1,5 @@
 <template>
-  <router-link
-    :to="to"
-    class="platform-badge"
-    :class="[size, { 'with-icon': hasIcon }]">
+  <router-link :to="to" class="platform-badge" :class="[size, { 'with-icon': hasIcon }]">
     <span v-if="hasIcon" class="badge-icon">
       <slot name="icon"></slot>
     </span>
@@ -13,22 +10,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed } from "vue";
 
 const props = defineProps({
   to: {
     type: Object,
-    required: true
+    required: true,
   },
   text: {
     type: String,
-    default: ''
+    default: "",
   },
   size: {
     type: String,
-    default: 'medium',
-    validator: (value: string) => ['small', 'medium', 'large'].includes(value)
-  }
+    default: "medium",
+    validator: (value: string) => ["small", "medium", "large"].includes(value),
+  },
 });
 
 const hasIcon = computed(() => !!props.text);

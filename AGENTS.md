@@ -37,6 +37,9 @@ pnpm format
 pnpm --filter <workspace-name> <script>
 ```
 
+CI fails a pull request when a file it changes is not `oxfmt`-formatted; run `pnpm format` (or
+`pnpm exec oxfmt <files>`) before pushing.
+
 Use `pnpm --filter @pipelab/cli ...` and `pnpm --filter @pipelab/ui ...` for
 focused CLI/UI work. Use the package's own scripts for focused tests,
 typechecks, lint, or builds. `turbo.json` is authoritative for task ordering;

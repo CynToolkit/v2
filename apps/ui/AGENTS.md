@@ -17,13 +17,13 @@ structure, control variants, and states where they serve the same purpose.
 
 ## Applying the design system
 
-| UI role | Existing convention |
-| --- | --- |
-| Cards and recessed panels | `--pl-card`, `--pl-sunken`, `--pl-border`, `--pl-radius`, `--pl-radius-sm` |
-| Text and identifiers | `--p-text-color`, `--pl-muted`, `--pl-font-mono` for paths, run IDs, and logs |
-| Interaction | `--pl-hover` for hover, `--pl-selected` or `--pl-selected-shadow` for selection, and `--pl-focus` for keyboard outlines |
-| Feedback | `--pl-info` for running or informational states, `--pl-ok` for success, `--pl-warn` for partial failure or warning, `--pl-danger` for failure, and `--pl-muted` for neutral states |
-| Loading placeholders | `--pl-skeleton` |
+| UI role                   | Existing convention                                                                                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cards and recessed panels | `--pl-card`, `--pl-sunken`, `--pl-border`, `--pl-radius`, `--pl-radius-sm`                                                                                                         |
+| Text and identifiers      | `--p-text-color`, `--pl-muted`, `--pl-font-mono` for paths, run IDs, and logs                                                                                                      |
+| Interaction               | `--pl-hover` for hover, `--pl-selected` or `--pl-selected-shadow` for selection, and `--pl-focus` for keyboard outlines                                                            |
+| Feedback                  | `--pl-info` for running or informational states, `--pl-ok` for success, `--pl-warn` for partial failure or warning, `--pl-danger` for failure, and `--pl-muted` for neutral states |
+| Loading placeholders      | `--pl-skeleton`                                                                                                                                                                    |
 
 For examples, use [Settings](src/components/Settings.vue) for selectable
 navigation, [the dashboard](src/pages/index.vue) for execution status badges,

@@ -3,16 +3,13 @@ import type { WorkflowTask } from "@pipelab/workflow-runtime";
 import { exportc3p, type ConstructExportExecutionContext } from "./export-shared.js";
 import { parseConstructExportType } from "./assets/script.js";
 import { getSavedConstructVersion } from "./saved-version.js";
-import type {
-  ConstructWorkflowTaskServicesContext,
-  ConstructWorkflowTaskServicesRun,
-} from "./export-c3p.types";
-import type { ProviderExecutables } from "@pipelab/plugin-core";
+import type { ConstructWorkflowTaskServicesRun } from "./export-c3p.types";
+import type { PipelabContext, ProviderExecutables } from "@pipelab/plugin-core";
 
 export { formatSavedConstructVersion } from "./saved-version.js";
 
 export interface ConstructWorkflowTaskServices {
-  context: ConstructExportExecutionContext["context"] & ConstructWorkflowTaskServicesContext;
+  context: ConstructExportExecutionContext["context"] & Pick<PipelabContext, "getThirdPartyPath">;
   executables: ProviderExecutables;
   run: ConstructWorkflowTaskServicesRun;
 }

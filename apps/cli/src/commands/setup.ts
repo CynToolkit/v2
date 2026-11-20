@@ -4,9 +4,9 @@ import { PipelabContext } from "@pipelab/core-node";
 import { setupSettingsConfigFile } from "@pipelab/core-node";
 import { AppConfig } from "@pipelab/shared";
 import { getDefaultUserDataPath } from "../paths";
-import type { SetupCommandOptions } from "./setup.types";
+import type { UserDataOptions } from "./options.types";
 
-export async function setupCommand(options: SetupCommandOptions) {
+export async function setupCommand(options: UserDataOptions) {
   p.intro(`Welcome to Pipelab CLI Setup Wizard`);
 
   const userDataPath = options.userData || getDefaultUserDataPath();

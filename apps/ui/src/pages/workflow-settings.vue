@@ -211,12 +211,13 @@ import { useWorkflowTab } from "../composables/workflow-header-state";
 import { useWorkflowDocument } from "../composables/useWorkflowDocument";
 import { requestNotificationPermission } from "../utils/run-notifications";
 import { retentionPreview, type RetentionPreviewRow } from "./workflow-retention-preview";
-import type { RetentionGroup, RetentionRuleLimits } from "./workflow-settings.types";
+import type { RetentionGroup } from "./workflow-settings.types";
 import Button from "primevue/button";
 import Checkbox from "primevue/checkbox";
 import ConfirmDialog from "primevue/confirmdialog";
 import InputNumber from "primevue/inputnumber";
 import Message from "primevue/message";
+import type { ReleaseRetentionLimits } from "@pipelab/shared";
 
 const route = useRoute();
 const actionsTarget = useWorkflowTab(() => {
@@ -260,7 +261,7 @@ type RuleGroup = "history" | "artifacts";
 const retention = () => flow.value?.settings?.retention;
 const setGroupRule = (group: RuleGroup, key: "maxRuns" | "maxAgeDays", value?: number) => {
   const policy = { ...settings().retention };
-  const rules: RetentionRuleLimits = { ...policy[group] };
+  const rules: ReleaseRetentionLimits = { ...policy[group] };
   if (value === undefined) delete rules[key];
   else rules[key] = value;
   if (Object.keys(rules).length) policy[group] = rules;

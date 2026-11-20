@@ -2,7 +2,7 @@ import { plannedUsedTargetKeys, usedTargetKeys } from "@pipelab/shared";
 import type { IconType, ReleaseCatalog, ReleaseConfig, ReleasePlan } from "@pipelab/shared";
 import type { ElkNode, ElkExtendedEdge } from "elkjs/lib/elk-api";
 import { destinationIcon, providerMetadataIcon, sourceIcon } from "../utils/provider-icons";
-import type { PlanGraphEdgePoints, NodeCopyResult } from "./workflow-plan-graph.types";
+import type { PlanPoint, NodeCopyResult } from "./workflow-plan-graph.types";
 
 export type PlanNodeKind = "source" | "build" | "automatic" | "destination";
 
@@ -21,7 +21,7 @@ interface PlanGraphEdge {
   from: string;
   to: string;
   /** Start, bends and end of an orthogonal route, in graph coordinates. */
-  points: Array<PlanGraphEdgePoints>;
+  points: Array<PlanPoint>;
 }
 
 export interface PlanGraphLayout {

@@ -127,21 +127,23 @@ describe("run notifications through the shared engine", () => {
 
     registerWorkflowHandlers(context);
     const sent: Array<Events<"workflow:execute">> = [];
-    await useAPI().handlers["workflow:execute"]?.(
-      { sender: "notifications-test" },
-      {
-        value: {
-          name: `workflows/${config.id}`,
-          env: {},
-          connectionOverrides: [
-            { alias: "hook", field: "url", value: { kind: "literal", value: webhook.url } },
-          ],
+    await useAPI()
+      .handlers.get("workflow:execute")
+      ?.run(
+        { sender: "notifications-test" },
+        {
+          value: {
+            name: `workflows/${config.id}`,
+            env: {},
+            connectionOverrides: [
+              { alias: "hook", field: "url", value: { kind: "literal", value: webhook.url } },
+            ],
+          },
+          send: async (events) => {
+            sent.push(events);
+          },
         },
-        send: async (events) => {
-          sent.push(events);
-        },
-      },
-    );
+      );
     expect(sent.some((event) => event.type === "end" && event.data.type === "success")).toBe(true);
     expect(webhook.bodies.map((body) => JSON.parse(body))).toEqual([
       { text: "Notify workflow success" },

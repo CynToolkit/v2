@@ -7,16 +7,16 @@ and [Contributor architecture](apps/documentation/contributing/architecture.md).
 
 ## Workspace boundaries
 
-| Directory | Responsibility |
-| --- | --- |
-| `apps/desktop` | Electron lifecycle, native dialogs and shell operations, preload bridge, IPC, and starting the local CLI server. |
-| `apps/ui` | Vue interface, graph pipeline editor, Release workflow editor, and browser-side API calls. |
-| `apps/cli` | CLI command registration and packaged executable bundle. It starts the core-node server and exposes pipeline and Release workflow commands. |
-| `packages/core-node` | Node context, HTTP/WebSocket server, handlers, persistence, plugin registry, and workflow host adapters. |
-| `packages/shared` | Shared types, schemas, configuration, plugin definitions, and Release planning/compiler contracts. |
-| `packages/workflow-runtime` | Host-abstracted task workflow types, local host, and execution runtime. |
+| Directory                                    | Responsibility                                                                                                                                                                    |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/desktop`                               | Electron lifecycle, native dialogs and shell operations, preload bridge, IPC, and starting the local CLI server.                                                                  |
+| `apps/ui`                                    | Vue interface, graph pipeline editor, Release workflow editor, and browser-side API calls.                                                                                        |
+| `apps/cli`                                   | CLI command registration and packaged executable bundle. It starts the core-node server and exposes pipeline and Release workflow commands.                                       |
+| `packages/core-node`                         | Node context, HTTP/WebSocket server, handlers, persistence, plugin registry, and workflow host adapters.                                                                          |
+| `packages/shared`                            | Shared types, schemas, configuration, plugin definitions, and Release planning/compiler contracts.                                                                                |
+| `packages/workflow-runtime`                  | Host-abstracted task workflow types, local host, and execution runtime.                                                                                                           |
 | `packages/providers`, `packages/plugin-core` | Provider implementations (actions, workflow producers, sources, destinations) and the shared execution helpers below them. Core-node statically registers the built-in providers. |
-| `workers/*`, `supabase/` | Cloudflare Worker services and database migrations/functions for cloud features. |
+| `workers/*`, `supabase/`                     | Cloudflare Worker services and database migrations/functions for cloud features.                                                                                                  |
 
 ## Runtime paths
 

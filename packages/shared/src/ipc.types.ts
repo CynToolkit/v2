@@ -18,14 +18,14 @@ export interface UpdateState {
 }
 
 export type IpcEvent<TYPE extends string, DATA> = { type: TYPE; data: DATA };
+export interface EndEventDataSuccess<DATA> {
+  type: "success";
+  result: DATA;
+}
+
 export interface EndEvent<DATA> {
   type: "end";
-  data:
-    | {
-        type: "success";
-        result: DATA;
-      }
-    | EndEventDataError;
+  data: EndEventDataSuccess<DATA> | EndEventDataError;
 }
 
 export type IpcDefinition = {
@@ -71,9 +71,15 @@ export type HandleListenerRendererSendFn<KEY extends RendererChannels> = (
   events: RendererEvents<KEY>,
 ) => void;
 
+/** What a renderer-channel handler receives: the request payload and a way to answer it. */
+export interface HandleListenerRendererArgs<KEY extends RendererChannels> {
+  value: RendererData<KEY>;
+  send: HandleListenerRendererSendFn<KEY>;
+}
+
 export type HandleListenerRenderer<KEY extends RendererChannels> = (
   event: unknown,
-  data: { value: RendererData<KEY>; send: HandleListenerRendererSendFn<KEY> },
+  data: HandleListenerRendererArgs<KEY>,
 ) => Promise<void>;
 
 export interface EndEventDataError {

@@ -25,8 +25,8 @@ function configuredEndpoints(values: Record<string, string | undefined> = localV
 
 Deno.test("reads the existing Polar access-token secret and supports the previous name", () => {
   assertEquals(
-    getPolarAccessToken((name) =>
-      ({ POLAR_ACCESS_TOKEN: " access-token ", POLAR_TOKEN: "legacy-token" })[name]
+    getPolarAccessToken(
+      (name) => ({ POLAR_ACCESS_TOKEN: " access-token ", POLAR_TOKEN: "legacy-token" })[name],
     ),
     "access-token",
   );
@@ -38,11 +38,14 @@ Deno.test("reads the existing Polar access-token secret and supports the previou
 
 Deno.test("does not treat the Polar SDK server mode as an API base URL", () => {
   assertEquals(
-    getPolarEndpoints((name) => ({
-      POLAR_SERVER: "production",
-      POLAR_FRONTEND_BASE_URL: localValues.POLAR_FRONTEND_BASE_URL,
-      POLAR_CHECKOUT_LINK_BASE_URL: localValues.POLAR_CHECKOUT_LINK_BASE_URL,
-    })[name]),
+    getPolarEndpoints(
+      (name) =>
+        ({
+          POLAR_SERVER: "production",
+          POLAR_FRONTEND_BASE_URL: localValues.POLAR_FRONTEND_BASE_URL,
+          POLAR_CHECKOUT_LINK_BASE_URL: localValues.POLAR_CHECKOUT_LINK_BASE_URL,
+        })[name],
+    ),
     undefined,
   );
 });

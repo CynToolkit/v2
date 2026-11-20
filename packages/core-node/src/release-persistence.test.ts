@@ -841,10 +841,10 @@ describe("ReleasePersistence", () => {
 
     try {
       registerWorkflowHandlers(context);
-      const handler = useAPI().handlers["workflow:execute"];
+      const handler = useAPI().handlers.get("workflow:execute");
       if (!handler) throw new Error("workflow:execute handler is not registered");
       const sentEvents: unknown[] = [];
-      await handler(
+      await handler.run(
         { sender: "test" },
         {
           value: {
@@ -947,12 +947,12 @@ describe("ReleasePersistence", () => {
     const nodeSetup = vi.spyOn(remote, "ensureNodeJS").mockResolvedValue("node");
     const pnpmSetup = vi.spyOn(remote, "ensurePNPM").mockResolvedValue("pnpm");
     registerWorkflowHandlers(context);
-    const handler = useAPI().handlers["workflow:execute"];
+    const handler = useAPI().handlers.get("workflow:execute");
     if (!handler) throw new Error("workflow:execute handler is not registered");
     const sentEvents: unknown[] = [];
 
     try {
-      await handler(
+      await handler.run(
         { sender: "test" },
         {
           value: {
@@ -1030,10 +1030,10 @@ describe("ReleasePersistence", () => {
 
       expect(run.result.artifacts[0]?.path).toBe(secretPath);
       registerWorkflowHandlers(context);
-      const handler = useAPI().handlers["workflow:execute"];
+      const handler = useAPI().handlers.get("workflow:execute");
       if (!handler) throw new Error("workflow:execute handler is not registered");
       const sentEvents: unknown[] = [];
-      await handler(
+      await handler.run(
         { sender: "test" },
         {
           value: {

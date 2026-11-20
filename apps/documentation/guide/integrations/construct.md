@@ -49,7 +49,6 @@ it is missing. Downloads are cached in Pipelab's local data directory and
 reused on later runs. Internet access is required for a first download.
 Profile inspection uses an available browser and does not install Chromium.
 
-
 Choose a compatible local Chromium profile that can access the Construct editor and project. Pipelab refreshes its managed profile from the selected profile before each run, while keeping the managed browser and Construct cache in place. This picks up current login state and installed Construct addons without requiring a profile reset. With no Construct Account Connection, the managed profile is scoped to the Pipelab project and selected browser profile and uses that profile's saved login. With a Connection, the profile is also scoped to the account username; Pipelab keeps a separate account session and does not import the selected profile's Construct login data. Changing Construct versions reuses that account-scoped profile while keeping stable and beta account sessions separate. Pipelab does not modify the selected browser profile. Same-profile exports run one at a time.
 
 The managed profile remains in Pipelab's local cache between runs and can

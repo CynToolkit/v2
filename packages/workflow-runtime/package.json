@@ -1,7 +1,7 @@
 {
   "name": "@pipelab/workflow-runtime",
-  "private": true,
   "version": "1.0.0-beta.2",
+  "private": true,
   "description": "Standalone workflow execution runtime for Pipelab",
   "license": "FSL-1.1-MIT",
   "repository": {

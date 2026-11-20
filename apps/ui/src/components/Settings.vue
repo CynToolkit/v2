@@ -833,14 +833,15 @@ import {
   findLocale,
 } from "@renderer/composables/browser-preferences";
 import { uiEnvironment } from "@renderer/composables/ui-runtime";
-import type { FolderPickerError, GetFolderLabelFolder } from "./Settings.types";
+import type { GetFolderLabelFolder } from "./Settings.types";
 import { format } from "date-fns";
 import Button from "primevue/button";
 import ToggleSwitch from "primevue/toggleswitch";
 import UpgradeDialog from "@renderer/components/UpgradeDialog.vue";
 import InputText from "primevue/inputtext";
+import type { I18nSchema } from "../i18n.types";
 
-const { t, locale } = useI18n<FolderPickerError, Locales>();
+const { t, locale } = useI18n<I18nSchema, Locales>();
 
 const confirm = useConfirm();
 const appSettings = useAppSettings();

@@ -9,7 +9,10 @@
           <section class="mb-8">
             <h2 class="mb-4">1. Introduction</h2>
             <p>
-              Welcome to Pipelab. We are committed to protecting your privacy and providing you with a safe automation experience. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website or use the Pipelab desktop application.
+              Welcome to Pipelab. We are committed to protecting your privacy and providing you with
+              a safe automation experience. This Privacy Policy explains how we collect, use, and
+              safeguard your information when you visit our website or use the Pipelab desktop
+              application.
             </p>
           </section>
 
@@ -18,41 +21,62 @@
 
             <h3 class="mb-2 mt-4">Website Analytics</h3>
             <p>
-              We collect anonymous website usage statistics to understand how visitors interact with our site. This information is collected in a privacy-respecting manner that does not track personally identifiable information (PII) or use cookies for tracking purposes.
+              We collect anonymous website usage statistics to understand how visitors interact with
+              our site. This information is collected in a privacy-respecting manner that does not
+              track personally identifiable information (PII) or use cookies for tracking purposes.
             </p>
 
             <h3 class="mb-2 mt-4">Product Analytics & Telemetry</h3>
             <p>
-              To improve our services and prioritize development, we collect telemetry data regarding how you interact with the Pipelab application. This includes feature usage, performance metrics, and general technical information about your device and operating system. You may opt-out of this data collection within the application settings.
+              To improve our services and prioritize development, we collect telemetry data
+              regarding how you interact with the Pipelab application. This includes feature usage,
+              performance metrics, and general technical information about your device and operating
+              system. You may opt-out of this data collection within the application settings.
             </p>
 
             <h3 class="mb-2 mt-4">Account & Infrastructure</h3>
             <p>
-              If you choose to create an account, we collect necessary information such as your email address and authentication credentials. This data is used to provide core services, including account security and optional cloud-sync features.
+              If you choose to create an account, we collect necessary information such as your
+              email address and authentication credentials. This data is used to provide core
+              services, including account security and optional cloud-sync features.
             </p>
 
             <h3 class="mb-2 mt-4">Payments & Sponsorships</h3>
             <p>
-              When you contribute to Pipelab via a sponsorship or subscription, your transaction is handled by a secure third-party payment processor. We receive information about the contribution level and your account association, but we do not store sensitive payment details like credit card numbers on our infrastructure.
+              When you contribute to Pipelab via a sponsorship or subscription, your transaction is
+              handled by a secure third-party payment processor. We receive information about the
+              contribution level and your account association, but we do not store sensitive payment
+              details like credit card numbers on our infrastructure.
             </p>
           </section>
 
           <section class="mb-8">
             <h2 class="mb-4">3. Data Residency & Security</h2>
             <p>
-              Pipelab follows a local-first design philosophy. Most of your data, including automation workflows and encrypted secrets, resides primarily on your local machine.
+              Pipelab follows a local-first design philosophy. Most of your data, including
+              automation workflows and encrypted secrets, resides primarily on your local machine.
             </p>
             <ul class="ml-4 mt-2">
-              <li><strong>Local Storage:</strong> Your primary data remains under your control on your local device.</li>
-              <li><strong>Encryption:</strong> Sensitive information (such as API keys or integrations) is encrypted before being stored.</li>
-              <li><strong>Cloud Sync:</strong> If you explicitly enable synchronization features, your data is transmitted over secure channels and stored in protected environments.</li>
+              <li>
+                <strong>Local Storage:</strong> Your primary data remains under your control on your
+                local device.
+              </li>
+              <li>
+                <strong>Encryption:</strong> Sensitive information (such as API keys or
+                integrations) is encrypted before being stored.
+              </li>
+              <li>
+                <strong>Cloud Sync:</strong> If you explicitly enable synchronization features, your
+                data is transmitted over secure channels and stored in protected environments.
+              </li>
             </ul>
           </section>
 
           <section class="mb-8">
             <h2 class="mb-4">4. Your Rights</h2>
             <p>
-              You have the right to access, correct, or delete your personal data. If you have an account, you can manage your data within the application or by contacting us directly.
+              You have the right to access, correct, or delete your personal data. If you have an
+              account, you can manage your data within the application or by contacting us directly.
             </p>
           </section>
 

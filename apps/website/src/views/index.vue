@@ -5,12 +5,7 @@
         <div class="flex align-items-center justify-content-between py-3">
           <div class="logo">
             <RouterLink class="nav-link-logo" :to="{ name: 'Home' }">
-              <img
-                height="48"
-                src="/banner.png"
-                alt="Pipelab"
-                class="logo-img"
-              />
+              <img height="48" src="/banner.png" alt="Pipelab" class="logo-img" />
             </RouterLink>
           </div>
           <nav class="hidden lg:flex">
@@ -31,11 +26,7 @@
               <span v-if="!item.iconOnly">{{ item.label }}</span>
             </component>
           </nav>
-          <Button
-            icon="pi pi-bars"
-            @click="toggleMobileMenu"
-            class="primary-btn lg:hidden"
-          />
+          <Button icon="pi pi-bars" @click="toggleMobileMenu" class="primary-btn lg:hidden" />
         </div>
       </div>
     </header>
@@ -64,28 +55,23 @@
         <div class="grid py-6">
           <div class="col-12 md:col-4">
             <div class="footer-brand">
-              <img
-                height="32"
-                src="/banner.png"
-                alt="Pipelab"
-                class="mb-3"
-              />
-              <p class="text-sm opacity-70">
-                The visual automation tool for game developers.
-              </p>
-              <p class="text-sm opacity-50 mt-4">
-                © 2026 Pipelab. All rights reserved.
-              </p>
+              <img height="32" src="/banner.png" alt="Pipelab" class="mb-3" />
+              <p class="text-sm opacity-70">The visual automation tool for game developers.</p>
+              <p class="text-sm opacity-50 mt-4">© 2026 Pipelab. All rights reserved.</p>
             </div>
           </div>
           <div class="col-6 md:col-4">
             <h4 class="footer-title mb-4">Legal</h4>
             <ul class="list-none p-0 m-0">
               <li class="mb-2">
-                <RouterLink :to="{ name: 'Privacy' }" class="footer-link">Privacy Policy</RouterLink>
+                <RouterLink :to="{ name: 'Privacy' }" class="footer-link"
+                  >Privacy Policy</RouterLink
+                >
               </li>
               <li class="mb-2">
-                <RouterLink :to="{ name: 'Terms' }" class="footer-link">Terms of Service</RouterLink>
+                <RouterLink :to="{ name: 'Terms' }" class="footer-link"
+                  >Terms of Service</RouterLink
+                >
               </li>
             </ul>
           </div>
@@ -96,7 +82,9 @@
                 <a href="mailto:contact@pipelab.app" class="footer-link">Contact Us</a>
               </li>
               <li class="mb-2">
-                <a href="//discord.gg/MzNw26cBb5" target="_blank" rel="noopener" class="footer-link">Community Discord</a>
+                <a href="//discord.gg/MzNw26cBb5" target="_blank" rel="noopener" class="footer-link"
+                  >Community Discord</a
+                >
               </li>
             </ul>
           </div>

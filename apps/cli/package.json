@@ -10,6 +10,11 @@
     "url": "https://github.com/CynToolkit/v2.git",
     "directory": "apps/cli"
   },
+  "bin": {
+    "pipelab": "./src/index.ts",
+    "plab": "./src/index.ts"
+  },
+  "type": "module",
   "exports": {
     "./program": {
       "types": "./src/index.ts",
@@ -23,11 +28,11 @@
     },
     "./package.json": "./package.json"
   },
-  "bin": {
-    "pipelab": "./src/index.ts",
-    "plab": "./src/index.ts"
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist",
+    "linkDirectory": false
   },
-  "type": "module",
   "scripts": {
     "build": "cross-env NODE_ENV=production tsdown && node scripts/stage-bundle.mjs",
     "dev": "cross-env NODE_ENV=development tsx watch src/index.ts serve",
@@ -66,10 +71,5 @@
     "env": {
       "NODE_ENV": "development"
     }
-  },
-  "publishConfig": {
-    "directory": "dist",
-    "linkDirectory": false,
-    "access": "public"
   }
 }

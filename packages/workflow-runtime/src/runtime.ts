@@ -6,6 +6,7 @@ import {
   type WorkflowEventInput,
   type WorkflowResult,
   type WorkflowRunContext,
+  type WorkflowRunServices,
   type WorkflowConnectionOverride,
   type WorkflowConnectionRequirement,
   type WorkflowConnectionValues,
@@ -722,7 +723,7 @@ export function runWorkflow(
 /** Runs a workflow whose tasks read host services, which the caller must then provide. */
 export function runWorkflow<TServices>(
   workflow: Workflow,
-  context: WorkflowRunContext<TServices> & { services: TServices },
+  context: WorkflowRunContext<TServices> & WorkflowRunServices<TServices>,
 ): Promise<WorkflowResult>;
 export async function runWorkflow(
   workflow: Workflow,

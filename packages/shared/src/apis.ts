@@ -81,12 +81,12 @@ export type IpcDefinition = {
   "dialog:showOpenDialog": [
     // input
     Electron.OpenDialogOptions,
-    EndEvent<DialogShowOpenDialogEvent>,
+    EndEvent<OpenDialogResult>,
   ];
   "dialog:showSaveDialog": [
     // input
     Electron.SaveDialogOptions,
-    EndEvent<DialogShowSaveDialogEvent>,
+    EndEvent<SaveDialogResult>,
   ];
   "providers:metadata:get": [void, EndEvent<ProvidersMetadataGetEvent>];
 
@@ -168,6 +168,7 @@ export type Events<KEY extends Channels> = IpcDefinition[KEY][1];
 export type End<KEY extends Channels> = Extract<IpcDefinition[KEY][1], EndEventShape>["data"];
 
 export type { RequestId } from "./ipc.types";
+export type { ConnectionTestInput, FsDirectoryEntry, FsRoot } from "./apis.types";
 import type { RequestId } from "./ipc.types";
 import type {
   FsReadInput,
@@ -178,8 +179,6 @@ import type {
   FsListDirectoryEvent,
   FsGetRootsEvent,
   FsIsPathBlacklistedEvent,
-  DialogShowOpenDialogEvent,
-  DialogShowSaveDialogEvent,
   ProvidersMetadataGetEvent,
   SettingsSaveInput,
   SettingsResetInput,
@@ -219,5 +218,7 @@ import type {
   StartupProgressEventDone,
   EndEventShape,
 } from "./apis.types";
+import type { OpenDialogResult } from "./preload.types";
+import type { SaveDialogResult } from "./preload.types";
 
 // type Output = End<'fs:openFolder'>

@@ -112,13 +112,13 @@ with public access using [npm Trusted Publishing](https://docs.npmjs.com/trusted
 In the npm package's **Settings → Trusted publishing**, add a **GitHub Actions**
 publisher with these values:
 
-| Field | Value |
-| --- | --- |
-| Organization or user | `CynToolkit` |
-| Repository | `v2` |
-| Workflow filename | `release.yml` |
-| Environment name | Leave blank |
-| Allowed actions | Allow direct publishing with `npm publish` |
+| Field                | Value                                      |
+| -------------------- | ------------------------------------------ |
+| Organization or user | `CynToolkit`                               |
+| Repository           | `v2`                                       |
+| Workflow filename    | `release.yml`                              |
+| Environment name     | Leave blank                                |
+| Allowed actions      | Allow direct publishing with `npm publish` |
 
 The release job grants `id-token: write` on a GitHub-hosted runner. Node
 24.15.0 includes an npm version supporting OIDC (npm 11.5.1 or newer is

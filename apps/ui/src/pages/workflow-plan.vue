@@ -112,7 +112,7 @@ import {
   type PlanGraphLayout,
   type PlanNodeKind,
 } from "./workflow-plan-graph";
-import type { EdgePathPoints } from "./workflow-plan.types";
+import type { PlanPoint } from "./workflow-plan-graph.types";
 import { providerIconClass, providerIconImage } from "../utils/provider-icons";
 import { Controls } from "@vue-flow/controls";
 import { Background } from "@vue-flow/background";
@@ -172,7 +172,7 @@ const flowEdges = computed<Edge[]>(() =>
   })),
 );
 // Sharp corners on purpose: the points already come with right angles.
-const edgePath = (points: Array<EdgePathPoints>) =>
+const edgePath = (points: Array<PlanPoint>) =>
   points.map((point, index) => `${index ? "L" : "M"}${point.x} ${point.y}`).join(" ");
 
 let viewportReady = false;

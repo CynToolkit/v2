@@ -47,8 +47,8 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 
-const $animateLine = ref<SVGAnimateElement>()
-const $animateHead = ref<SVGAnimateElement>()
+const $animateLine = ref<SVGAnimateElement>();
+const $animateHead = ref<SVGAnimateElement>();
 
 const props = defineProps({
   color: {

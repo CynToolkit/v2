@@ -106,15 +106,17 @@ describe("CLI and IPC workflow execution parity", () => {
     vi.mocked(coreNode.executeWorkflow).mockRestore();
     registerWorkflowHandlers(context);
     const sentEvents: Array<Events<"workflow:execute">> = [];
-    await useAPI().handlers["workflow:execute"]?.(
-      { sender: "parity-test" },
-      {
-        value: { name: `workflows/${config.id}`, env: {} },
-        send: async (events) => {
-          sentEvents.push(events);
+    await useAPI()
+      .handlers.get("workflow:execute")
+      ?.run(
+        { sender: "parity-test" },
+        {
+          value: { name: `workflows/${config.id}`, env: {} },
+          send: async (events) => {
+            sentEvents.push(events);
+          },
         },
-      },
-    );
+      );
     const completion = sentEvents.find(
       (event) => event.type === "end" && event.data.type === "success",
     );
@@ -186,15 +188,17 @@ describe("CLI and IPC workflow execution parity", () => {
     const context = new PipelabContext({ userDataPath: sandbox.paths.userData });
     registerWorkflowHandlers(context);
     const sentEvents: Array<Events<"workflow:execute">> = [];
-    await useAPI().handlers["workflow:execute"]?.(
-      { sender: "parity-test" },
-      {
-        value: { name: `workflows/${config.id}`, env: {} },
-        send: async (events) => {
-          sentEvents.push(events);
+    await useAPI()
+      .handlers.get("workflow:execute")
+      ?.run(
+        { sender: "parity-test" },
+        {
+          value: { name: `workflows/${config.id}`, env: {} },
+          send: async (events) => {
+            sentEvents.push(events);
+          },
         },
-      },
-    );
+      );
     const error = sentEvents.find((event) => event.type === "end" && event.data.type === "error");
     expect(error?.type).toBe("end");
     if (error?.type === "end" && error.data.type === "error") {
@@ -240,15 +244,17 @@ describe("CLI and IPC workflow execution parity", () => {
     const context = new PipelabContext({ userDataPath: sandbox.paths.userData });
     registerWorkflowHandlers(context);
     const sentEvents: Array<Events<"workflow:execute">> = [];
-    await useAPI().handlers["workflow:execute"]?.(
-      { sender: "parity-test" },
-      {
-        value: { name: `workflows/${config.id}`, env: {} },
-        send: async (events) => {
-          sentEvents.push(events);
+    await useAPI()
+      .handlers.get("workflow:execute")
+      ?.run(
+        { sender: "parity-test" },
+        {
+          value: { name: `workflows/${config.id}`, env: {} },
+          send: async (events) => {
+            sentEvents.push(events);
+          },
         },
-      },
-    );
+      );
     const error = sentEvents.find((event) => event.type === "end" && event.data.type === "error");
     const ipcFailure =
       error?.type === "end" && error.data.type === "error" ? error.data.ipcError : "";

@@ -6,20 +6,20 @@
   --text-primary: #f3f4f6;
   --text-secondary: #9ca3af;
   --text-muted: #6b7280;
-  
+
   --primary: #6366f1;
   --primary-glow: rgba(99, 102, 241, 0.15);
   --primary-hover: #4f46e5;
   --accent: #8b5cf6;
-  
+
   --success: #10b981;
   --success-glow: rgba(16, 185, 129, 0.1);
   --danger: #ef4444;
   --danger-glow: rgba(239, 68, 68, 0.1);
-  
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
-  
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: "Outfit", system-ui, -apple-system, sans-serif;
+
   --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
 }
@@ -40,7 +40,7 @@ body {
   align-items: center;
   overflow-x: hidden;
   padding: 2rem 1rem;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
 }
@@ -52,7 +52,10 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-heading);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -68,7 +71,9 @@ h1, h2, h3, h4 {
   padding: 2.5rem;
   box-shadow: var(--shadow-lg), var(--shadow-glow);
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* App Logo & Header */
@@ -91,7 +96,7 @@ h1, h2, h3, h4 {
 }
 
 .logo-container::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -2px;
   border-radius: 18px;
@@ -146,7 +151,8 @@ h1, h2, h3, h4 {
   overflow: hidden;
 }
 
-.dropzone:hover, .dropzone.drag-active {
+.dropzone:hover,
+.dropzone.drag-active {
   border-color: var(--primary);
   background: rgba(99, 102, 241, 0.04);
 }
@@ -157,10 +163,13 @@ h1, h2, h3, h4 {
   stroke: var(--text-secondary);
   stroke-width: 1.5;
   margin-bottom: 1rem;
-  transition: transform 0.2s ease, stroke 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    stroke 0.2s ease;
 }
 
-.dropzone:hover .dropzone-icon, .dropzone.drag-active .dropzone-icon {
+.dropzone:hover .dropzone-icon,
+.dropzone.drag-active .dropzone-icon {
   transform: translateY(-4px);
   stroke: #a5b4fc;
 }
@@ -397,7 +406,9 @@ h1, h2, h3, h4 {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner-inner-pct {
@@ -525,8 +536,14 @@ h1, h2, h3, h4 {
 }
 
 @keyframes scaleIn {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .success-icon {
@@ -557,8 +574,14 @@ h1, h2, h3, h4 {
 }
 
 @keyframes fadeInUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .nudge-title {
@@ -704,7 +727,7 @@ h1, h2, h3, h4 {
   .glass-container {
     padding: 1.5rem;
   }
-  
+
   .app-title {
     font-size: 1.75rem;
   }

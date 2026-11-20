@@ -1,10 +1,4 @@
-export interface WorkflowShortcuts {
-  id: string;
-  name: string;
-  projectId: string;
-}
-
-export interface DashboardShipWorkflow {
+export interface DashboardWorkflow {
   id: string;
   name: string;
   projectId: string;

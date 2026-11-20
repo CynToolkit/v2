@@ -18,7 +18,9 @@ export const readRequestedWorkflowEnvironment = (
   const approved = new Set(approvedNames);
   const unapprovedName = names.find((name) => !approved.has(name));
   if (unapprovedName)
-    throw new Error(`Workflow environment variable '${unapprovedName}' is not bound in this workflow.`);
+    throw new Error(
+      `Workflow environment variable '${unapprovedName}' is not bound in this workflow.`,
+    );
   return Object.fromEntries(
     names.flatMap((name) =>
       typeof environment[name] === "string" ? [[name, environment[name]!]] : [],
