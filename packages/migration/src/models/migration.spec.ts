@@ -152,6 +152,7 @@ describe("migrator", () => {
   test("should pass the next version to each migration", async () => {
     const seen: string[] = [];
     const migrator = createMigrator<V1, V3>().createMigrations({
+      defaultValue: outputV3,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -176,12 +177,12 @@ describe("migrator", () => {
 
   test("should reject duplicate and empty migration lists", () => {
     const dup = createMigration<V1, V2>({ version: "1.0.0", up: (s) => ({ dummyV2: s.dummyV1 }) });
-    expect(() => createMigrator<V1, V2>().createMigrations({ migrations: [dup, dup] })).toThrow(
-      "Duplicate migration",
-    );
-    expect(() => createMigrator<V1, V2>().createMigrations({ migrations: [] })).toThrow(
-      "at least one migration",
-    );
+    expect(() =>
+      createMigrator<V1, V2>().createMigrations({ defaultValue: outputV2, migrations: [dup, dup] }),
+    ).toThrow("Duplicate migration");
+    expect(() =>
+      createMigrator<V1, V2>().createMigrations({ defaultValue: outputV2, migrations: [] }),
+    ).toThrow("at least one migration");
   });
 
   test("should throw a clear error for a state newer than the latest version", async () => {
@@ -197,6 +198,7 @@ describe("migrator", () => {
     };
 
     const badMigratorInstance = createMigrator<V1, V4>().createMigrations({
+      defaultValue: outputV4,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -222,6 +224,7 @@ describe("migrator", () => {
     };
 
     const migrator = createMigrator<V1, V4>().createMigrations({
+      defaultValue: outputV4,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -249,6 +252,7 @@ describe("migrator", () => {
     };
 
     const migrator = createMigrator<V1, V2>().createMigrations({
+      defaultValue: outputV2,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -285,6 +289,7 @@ describe("async", () => {
     };
 
     const migrator = createMigrator<V1, V2>().createMigrations({
+      defaultValue: outputV2,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",

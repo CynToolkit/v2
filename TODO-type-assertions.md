@@ -6,24 +6,25 @@ a relationship, so removing it needs a redesign or runtime validation, not a loc
 
 ## Production code
 
-| Where | Assertion | What removing it needs |
-| --- | --- | --- |
-| `apps/ui/src/composables/api.ts` (5×) | `as End<KEY>`, `as Partial<FilePickerOptions>` | The Electron shell fallback builds a result for a generic channel. Needs per-channel shell handlers or a validated result layer. |
-| `packages/migration/src/models/migration.ts` (4×) | `finalState as OutputState`, `{} as OutputState` | The final state of a migration chain can't be proven without a schema per migration step. Make `defaultValue` required to drop the `{}` one. |
-| `packages/workflow-runtime/src/runtime.ts` | `visit(value) as T` | Generic deep redaction returns the same shape it receives. |
-| `packages/workflow-runtime/src/runtime.ts` | `context.services ?? ({} as TServices)` | Empty default for an unconstrained generic; make `services` required in the context. |
-| `packages/core-node/src/ipc-core.ts` | `Object.assign(handlers, { [channel]: listener })` | Writing a handler to a per-channel mapped type with a generic key. Reads are fully typed. |
-| `apps/ui/src/composables/websocket-client.ts` | `Object.assign(this.eventListeners, { [channel]: listeners })`, queued `resolve`/`listener` casts | Same write problem; the queue erases the channel type. |
-| `packages/providers/src/construct/export-shared.ts` and a few provider files | `as` after valibot/JSON parsing of provider-specific shapes | Add a schema for the few remaining shapes. |
+Every item below has been looked at and cannot be removed without trading a visible assertion for
+a hidden one (a type predicate that only claims the relationship) or a much larger redesign.
+
+| Where                                             | Assertion                                                                                         | Why it stays                                                                                                                                        |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/migration/src/models/migration.ts` (3×) | `finalState as OutputState`                                                                       | The final state of a migration chain is only known per step. Removing it needs a schema (or guard) per migrator, validated at the end of `migrate`. |
+| `packages/workflow-runtime/src/runtime.ts`        | `visit(value) as T`                                                                               | Generic deep redaction returns the same shape it receives; the walk is untyped by design.                                                           |
+| `packages/core-node/src/ipc-core.ts`              | `Object.assign(handlers, { [channel]: listener })`                                                | Writing a handler to a per-channel mapped type with a generic key. Reads are fully typed.                                                           |
+| `apps/ui/src/composables/websocket-client.ts`     | `Object.assign(this.eventListeners, { [channel]: listeners })`, queued `resolve`/`listener` casts | Same write problem; the queue erases the channel type.                                                                                              |
+| `packages/core-node/src/context.ts`               | `// @ts-ignore` on `import.meta`                                                                  | The desktop app typechecks this file as CommonJS, where `import.meta` is an error; `@ts-expect-error` would fail in the ESM build.                  |
 
 ## Test code
 
 - `partialDouble<T>()` and `invalidInput<T>()` in `packages/shared/src/test-doubles.ts`, plus a
   copy of `partialDouble` in `workers/shared/test-doubles.ts`. They take `object` / `unknown` and
   return `T`, so they are one documented gap instead of an `as unknown as` at ~130 call sites.
-  To remove them, replace the doubles with full typed fakes or a mocking library
-  (for example `vitest-mock-extended`).
-- `fakeResponse` in `packages/core-node/src/utils/github.test.ts` (`Partial<Response> as Response`).
+  A mocking library (for example `vitest-mock-extended`) would remove it, but its proxies answer
+  every unset property with a function, which changes what tests like `services.x?.y` observe, so
+  it needs a per-test review rather than a mechanical swap.
 
 ## Not part of this work
 

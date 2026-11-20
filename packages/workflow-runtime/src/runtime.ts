@@ -713,10 +713,20 @@ const artifactForDelivery = (
   );
 };
 
-export const runWorkflow = async <TServices = unknown>(
+/** Runs a workflow whose tasks need no host services. */
+export function runWorkflow(
   workflow: Workflow,
-  context: WorkflowRunContext<TServices>,
-): Promise<WorkflowResult> => {
+  context: WorkflowRunContext,
+): Promise<WorkflowResult>;
+/** Runs a workflow whose tasks read host services, which the caller must then provide. */
+export function runWorkflow<TServices>(
+  workflow: Workflow,
+  context: WorkflowRunContext<TServices> & { services: TServices },
+): Promise<WorkflowResult>;
+export async function runWorkflow(
+  workflow: Workflow,
+  context: WorkflowRunContext,
+): Promise<WorkflowResult> {
   validateWorkflow(workflow);
   const signal = context.signal ?? new AbortController().signal;
   const tasks = { ...builtInTasks, ...context.tasks };
@@ -730,7 +740,7 @@ export const runWorkflow = async <TServices = unknown>(
   });
   const redact = valueResolver.redactString;
   const redactObject = <T>(value: T) => valueResolver.redactObject(value);
-  const services = context.services ?? ({} as TServices);
+  const { services } = context;
   const outputs: Record<string, Record<string, unknown>> = {};
   const steps: Record<string, WorkflowStepResult> = {};
   const artifacts: Array<WorkflowArtifactInstance> = [];
@@ -1042,18 +1052,17 @@ export const runWorkflow = async <TServices = unknown>(
                 )
               )
                 return;
-              stepArtifacts.push(
-                Object.freeze({
-                  id: `artifact-${context.buildId ?? startedAt}-${artifactSequence++}`,
-                  descriptor: definition.descriptor,
-                  version: context.version,
-                  path,
-                  stepId: step.id,
-                  artifact: outputId,
-                  checksum: metadata?.checksum,
-                  size: metadata?.size,
-                }) as WorkflowArtifactInstance,
-              );
+              const artifact: WorkflowArtifactInstance = {
+                id: `artifact-${context.buildId ?? startedAt}-${artifactSequence++}`,
+                descriptor: definition.descriptor,
+                version: context.version,
+                path,
+                stepId: step.id,
+                artifact: outputId,
+                checksum: metadata?.checksum,
+                size: metadata?.size,
+              };
+              stepArtifacts.push(Object.freeze(artifact));
             },
             withPhases,
           });
@@ -1306,4 +1315,4 @@ export const runWorkflow = async <TServices = unknown>(
     safeError.name = serialized.name;
     throw safeError;
   }
-};
+}

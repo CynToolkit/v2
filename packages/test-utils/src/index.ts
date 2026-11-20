@@ -8,6 +8,7 @@ import {
   runWorkflow,
   type WorkflowArtifactDefinition,
   type WorkflowEvent,
+  type WorkflowResult,
   type WorkflowConnectionValues,
   type WorkflowTask,
   type WorkflowTaskRegistry,
@@ -128,19 +129,37 @@ export const runCLI = async (
   });
 };
 
+interface WorkflowTaskRun {
+  outputs: WorkflowResult["outputs"][string];
+  artifacts: WorkflowResult["steps"][string]["artifacts"];
+  result: WorkflowResult;
+  events: WorkflowEvent[];
+  logs: string[];
+}
+
+interface RunWorkflowTaskOptions {
+  inputs?: Record<string, unknown>;
+  workspacePath: string;
+  artifacts?: Record<string, WorkflowArtifactDefinition>;
+  connectionValues?: WorkflowConnectionValues;
+  signal?: AbortSignal;
+  host?: Partial<WorkflowHost>;
+}
+
 /** Runs a native workflow task through workflow-runtime for focused plugin tests. */
-export const runWorkflowTask = async <TServices = unknown>(
+export function runWorkflowTask(
+  task: WorkflowTask,
+  options: RunWorkflowTaskOptions,
+): Promise<WorkflowTaskRun>;
+/** Runs a task that reads host services, which the test must then provide. */
+export function runWorkflowTask<TServices>(
   task: WorkflowTask<TServices>,
-  options: {
-    inputs?: Record<string, unknown>;
-    workspacePath: string;
-    artifacts?: Record<string, WorkflowArtifactDefinition>;
-    connectionValues?: WorkflowConnectionValues;
-    signal?: AbortSignal;
-    services?: TServices;
-    host?: Partial<WorkflowHost>;
-  },
-) => {
+  options: RunWorkflowTaskOptions & { services: TServices },
+): Promise<WorkflowTaskRun>;
+export async function runWorkflowTask(
+  task: WorkflowTask,
+  options: RunWorkflowTaskOptions & { services?: unknown },
+): Promise<WorkflowTaskRun> {
   const events: WorkflowEvent[] = [];
   const logs: string[] = [];
   const host = {
@@ -153,7 +172,7 @@ export const runWorkflowTask = async <TServices = unknown>(
     }),
     ...options.host,
   };
-  const tasks: WorkflowTaskRegistry<TServices> = { "test:native": task };
+  const tasks: WorkflowTaskRegistry = { "test:native": task };
   const result = await runWorkflow(
     {
       version: 1,
@@ -183,7 +202,7 @@ export const runWorkflowTask = async <TServices = unknown>(
     events,
     logs,
   };
-};
+}
 
 /**
  * Runs the packaged electron app (smoke test)
