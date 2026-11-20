@@ -67,7 +67,6 @@ export const createWorkflowListr = (
                     rendererOptions: {
                       collapseErrors: false,
                       collapseSubtasks: false,
-                      outputBar: 1,
                       showErrorMessage: true,
                     },
                   }),
@@ -94,7 +93,6 @@ export const createWorkflowListr = (
               rendererOptions: {
                 collapseErrors: false,
                 collapseSubtasks: false,
-                outputBar: 1,
                 showErrorMessage: true,
               },
             },
@@ -108,7 +106,6 @@ export const createWorkflowListr = (
       rendererOptions: {
         collapseErrors: false,
         collapseSubtasks: false,
-        outputBar: 1,
         showErrorMessage: true,
       },
     },

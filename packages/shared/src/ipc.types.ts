@@ -17,7 +17,6 @@ export interface UpdateState {
   progress?: number;
 }
 
-export type IpcEvent<TYPE extends string, DATA> = { type: TYPE; data: DATA };
 export interface EndEventDataSuccess<DATA> {
   type: "success";
   result: DATA;
@@ -28,7 +27,8 @@ export interface EndEvent<DATA> {
   data: EndEventDataSuccess<DATA> | EndEventDataError;
 }
 
-export type IpcDefinition = {
+/** Channels the main process sends to the renderer. */
+export type RendererIpcDefinition = {
   "dialog:alert": [
     // input
     DialogAlertInput,
@@ -51,11 +51,11 @@ export type IpcDefinition = {
   ];
 };
 
-export type RendererChannels = keyof IpcDefinition;
-export type RendererData<KEY extends RendererChannels> = IpcDefinition[KEY][0];
-export type RendererEvents<KEY extends RendererChannels> = IpcDefinition[KEY][1];
+export type RendererChannels = keyof RendererIpcDefinition;
+export type RendererData<KEY extends RendererChannels> = RendererIpcDefinition[KEY][0];
+export type RendererEvents<KEY extends RendererChannels> = RendererIpcDefinition[KEY][1];
 export type RendererEnd<KEY extends RendererChannels> = Extract<
-  IpcDefinition[KEY][1],
+  RendererIpcDefinition[KEY][1],
   RendererEndEvent
 >["data"];
 
