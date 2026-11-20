@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MigrationValidationError } from "@pipelab/migration";
 import {
   appSettingsMigrator,
   connectionsMigrator,
@@ -36,6 +37,18 @@ describe("appSettingsMigrator", () => {
     expect(settings).toStrictEqual(defaultAppSettings);
     expect(settings).not.toHaveProperty("plugins");
     expect(await appSettingsMigrator.migrate(settings)).toEqual(settings);
+  });
+
+  it("fills keys that older builds did not write, and drops unknown ones", async () => {
+    const { tours: _tours, agents: _agents, ...older } = defaultAppSettings;
+    const persisted = { ...older, plugins: ["legacy"] };
+    const migrated = await appSettingsMigrator.migrate(persisted);
+    expect(migrated).toStrictEqual(defaultAppSettings);
+  });
+
+  it("rejects settings that do not match the current schema", async () => {
+    const persisted = { ...defaultAppSettings, theme: "sepia" };
+    await expect(appSettingsMigrator.migrate(persisted)).rejects.toThrow(MigrationValidationError);
   });
 
   it("rejects settings from an unknown version", async () => {

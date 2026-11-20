@@ -431,6 +431,8 @@ const redactValue = <T>(value: T, secrets: readonly string[], preserveArtifactPa
     }
     return result;
   };
+  // The walk copies every value and only replaces strings, so the result has the shape of `value`;
+  // TypeScript cannot express that for a generic deep copy.
   return visit(value) as T;
 };
 

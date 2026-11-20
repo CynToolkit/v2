@@ -4,8 +4,13 @@ import {
   finalVersion,
   type MigrateOptions,
 } from "@pipelab/migration";
-import { AppConfig, ConnectionsConfig } from "../config.schema";
-import { FileRepo } from "./projects-definition";
+import {
+  AppSettingsValidator,
+  ConnectionsValidator,
+  type AppConfig,
+  type ConnectionsConfig,
+} from "../config.schema";
+import { FileRepoValidator, type FileRepo } from "./projects-definition";
 import type { VersionedData } from "./migrators.types";
 
 // --- Types ---
@@ -39,6 +44,7 @@ export const defaultAppSettings = settingsMigratorInternal.createDefault({
 
 export const appSettingsMigrator = settingsMigratorInternal.createMigrations({
   defaultValue: defaultAppSettings,
+  schema: AppSettingsValidator,
   migrations: [
     createMigration<AppConfig, never>({
       version: "1.0.0",
@@ -58,6 +64,7 @@ export const defaultConnections = connectionsMigratorInternal.createDefault({
 
 export const connectionsMigrator = connectionsMigratorInternal.createMigrations({
   defaultValue: defaultConnections,
+  schema: ConnectionsValidator,
   migrations: [
     createMigration<ConnectionsConfig, never>({
       version: "1.0.0",
@@ -84,6 +91,7 @@ export const defaultFileRepo = fileRepoMigratorInternal.createDefault({
 
 export const fileRepoMigrations = fileRepoMigratorInternal.createMigrations({
   defaultValue: defaultFileRepo,
+  schema: FileRepoValidator,
   migrations: [
     createMigration<FileRepo, never>({
       version: "1.0.0",
