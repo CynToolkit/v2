@@ -44,9 +44,12 @@
     "vue-demi": "0.14.10"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+    "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [
       "oxfmt",
       "oxlint --fix"
+    ],
+    "*.{vue,json,jsonc,md,css,scss,html,yml,yaml}": [
+      "oxfmt --no-error-on-unmatched-pattern"
     ]
   },
   "packageManager": "pnpm@10.33.0"
