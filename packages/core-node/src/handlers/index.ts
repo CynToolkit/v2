@@ -39,5 +39,10 @@ export { registerHistoryHandlers } from "./history";
 export { registerEngineHandlers } from "./engine";
 export { registerAgentsHandlers } from "./agents";
 export { BuildHistoryStorage } from "./build-history";
-export { executeWorkflow, prepareReleaseWorkflow, registerWorkflowHandlers } from "./workflow";
+export {
+  cancelAllWorkflowRuns,
+  executeWorkflow,
+  prepareReleaseWorkflow,
+  registerWorkflowHandlers,
+} from "./workflow";
 export type { ExecuteWorkflowOptions } from "./workflow";

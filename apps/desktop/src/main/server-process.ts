@@ -1,44 +1,27 @@
-import type { ChildProcess } from "node:child_process";
-import { tmpdir } from "node:os";
-import { app, BrowserWindow, dialog } from "electron";
+import { spawn, type ChildProcess } from "node:child_process";
+import { app, dialog } from "electron";
 import { is } from "@electron-toolkit/utils";
 import http from "node:http";
+import { join } from "node:path";
 import { uiDevPort, getUiDevServerFatalError } from "@pipelab/constants";
-import {
-  fetchPipelabCli,
-  projectRoot,
-  PipelabContext,
-  getDefaultUserDataPath,
-} from "@pipelab/core-node/desktop";
-import {
-  monitorCliProcessExit,
-  startAuthenticatedCliProcess,
-  stopCliProcessTree,
-} from "./cli-bootstrap";
-import { getLocalCliRunner } from "./cli-runner";
+import { getDefaultUserDataPath, projectRoot } from "@pipelab/core-node/desktop";
+import { killProcessTree } from "./process-tree";
+
+const READY_TIMEOUT_MS = 60_000;
+const STOP_TIMEOUT_MS = 10_000;
+const MAX_RESTARTS = 5;
+const RESTART_WINDOW_MS = 60_000;
 
 let serverProcess: ChildProcess | null = null;
 let serverPort: number | null = null;
-let serverPid: number | null = null;
-let serverCreationTime: string | undefined;
-let launcherCreationTime: string | undefined;
-let stoppingServerProcess: ChildProcess | null = null;
-let cleanupPendingProcess: ChildProcess | null = null;
+let startingServer: Promise<number> | null = null;
+let stopping = false;
+let restartTimes: number[] = [];
+let restartListener: ((port: number) => void) | undefined;
 
-const CLI_OUTPUT_TAIL_LINES = 40;
-let cliOutputTail: string[] = [];
-let lastCliExitCode: number | null = null;
-
-/**
- * When the CLI died after reporting ready, the UI load fails with a generic
- * ERR_FAILED. Return the CLI's last output so the real cause can be shown.
- */
-export const getCliExitDiagnostics = (): string | undefined => {
-  if (lastCliExitCode === null) return undefined;
-  return (
-    `The background server exited with code ${lastCliExitCode}. Last output:\n` +
-    (cliOutputTail.length ? cliOutputTail.join("\n") : "(no output captured)")
-  );
+/** Called after the server crashed and was restarted, so the window can reconnect. */
+export const onServerRestarted = (listener: (port: number) => void) => {
+  restartListener = listener;
 };
 
 export const getUiDevelopmentPort = () => {
@@ -80,13 +63,67 @@ const isUp = (
     attempt();
   });
 
-export const startServer = async (): Promise<number> => {
-  if (serverProcess) {
-    if (serverPort === null) throw new Error("The CLI server startup is still in progress.");
-    return serverPort;
-  }
+/** Directory holding the UI and asset templates the server serves. */
+const getCliDirectory = () =>
+  is.dev && projectRoot ? join(projectRoot, "apps", "cli") : join(app.getAppPath(), "dist", "cli");
 
-  // 0. In dev mode, ensure UI dev server is running BEFORE anything else
+const spawnServer = (preferredPort: number): Promise<{ child: ChildProcess; port: number }> => {
+  const releaseTag = app.getVersion().includes("beta") ? "beta" : "latest";
+  const userDataPath =
+    (process.env.PIPELAB_TEST_DESKTOP === "1" && process.env.PIPELAB_TEST_DESKTOP_USER_DATA_PATH) ||
+    getDefaultUserDataPath(releaseTag === "beta" ? "beta" : "prod");
+
+  const args = [
+    join(app.getAppPath(), ".vite", "build", "server-entry.js"),
+    "--port",
+    String(preferredPort),
+    "--user-data",
+    userDataPath,
+    "--cli-dir",
+    getCliDirectory(),
+  ];
+
+  // The server is the CLI package bundled into server-entry.js. It runs in its own process
+  // (a crash cannot take the main process down) and, on Unix, as its own process group
+  // leader so everything it starts can be cleaned up with killProcessTree.
+  const child = spawn(process.execPath, args, {
+    detached: process.platform !== "win32",
+    windowsHide: true,
+    stdio: ["ignore", "pipe", "pipe", "ipc"],
+    env: {
+      ...process.env,
+      ELECTRON_RUN_AS_NODE: "1",
+      NODE_ENV: is.dev ? "development" : "production",
+    },
+  });
+  child.stdout?.on("data", (chunk: Buffer) => process.stdout.write(chunk));
+  child.stderr?.on("data", (chunk: Buffer) => process.stderr.write(chunk));
+
+  return new Promise((resolve, reject) => {
+    const fail = (error: Error) => {
+      clearTimeout(timeout);
+      killProcessTree(child.pid);
+      reject(error);
+    };
+    const timeout = setTimeout(
+      () => fail(new Error("The server did not become ready in time.")),
+      READY_TIMEOUT_MS,
+    );
+    child.on("message", (message: unknown) => {
+      const { type, port } = (message ?? {}) as { type?: string; port?: unknown };
+      if (type !== "ready" || typeof port !== "number") return;
+      clearTimeout(timeout);
+      resolve({ child, port });
+    });
+    child.once("error", fail);
+    child.once("exit", (code) =>
+      fail(new Error(`The server exited during startup (code ${code}).`)),
+    );
+  });
+};
+
+const launchServer = async (): Promise<number> => {
+  // In dev mode, ensure UI dev server is running BEFORE anything else
   if (is.dev) {
     let retries = 5;
     const developmentPort = getUiDevelopmentPort();
@@ -97,161 +134,85 @@ export const startServer = async (): Promise<number> => {
     }
   }
 
-  if (is.dev) {
-    console.info("  [DEVELOPMENT MODE] CLI server is starting automatically.");
-  }
+  stopping = false;
+  // Port 0 lets the OS pick a free loopback port for every launch.
+  const { child, port } = await spawnServer(0);
+  watchServer(child, port);
+  serverProcess = child;
+  serverPort = port;
+  console.info(`[Server] CLI server is ready on loopback port ${port}`);
+  return port;
+};
 
-  // 2. Resolve the CLI
-  const releaseTag = app.getVersion().includes("beta") ? "beta" : "latest";
-  const userDataPath =
-    (process.env.PIPELAB_TEST_DESKTOP === "1" && process.env.PIPELAB_TEST_DESKTOP_USER_DATA_PATH) ||
-    getDefaultUserDataPath(releaseTag === "beta" ? "beta" : "prod");
-  const context = new PipelabContext({ userDataPath, releaseTag });
-  const cliVersion = is.dev ? "local" : releaseTag;
-  const { entryPoint, isLocal, packageDir } = await fetchPipelabCli(cliVersion, { context });
-
-  let args = [entryPoint, "serve"];
-  let executable = process.execPath;
-
-  if (isLocal && entryPoint.endsWith(".ts")) {
-    console.info(`[Server] Local CLI detected at ${packageDir}, starting with tsx`);
-    // A single CLI process keeps its authenticated, OS-assigned port stable.
-    // The UI still uses Vite HMR; restart Desktop after changing CLI source.
-    ({ executable, args } = getLocalCliRunner(
-      projectRoot,
-      entryPoint,
-      process.platform,
-      process.execPath,
-    ));
-    console.info(`[Server] Local CLI executable: ${executable}`);
-    console.info(`[Server] Local CLI arguments: ${args.join(" ")}`);
-    console.info(`[Server] Local CLI working directory: ${projectRoot ?? process.cwd()}`);
-  } else {
-    console.info(`[Server] Starting CLI server from: ${entryPoint}`);
-  }
-
-  const childEnv: NodeJS.ProcessEnv = {
-    ...process.env,
-    NODE_ENV: is.dev ? "development" : "production",
-    PORT: "0",
-    IS_SERVER: "true",
-  };
-  if (executable === process.execPath) {
-    childEnv.ELECTRON_RUN_AS_NODE = "1";
-  } else {
-    delete childEnv.ELECTRON_RUN_AS_NODE;
-  }
-  if (process.platform === "win32" && isLocal) {
-    const runtimeEnvKeys = Object.keys(childEnv)
-      .filter((key) => /^(?:ELECTRON_|NODE_|npm_node_execpath$)/i.test(key))
-      .sort()
-      .join(",");
-    console.info(
-      `[Server] Windows CLI host: parent=${process.execPath}, cwd=${process.cwd()}, temp=${tmpdir()}, environment keys=${runtimeEnvKeys || "none"}`,
-    );
-  }
-  // Keep the server's CLI context on the same profile the Desktop resolves above.
-  args = [...args, "--port", "0", "--host", "127.0.0.1", "--user-data", userDataPath];
-
-  const started = await startAuthenticatedCliProcess({
-    executable,
-    args,
-    ...(isLocal && projectRoot ? { cwd: projectRoot } : {}),
-    env: childEnv,
-    desktopVersion: app.getVersion(),
-    onStartupFailure: (child, authenticatedPid, authenticatedCreationTime, launcherCreation) =>
-      stopCliProcessTree(child, authenticatedPid, authenticatedCreationTime, launcherCreation),
-    onSpawn: (child) => {
-      serverProcess = child;
-      console.info(`[Server] CLI child spawned (pid: ${child.pid ?? "unknown"})`);
-      console.info(
-        `[Server] CLI launch environment: NODE_OPTIONS=${childEnv.NODE_OPTIONS ? "set" : "unset"}, ELECTRON_RUN_AS_NODE=${childEnv.ELECTRON_RUN_AS_NODE ?? "unset"}, npm_node_execpath=${process.env.npm_node_execpath ? "set" : "unset"}`,
-      );
-      cliOutputTail = [];
-      for (const stream of [child.stdout, child.stderr]) {
-        stream?.on("data", (chunk: Buffer | string) => {
-          cliOutputTail.push(...chunk.toString().split(/\r?\n/).filter(Boolean));
-          if (cliOutputTail.length > CLI_OUTPUT_TAIL_LINES)
-            cliOutputTail.splice(0, cliOutputTail.length - CLI_OUTPUT_TAIL_LINES);
-        });
-      }
-      child.on("error", (error) => console.error("ERROR: CLI server process failed:", error));
-      monitorCliProcessExit(child, (code) => {
-        if (
-          serverProcess === child &&
-          serverPort !== null &&
-          stoppingServerProcess !== child &&
-          cleanupPendingProcess !== child
-        ) {
-          console.error(
-            `The authenticated CLI process exited with code ${code ?? "unknown"}. Cleaning up its process tree before Desktop closes.`,
-          );
-          void stopServer()
-            .then(() => app.exit(1))
-            .catch((error: unknown) => {
-              console.error("Failed to stop the CLI process tree after an unexpected exit:", error);
-              dialog.showErrorBox(
-                "CLI Shutdown Error",
-                "The local CLI launcher exited, but Desktop could not confirm that its server process stopped. Close the Pipelab CLI process, then retry shutting down Desktop.",
-              );
-              if (BrowserWindow.getAllWindows().length === 0) {
-                app.emit("activate");
-              }
-            });
-        }
-      });
-      child.on("close", (code) => {
-        console.info(`CLI server process exited with code ${code}`);
-        lastCliExitCode = code ?? -1;
-        if (
-          serverProcess === child &&
-          stoppingServerProcess !== child &&
-          cleanupPendingProcess !== child
-        ) {
-          serverProcess = null;
-          serverPort = null;
-        }
-      });
-    },
+/** Restart the server when it exits unexpectedly. */
+const watchServer = (child: ChildProcess, port: number) => {
+  child.once("exit", (code) => {
+    if (serverProcess !== child || stopping) return;
+    console.error(`[Server] CLI server exited unexpectedly (code ${code}). Restarting.`);
+    // Remove whatever the crashed server left running (workflow builds, helpers).
+    killProcessTree(child.pid);
+    serverProcess = null;
+    serverPort = null;
+    void recoverServer(port);
   });
-  if (serverProcess !== started.child || started.child.exitCode !== null) {
-    throw new Error(
-      "The CLI server stopped during startup verification. Restart Desktop and try again.",
-    );
-  }
-  serverPort = started.port;
-  serverPid = started.serverPid;
-  serverCreationTime = started.serverCreationTime;
-  launcherCreationTime = started.launcherCreationTime;
+};
 
-  console.info(`[Server] Authenticated CLI server is ready on loopback port ${started.port}`);
-  return started.port;
+const recoverServer = async (previousPort: number) => {
+  const now = Date.now();
+  restartTimes = [...restartTimes.filter((time) => now - time < RESTART_WINDOW_MS), now];
+  if (restartTimes.length > MAX_RESTARTS) {
+    dialog.showErrorBox(
+      "Server Error",
+      "The Pipelab background server keeps crashing. Restart the application.",
+    );
+    app.quit();
+    return;
+  }
+  // Prefer the previous port so the open window keeps its address; fall back to a free one.
+  for (const preferredPort of [previousPort, 0]) {
+    try {
+      const { child, port } = await spawnServer(preferredPort);
+      if (stopping) {
+        child.kill();
+        return;
+      }
+      watchServer(child, port);
+      serverProcess = child;
+      serverPort = port;
+      console.info(`[Server] CLI server recovered on loopback port ${port}`);
+      restartListener?.(port);
+      return;
+    } catch (error) {
+      console.error("[Server] Restart attempt failed:", error);
+    }
+  }
+  void recoverServer(0);
+};
+
+export const startServer = async (): Promise<number> => {
+  if (serverPort !== null) return serverPort;
+  startingServer ??= launchServer().finally(() => {
+    startingServer = null;
+  });
+  return startingServer;
 };
 
 export const stopServer = async () => {
   const child = serverProcess;
-  if (child) {
-    stoppingServerProcess = child;
-    try {
-      await stopCliProcessTree(
-        child,
-        serverPid ?? undefined,
-        serverCreationTime,
-        launcherCreationTime,
-      );
-      if (serverProcess === child) {
-        serverProcess = null;
-        serverPort = null;
-        serverPid = null;
-        serverCreationTime = undefined;
-        launcherCreationTime = undefined;
-      }
-      if (cleanupPendingProcess === child) cleanupPendingProcess = null;
-    } catch (error) {
-      cleanupPendingProcess = child;
-      throw error;
-    } finally {
-      if (stoppingServerProcess === child) stoppingServerProcess = null;
-    }
-  }
+  stopping = true;
+  if (!child) return;
+  serverProcess = null;
+  serverPort = null;
+  await new Promise<void>((resolve) => {
+    const timeout = setTimeout(resolve, STOP_TIMEOUT_MS);
+    child.once("exit", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+    // Lets the server cancel in-flight workflow runs before it exits.
+    if (child.connected) child.send({ type: "shutdown" });
+    else resolve();
+  });
+  // Whether it exited gracefully or not, leave nothing of the server behind.
+  killProcessTree(child.pid);
 };

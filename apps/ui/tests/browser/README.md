@@ -64,7 +64,7 @@ pnpm --filter @pipelab/cli exec vitest run \
   tests/e2e/tests/construct-ui-to-binary.spec.ts
 ```
 
-The test starts the real Desktop app, which starts its real CLI sidecar, then
+The test starts the real Desktop app, which runs its real CLI server as a child process, then
 drives the Desktop window through the visible workflow wizard, workflow build
 settings, and Dashboard Ship confirmation. Workflow save, planning, Construct
 export, execution, run history, local folder delivery, and Electron packaging

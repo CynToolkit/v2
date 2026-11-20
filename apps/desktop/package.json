@@ -19,11 +19,13 @@
     "tsconfig.json",
     "vite.base.config.mts",
     "vite.main.config.mts",
+    "vite.server.config.mts",
+    "vite.cli.config.mts",
     "vite.preload.config.mts"
   ],
   "main": ".vite/build/main.js",
   "scripts": {
-    "build:vite": "vite build -c vite.main.config.mts && vite build -c vite.preload.config.mts",
+    "build:vite": "vite build -c vite.main.config.mts && vite build -c vite.server.config.mts && vite build -c vite.cli.config.mts && vite build -c vite.preload.config.mts",
     "dev": "cross-env NODE_OPTIONS=--enable-source-maps pnpm build:vite && electron .",
     "format": "oxfmt .",
     "lint": "oxlint .",
@@ -40,6 +42,7 @@
   "devDependencies": {
     "@electron-toolkit/preload": "3.0.2",
     "@electron-toolkit/utils": "4.0.0",
+    "@pipelab/cli": "workspace:*",
     "@pipelab/constants": "workspace:*",
     "@pipelab/core-node": "workspace:*",
     "@pipelab/plugin-core": "workspace:*",

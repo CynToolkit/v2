@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { isDev, readDesktopBootstrapEnvironment, serveCommand } from "@pipelab/core-node";
+import { isDev } from "@pipelab/core-node";
+import { resolveCliVersion, startServer } from "./serve";
 import { historyCommand } from "./commands/history";
 import { usageCommand, purgeCommand } from "./commands/maintenance";
 import { setupCommand } from "./commands/setup";
@@ -11,30 +12,27 @@ import {
   runWorkflowCommand,
   workflowRunOptions,
 } from "./commands/workflows";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isSupabaseAvailable } from "@pipelab/shared";
 import { config } from "dotenv";
 import { PostHog } from "posthog-node";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-process.env.PIPELAB_CLI_DIR ||= __dirname;
+// Desktop bundles this program as CommonJS, where import.meta is unavailable but __dirname is.
+const cliDirname =
+  typeof __dirname === "undefined" ? dirname(fileURLToPath(import.meta.url)) : __dirname;
+process.env.PIPELAB_CLI_DIR ||= cliDirname;
 
 // Only load .env in development as values are bundled in production by tsdown
 if (isDev) {
-  const envPath = join(__dirname, "../../../.env");
+  const envPath = join(cliDirname, "../../../.env");
   if (existsSync(envPath)) {
     config({ path: envPath });
   }
 }
 
 const isProduction = !isDev && process.env.TEST !== "true";
-
-if (process.env.PIPELAB_DESKTOP_BOOTSTRAP_SECRET) {
-  console.info("[CLI] Authenticated Desktop CLI entry loaded.");
-}
 
 let posthog: PostHog | undefined;
 if (isProduction && process.env.POSTHOG_API_KEY) {
@@ -45,24 +43,7 @@ if (isProduction && process.env.POSTHOG_API_KEY) {
 import { Command } from "commander";
 import { getDefaultUserDataPath } from "./paths";
 
-// Resolve version from injected env or package.json. No "workspace"/"local"
-// pseudo-versions: in dev the package.json lookup below resolves the real
-// workspace version (apps/cli/package.json sits next to src/).
-let version = process.env.CLI_VERSION || "0.0.0";
-if (version === "0.0.0") {
-  try {
-    const packageJsonPath = existsSync(join(__dirname, "package.json"))
-      ? join(__dirname, "package.json")
-      : join(__dirname, "..", "package.json");
-
-    if (existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
-      version = packageJson.version;
-    }
-  } catch (e) {
-    console.warn("[CLI] Could not resolve version from package.json, using fallback.");
-  }
-}
+const version = resolveCliVersion(cliDirname);
 
 const program = new Command();
 
@@ -86,9 +67,7 @@ program
   .action(async (options) => {
     try {
       options.userData = options.userData || getDefaultUserDataPath();
-      const desktopBootstrap = readDesktopBootstrapEnvironment();
-      if (desktopBootstrap) console.info("[CLI] Authenticated Desktop server command started.");
-      await serveCommand({ ...options, desktopBootstrap }, version, __dirname);
+      await startServer({ ...options, version, cliDirname });
     } catch (e) {
       console.error(e);
       process.exit(1);

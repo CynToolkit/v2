@@ -11,11 +11,7 @@ import {
   isAuthorizedRequest,
   type ServerSecurityOptions,
 } from "./server-security";
-import {
-  desktopBootstrapPath,
-  handleDesktopBootstrapRequest,
-  type DesktopBootstrapOptions,
-} from "./desktop-bootstrap";
+import { markDesktopHosted } from "./desktop-host";
 
 export interface ServeOptions {
   port: string | number;
@@ -25,7 +21,8 @@ export interface ServeOptions {
   host?: string;
   authToken?: string;
   allowedOrigin?: string;
-  desktopBootstrap?: Omit<DesktopBootstrapOptions, "version">;
+  /** Set when the Desktop app runs the server inside its own process. */
+  desktopHosted?: boolean;
 }
 
 let startupDone = false;
@@ -50,6 +47,7 @@ export const sendStartupReady = () => {
 
 export async function serveCommand(options: ServeOptions, version: string, cliDirname: string) {
   if (!options.userData) throw new Error("userDataPath is required for serveCommand");
+  if (options.desktopHosted) markDesktopHosted();
   const releaseTag = version.includes("beta") ? "beta" : "latest";
   const context = new PipelabContext({
     userDataPath: options.userData,
@@ -71,13 +69,6 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
 
   const server = http.createServer(async (request, response) => {
     const urlObj = request.url ? new URL(request.url, "http://localhost") : null;
-    if (urlObj?.pathname === desktopBootstrapPath && options.desktopBootstrap) {
-      await handleDesktopBootstrapRequest(request, response, {
-        ...options.desktopBootstrap,
-        version,
-      });
-      return;
-    }
     // Serve local media files securely via HTTP
     if (urlObj && urlObj.pathname.startsWith("/media-file/")) {
       if (!isAuthorizedRequest(request, security)) {
@@ -147,17 +138,7 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
     });
   });
 
-  if (options.desktopBootstrap) {
-    server.once("close", () => {
-      console.error("The authenticated Desktop CLI server listener closed unexpectedly.");
-      process.exit(1);
-    });
-  }
-
   // Start the server EARLY so the UI can connect and receive progress updates
-  if (options.desktopBootstrap) {
-    console.info("[Server] Binding authenticated Desktop server listener.");
-  }
   await webSocketServer.start(Number(options.port), server, security);
 
   const address = server.address();
@@ -174,16 +155,6 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
     console.log(`UI available at http://127.0.0.1:${boundPort}`);
   }
 
-  if (options.desktopBootstrap) {
-    try {
-      process.stdout.write(
-        `PIPELAB_DESKTOP_READY:${JSON.stringify({ type: "ready", port: boundPort, sessionId: options.desktopBootstrap.sessionId })}\n`,
-      );
-    } catch {
-      throw new Error("Desktop bootstrap channel is unavailable; restart the Desktop app.");
-    }
-  }
-
   await registerAllHandlers({
     version,
     context,
@@ -191,5 +162,5 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
 
   sendStartupReady();
 
-  return server;
+  return { server, port: boundPort };
 }

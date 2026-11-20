@@ -12,7 +12,10 @@ const stagedOutput = path.join(stageRoot, "out");
 const cliSource = path.join(repoDir, "apps", "cli", "dist");
 const desktopOutput = path.join(desktopDir, "out");
 
-const requiredCliFiles = ["package.json", "index.mjs", path.join("ui", "index.html")];
+// The CLI code is bundled into the Desktop main process; only its UI and asset
+// templates are shipped as files.
+const cliRuntimeFolders = ["ui", "assets"];
+const requiredCliFiles = [path.join("ui", "index.html")];
 
 const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
@@ -128,7 +131,12 @@ async function prepareStage() {
   );
   await verifyStageLinks(stageDir);
 
-  await copyTreeWithoutSymlinks(cliSource, path.join(stageDir, "dist", "cli"));
+  for (const folder of cliRuntimeFolders) {
+    await copyTreeWithoutSymlinks(
+      path.join(cliSource, folder),
+      path.join(stageDir, "dist", "cli", folder),
+    );
+  }
   await verifyBundledCli(path.join(stageDir, "dist", "cli"));
   await rm(stagedOutput, { recursive: true, force: true });
 }

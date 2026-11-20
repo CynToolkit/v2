@@ -6,7 +6,7 @@ The Desktop version of Pipelab, built with Electron.
 
 The Desktop application serves as the native shell for the Pipelab ecosystem. Its responsibilities include:
 
-1.  **Process Management**: The main process starts and manages the `@pipelab/cli` server as a sidecar on a per-launch loopback port. It verifies the child process, launch session, protocol, and CLI version before loading the UI.
+1.  **Process Management**: The main process runs the server (the `@pipelab/cli/serve` package, bundled as `server-entry.js`) as a supervised child process on a per-launch, OS-assigned loopback port. It loads the UI once the server reports ready, on a crash kills the server's process tree and restarts it, and cancels in-flight workflow runs when it shuts down. `Pipelab cli <args>` runs the bundled CLI program (for example `Pipelab cli workflow run <id>`).
 2.  **Native Bridge**: Provides IPC handlers for native OS features (file system dialogs, system notifications, auto-updates) that are not available to the web renderer.
 3.  **UI Container**: Loads and displays the `@pipelab/ui` interface.
 
@@ -30,5 +30,5 @@ pnpm make       # Creates installers (dmg, exe, deb, zip)
 ```
 
 The Desktop development renderer keeps Vite HMR. Restart the Desktop app after
-changing CLI server source so the new process can complete its authenticated
-startup handshake.
+changing CLI server source, because the server is bundled into
+`server-entry.js` by `pnpm build:vite`.

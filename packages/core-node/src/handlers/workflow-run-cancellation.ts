@@ -12,6 +12,11 @@ export class WorkflowRunCancellationRegistry {
     return true;
   }
 
+  cancelAll() {
+    for (const controller of this.controllers.values()) controller.abort("Interrupted by shutdown");
+    this.controllers.clear();
+  }
+
   remove(runId: string, controller: AbortController) {
     if (this.controllers.get(runId) === controller) this.controllers.delete(runId);
   }

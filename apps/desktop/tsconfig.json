@@ -6,6 +6,8 @@
     "outDir": "dist",
     "inlineSourceMap": true,
     "paths": {
+      "@pipelab/cli/serve": ["../cli/src/serve.ts"],
+      "@pipelab/core-node": ["../../packages/core-node/src/index.ts"],
       "@pipelab/core-node/desktop": ["../../packages/core-node/src/desktop.ts"],
       "@pipelab/*": ["../../packages/shared/src/libs/*"],
       "check-disk-space": ["../../node_modules/check-disk-space/dist/check-disk-space.d.mts"]
@@ -21,6 +23,8 @@
     "./assets",
     "vite.base.config.mts",
     "vite.main.config.mts",
+    "vite.server.config.mts",
+    "vite.cli.config.mts",
     "vite.preload.config.mts",
     "electron-builder.config.mjs"
   ],

@@ -46,7 +46,7 @@ pnpm build      # Generates the production assets in the /dist folder
 ```
 
 > [!NOTE]
-> With root `pnpm dev`, Desktop manages its own authenticated CLI sidecar. Use `pnpm dev-remote` for standalone UI development with a separate remote CLI.
+> With root `pnpm dev`, Desktop runs and supervises its own CLI server. Use `pnpm dev-remote` for standalone UI development with a separate remote CLI.
 
 ### Browser startup without an agent
 

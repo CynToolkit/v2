@@ -20,7 +20,7 @@ Core-node's single `builtInProviders` list drives renderer metadata, Release def
 
 ## Runtime boundaries
 
-The desktop process starts or reuses the CLI sidecar. In production, the server serves bundled UI assets and accepts UI requests over WebSocket. The UI's native operations go through Electron IPC exposed by preload. `pipelab serve` defaults to `127.0.0.1`; remote binding requires authentication in production. The CLI exposes saved Release workflow commands.
+The desktop process bundles the CLI package (`@pipelab/cli/serve`) into `server-entry.js`, runs it as a supervised child process (its own process group on Unix), and on a crash kills everything it started and restarts it. In production, the server serves bundled UI assets and accepts UI requests over WebSocket. The UI's native operations go through Electron IPC exposed by preload. `pipelab serve` defaults to `127.0.0.1`; remote binding requires authentication in production. The CLI exposes saved Release workflow commands.
 
 For cloud artifacts, core-node is the client/host adapter, `workers/pipelab-cloud` owns authenticated API validation and signed transfer operations, and Supabase migrations define persisted metadata and cleanup state. Keep credentials and provider-specific request behavior within those owning boundaries.
 

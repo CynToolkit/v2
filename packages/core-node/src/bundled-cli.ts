@@ -1,13 +1,6 @@
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { isDev, projectRoot } from "./context";
-
-export interface BundledCli {
-  packageDir: string;
-  entryPoint: string;
-  isLocal: false;
-}
 
 export const resolveBundledUiFolder = (cliDirname: string) => join(cliDirname, "ui");
 
@@ -35,33 +28,4 @@ export function resolveBundledAsset(packageName: string, cliDirname?: string): s
   throw new Error(
     `Bundled asset ${packageName} was not found. Expected it under the CLI assets directory.`,
   );
-}
-
-const bundledCliCandidates = (resourcesPath: string) => [
-  // Desktop packaging keeps the CLI in the unpacked app tree so Forge does
-  // not recursively copy it as an extra resource on Windows.
-  join(resourcesPath, "app", "dist", "cli"),
-  // Compatibility with desktop packages created before the CLI moved into
-  // the unpacked application tree.
-  join(resourcesPath, "cli"),
-];
-
-export async function resolveBundledCli(resourcesPath: string): Promise<BundledCli | null> {
-  for (const packageDir of bundledCliCandidates(resourcesPath)) {
-    const manifestPath = join(packageDir, "package.json");
-    if (!existsSync(manifestPath)) continue;
-
-    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-    const configuredEntry =
-      typeof manifest.bin === "string"
-        ? manifest.bin
-        : manifest.bin?.pipelab || manifest.bin?.plab || manifest.main;
-    const entryPoint = join(packageDir, configuredEntry || "index.mjs");
-
-    if (existsSync(entryPoint)) {
-      return { packageDir, entryPoint, isLocal: false };
-    }
-  }
-
-  return null;
 }

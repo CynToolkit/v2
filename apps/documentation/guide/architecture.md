@@ -1,11 +1,12 @@
 # How Pipelab runs your work
 
 The desktop app is made from an Electron shell, a Vue UI, and a local Node.js
-engine. Each Desktop launch starts its own CLI server on an OS-assigned loopback
-port. Before loading the UI, the shell verifies the server's Pipelab identity,
-child process, session, protocol, and compatible CLI version with a
-per-launch challenge and secret. Startup fails with an error if verification
-does not match. In production, the server also serves the bundled UI.
+engine. Each Desktop launch runs the CLI server as a supervised child
+process, on an OS-assigned loopback port. The shell loads the UI only once the
+server reports ready, and startup fails with an error if it cannot start. If the
+server crashes, the shell kills whatever it left running, restarts it (on the same port when possible) and
+reloads the window, so a server crash does not close the app. In production, the
+server also serves the bundled UI.
 
 ![Pipelab desktop, UI, CLI server, and execution paths](../assets/architecture/architecture.svg)
 

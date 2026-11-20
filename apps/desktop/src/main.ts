@@ -5,12 +5,13 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import {
-  getCliExitDiagnostics,
   getUiDevelopmentPort,
+  onServerRestarted,
   startServer,
   stopServer,
 } from "./main/server-process";
 import { getProtocolName, getAppBundleId } from "@pipelab/constants";
+import { getCliPassthroughArgs, runCliPassthrough } from "./main/cli-passthrough";
 import { registerIpcHandlers } from "./main/ipc-handlers";
 import { installUpdateAfterServerStops } from "./main/update-shutdown";
 import { createUpdater } from "./main/updater";
@@ -140,8 +141,12 @@ app.on("open-url", (event, url) => {
   handleProtocolUrl(url);
 });
 
-// Single Instance Lock setup
-const gotTheLock = app.requestSingleInstanceLock();
+// `Pipelab cli <any CLI command and options>` runs the bundled CLI program and exits.
+const cliPassthroughArgs = getCliPassthroughArgs(process.argv, is.dev);
+if (cliPassthroughArgs) runCliPassthrough(cliPassthroughArgs);
+
+// Single Instance Lock setup (a CLI run must not be absorbed by a running Desktop)
+const gotTheLock = cliPassthroughArgs ? true : app.requestSingleInstanceLock();
 if (!gotTheLock) {
   console.info("[Main] Another instance is already running. Quitting.");
   app.exit(0);
@@ -189,10 +194,10 @@ function stopServerOnce(): Promise<void> {
 }
 
 function handleShutdownFailure(error: unknown): void {
-  console.error("Failed to stop the CLI process tree:", error);
+  console.error("Failed to stop the CLI server:", error);
   dialog.showErrorBox(
     "Shutdown Error",
-    "Pipelab could not confirm that its local CLI process stopped. The application will stay open so cleanup can be retried.",
+    "Pipelab could not confirm that its local server stopped. The application will stay open so cleanup can be retried.",
   );
   void restoreWindowAfterFailedShutdown().catch((restoreError: unknown) =>
     console.error("Failed to restore the Desktop window after shutdown error:", restoreError),
@@ -511,6 +516,8 @@ function startUpdater(): void {
 }
 
 app.whenReady().then(async () => {
+  if (cliPassthroughArgs) return;
+
   protocol.handle("media", (request) => {
     const path = decodeURIComponent(request.url.replace(/^media:\/\/+/, "/"));
     return net.fetch(pathToFileURL(path).toString());
@@ -556,14 +563,21 @@ app.whenReady().then(async () => {
   );
   createWindow();
 
+  // When the server crashes and is restarted, point the window at it again.
+  onServerRestarted((port) => {
+    const url = is.dev
+      ? `http://127.0.0.1:${getUiDevelopmentPort()}/?cliPort=${port}`
+      : `http://127.0.0.1:${port}`;
+    void mainWindow?.loadURL(url);
+  });
+
   // Start the background server (this might include downloading the CLI on first run)
   try {
     console.info("[Main] Starting standalone server...");
     const cliPort = await startServer();
     console.info("[Main] Standalone server is ready");
 
-    // Do not load any renderer until the CLI child proves its launch identity.
-    // The port is not a credential; the per-launch secret stays in the main process.
+    // Do not load any renderer until the in-process server is listening.
     const uiUrl = is.dev
       ? `http://127.0.0.1:${getUiDevelopmentPort()}/?cliPort=${cliPort}`
       : `http://127.0.0.1:${cliPort}`;
@@ -577,8 +591,7 @@ app.whenReady().then(async () => {
     dialog.showErrorBox(
       "Startup Error",
       "Failed to start the background server. This is required for Pipelab to function.\n\n" +
-        (error instanceof Error ? error.message : String(error)) +
-        (getCliExitDiagnostics() ? `\n\n${getCliExitDiagnostics()}` : ""),
+        (error instanceof Error ? error.message : String(error)),
     );
     app.quit();
     return;

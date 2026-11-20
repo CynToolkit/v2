@@ -26,7 +26,7 @@ graph TD
 
     UI <-->|WebSocket| CLI
     UI <-->|IPC| Electron
-    Electron ---|Spawns Sidecar| CLI
+    Electron ---|Bundles and supervises| CLI
     CLI ---|Executes| Workflows[Release Workflows]
 
     class UI,Electron,CLI main;
@@ -34,7 +34,7 @@ graph TD
 
 - **The Engine (@pipelab/cli)**: A standalone Node.js server that handles workflow execution, runs provider tasks, and exposes a WebSocket API.
 - **The Interface (@pipelab/ui)**: A Vue 3 application that provides the Release workflow editor. It connects to the CLI via WebSockets for real-time execution feedback.
-- **The Container (@pipelab/app)**: An Electron wrapper that provides native OS integration (file dialogs, system tray). In production, it automatically manages the CLI as a "sidecar" process.
+- **The Container (@pipelab/app)**: An Electron wrapper that provides native OS integration (file dialogs, system tray). It bundles the CLI server and runs it as a supervised child process, restarting it (and cleaning up everything it started) if it crashes.
 
 ---
 
@@ -72,7 +72,7 @@ pnpm dev
 ```
 
 > [!TIP]
-> This starts the UI dev server and Electron. Electron starts and manages the local CLI sidecar itself, so do not start `@pipelab/cli` separately for the desktop workflow.
+> This starts the UI dev server and Electron. Electron runs and supervises the CLI server itself, so do not start `@pipelab/cli` separately for the desktop workflow.
 
 The Electron window opens after the UI is available on port 5173. Use `Ctrl+C` in the terminal to stop the development processes.
 
@@ -90,7 +90,7 @@ Create an installable distributable instead:
 pnpm make
 ```
 
-Both commands build the CLI bundle and include it with the desktop application as its production sidecar. Forge writes results to `apps/desktop/out/`; `package` creates an unpacked application bundle, while `make` creates the platform-specific installer/archive. Build on each target operating system for its native installer format.
+Both commands build the CLI bundle and ship its UI and asset templates with the desktop application; the CLI server code is bundled into `server-entry.js` inside the Desktop app. Forge writes results to `apps/desktop/out/`; `package` creates an unpacked application bundle, while `make` creates the platform-specific installer/archive. Build on each target operating system for its native installer format.
 
 ### Useful commands
 
