@@ -8,8 +8,6 @@ import type { ProviderHostContext } from "@pipelab/plugin-core";
 import { loadConstructPlaywright } from "./playwright-runtime.js";
 import { preparePlaywrightProfile } from "./export-shared.js";
 
-export type { BrowserProfileAuthStatus, BrowserProfileCandidate };
-
 export type BrowserProfileOption = Pick<
   BrowserProfileCandidate,
   "browser" | "profileName" | "path"
@@ -170,7 +168,10 @@ const executable = (browser: string, chromium: BrowserType) => {
   return existsSync(playwrightBrowser) ? playwrightBrowser : undefined;
 };
 
-type ChromiumProfile = { path: string; name: string };
+interface ChromiumProfile {
+  path: string;
+  name: string;
+}
 
 export const chromiumProfiles = async (root: string): Promise<ChromiumProfile[]> => {
   try {

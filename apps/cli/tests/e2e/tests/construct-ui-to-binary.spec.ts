@@ -15,11 +15,11 @@ const constructProfilePath = process.env.CONSTRUCT_CI_PROFILE_PATH;
 const playwrightRequire = createRequire(join(repoRoot, "apps/website/package.json"));
 const { chromium } = playwrightRequire("playwright") as typeof import("playwright");
 
-type StartedProcess = {
+interface StartedProcess {
   child: ChildProcessWithoutNullStreams;
   output: string;
   exited: Promise<{ code: number | null; signal: NodeJS.Signals | null }>;
-};
+}
 
 const startProcess = (
   command: string,

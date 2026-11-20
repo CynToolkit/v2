@@ -9,7 +9,6 @@ import {
 import type { ReleaseFieldOption, ReleaseSourceDefinition } from "@pipelab/shared";
 import { getSavedConstructVersion } from "./saved-version";
 export { discoverBrowserProfiles, inspectChromiumProfile } from "./browser-profiles";
-export type { BrowserProfileCandidate } from "./browser-profiles";
 
 import { constructWorkflowTaskFactories } from "./export-c3p";
 import { constructProviderLogo } from "../provider-icons";

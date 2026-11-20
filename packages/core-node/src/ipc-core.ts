@@ -5,8 +5,6 @@ import { WebSocketEvent, WebSocketHandler, WebSocketSendFunction } from "@pipela
 
 export type HandleListenerSendFn<KEY extends Channels> = WebSocketSendFunction<KEY>;
 
-export type WsEvent = WebSocketEvent;
-
 export type HandleListener<KEY extends Channels> = WebSocketHandler<KEY>;
 
 const handlers: Record<string, WebSocketHandler<any>> = {};
@@ -28,7 +26,7 @@ export const useAPI = () => {
 
     if (handlers[channel]) {
       logger().debug("Executing handler for channel:", channel);
-      const event: WsEvent = {
+      const event: WebSocketEvent = {
         sender: ws.url || "websocket-client",
       };
 

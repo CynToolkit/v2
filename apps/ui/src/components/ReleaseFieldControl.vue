@@ -270,7 +270,10 @@ const suggestedEnvironmentVariableName = `PIPELAB_${
     .toUpperCase() || "VALUE"
 }`;
 const environmentBindingEnabled = ref(initialEnvironmentVariableName !== undefined);
-type DescriptionPart = { kind: "text" | "bold" | "code"; text: string };
+interface DescriptionPart {
+  kind: "text" | "bold" | "code";
+  text: string;
+}
 // Descriptions may use **bold** and `code`; they are rendered as elements, never as HTML.
 const descriptionParts = computed<DescriptionPart[]>(() =>
   (props.field.description ?? "")

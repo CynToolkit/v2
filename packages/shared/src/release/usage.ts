@@ -102,7 +102,9 @@ export const usedSelectionFromConfig = (config: ReleaseConfig): UsedValueSelecti
   };
 };
 
-type FieldBearer<TField> = { fields?: readonly TField[] };
+interface FieldBearer<TField> {
+  fields?: readonly TField[];
+}
 
 /** Field definitions a walk reads: the release registry and the renderer catalog both fit. */
 export interface UsedValueDefinitions<TField> {

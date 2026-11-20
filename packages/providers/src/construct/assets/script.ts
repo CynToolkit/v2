@@ -67,7 +67,10 @@ const logElapsed = (log: typeof console.log, label: string, startedAt: number) =
   log(label, `${Date.now() - startedAt} ms`);
 };
 
-type ConstructLoginData = { userID: string | number; token: string };
+interface ConstructLoginData {
+  userID: string | number;
+  token: string;
+}
 type ConstructLoginResult =
   | { loginData: ConstructLoginData; startedAt: number }
   | { error: unknown; startedAt: number };
@@ -241,7 +244,10 @@ export const clickConstructDownload = async (
   return result.download;
 };
 
-type ConstructSettingsSeedOptions = { origin: string; timeoutMs: number };
+interface ConstructSettingsSeedOptions {
+  origin: string;
+  timeoutMs: number;
+}
 interface ConstructSettingsSeedResult {
   welcomeTourDismissed: true;
   uiAnimationsDisabled: true;
