@@ -6,9 +6,23 @@ import {
   getDesktopReleaseFeedUrl,
 } from "./github";
 
-/** Only the fields a test sets are provided; the code under test reads nothing else. */
-const fakeResponse = (init: Partial<Pick<Response, "ok" | "status" | "statusText" | "json">>) =>
-  init as Response;
+interface FakeResponseInit {
+  ok?: boolean;
+  status?: number;
+  statusText?: string;
+  json?: () => Promise<unknown>;
+}
+
+/** A real `Response` carrying the status a test sets, with `json` replaced by the test's body. */
+const fakeResponse = ({
+  ok = true,
+  status = ok ? 200 : 500,
+  statusText,
+  json,
+}: FakeResponseInit) => {
+  const response = new Response(null, { status, statusText });
+  return json ? Object.assign(response, { json }) : response;
+};
 
 describe("GitHub Release Updates API", () => {
   let fetchSpy: MockInstance<typeof fetch>;

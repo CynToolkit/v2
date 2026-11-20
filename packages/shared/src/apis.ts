@@ -218,11 +218,8 @@ export type IpcDefinition = {
 
 export type Channels = keyof IpcDefinition;
 
-export const ShellChannels: Channels[] = [
-  "dialog:showOpenDialog",
-  "dialog:showSaveDialog",
-  "shell:openPath",
-];
+/** Channels the Electron shell can answer natively instead of the agent. */
+export type ShellChannel = "dialog:showOpenDialog" | "dialog:showSaveDialog" | "shell:openPath";
 
 export type Data<KEY extends Channels> = IpcDefinition[KEY][0];
 export type Events<KEY extends Channels> = IpcDefinition[KEY][1];

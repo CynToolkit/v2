@@ -4,7 +4,6 @@ import type { Data } from "@pipelab/shared";
 import { useAPI } from "./api";
 
 vi.mock("@pipelab/shared", () => ({
-  ShellChannels: ["dialog:showOpenDialog", "dialog:showSaveDialog", "shell:openPath"],
   useLogger: () => ({ logger: () => ({ debug() {}, error() {} }) }),
 }));
 

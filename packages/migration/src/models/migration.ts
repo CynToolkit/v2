@@ -39,7 +39,8 @@ export interface MigrationObjInput<Current, Up> {
 export interface MigratorConfig<InitialState, FinalState> {
   migrations: MigrationClass<any, any>[];
   coerce?: boolean;
-  defaultValue?: FinalState;
+  /** State used when there is nothing persisted yet; also seeds new files. */
+  defaultValue: FinalState;
 }
 
 export class Migrator<InitialState extends MigrationSchema, OutputState extends MigrationSchema> {
@@ -61,7 +62,7 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
       this.migrations[migration.version] = migration;
     });
 
-    this.defaultValue = config?.defaultValue ?? ({} as OutputState);
+    this.defaultValue = config.defaultValue;
 
     const versions = this.getVersions();
     this.current = versions[versions.length - 1];
