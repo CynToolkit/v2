@@ -24,13 +24,9 @@ import { parseWorkflowConnectionOverrides } from "./workflow-connection-override
 import { createWorkflowTaskGroups, type WorkflowStepTask } from "./workflow-task-groups";
 import { workflowStepTitle } from "./workflow-task-title";
 import { createWorkflowTaskOutputBuffer, workflowTaskOutputLines } from "./workflow-task-output";
-import type {
-  ListWorkflowsCommandOptions,
-  DeleteWorkflowCommandOptions,
-  RunWorkflowCommandOptions,
-  RunCompletion,
-  WorkflowLogs,
-} from "./workflows.types";
+import type { RunWorkflowCommandOptions, RunCompletion, WorkflowLogs } from "./workflows.types";
+import type { UserDataOptions } from "./options.types";
+import type { ForcedUserDataOptions } from "./options.types";
 
 export const formatWorkflowStepElapsed = (durationMs: number) =>
   durationMs < 1_000 ? `${Math.round(durationMs)} ms` : `${(durationMs / 1_000).toFixed(2)} s`;
@@ -275,7 +271,7 @@ const loadWorkflowFile = async (path: string): Promise<ReleaseConfig> => {
   return config;
 };
 
-export async function listWorkflowsCommand(options: ListWorkflowsCommandOptions = {}) {
+export async function listWorkflowsCommand(options: UserDataOptions = {}) {
   const context = contextFor(options.userData);
   const entries = await workflowEntries(context);
   const persistence = new ReleasePersistence(context);
@@ -291,7 +287,7 @@ export async function listWorkflowsCommand(options: ListWorkflowsCommandOptions 
   }
 }
 
-export async function deleteWorkflowCommand(id: string, options: DeleteWorkflowCommandOptions) {
+export async function deleteWorkflowCommand(id: string, options: ForcedUserDataOptions) {
   if (!options.force) throw new Error("Deleting a workflow requires the --force flag.");
   const context = contextFor(options.userData);
   const persistence = new ReleasePersistence(context);

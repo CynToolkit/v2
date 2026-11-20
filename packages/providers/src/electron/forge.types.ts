@@ -3,8 +3,3 @@ export interface ForgeArtifactMetadata {
   size?: number;
   name?: string;
 }
-
-export interface ForgeResult {
-  folder: string;
-  binary: string | undefined;
-}

@@ -1,7 +1,11 @@
-import { downloadFile, fileExists, runWithLiveLogs } from "@pipelab/plugin-core";
+import {
+  downloadFile,
+  fileExists,
+  runWithLiveLogs,
+  type PipelabContext,
+} from "@pipelab/plugin-core";
 import { chmod, mkdir, mkdtemp, rename, rm } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
-import type { PatchOptionsContext } from "./gpupatch.types";
 
 const GPUPATCH_RELEASE = "v0.2.1";
 
@@ -14,7 +18,7 @@ export const gpupatchAssetName = (platform: NodeJS.Platform, arch: NodeJS.Archit
 };
 
 interface PatchOptions {
-  context: PatchOptionsContext;
+  context: Pick<PipelabContext, "getThirdPartyPath">;
   log: typeof console.log;
   abortSignal?: AbortSignal;
 }

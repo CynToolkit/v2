@@ -5,9 +5,9 @@ import { electronWorkflowTaskFactories } from "./package-v2";
 import { electronPhases } from "./phases";
 import { requiresMacHostForMacTargets } from "../host-matrix";
 import { electronProviderLogo } from "../provider-icons";
-import type { ElectronTargetInputsResult } from "./index.types";
+import type { DesktopTargetInputs } from "@pipelab/plugin-core";
 
-export const electronTargetInputs = (targetId: string): ElectronTargetInputsResult => {
+export const electronTargetInputs = (targetId: string): DesktopTargetInputs => {
   const [target, arch] = targetId.split("-");
   const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
   const supportedArch = pickLiteral(["x64", "arm64"], arch);

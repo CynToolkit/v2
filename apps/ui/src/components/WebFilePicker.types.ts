@@ -1,16 +1,5 @@
-export interface FileItem {
-  name: string;
-  isDirectory: boolean;
-  isSymbolicLink: boolean;
-  size: number;
-  mtime: number;
-}
-
-export interface FileRoot {
-  name: string;
-  path: string;
-}
+import type { FsDirectoryEntry } from "@pipelab/shared";
 
 export interface FileRowDoubleClick {
-  data: FileItem;
+  data: FsDirectoryEntry;
 }

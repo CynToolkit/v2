@@ -6,8 +6,3 @@ export interface PlanRetentionInput {
   policy: ReleaseRetentionPolicy | undefined;
   now?: number;
 }
-
-export interface ExceedsRules {
-  maxRuns?: number;
-  maxAgeDays?: number;
-}

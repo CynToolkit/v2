@@ -9,9 +9,9 @@ import { registerSystemHandlers } from "./system";
 import { registerWorkflowHandlers } from "./workflow";
 import { BuildHistoryStorage } from "./build-history";
 import { sweepRetention } from "../release/apply-retention";
-import type { RegisterAllHandlersOptions } from "./index.types";
+import type { HandlerRegistrationOptions } from "./index.types";
 
-export const registerAllHandlers = async (options: RegisterAllHandlersOptions) => {
+export const registerAllHandlers = async (options: HandlerRegistrationOptions) => {
   const context = options.context;
   await new BuildHistoryStorage(context).reconcileInterruptedRuns();
 

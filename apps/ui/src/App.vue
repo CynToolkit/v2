@@ -47,7 +47,7 @@ import { useFiles } from "./store/files";
 import { useUIStore } from "./store/ui";
 import { browserPreferences } from "./composables/browser-preferences";
 import { shouldAutoConnectAgent, uiEnvironment } from "./composables/ui-runtime";
-import type { I18nSchema } from "./App.types";
+import type { I18nSchema } from "./i18n.types";
 
 const UpgradeDialog = defineAsyncComponent(() => import("./components/UpgradeDialog.vue"));
 const DevBenefitsOverride = defineAsyncComponent(

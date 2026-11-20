@@ -180,15 +180,16 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useUIStore, type FilePickerOptions } from "../store/ui";
 import { useAPI } from "../composables/api";
 import { useLogger } from "@pipelab/shared";
-import type { FileItem, FileRoot, FileRowDoubleClick } from "./WebFilePicker.types";
+import type { FileRowDoubleClick } from "./WebFilePicker.types";
+import type { FsDirectoryEntry, FsRoot } from "@pipelab/shared";
 const uiStore = useUIStore();
 const api = useAPI();
 const { logger } = useLogger();
 const options = computed(() => uiStore.filePickerOptions);
 const currentPath = ref("");
-const files = ref<FileItem[]>([]);
-const roots = ref<FileRoot[]>([]);
-const selection = ref<FileItem | FileItem[] | null>(null);
+const files = ref<FsDirectoryEntry[]>([]);
+const roots = ref<FsRoot[]>([]);
+const selection = ref<FsDirectoryEntry | FsDirectoryEntry[] | null>(null);
 const saveFileName = ref("");
 const isLoading = ref(false);
 const errorMessage = ref("");
@@ -215,7 +216,7 @@ const isAtRoot = computed(() => /^\/$|^[A-Za-z]:[\\/]?$/.test(currentPath.value)
 const canConfirm = computed(() =>
   isSave.value ? !!saveFileName.value.trim() : selectedFiles.value.length > 0,
 );
-const selectedFiles = computed<FileItem[]>(() =>
+const selectedFiles = computed<FsDirectoryEntry[]>(() =>
   Array.isArray(selection.value) ? selection.value : selection.value ? [selection.value] : [],
 );
 const isWindows = () => /^[A-Za-z]:[\\/]/.test(currentPath.value);
@@ -357,7 +358,7 @@ const initialize = async (value: FilePickerOptions | null) => {
     await goToHome();
   else await loadDirectory();
 };
-const getFileIcon = (f: FileItem) =>
+const getFileIcon = (f: FsDirectoryEntry) =>
   f.isDirectory ? "pi pi-folder is-folder" : f.isSymbolicLink ? "pi pi-link" : "pi pi-file";
 const formatSize = (b: number) =>
   b === 0

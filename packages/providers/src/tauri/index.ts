@@ -4,9 +4,9 @@ import { requiresHostOfSamePlatform } from "../host-matrix";
 import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { tauriWorkflowTaskFactories } from "./package";
 import { tauriProviderLogo } from "../provider-icons";
-import type { TauriTargetInputsResult } from "./index.types";
+import type { DesktopTargetInputs } from "@pipelab/plugin-core";
 
-export const tauriTargetInputs = (targetId: string): TauriTargetInputsResult => {
+export const tauriTargetInputs = (targetId: string): DesktopTargetInputs => {
   const [target, arch] = targetId.split("-");
   const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
   const supportedArch = pickLiteral(["x64", "arm64"], arch);

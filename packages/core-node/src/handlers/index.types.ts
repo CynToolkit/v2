@@ -1,6 +1,6 @@
 import type { PipelabContext } from "../context";
 
-export interface RegisterAllHandlersOptions {
+export interface HandlerRegistrationOptions {
   version: string;
   context: PipelabContext;
 }

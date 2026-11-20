@@ -19,8 +19,9 @@ import semver from "semver";
 import { pathToFileURL } from "node:url";
 import { patchExecutableWithGpupatch } from "./gpupatch";
 import type { ElectronPhaseRunner } from "./phases";
-import type { ForgeArtifactMetadata, ForgeResult } from "./forge.types";
+import type { ForgeArtifactMetadata } from "./forge.types";
 import type { ProviderExecutables } from "@pipelab/plugin-core";
+import type { PackagedApp } from "@pipelab/plugin-core";
 
 // TODO: https://js.electronforge.io/modules/_electron_forge_core.html
 
@@ -57,7 +58,7 @@ export const forge = async (
     setOutput,
   }: ForgeExecutionContext,
   completeConfiguration: DesktopApp.Electron,
-): Promise<ForgeResult | undefined> => {
+): Promise<PackagedApp | undefined> => {
   log("Building electron");
   const { node } = paths;
   let destinationFolder = "";

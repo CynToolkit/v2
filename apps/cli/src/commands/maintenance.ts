@@ -1,6 +1,8 @@
 import { PipelabContext, BuildHistoryStorage } from "@pipelab/core-node";
 import { getDefaultUserDataPath } from "../paths";
-import type { UsageCommandOptions, PurgeCommandOptions } from "./maintenance.types";
+
+import type { UserDataOptions } from "./options.types";
+import type { ForcedUserDataOptions } from "./options.types";
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return "0 Bytes";
@@ -11,7 +13,7 @@ function formatBytes(bytes: number, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-export async function usageCommand(options: UsageCommandOptions) {
+export async function usageCommand(options: UserDataOptions) {
   const userDataPath = options.userData || getDefaultUserDataPath();
   const context = new PipelabContext({ userDataPath });
   const storage = new BuildHistoryStorage(context);
@@ -30,7 +32,7 @@ export async function usageCommand(options: UsageCommandOptions) {
   });
 }
 
-export async function purgeCommand(projectId: string | undefined, options: PurgeCommandOptions) {
+export async function purgeCommand(projectId: string | undefined, options: ForcedUserDataOptions) {
   if (!options.force) {
     console.error(
       "This is a destructive operation. Please use the --force flag to confirm you want to purge the history.",

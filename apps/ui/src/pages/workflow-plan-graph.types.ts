@@ -1,6 +1,6 @@
 import type { IconType } from "@pipelab/shared";
 
-export interface PlanGraphEdgePoints {
+export interface PlanPoint {
   x: number;
   y: number;
 }
