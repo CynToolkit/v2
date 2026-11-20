@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClientOptions } from "@supabase/supabase-js";
 import { Database } from "./database.types";
 
 const getSupabaseConfig = () => {
@@ -14,7 +14,7 @@ export const isSupabaseAvailable = () => {
   return available;
 };
 
-export const supabase = (options?: any) => {
+export const supabase = (options?: SupabaseClientOptions<"public">) => {
   const { url, publishableKey } = getSupabaseConfig();
   if (!url || !publishableKey) {
     if (process.env.NODE_ENV !== "test") {

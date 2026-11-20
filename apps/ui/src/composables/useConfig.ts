@@ -10,12 +10,27 @@ import {
   defaultFileRepo,
 } from "@pipelab/shared";
 
-function createConfigComposable<T>(
-  loadChannel: "settings:load" | "connections:load" | "projects:load",
-  saveChannel: "settings:save" | "connections:save" | "projects:save",
-  resetChannel: "settings:reset" | "connections:reset" | "projects:reset",
-  defaultValue: T,
-) {
+interface ConfigSuccess<R> {
+  type: "success";
+  result: R;
+}
+
+interface ConfigFailure {
+  type: "error";
+  ipcError: string;
+}
+
+type ConfigResult<R> = ConfigSuccess<R> | ConfigFailure;
+
+/** Typed access to one persisted config document; `name` only labels logs and errors. */
+interface ConfigIO<T> {
+  name: string;
+  load: () => Promise<ConfigResult<T>>;
+  save: (data: T) => Promise<ConfigResult<"ok">>;
+  reset: (key: string) => Promise<ConfigResult<"ok">>;
+}
+
+function createConfigComposable<T>({ name, ...io }: ConfigIO<T>, defaultValue: T) {
   const api = useAPI();
   const agent = useAgentAvailability();
   const data = ref<T>(defaultValue);
@@ -61,21 +76,21 @@ function createConfigComposable<T>(
       status.value = "loading";
       error.value = undefined;
       try {
-        const result = await api.execute(loadChannel as any);
+        const result = await io.load();
         if (generation !== requestGeneration || !agent.isReady.value) return;
         if (result.type === "success") {
-          const loadedValue: T = result.result;
+          const loadedValue = result.result;
           data.value = loadedValue;
           status.value = "ready";
         } else {
-          console.error(`[useConfig] failed to load "${loadChannel}":`, result.ipcError);
+          console.error(`[useConfig] failed to load "${name}":`, result.ipcError);
           error.value = result.ipcError;
           status.value = "error";
           throw new Error(result.ipcError);
         }
       } catch (err) {
         if (generation !== requestGeneration) return;
-        console.error(`[useConfig] error loading "${loadChannel}":`, err);
+        console.error(`[useConfig] error loading "${name}":`, err);
         error.value = err instanceof Error ? err.message : String(err);
         status.value = "error";
         throw err;
@@ -99,20 +114,20 @@ function createConfigComposable<T>(
       throw unavailable;
     }
 
-    if (!loaded.value) throw new Error(`Cannot save ${saveChannel} before loading persisted data`);
+    if (!loaded.value) throw new Error(`Cannot save ${name} before loading persisted data`);
 
     const generation = requestGeneration;
     try {
-      const result = await api.execute(saveChannel as any, { data: newValue });
+      const result = await io.save(newValue);
       if (generation !== requestGeneration || !agent.isReady.value) {
         throw new Error("Agent disconnected before the save completed");
       }
       if (result.type === "error") {
-        throw new Error(result.ipcError || `Unable to save ${saveChannel}`);
+        throw new Error(result.ipcError || `Unable to save ${name}`);
       }
       data.value = newValue;
     } catch (err) {
-      console.error(`[useConfig] error saving "${saveChannel}":`, err);
+      console.error(`[useConfig] error saving "${name}":`, err);
       throw err;
     }
   };
@@ -120,20 +135,17 @@ function createConfigComposable<T>(
   const reset = async (key: keyof T): Promise<void> => {
     if (agent.isReady.value && api.isConnected() && loaded.value) {
       try {
-        const result = await api.execute(resetChannel as any, { key: String(key) });
+        const result = await io.reset(String(key));
         if (result.type === "success") {
           await load(true);
         } else {
           console.error(
-            `[useConfig] failed to reset key "${String(key)}" of "${resetChannel}":`,
+            `[useConfig] failed to reset key "${String(key)}" of "${name}":`,
             result.ipcError,
           );
         }
       } catch (err) {
-        console.error(
-          `[useConfig] error resetting key "${String(key)}" of "${resetChannel}":`,
-          err,
-        );
+        console.error(`[useConfig] error resetting key "${String(key)}" of "${name}":`, err);
       }
     }
   };
@@ -152,28 +164,40 @@ function createConfigComposable<T>(
 }
 
 export const useSettingsConfig = () => {
+  const api = useAPI();
   return createConfigComposable<AppConfig>(
-    "settings:load",
-    "settings:save",
-    "settings:reset",
+    {
+      name: "settings",
+      load: () => api.execute("settings:load"),
+      save: (data) => api.execute("settings:save", { data }),
+      reset: (key) => api.execute("settings:reset", { key }),
+    },
     defaultAppSettings,
   );
 };
 
 export const useConnectionsConfig = () => {
+  const api = useAPI();
   return createConfigComposable<ConnectionsConfig>(
-    "connections:load",
-    "connections:save",
-    "connections:reset",
+    {
+      name: "connections",
+      load: () => api.execute("connections:load"),
+      save: (data) => api.execute("connections:save", { data }),
+      reset: (key) => api.execute("connections:reset", { key }),
+    },
     defaultConnections,
   );
 };
 
 export const useProjectsConfig = () => {
+  const api = useAPI();
   return createConfigComposable<FileRepo>(
-    "projects:load",
-    "projects:save",
-    "projects:reset",
+    {
+      name: "projects",
+      load: () => api.execute("projects:load"),
+      save: (data) => api.execute("projects:save", { data }),
+      reset: (key) => api.execute("projects:reset", { key }),
+    },
     defaultFileRepo,
   );
 };

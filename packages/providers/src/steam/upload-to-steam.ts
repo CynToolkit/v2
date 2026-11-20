@@ -1,3 +1,4 @@
+import { stringInput } from "@pipelab/shared";
 import { dirname, join, resolve, win32 as win32Path } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { ExternalCommandError, runWithLiveLogs } from "@pipelab/plugin-core";
@@ -63,9 +64,9 @@ export const createSteamUploadTask =
   async (taskContext: WorkflowTaskContext<TServices>) => {
     const { context } = services;
     const { log, inputs, workspace, signal, connectionValues } = taskContext;
-    const folder = resolve(inputs.folder as string);
-    const appId = inputs.appId as string;
-    const depotId = inputs.depotId as string;
+    const folder = resolve(stringInput(inputs, "folder"));
+    const appId = stringInput(inputs, "appId");
+    const depotId = stringInput(inputs, "depotId");
     const accountConnectionId = String(inputs.accountConnectionId || "").trim();
     if (!accountConnectionId) throw new Error("A Steam account connection is required");
     const boundConnectionValues = connectionValues[accountConnectionId];
@@ -75,7 +76,7 @@ export const createSteamUploadTask =
       );
     const username = String(boundConnectionValues.username || "").trim();
     if (!username) throw new Error("Steam account connection has no username");
-    const description = inputs.description as string;
+    const description = stringInput(inputs, "description");
 
     if (!/^\d+$/.test(appId) || !/^\d+$/.test(depotId))
       throw new Error("Steam App ID and Depot ID must contain only digits");

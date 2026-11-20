@@ -50,7 +50,7 @@ describe("remote utilities & offline mode", () => {
   });
 
   test("isOnline returns true when dns.lookup succeeds", async () => {
-    vi.spyOn(dns, "lookup").mockResolvedValue({ address: "1.2.3.4", family: 4 } as any);
+    vi.spyOn(dns, "lookup").mockResolvedValue({ address: "1.2.3.4", family: 4 });
     const online = await isOnline();
     expect(online).toBe(true);
   });

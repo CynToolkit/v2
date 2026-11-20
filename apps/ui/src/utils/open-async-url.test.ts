@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { openAsyncUrl } from "./open-async-url";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("openAsyncUrl", () => {
   afterEach(() => {
@@ -12,7 +13,7 @@ describe("openAsyncUrl", () => {
     const replace = vi.fn();
     const close = vi.fn();
     const open = vi.fn().mockReturnValue(undefined);
-    const popup = { opener: {}, close, location: { replace } } as unknown as Window;
+    const popup = partialDouble<Window>({ opener: {}, close, location: { replace } });
     open.mockReturnValue(popup);
     vi.stubGlobal("window", { open });
 
@@ -55,11 +56,13 @@ describe("openAsyncUrl", () => {
 
   it("rejects non-HTTP destinations", async () => {
     const close = vi.fn();
-    const open = vi.fn().mockReturnValue({
-      opener: {},
-      close,
-      location: { replace: vi.fn() },
-    } as unknown as Window);
+    const open = vi.fn().mockReturnValue(
+      partialDouble<Window>({
+        opener: {},
+        close,
+        location: { replace: vi.fn() },
+      }),
+    );
     vi.stubGlobal("window", { open });
 
     await expect(openAsyncUrl(async () => "javascript:alert(1)")).resolves.toBe("failed");
@@ -74,11 +77,13 @@ describe("openAsyncUrl", () => {
     );
 
     const close = vi.fn();
-    open.mockReturnValue({
-      opener: {},
-      close,
-      location: { replace: vi.fn() },
-    } as unknown as Window);
+    open.mockReturnValue(
+      partialDouble<Window>({
+        opener: {},
+        close,
+        location: { replace: vi.fn() },
+      }),
+    );
     await expect(openAsyncUrl(async () => undefined)).resolves.toBe("failed");
     expect(close).toHaveBeenCalledOnce();
   });

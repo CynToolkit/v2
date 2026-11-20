@@ -9,6 +9,7 @@ import {
   WebSocketConnectionState,
   WebSocketError,
   WebSocketMessage,
+  type WebSocketErrorMessage,
   isWebSocketRequestMessage,
   Agent,
   Channels,
@@ -193,7 +194,7 @@ export class WebSocketServer {
         });
 
         logger().debug("Routing message to handler:", message.channel);
-        await processWebSocketMessage(ws, message.channel, message);
+        await processWebSocketMessage(ws, message);
         logger().debug("Handler processed message successfully");
       } else {
         logger().warn("Invalid message format received:", {
@@ -224,7 +225,9 @@ export class WebSocketServer {
     code?: string,
   ) {
     try {
-      const errorResponse: any = {
+      const errorResponse: Omit<WebSocketErrorMessage, "requestId"> & {
+        requestId: string | undefined;
+      } = {
         type: "error",
         requestId,
         error: errorMessage,

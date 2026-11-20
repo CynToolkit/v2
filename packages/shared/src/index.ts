@@ -34,6 +34,8 @@ export * from "./validation";
 export * from "./variables";
 export * from "./websocket.types";
 export * from "./persisted-id";
+export * from "./preload.types";
+export * from "./guards";
 export * from "./release/types";
 export * from "./release/matcher";
 export * from "./release/config";

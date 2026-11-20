@@ -1,10 +1,11 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { electronAPI } from "@electron-toolkit/preload";
+import { electronAPI, type ElectronAPI } from "@electron-toolkit/preload";
+import type { PipelabBridge } from "@pipelab/shared";
 
 declare global {
   interface Window {
-    electron: any;
-    pipelab: any;
+    electron: ElectronAPI;
+    pipelab: PipelabBridge;
     version: string;
     isPackaged: boolean;
   }
@@ -26,54 +27,39 @@ try {
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
+const versions = {
+  electron: process.versions.electron,
+  chrome: process.versions.chrome,
+  node: process.versions.node,
+  app: version,
+};
+
+const pipelab: PipelabBridge = {
+  versions,
+  showOpenDialog: (options) => ipcRenderer.invoke("dialog:showOpenDialog", options),
+  showSaveDialog: (options) => ipcRenderer.invoke("dialog:showSaveDialog", options),
+  openExternal: (url) => ipcRenderer.invoke("shell:openExternal", url),
+  showItemInFolder: (path) => ipcRenderer.invoke("shell:showItemInFolder", path),
+  isPathBlacklisted: (path) => ipcRenderer.invoke("path:isBlacklisted", path),
+  relaunch: () => ipcRenderer.invoke("app:relaunch"),
+  installUpdate: () => ipcRenderer.invoke("app:install-update"),
+  readWorkflowEnvironment: (workflowId) =>
+    ipcRenderer.invoke("workflow:environment:read", workflowId),
+};
+const isPackaged = process.env.NODE_ENV !== "development";
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
-
-    const versions = {
-      electron: process.versions.electron,
-      chrome: process.versions.chrome,
-      node: process.versions.node,
-      app: version,
-    };
-
-    contextBridge.exposeInMainWorld("pipelab", {
-      versions,
-      showOpenDialog: (options: any) => ipcRenderer.invoke("dialog:showOpenDialog", options),
-      showSaveDialog: (options: any) => ipcRenderer.invoke("dialog:showSaveDialog", options),
-      openExternal: (url: string) => ipcRenderer.invoke("shell:openExternal", url),
-      showItemInFolder: (path: string) => ipcRenderer.invoke("shell:showItemInFolder", path),
-      isPathBlacklisted: (path: string) => ipcRenderer.invoke("path:isBlacklisted", path),
-      relaunch: () => ipcRenderer.invoke("app:relaunch"),
-      installUpdate: () => ipcRenderer.invoke("app:install-update"),
-      readWorkflowEnvironment: (workflowId: string) =>
-        ipcRenderer.invoke("workflow:environment:read", workflowId),
-    });
+    contextBridge.exposeInMainWorld("pipelab", pipelab);
     contextBridge.exposeInMainWorld("version", version);
-    contextBridge.exposeInMainWorld("isPackaged", process.env.NODE_ENV !== "development");
+    contextBridge.exposeInMainWorld("isPackaged", isPackaged);
   } catch (error) {
     console.error(error);
   }
 } else {
   window.electron = electronAPI;
-  const versions = {
-    electron: process.versions.electron,
-    chrome: process.versions.chrome,
-    node: process.versions.node,
-    app: version,
-  };
-  window.pipelab = {
-    versions,
-    showOpenDialog: (options: any) => ipcRenderer.invoke("dialog:showOpenDialog", options),
-    showSaveDialog: (options: any) => ipcRenderer.invoke("dialog:showSaveDialog", options),
-    openExternal: (url: string) => ipcRenderer.invoke("shell:openExternal", url),
-    showItemInFolder: (path: string) => ipcRenderer.invoke("shell:showItemInFolder", path),
-    isPathBlacklisted: (path: string) => ipcRenderer.invoke("path:isBlacklisted", path),
-    relaunch: () => ipcRenderer.invoke("app:relaunch"),
-    installUpdate: () => ipcRenderer.invoke("app:install-update"),
-    readWorkflowEnvironment: (workflowId: string) =>
-      ipcRenderer.invoke("workflow:environment:read", workflowId),
-  };
+  window.pipelab = pipelab;
   window.version = version;
-  window.isPackaged = process.env.NODE_ENV !== "development";
+  window.isPackaged = isPackaged;
 }

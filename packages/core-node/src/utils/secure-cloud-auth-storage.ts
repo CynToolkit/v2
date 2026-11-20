@@ -1,4 +1,5 @@
 import type { SupportedStorage } from "@supabase/supabase-js";
+import { isRecord } from "@pipelab/shared";
 import type { PipelabContext } from "../context";
 
 interface KeyringEntry {
@@ -18,7 +19,7 @@ export class SecureCloudAuthStorage implements SupportedStorage {
 
   private getEntry() {
     this.entryPromise ??= import("@napi-rs/keyring")
-      .then(({ Entry }) => new Entry("Pipelab CLI", this.account) as unknown as KeyringEntry)
+      .then(({ Entry }) => new Entry("Pipelab CLI", this.account))
       .catch(() => {
         throw new Error(
           "Pipelab Cloud CLI sign-in needs an available operating system credential store.",
@@ -32,8 +33,8 @@ export class SecureCloudAuthStorage implements SupportedStorage {
       const password = await (await this.getEntry()).getPassword();
       if (!password) return null;
       const data: unknown = JSON.parse(password);
-      if (!data || typeof data !== "object" || !(key in data)) return null;
-      const value = (data as Record<string, unknown>)[key];
+      if (!isRecord(data)) return null;
+      const value = data[key];
       return typeof value === "string" ? value : null;
     } catch (error) {
       if (error instanceof Error && error.message.includes("credential store")) throw error;

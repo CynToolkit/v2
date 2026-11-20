@@ -1,26 +1,14 @@
-import { ElectronAPI } from "@electron-toolkit/preload";
+import type { ElectronAPI } from "@electron-toolkit/preload";
+import type { PipelabBridge } from "@pipelab/shared";
 
 declare global {
   interface Window {
     electron: ElectronAPI;
-    api: unknown;
     version?: string;
     isPackaged?: boolean;
     isTest?: boolean;
     isCI?: boolean;
-    pipelab?: {
-      versions?: {
-        electron?: string;
-        chrome?: string;
-        node?: string;
-        app?: string;
-      };
-      showOpenDialog?: (options: any) => Promise<any>;
-      showSaveDialog?: (options: any) => Promise<any>;
-      openExternal?: (url: string) => Promise<boolean | void>;
-      showItemInFolder?: (path: string) => Promise<any>;
-      isPathBlacklisted?: (path: string) => Promise<boolean>;
-      readWorkflowEnvironment?: (workflowId: string) => Promise<Record<string, string>>;
-    };
+    pipelab?: PipelabBridge;
   }
 }
+export {}; // Make this a module

@@ -9,6 +9,7 @@ import {
   type ReleaseConfig,
   type SaveLocationWorkflow,
   useLogger,
+  hasErrorCode,
 } from "@pipelab/shared";
 import { PipelabContext } from "./context";
 import { JsonFileMissingError, readJsonFile, writeJsonFileAtomically } from "./utils/atomic-json";
@@ -239,7 +240,7 @@ export class ReleasePersistence {
         );
       } catch (fileError) {
         if (fileError instanceof ReleasePersistenceError) throw fileError;
-        if ((fileError as NodeJS.ErrnoException).code !== "ENOENT") throw fileError;
+        if (!hasErrorCode(fileError, "ENOENT")) throw fileError;
       }
     }
     const nextRepo: FileRepo = {

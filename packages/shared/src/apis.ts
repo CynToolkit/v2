@@ -1,22 +1,53 @@
 import type { PreflightResult, RendererProviderMetadata } from "./plugins/definitions";
-import { User, UserResponse } from "@supabase/supabase-js";
+import {
+  AuthError,
+  AuthResponse,
+  FunctionInvokeOptions,
+  User,
+  UserResponse,
+} from "@supabase/supabase-js";
 import { AppConfig, ConnectionsConfig } from "./config.schema";
 import { FileRepo } from "./config/projects-definition";
 import type {
   ReleaseCatalog,
   ReleaseConfig,
   ReleasePlan,
+  ProducerInspection,
+  ReleaseFieldOption,
   ReleaseProducerConfig,
   ValidationIssue,
 } from "./release/types";
 import { Agent } from "./websocket.types";
-import { BuildHistoryEntry, BuildHistoryQuery, BuildHistoryResponse } from "./build-history";
+import {
+  BuildHistoryEntry,
+  BuildHistoryQuery,
+  BuildHistoryResponse,
+  BuildHistoryStorageInfo,
+} from "./build-history";
 import type {
   WorkflowConnectionOverride,
   WorkflowConnectionValues,
   WorkflowEvent,
   WorkflowResult,
 } from "@pipelab/workflow-runtime";
+export interface ReleaseSourceInspection {
+  issues?: ValidationIssue[];
+  fieldOptions?: Record<string, ReleaseFieldOption[]>;
+}
+
+export interface AuthErrorResult {
+  error: AuthError | null;
+}
+
+export interface AuthInvokeError {
+  message?: string;
+}
+
+export interface AuthInvokeResult {
+  data: unknown;
+  error: AuthInvokeError | null;
+}
+
 export type BrowserProfileAuthStatus = "authenticated" | "not-authenticated" | "unknown";
 
 export interface BrowserProfileCandidate {
@@ -113,11 +144,11 @@ export type IpcDefinition = {
   "release:catalog:get": [void, EndEvent<ReleaseCatalog>];
   "release:source:inspect": [
     { provider: string; config: Record<string, unknown> },
-    EndEvent<unknown>,
+    EndEvent<ReleaseSourceInspection>,
   ];
   "release:producer:inspect": [
     { provider: string; config: ReleaseProducerConfig; sourceConfig?: Record<string, unknown> },
-    EndEvent<unknown>,
+    EndEvent<ProducerInspection>,
   ];
   "release:validate": [{ config: ReleaseConfig }, EndEvent<{ issues: ValidationIssue[] }>];
   "release:plan": [{ config: ReleaseConfig }, EndEvent<ReleasePlan>];
@@ -171,26 +202,15 @@ export type IpcDefinition = {
   "build-history:delete": [{ id: string; projectId?: string }, EndEvent<{ result: "ok" | "ko" }>];
   "build-history:clear": [void, EndEvent<{ result: "ok" | "ko" }>];
   "build-history:clear-by-project": [{ projectId: string }, EndEvent<{ result: "ok" | "ko" }>];
-  "build-history:get-storage-info": [
-    void,
-    EndEvent<{
-      totalEntries: number;
-      totalSize: number;
-      oldestEntry?: number;
-      newestEntry?: number;
-    }>,
-  ];
+  "build-history:get-storage-info": [void, EndEvent<BuildHistoryStorageInfo>];
   "agents:get": [void, EndEvent<{ agents: Agent[] }>];
   "auth:getUser": [void, EndEvent<{ user: User | null }>];
   "auth:getCloudAccessToken": [void, EndEvent<{ accessToken: string | null }>];
   "auth:signInWithPassword": [{ email: string; password: string }, EndEvent<UserResponse>];
-  "auth:signUp": [{ email: string; password: string }, EndEvent<UserResponse>];
+  "auth:signUp": [{ email: string; password: string }, EndEvent<AuthResponse>];
   "auth:signOut": [void, EndEvent<void>];
-  "auth:resetPasswordForEmail": [{ email: string }, EndEvent<{ error: any | null }>];
-  "auth:invoke": [
-    { name: string; options?: any },
-    EndEvent<{ data: any | null; error: any | null }>,
-  ];
+  "auth:resetPasswordForEmail": [{ email: string }, EndEvent<AuthErrorResult>];
+  "auth:invoke": [{ name: string; options?: FunctionInvokeOptions }, EndEvent<AuthInvokeResult>];
   "agent:version:get": [void, EndEvent<{ version: string; channel: ReleaseChannel }>];
   "system:packages:cleanup": [void, EndEvent<boolean>];
   "startup:progress": [void, { type: "progress"; data: { message: string } } | { type: "done" }];
@@ -208,11 +228,6 @@ export type Data<KEY extends Channels> = IpcDefinition[KEY][0];
 export type Events<KEY extends Channels> = IpcDefinition[KEY][1];
 export type End<KEY extends Channels> = Extract<IpcDefinition[KEY][1], { type: "end" }>["data"];
 
-export interface IpcMessage {
-  // the channel to communicate
-  requestId: RequestId;
-  data: any;
-}
 export type { RequestId } from "./ipc.types";
 import type { RequestId } from "./ipc.types";
 

@@ -7,6 +7,7 @@ import type { PipelabContext } from "@pipelab/plugin-core";
 import { createLocalHost, runWorkflow } from "@pipelab/workflow-runtime";
 import type { Subprocess } from "execa";
 import { createSteamUploadTask, type SteamTaskServices } from "../../upload-to-steam";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("@pipelab/plugin-core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@pipelab/plugin-core")>();
@@ -22,11 +23,11 @@ describe("End-to-End: Steam Integration", () => {
   let sandbox: Awaited<ReturnType<typeof createSandbox>>;
 
   const servicesFor = (sandboxPath: string): SteamTaskServices => ({
-    context: {
+    context: partialDouble<PipelabContext>({
       getConnectionsPath: () => join(sandboxPath, "user-data", "config", "connections.json"),
       getThirdPartyPath: (...segments: string[]) =>
         join(sandboxPath, "user-data", "thirdparty", ...segments),
-    } as unknown as PipelabContext,
+    }),
   });
 
   afterEach(async () => {
@@ -174,7 +175,7 @@ describe("End-to-End: Steam Integration", () => {
       description: "Test Build",
       folder,
     };
-    const mockProcess = { kill: vi.fn() } as unknown as Subprocess;
+    const mockProcess = partialDouble<Subprocess>({ kill: vi.fn() });
     vi.mocked(runWithLiveLogs).mockImplementationOnce(async (...args) => {
       args[4]?.onStdout?.("Cached credentials not found", mockProcess);
     });

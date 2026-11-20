@@ -93,13 +93,13 @@ const executionPlan = (workflow: Workflow) =>
     uses: step.uses,
     status: "pending" as const,
     startTime: 0,
-    logs: [] as LogEntry[],
+    logs: new Array<LogEntry>(),
     ...(step.phases
       ? {
           phases: step.phases.map((phase) => ({
             ...phase,
             status: "pending" as const,
-            warnings: [] as string[],
+            warnings: new Array<string>(),
           })),
         }
       : {}),
@@ -506,14 +506,16 @@ export const executeWorkflow = async (
         throw preflightFailure;
       }
     }
-    // tslog v5 types its level methods as overloads with specific first arguments, so the
-    // workflow logger contract (variadic unknown) is adapted through a narrow typed view.
-    const loose = () =>
-      logger() as unknown as Record<"info" | "warn" | "error", (...args: unknown[]) => void>;
+    // tslog's level methods take either a message or a fields object first, while the workflow
+    // logger contract is variadic `unknown`, so the first argument is narrowed here.
+    const emit = (level: "info" | "warn" | "error", [first, ...rest]: unknown[]) => {
+      if (typeof first === "object" && first !== null) logger()[level](first, undefined, ...rest);
+      else logger()[level](String(first ?? ""), ...rest);
+    };
     const workflowLogger = options.logger ?? {
-      info: (...args: unknown[]) => loose().info(...args),
-      warn: (...args: unknown[]) => loose().warn(...args),
-      error: (...args: unknown[]) => loose().error(...args),
+      info: (...args: unknown[]) => emit("info", args),
+      warn: (...args: unknown[]) => emit("warn", args),
+      error: (...args: unknown[]) => emit("error", args),
     };
     result = await runWorkflow(workflow, {
       host: createLocalHost(workspaceRoot, {

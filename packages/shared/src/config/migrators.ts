@@ -41,7 +41,7 @@ export const appSettingsMigrator = settingsMigratorInternal.createMigrations({
   defaultValue: defaultAppSettings,
   migrations: [
     createMigration<AppConfig, never>({
-      version: "1.0.0" as SemVer,
+      version: "1.0.0",
       up: finalVersion,
     }),
   ],
@@ -60,7 +60,7 @@ export const connectionsMigrator = connectionsMigratorInternal.createMigrations(
   defaultValue: defaultConnections,
   migrations: [
     createMigration<ConnectionsConfig, never>({
-      version: "1.0.0" as SemVer,
+      version: "1.0.0",
       up: finalVersion,
     }),
   ],

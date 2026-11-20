@@ -7,6 +7,30 @@ import type {
 } from "@pipelab/workflow-runtime";
 import type { ArtifactDescriptor } from "./release/types";
 
+export interface BuildHistoryFolderUsage {
+  name: SandboxFolder;
+  label: string;
+  size: number;
+}
+
+export interface BuildHistoryDiskUsage {
+  total: number;
+  free: number;
+  pipelab: number;
+  folders: BuildHistoryFolderUsage[];
+}
+
+/** Disk and history usage shown on the Advanced settings page. */
+export interface BuildHistoryStorageInfo {
+  totalEntries: number;
+  totalSize: number;
+  oldestEntry?: number;
+  newestEntry?: number;
+  numberOfProjects: number;
+  userDataPath: string;
+  disk: BuildHistoryDiskUsage;
+}
+
 export interface ExecutionStep {
   id: string;
   name: string;
@@ -372,20 +396,7 @@ export interface IBuildHistoryStorage {
   update(id: string, updates: Partial<BuildHistoryEntry>, projectId?: string): Promise<void>;
   delete(id: string, projectId?: string): Promise<void>;
   clear(): Promise<void>;
-  getStorageInfo(): Promise<{
-    totalEntries: number;
-    totalSize: number;
-    oldestEntry?: number;
-    newestEntry?: number;
-    numberOfProjects: number;
-    userDataPath: string;
-    disk: {
-      total: number;
-      free: number;
-      pipelab: number;
-      folders: Array<{ name: SandboxFolder; label: string; size: number }>;
-    };
-  }>;
+  getStorageInfo(): Promise<BuildHistoryStorageInfo>;
 }
 
 // Authorization and subscription types

@@ -14,10 +14,11 @@ describe("workflow execution IPC logging", () => {
     const debug = vi.spyOn(useLogger().logger(), "debug");
     handle("workflow:execute", async () => undefined);
 
-    await processWebSocketMessage({ url: "test-client" } as WebSocket, "workflow:execute", {
+    await processWebSocketMessage({ url: "test-client" } as WebSocket, {
+      channel: "workflow:execute",
       requestId: "request-1",
       data: { name: "workflows/release", env: { PUBLISH_TOKEN: secret } },
-    } as never);
+    });
 
     expect(JSON.stringify(debug.mock.calls)).not.toContain(secret);
   });

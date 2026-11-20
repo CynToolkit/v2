@@ -836,6 +836,7 @@ import { useAgentAvailability } from "@renderer/composables/useAgentAvailability
 import {
   browserPreferences,
   saveBrowserPreference,
+  findLocale,
 } from "@renderer/composables/browser-preferences";
 import { uiEnvironment } from "@renderer/composables/ui-runtime";
 
@@ -877,7 +878,7 @@ const browseCacheFolder = async () => {
   });
   if (result.type === "success" && !result.result.canceled && result.result.filePaths.length > 0) {
     appSettings.updateSettings({
-      ...(toRaw(settingsRef.value) as any),
+      ...toRaw(settingsRef.value),
       cacheFolder: result.result.filePaths[0],
     });
   }
@@ -890,7 +891,7 @@ const browseTempFolder = async () => {
   });
   if (result.type === "success" && !result.result.canceled && result.result.filePaths.length > 0) {
     appSettings.updateSettings({
-      ...(toRaw(settingsRef.value) as any),
+      ...toRaw(settingsRef.value),
       tempFolder: result.result.filePaths[0],
     });
   }
@@ -898,14 +899,14 @@ const browseTempFolder = async () => {
 
 const resetCacheFolder = () => {
   appSettings.updateSettings({
-    ...(toRaw(settingsRef.value) as any),
+    ...toRaw(settingsRef.value),
     cacheFolder: undefined,
   });
 };
 
 const resetTempFolder = () => {
   appSettings.updateSettings({
-    ...(toRaw(settingsRef.value) as any),
+    ...toRaw(settingsRef.value),
     tempFolder: undefined,
   });
 };
@@ -938,19 +939,21 @@ watch(
 
 const currentLocale = computed({
   get: () =>
-    isBrowser ? browserPreferences.locale : (settingsRef.value?.locale as string) || "en-US",
+    isBrowser ? browserPreferences.locale : settingsRef.value?.locale || "en-US",
   set: (value: string) => {
     browserPreferenceError.value = "";
+    const nextLocale = findLocale(value);
+    if (!nextLocale) return;
     if (isBrowser) {
-      if (!saveBrowserPreference("locale", value as Locales)) {
+      if (!saveBrowserPreference("locale", nextLocale)) {
         browserPreferenceError.value =
           "Browser storage is unavailable. Your language was not changed.";
       }
       return;
     }
     appSettings.updateSettings({
-      ...(toRaw(settingsRef.value) as any),
-      locale: value as Locales,
+      ...toRaw(settingsRef.value),
+      locale: nextLocale,
     });
   },
 });
@@ -975,7 +978,7 @@ const updateTheme = (value: boolean) => {
     return;
   }
   return appSettings.updateSettings({
-    ...(toRaw(settingsRef.value) as any),
+    ...toRaw(settingsRef.value),
     theme: value ? "dark" : "light",
   });
 };
@@ -1019,7 +1022,7 @@ const formatSize = (bytes: number): string => {
 
 const getFolderLabel = (folder: { name: SandboxFolder; label: string }) => {
   const key = `settings.storage-${folder.name}`;
-  const translated = t(key as any);
+  const translated = t(key);
   return translated === key ? folder.label : translated;
 };
 
@@ -1104,11 +1107,11 @@ const cleanPackagesCache = () => {
           });
           cleaningPackages.value = false;
         }
-      } catch (e: any) {
+      } catch (e) {
         toast.add({
           severity: "error",
           summary: t("base.error", "Error"),
-          detail: e.message || "Failed to clear package cache.",
+          detail: (e instanceof Error && e.message) || "Failed to clear package cache.",
           life: 3000,
         });
         cleaningPackages.value = false;
@@ -1128,7 +1131,7 @@ const restartTour = async () => {
   tours.dashboard = { step: 0, completed: false };
   try {
     await appSettings.updateSettings({
-      ...(toRaw(settingsRef.value) as any),
+      ...toRaw(settingsRef.value),
       tours,
     });
     toast.add({

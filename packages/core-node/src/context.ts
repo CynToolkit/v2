@@ -75,6 +75,12 @@ type Join<T extends string[], D extends string> = T extends []
       ? `${F}${D}${Join<R, D>}`
       : string;
 
+/** The folder overrides read from the saved settings file. */
+interface CachedSettings {
+  tempFolder?: string;
+  cacheFolder?: string;
+}
+
 export class PipelabContext {
   public readonly userDataPath: string;
   public readonly releaseTag: string;
@@ -133,7 +139,7 @@ export class PipelabContext {
     return this.getConfigPath("projects.json");
   }
 
-  private _cachedSettings: any = null;
+  private _cachedSettings: CachedSettings | null = null;
   private _cachedSettingsTime: number = 0;
 
   private getSettings() {
@@ -229,7 +235,7 @@ export class PipelabContext {
       [SandboxFolder.Artifacts]: { label: "Artifacts", path: this.getArtifactsPath() },
     };
 
-    return (Object.keys(foldersRecord) as SandboxFolder[]).map((key) => ({
+    return Object.values(SandboxFolder).map((key) => ({
       name: key,
       ...foldersRecord[key],
     }));

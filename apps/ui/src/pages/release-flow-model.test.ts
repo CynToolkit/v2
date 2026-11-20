@@ -58,6 +58,7 @@ import type {
   ReleasePlan,
 } from "@pipelab/shared";
 import type { SlotDestinationDefinition } from "./release-flow-model";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const catalog: ReleaseCatalog = {
   buildTypes: [
@@ -416,7 +417,7 @@ describe("release flow model", () => {
   });
 
   it("duplicates a build after the original with fresh IDs and leaves the original alone", () => {
-    const flow = {
+    const flow = partialDouble<ReleaseConfig>({
       builds: [
         {
           id: "a",
@@ -428,7 +429,7 @@ describe("release flow model", () => {
         },
         { id: "z", type: "web", engine: "engine-b", config: {}, targets: [] },
       ],
-    } as unknown as ReleaseConfig;
+    });
     let hooks = 0;
     const copy = duplicateBuildProfile(flow, "a", "a2", "Desktop", () => `hook-new-${++hooks}`);
     expect(flow.builds.map((build) => build.id)).toEqual(["a", "a2", "z"]);
@@ -445,13 +446,13 @@ describe("release flow model", () => {
   });
 
   it("keeps an output this host cannot build selectable", () => {
-    const plan = {
+    const plan = partialDouble<ReleasePlan>({
       outputs: [],
       issues: [],
       producers: [],
       destinations: [],
       graph: { nodes: [], edges: [] },
-    } as unknown as ReleasePlan;
+    });
     const hostCatalog = {
       ...catalog,
       producers: catalog.producers.map((producer) => ({
@@ -518,14 +519,14 @@ describe("release flow model", () => {
       candidates,
       async (draft) =>
         draft.builds[1].input && "buildId" in draft.builds[1].input
-          ? ({
+          ? partialDouble<ReleasePlan>({
               outputs: [],
               producers: [{ id: "build-b" }],
               destinations: [],
               issues: [],
               graph: { nodes: [], edges: [] },
-            } as unknown as ReleasePlan)
-          : ({
+            })
+          : partialDouble<ReleasePlan>({
               outputs: [],
               producers: [],
               destinations: [],
@@ -538,7 +539,7 @@ describe("release flow model", () => {
                 },
               ],
               graph: { nodes: [], edges: [] },
-            } as unknown as ReleasePlan),
+            }),
     );
 
     expect(options.map((option) => option.value)).toEqual(["build-a:windows"]);
@@ -568,13 +569,13 @@ describe("release flow model", () => {
       "build-b",
       [{ value: "source", label: "Source", ref: { source: true } }],
       async () =>
-        ({
+        partialDouble<ReleasePlan>({
           outputs: [],
           producers: [{ id: "build-b" }],
           destinations: [],
           issues: [],
           graph: { nodes: [], edges: [] },
-        }) as unknown as ReleasePlan,
+        }),
     );
 
     expect(buildInputSelectionMode(options)).toBe("hidden");
@@ -676,13 +677,13 @@ describe("release flow model", () => {
       "build-b",
       [{ value: "source", label: "Source", ref: { source: true } }],
       async () =>
-        ({
+        partialDouble<ReleasePlan>({
           outputs: [],
           producers: [{ id: "build-b" }],
           destinations: [],
           issues: [],
           graph: { nodes: [], edges: [] },
-        }) as unknown as ReleasePlan,
+        }),
     );
 
     expect(options).toHaveLength(1);
@@ -695,13 +696,13 @@ describe("release flow model", () => {
   });
 
   it("accepts planner-resolved build inputs and rejects missing or invalid inputs", () => {
-    const plan = {
+    const plan = partialDouble<ReleasePlan>({
       outputs: [],
       producers: [{ id: "build" }],
       destinations: [],
       issues: [],
       graph: { nodes: [], edges: [] },
-    } as unknown as ReleasePlan;
+    });
     expect(plannerAcceptsBuildInput(plan, "build", 0)).toBe(true);
     expect(
       plannerAcceptsBuildInput(
@@ -736,13 +737,13 @@ describe("release flow model", () => {
         },
       ],
     };
-    const plan = {
+    const plan = partialDouble<ReleasePlan>({
       outputs: [],
       producers: [{ id: "build-a", input: { source: true } }],
       destinations: [],
       issues: [],
       graph: { nodes: [], edges: [] },
-    } as unknown as ReleasePlan;
+    });
 
     expect(plannedBuildInputLabel(workflow, plan, catalog, "build-a")).toBe("Source — Project");
   });
@@ -1041,7 +1042,7 @@ describe("release flow model", () => {
       "slot-a",
       async (candidate) => {
         const added = candidate.builds.at(-1)!;
-        return {
+        return partialDouble<ReleasePlan>({
           outputs: [],
           producers:
             added.engine === "engine-a" &&
@@ -1052,7 +1053,7 @@ describe("release flow model", () => {
           destinations: [],
           issues: [],
           graph: { nodes: [], edges: [] },
-        } as unknown as ReleasePlan;
+        });
       },
     );
 
@@ -1081,13 +1082,13 @@ describe("release flow model", () => {
       "slot-a",
       async (candidate) => {
         current = false;
-        return {
+        return partialDouble<ReleasePlan>({
           outputs: [],
           producers: [{ id: candidate.builds.at(-1)!.id }],
           destinations: [],
           issues: [],
           graph: { nodes: [], edges: [] },
-        } as unknown as ReleasePlan;
+        });
       },
       () => current,
     );
@@ -1115,13 +1116,13 @@ describe("release flow model", () => {
       [{ value: "source", label: "Source", ref: { source: true } }],
       async () => {
         current = false;
-        return {
+        return partialDouble<ReleasePlan>({
           outputs: [],
           producers: [{ id: "build-a" }],
           destinations: [],
           issues: [],
           graph: { nodes: [], edges: [] },
-        } as unknown as ReleasePlan;
+        });
       },
       () => current,
     );
@@ -1195,13 +1196,13 @@ describe("release flow model", () => {
   });
 
   it("accepts only planner-resolved compatible build candidates", () => {
-    const basePlan = {
+    const basePlan = partialDouble<ReleasePlan>({
       outputs: [],
       producers: [{ id: "candidate" }],
       destinations: [],
       issues: [],
       graph: { nodes: [], edges: [] },
-    } as unknown as ReleasePlan;
+    });
     expect(plannerAcceptsBuildCandidate(basePlan, "candidate", 1, 0, 0)).toBe(true);
     expect(
       plannerAcceptsBuildCandidate(
@@ -1225,7 +1226,7 @@ describe("release flow model", () => {
   });
 
   it("matches a newly saved connection by plugin integration", () => {
-    const connection = {
+    const connection = partialDouble<Parameters<typeof connectionMatchesIntegration>[0]>({
       id: "steam-account",
       pluginName: "@pipelab/plugin-steam",
       integrationName: "Steam Account",
@@ -1234,14 +1235,14 @@ describe("release flow model", () => {
       password: "secret",
       createdAt: new Date().toISOString(),
       isDefault: false,
-    } as never;
+    });
     expect(connectionMatchesIntegration(connection, "@pipelab/plugin-steam")).toBe(true);
     expect(connectionMatchesIntegration(connection, "@pipelab/plugin-itch")).toBe(false);
   });
 
   it("only allows shipping a fully planned release without blocking issues", () => {
     const flow = {} as ReleaseConfig;
-    const plan = { issues: [] } as unknown as ReleasePlan;
+    const plan = partialDouble<ReleasePlan>({ issues: [] });
     expect(releaseCanRun(flow, plan, [], false, false)).toBe(true);
     expect(releaseCanRun(flow, undefined, [], false, false)).toBe(false);
     expect(
@@ -1889,7 +1890,7 @@ describe("multi-input builds", () => {
       "Desktop shell — windows-x64, Electron — windows-x64",
     );
 
-    const planned = {
+    const planned = partialDouble<ReleasePlan>({
       outputs: [],
       producers: [
         {
@@ -1900,7 +1901,7 @@ describe("multi-input builds", () => {
       destinations: [],
       issues: [],
       graph: { nodes: [], edges: [] },
-    } as unknown as ReleasePlan;
+    });
     const empty = workflowWith([
       electronBuild("electron-win", ["windows-x64"]),
       bundleBuild("bundle-a", []),
@@ -1985,10 +1986,10 @@ describe("multi-input builds", () => {
       "slot-a",
       async (candidate) => {
         planned.push(candidate);
-        return {
+        return partialDouble<ReleasePlan>({
           producers: candidate.builds.map((build) => ({ id: build.id })),
           issues: [],
-        } as unknown as ReleasePlan;
+        });
       },
     );
 

@@ -1,4 +1,14 @@
-import { Channels, Data, End, Events, RequestId } from "@pipelab/shared";
+import {
+  Channels,
+  Data,
+  End,
+  Events,
+  RequestId,
+  type EventMessageFor,
+  type RequestMessageFor,
+  type WebSocketEventMessage,
+  type WebSocketListener,
+} from "@pipelab/shared";
 import { useLogger } from "@pipelab/shared";
 import { klona } from "klona";
 import { toRaw } from "vue";
@@ -67,20 +77,16 @@ export function resolveAuthToken(location: Pick<Location, "search" | "hash">): s
   }
 }
 
-// Message queue item interface
+// A request waiting for the connection: `run` re-sends it, `reject` fails it if the queue is dropped
 interface QueuedMessage {
-  channel: Channels;
-  data?: any;
-  resolve: (value: any) => void;
-  reject: (reason: any) => void;
-  requestId: RequestId;
-  listener?: (event: any) => void;
+  run: () => void;
+  reject: (reason: unknown) => void;
 }
 
 export class WebSocketClient {
   private ws: WebSocket | null = null;
   private listeners: Map<RequestId, (data: WebSocketMessage) => void> = new Map();
-  private eventListeners: Map<string, Set<(data: any) => void>> = new Map();
+  private eventListeners: { [KEY in Channels]?: Set<(data: Events<KEY>) => void> } = {};
   private reconnectAttempts = 0;
   private maxReconnectAttempts = Infinity;
   private reconnectDelay = 1000;
@@ -89,7 +95,7 @@ export class WebSocketClient {
   private connectionState: WebSocketConnectionState = "disconnected";
   private stateChangeListeners: Set<(state: WebSocketConnectionState) => void> = new Set();
   private messageQueue: QueuedMessage[] = [];
-  private reconnectTimeout: any = null;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   public currentUrl: string;
   private isRenderer = false;
 
@@ -242,36 +248,34 @@ export class WebSocketClient {
 
   private handleMessage(event: MessageEvent) {
     try {
-      const message: WebSocketMessage | { type: "event"; channel: string; data: any } = JSON.parse(
-        event.data,
-      );
+      const message: WebSocketMessage | WebSocketEventMessage = JSON.parse(event.data);
 
       if (isWebSocketResponseMessage(message) || isWebSocketErrorMessage(message)) {
         if (this.listeners.has(message.requestId)) {
           this.listeners.get(message.requestId)!(message);
         }
       } else if ("type" in message && message.type === "event" && "channel" in message) {
-        const channel = message.channel;
-        const listeners = this.eventListeners.get(channel);
-        if (listeners) {
-          listeners.forEach((listener) => {
-            try {
-              listener(message.data);
-            } catch (error) {
-              console.error(`Error in event listener for channel ${channel}:`, error);
-            }
-          });
-        }
+        this.emitEvent(message);
       }
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
     }
   }
 
+  private emitEvent<KEY extends Channels>(message: EventMessageFor<KEY>) {
+    this.eventListeners[message.channel]?.forEach((listener) => {
+      try {
+        listener(message.data);
+      } catch (error) {
+        console.error(`Error in event listener for channel ${message.channel}:`, error);
+      }
+    });
+  }
+
   public send<KEY extends Channels>(
     channel: KEY,
     data?: Data<KEY>,
-    listener?: (event: any) => void,
+    listener?: WebSocketListener<KEY>,
   ): Promise<End<KEY>> {
     return new Promise(async (resolve, reject) => {
       const { logger } = useLogger();
@@ -280,14 +284,10 @@ export class WebSocketClient {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         logger().debug("WebSocket not ready, queuing message:", { channel, hasData: !!data });
 
-        const requestId = nanoid() as RequestId;
+        const queuedData = toRaw(klona(data));
         this.messageQueue.push({
-          channel,
-          data: toRaw(klona(data)),
-          resolve,
+          run: () => this.sendMessage(channel, queuedData, resolve, reject, nanoid, listener),
           reject,
-          requestId,
-          listener,
         });
 
         return;
@@ -302,9 +302,9 @@ export class WebSocketClient {
     channel: KEY,
     data: Data<KEY> | undefined,
     resolve: (value: End<KEY>) => void,
-    reject: (reason: any) => void,
+    reject: (reason: unknown) => void,
     nanoidFn: () => string,
-    listener?: (event: any) => void,
+    listener?: WebSocketListener<KEY>,
   ): void {
     const { logger } = useLogger();
 
@@ -314,8 +314,8 @@ export class WebSocketClient {
       return;
     }
 
-    const requestId = nanoidFn() as RequestId;
-    const message: WebSocketMessage = {
+    const requestId: RequestId = nanoidFn();
+    const message: Omit<RequestMessageFor<KEY>, "data"> & { data: Data<KEY> | undefined } = {
       channel,
       requestId,
       data: toRaw(klona(data)),
@@ -348,7 +348,7 @@ export class WebSocketClient {
             logger().info("Received intermediate event:", {
               requestId,
               eventType: endEvent.type,
-              hasData: !!endEvent.data,
+              hasData: "data" in endEvent && !!endEvent.data,
             });
           }
         }
@@ -382,14 +382,7 @@ export class WebSocketClient {
 
     // Send all queued messages
     for (const queuedMessage of queuedMessages) {
-      this.sendMessage(
-        queuedMessage.channel,
-        queuedMessage.data,
-        queuedMessage.resolve,
-        queuedMessage.reject,
-        nanoid,
-        queuedMessage.listener,
-      );
+      queuedMessage.run();
     }
   }
 
@@ -459,16 +452,13 @@ export class WebSocketClient {
     this.disconnect({ clearQueue: true });
     this.connect(url);
   }
-  public on<KEY extends Channels>(
-    channel: KEY | string,
-    listener: (data: Events<KEY>) => void,
-  ): () => void {
-    if (!this.eventListeners.has(channel)) {
-      this.eventListeners.set(channel, new Set());
-    }
-    this.eventListeners.get(channel)!.add(listener);
+  public on<KEY extends Channels>(channel: KEY, listener: (data: Events<KEY>) => void): () => void {
+    const listeners = this.eventListeners[channel] ?? new Set<(data: Events<KEY>) => void>();
+    // Keyed by channel, so the set only ever holds listeners for that channel's events.
+    Object.assign(this.eventListeners, { [channel]: listeners });
+    listeners.add(listener);
     return () => {
-      this.eventListeners.get(channel)?.delete(listener);
+      listeners.delete(listener);
     };
   }
 }
@@ -493,7 +483,7 @@ export const useWebSocketAPI = () => {
   const execute = async <KEY extends Channels>(
     channel: KEY,
     data?: Data<KEY>,
-    listener?: (event: any) => void,
+    listener?: WebSocketListener<KEY>,
   ): Promise<End<KEY>> => {
     try {
       return await client.send(channel, data, listener);

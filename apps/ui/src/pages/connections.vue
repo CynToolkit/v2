@@ -577,6 +577,7 @@
 import { useRoute, useRouter } from "vue-router";
 import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { buildIntegrationTargets } from "./integration-targets";
+type IntegrationTarget = ReturnType<typeof buildIntegrationTargets>[number];
 import { ref, computed, toRaw, watch } from "vue";
 import { useConnectionsStore } from "@renderer/store/connections";
 import { useAppStore } from "@renderer/store/app";
@@ -602,7 +603,7 @@ import {
   decideConnectionSave,
   type TestedConnection,
 } from "../utils/connection-test";
-import type { PreflightResult } from "@pipelab/shared";
+import type { IconType, PreflightResult } from "@pipelab/shared";
 
 interface ConnectedAccount {
   id: string;
@@ -616,7 +617,7 @@ interface ConnectedAccount {
   gameId?: string;
   createdAt: string;
   isDefault: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Store & Composables
@@ -639,7 +640,7 @@ const addSearchQuery = ref("");
 const isAddConnectionVisible = ref(false);
 const isConnectDialogVisible = ref(false);
 const selectedConnectPluginName = ref("");
-const selectedConnectTarget = ref<any | null>(null);
+const selectedConnectTarget = ref<IntegrationTarget | null>(null);
 
 // Add Form State
 const newConnectionName = ref("");
@@ -887,8 +888,8 @@ const getPluginIconImage = (packageName: string) => {
   return icon?.type === "image" ? icon.image : undefined;
 };
 
-const getIconClass = (iconObj: any) => {
-  if (!iconObj || !iconObj.icon) return "";
+const getIconClass = (iconObj: IconType | null | undefined) => {
+  if (iconObj?.type !== "icon" || !iconObj.icon) return "";
   const iconName = iconObj.icon;
   if (iconName.startsWith("mdi-")) {
     return `mdi ${iconName}`;
@@ -990,7 +991,7 @@ const browseForEditFieldDirectory = async (key: string, label: string) => {
   }
 };
 
-const selectTargetToConnect = (target: any) => {
+const selectTargetToConnect = (target: IntegrationTarget) => {
   isAddConnectionVisible.value = false;
   selectedConnectTarget.value = target;
   selectedConnectPluginName.value = target.pluginName;
@@ -1115,11 +1116,11 @@ const saveNewAccount = async () => {
     });
 
     isConnectDialogVisible.value = false;
-  } catch (err: any) {
+  } catch (err) {
     toast.add({
       severity: "error",
       summary: "Failed to Save Connection",
-      detail: err.message || "An unexpected error occurred.",
+      detail: (err instanceof Error && err.message) || "An unexpected error occurred.",
       life: 5000,
     });
   } finally {

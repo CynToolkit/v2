@@ -37,11 +37,11 @@ export class JsonFileStorage {
       // We throw here because the user explicitly asked NOT to ignore errors
       throw e;
     }
-  }
+  };
 
   setItem = (key: string, value: string): void => {
     try {
-      let data: any = {};
+      let data: Record<string, string> = {};
       if (fs.existsSync(this.filePath)) {
         const content = fs.readFileSync(this.filePath, "utf8");
         if (content) {
@@ -54,7 +54,7 @@ export class JsonFileStorage {
       this.logger().error(`[Storage] Failed to write to ${this.filePath}:`, e);
       throw e;
     }
-  }
+  };
 
   removeItem = (key: string): void => {
     try {
@@ -68,7 +68,7 @@ export class JsonFileStorage {
       this.logger().error(`[Storage] Failed to remove key from ${this.filePath}:`, e);
       throw e;
     }
-  }
+  };
 
   /**
    * Helper to get the entire data object
@@ -82,7 +82,7 @@ export class JsonFileStorage {
       this.logger().error(`[Storage] Failed to read all data from ${this.filePath}:`, e);
       throw e;
     }
-  }
+  };
 
   /**
    * Helper to clear the entire storage file
@@ -96,5 +96,5 @@ export class JsonFileStorage {
       this.logger().error(`[Storage] Failed to clear ${this.filePath}:`, e);
       throw e;
     }
-  }
+  };
 }

@@ -842,6 +842,7 @@ describe("ReleasePersistence", () => {
     try {
       registerWorkflowHandlers(context);
       const handler = useAPI().handlers["workflow:execute"];
+      if (!handler) throw new Error("workflow:execute handler is not registered");
       const sentEvents: unknown[] = [];
       await handler(
         { sender: "test" },
@@ -947,6 +948,7 @@ describe("ReleasePersistence", () => {
     const pnpmSetup = vi.spyOn(remote, "ensurePNPM").mockResolvedValue("pnpm");
     registerWorkflowHandlers(context);
     const handler = useAPI().handlers["workflow:execute"];
+    if (!handler) throw new Error("workflow:execute handler is not registered");
     const sentEvents: unknown[] = [];
 
     try {
@@ -1029,6 +1031,7 @@ describe("ReleasePersistence", () => {
       expect(run.result.artifacts[0]?.path).toBe(secretPath);
       registerWorkflowHandlers(context);
       const handler = useAPI().handlers["workflow:execute"];
+      if (!handler) throw new Error("workflow:execute handler is not registered");
       const sentEvents: unknown[] = [];
       await handler(
         { sender: "test" },

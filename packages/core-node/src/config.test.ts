@@ -81,7 +81,7 @@ describe("setupConfigFile & Backup Creation", () => {
     const projectsFilePath = context.getProjectsPath();
 
     const customMigrator = {
-      defaultValue: { version: "2.0.0", projects: [] } as any,
+      defaultValue: { version: "2.0.0" as const, projects: [] },
       migrate: async () => {
         throw new Error("Migration failed!");
       },
@@ -89,10 +89,13 @@ describe("setupConfigFile & Backup Creation", () => {
 
     await fs.writeFile(projectsFilePath, JSON.stringify({ version: "1.0.0", invalidData: true }));
 
-    const configInstance = await setupConfigFile<any>(context.getProjectsPath(), {
-      context,
-      migrator: customMigrator,
-    });
+    const configInstance = await setupConfigFile<{ version: "2.0.0"; projects: never[] }>(
+      context.getProjectsPath(),
+      {
+        context,
+        migrator: customMigrator,
+      },
+    );
     const config = await configInstance.getConfig();
 
     expect(config.version).toBe("2.0.0");

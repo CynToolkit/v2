@@ -43,6 +43,12 @@ const targetDescriptors = {
   },
 };
 
+const descriptorFor = (targetId: string) => {
+  const descriptor = Object.entries(targetDescriptors).find(([id]) => id === targetId)?.[1];
+  if (!descriptor) throw new Error(`Unknown Godot target: ${targetId}`);
+  return descriptor;
+};
+
 const presetInfoForProject = (
   projectPath: string,
   preset: string,
@@ -322,7 +328,7 @@ export const godotExporter: ReleaseProducerDefinition = {
           executable: config.config.executable || findGodotExecutable(),
         },
         artifacts: {
-          output: { descriptor: targetDescriptors[target.id as keyof typeof targetDescriptors] },
+          output: { descriptor: descriptorFor(target.id) },
         },
       })),
     artifacts: Object.fromEntries(
@@ -332,7 +338,7 @@ export const godotExporter: ReleaseProducerDefinition = {
           target.id,
           {
             reference: { stepId: `${config.id}-${target.id}`, artifact: "output" },
-            descriptor: targetDescriptors[target.id as keyof typeof targetDescriptors],
+            descriptor: descriptorFor(target.id),
           },
         ]),
     ),

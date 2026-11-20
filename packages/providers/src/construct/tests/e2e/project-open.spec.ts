@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import type { Page } from "playwright";
 import { openConstructProjectFile } from "../../assets/script";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 interface FakeFileChooser {
   setFiles: (files: string[]) => Promise<void>;
@@ -108,7 +109,7 @@ class FakePage {
 
 const open = (page: FakePage, signal = new AbortController().signal) =>
   openConstructProjectFile(
-    page as unknown as Page,
+    partialDouble<Page>(page),
     "/projects/game.c3p",
     signal,
     () => {},

@@ -502,7 +502,7 @@ async function resolveEntryPoint(packageDir: string, packageName: string) {
 
     if (pkg.bin) {
       const binFile = typeof pkg.bin === "string" ? pkg.bin : Object.values(pkg.bin)[0];
-      if (binFile) return join(packageDir, binFile as string);
+      if (typeof binFile === "string" && binFile) return join(packageDir, binFile);
     }
   } catch (e) {
     console.warn(`[Fetcher] ${packageName}: Failed to resolve entry point:`, e);

@@ -1,4 +1,3 @@
-import type { Tagged } from "type-fest";
 import type { ILogObjMeta } from "tslog";
 
 export type UpdateStatus =
@@ -67,15 +66,16 @@ export type RendererEnd<KEY extends RendererChannels> = Extract<
 export interface RendererMessage {
   // the channel to communicate
   requestId: RequestId;
-  data: any;
+  data: RendererData<RendererChannels>;
 }
-export type RequestId = Tagged<string, "request-id">;
+/** Correlates a request with its responses; generated per call, so any string is valid. */
+export type RequestId = string;
 
 export type HandleListenerRendererSendFn<KEY extends RendererChannels> = (
   events: RendererEvents<KEY>,
 ) => void;
 
 export type HandleListenerRenderer<KEY extends RendererChannels> = (
-  event: any,
+  event: unknown,
   data: { value: RendererData<KEY>; send: HandleListenerRendererSendFn<KEY> },
 ) => Promise<void>;

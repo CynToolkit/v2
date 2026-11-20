@@ -1,3 +1,4 @@
+import { isRecord } from "../guards";
 import { object, string, optional, InferOutput, literal, array } from "valibot";
 import { isSafePersistedId } from "../persisted-id";
 
@@ -33,9 +34,8 @@ export class FileRepoParseError extends Error {
 
 const assertFileRepo: (value: unknown) => asserts value is FileRepo = (value) => {
   const issues: string[] = [];
-  if (typeof value !== "object" || value === null || Array.isArray(value))
-    throw new FileRepoParseError(["Project index must be an object."]);
-  const record = value as Record<string, unknown>;
+  if (!isRecord(value)) throw new FileRepoParseError(["Project index must be an object."]);
+  const record = value;
   if (record.version !== "1.0.0") issues.push("Only project index version 1.0.0 is supported.");
   if (!Array.isArray(record.projects)) issues.push("projects must be an array.");
   if (record.workflows !== undefined && !Array.isArray(record.workflows))
@@ -45,11 +45,11 @@ const assertFileRepo: (value: unknown) => asserts value is FileRepo = (value) =>
     ? record.projects
     : []
   ).entries()) {
-    if (typeof project !== "object" || project === null || Array.isArray(project)) {
+    if (!isRecord(project)) {
       issues.push(`projects.${index} must be an object.`);
       continue;
     }
-    const candidate = project as Record<string, unknown>;
+    const candidate = project;
     for (const key of ["id", "name"])
       if (typeof candidate[key] !== "string" || candidate[key].trim().length === 0)
         issues.push(`projects.${index}.${key} must be non-empty.`);
@@ -67,11 +67,11 @@ const assertFileRepo: (value: unknown) => asserts value is FileRepo = (value) =>
     ? record.workflows
     : []
   ).entries()) {
-    if (typeof workflow !== "object" || workflow === null || Array.isArray(workflow)) {
+    if (!isRecord(workflow)) {
       issues.push(`workflows.${index} must be an object.`);
       continue;
     }
-    const candidate = workflow as Record<string, unknown>;
+    const candidate = workflow;
     for (const key of ["id", "project", "lastModified", "configName"])
       if (typeof candidate[key] !== "string" || candidate[key].trim().length === 0)
         issues.push(`workflows.${index}.${key} must be non-empty.`);

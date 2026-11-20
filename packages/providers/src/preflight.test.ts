@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { checkItchPreflight, testItchConnection } from "./itch/export";
 import { checkPokiPreflight, testPokiConnection } from "./poki/export";
 import { checkSteamPreflight, testSteamConnection } from "./steam/preflight";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const itchContext = (apiKey = "key") => ({
   inputs: { accountConnectionId: "acct", project: "game" },
@@ -59,10 +60,10 @@ describe("Poki and Steam preflight", () => {
   });
 
   it("fails Poki without a login and checks the game once one exists", async () => {
-    const context = {
+    const context: Parameters<typeof checkPokiPreflight>[0] = {
       inputs: { project: "game" },
       connectionValues: {},
-      services: services(join(root, "thirdparty")) as never,
+      services: partialDouble(services(join(root, "thirdparty"))),
     };
     expect((await checkPokiPreflight(context)).status).toBe("failed");
     await mkdir(join(root, "empty", "poki"), { recursive: true });
@@ -73,10 +74,10 @@ describe("Poki and Steam preflight", () => {
 
   it("checks only SteamCMD's saved accounts", async () => {
     const thirdParty = join(root, "thirdparty");
-    const context = {
+    const context: Parameters<typeof checkSteamPreflight>[0] = {
       inputs: { accountConnectionId: "acct" },
       connectionValues: { acct: { username: "Studio" } },
-      services: services(thirdParty) as never,
+      services: partialDouble(services(thirdParty)),
     };
     vi.stubEnv("HOME", join(root, "home"));
     expect((await checkSteamPreflight(context)).status).toBe("unverifiable");
@@ -124,9 +125,9 @@ describe("Connection tests", () => {
   it("only fails Poki and Steam for blank names; a missing login is unverifiable", async () => {
     const root = await mkdtemp(join(tmpdir(), "conn-test-"));
     try {
-      const services = {
+      const services = partialDouble<Parameters<typeof testPokiConnection>[0]["services"]>({
         context: { getThirdPartyPath: (...parts: string[]) => join(root, "tp", ...parts) },
-      } as never;
+      });
       vi.stubEnv("XDG_CONFIG_HOME", join(root, "empty"));
       vi.stubEnv("LOCALAPPDATA", join(root, "empty"));
       expect((await testPokiConnection({ values: {}, services })).status).toBe("failed");

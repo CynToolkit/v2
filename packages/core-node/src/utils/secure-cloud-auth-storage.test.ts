@@ -18,6 +18,7 @@ vi.mock("@napi-rs/keyring", () => ({
 }));
 
 import { SecureCloudAuthStorage } from "./secure-cloud-auth-storage";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("SecureCloudAuthStorage", () => {
   beforeEach(() => {
@@ -25,9 +26,9 @@ describe("SecureCloudAuthStorage", () => {
   });
 
   it("stores and restores Supabase sessions through the OS credential entry", async () => {
-    const context = {
+    const context = partialDouble<PipelabContext>({
       getConfigPath: () => "/pipelab/user-data/cloud-auth-session",
-    } as unknown as PipelabContext;
+    });
     const storage = new SecureCloudAuthStorage(context);
 
     await storage.setItem("supabase.auth.token", "session-payload");
@@ -37,9 +38,9 @@ describe("SecureCloudAuthStorage", () => {
   });
 
   it("removes the credential when the last stored session value is removed", async () => {
-    const context = {
+    const context = partialDouble<PipelabContext>({
       getConfigPath: () => "/pipelab/user-data/cloud-auth-session",
-    } as unknown as PipelabContext;
+    });
     const storage = new SecureCloudAuthStorage(context);
     await storage.setItem("supabase.auth.token", "session-payload");
 

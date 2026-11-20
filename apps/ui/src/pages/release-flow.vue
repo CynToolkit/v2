@@ -837,7 +837,7 @@ import type {
   ReleaseOutputRef,
   ValidationIssue,
 } from "@pipelab/shared";
-import { deploymentFolderName, deploymentFolderPath } from "@pipelab/shared";
+import { deploymentFolderName, deploymentFolderPath, isRecord } from "@pipelab/shared";
 import ReleaseFieldControl from "../components/ReleaseFieldControl.vue";
 import ReleaseDestinationAccountPreview from "../components/ReleaseDestinationAccountPreview.vue";
 import { useAPI } from "../composables/api";
@@ -1071,11 +1071,16 @@ const pendingBlockerConnection = ref<
     }
   | undefined
 >();
-const connectionDraft = ref({
+const connectionDraft = ref<{
+  name: string;
+  integration: string;
+  integrationName: string;
+  values: Record<string, string>;
+}>({
   name: "",
   integration: "",
   integrationName: "",
-  values: {} as Record<string, string>,
+  values: {},
 });
 const dialogStyle = { width: "560px", maxWidth: "94vw" };
 const saveStateLabel = computed(() =>
@@ -1658,8 +1663,7 @@ const hasConfiguredValue = (value: unknown): boolean => {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
   if (Array.isArray(value)) return value.some(hasConfiguredValue);
-  if (typeof value === "object")
-    return Object.values(value as Record<string, unknown>).some(hasConfiguredValue);
+  if (isRecord(value)) return Object.values(value).some(hasConfiguredValue);
   return true;
 };
 const confirmDestructiveChange = (
@@ -2042,10 +2046,7 @@ const inspectSource = async () => {
       ];
       return;
     }
-    const data = result.result as {
-      issues?: ValidationIssue[];
-      fieldOptions?: Record<string, ReleaseFieldOption[]>;
-    };
+    const data = result.result;
     inspectionIssues.value = (data.issues || []).map((issue) => ({
       ...issue,
       path: issue.path?.startsWith("source.")

@@ -1,3 +1,4 @@
+import { isRecord } from "../guards";
 import type { ConnectionsConfig, Connection, WorkflowConnectionBinding } from "../config.schema";
 
 export type { ConnectionsConfig, Connection, WorkflowConnectionBinding };
@@ -24,12 +25,12 @@ export class ConnectionsParseError extends Error {
 
 const assertConnectionsConfig: (value: unknown) => asserts value is ConnectionsConfig = (value) => {
   const issues: ConnectionsParseIssue[] = [];
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+  if (!isRecord(value)) {
     throw new ConnectionsParseError([
       { code: "connections.invalid", message: "Connections must be an object." },
     ]);
   }
-  const record = value as Record<string, unknown>;
+  const record = value;
   if (record.version !== "1.0.0")
     issues.push({
       code: "connections.version",
@@ -49,11 +50,11 @@ const assertConnectionsConfig: (value: unknown) => asserts value is ConnectionsC
     : []
   ).entries()) {
     const path = `connections.${index}`;
-    if (typeof connection !== "object" || connection === null || Array.isArray(connection)) {
+    if (!isRecord(connection)) {
       issues.push({ code: "connections.invalid", message: "Connection must be an object.", path });
       continue;
     }
-    const candidate = connection as Record<string, unknown>;
+    const candidate = connection;
     for (const key of ["id", "pluginName", "name", "createdAt"])
       if (typeof candidate[key] !== "string" || candidate[key].trim().length === 0)
         issues.push({
@@ -96,9 +97,8 @@ const assertConnectionsConfig: (value: unknown) => asserts value is ConnectionsC
     });
   const connectionIds = new Set(
     (Array.isArray(record.connections) ? record.connections : []).flatMap((connection) => {
-      if (typeof connection !== "object" || connection === null || Array.isArray(connection))
-        return [];
-      const id = (connection as Record<string, unknown>).id;
+      if (!isRecord(connection)) return [];
+      const id = connection.id;
       return typeof id === "string" ? [id] : [];
     }),
   );
@@ -108,7 +108,7 @@ const assertConnectionsConfig: (value: unknown) => asserts value is ConnectionsC
     : []
   ).entries()) {
     const path = `workflowBindings.${index}`;
-    if (typeof binding !== "object" || binding === null || Array.isArray(binding)) {
+    if (!isRecord(binding)) {
       issues.push({
         code: "connections.binding",
         message: "Workflow connection binding must be an object.",
@@ -116,7 +116,7 @@ const assertConnectionsConfig: (value: unknown) => asserts value is ConnectionsC
       });
       continue;
     }
-    const candidate = binding as Record<string, unknown>;
+    const candidate = binding;
     if (typeof candidate.workflowId !== "string" || !candidate.workflowId.trim())
       issues.push({
         code: "connections.binding",

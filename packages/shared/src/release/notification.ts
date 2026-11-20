@@ -41,7 +41,7 @@ export const renderNotificationTemplate = (
   event: ReleaseNotificationEvent,
   escape: (value: string) => string = (value) => value,
 ): string => {
-  const values: Record<(typeof NOTIFICATION_TEMPLATE_VARIABLES)[number], string> = {
+  const values: Record<string, string> = {
     workflow: event.workflow,
     status: event.status,
     duration: formatNotificationDuration(event.durationMs),
@@ -50,7 +50,7 @@ export const renderNotificationTemplate = (
     error: event.error ?? "",
   };
   return template.replace(templateVariablePattern, (whole, name: string) =>
-    Object.hasOwn(values, name) ? escape(values[name as keyof typeof values]) : whole,
+    Object.hasOwn(values, name) ? escape(values[name]) : whole,
   );
 };
 

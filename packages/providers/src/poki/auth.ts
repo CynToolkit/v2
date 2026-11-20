@@ -1,3 +1,5 @@
+import * as v from "valibot";
+import { parseOrUndefined } from "@pipelab/shared";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -59,18 +61,14 @@ export const findPokiConfigRoot = async (
 
 const loginTimeoutMs = 5 * 60 * 1000;
 
-type PokiAuthConfig = Record<string, unknown> & { access_token: string };
+type PokiAuthConfig = v.InferOutput<typeof authConfigSchema>;
+
+const authConfigSchema = v.looseObject({ access_token: v.string() });
 
 const parseAuthConfig = (value: unknown): PokiAuthConfig => {
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    Array.isArray(value) ||
-    typeof (value as Record<string, unknown>).access_token !== "string"
-  ) {
-    throw new Error("Poki sign-in did not return a usable authentication token.");
-  }
-  return value as PokiAuthConfig;
+  const parsed = parseOrUndefined(authConfigSchema, value);
+  if (!parsed) throw new Error("Poki sign-in did not return a usable authentication token.");
+  return parsed;
 };
 
 const exchangeToken = async (token: string): Promise<PokiAuthConfig> => {

@@ -1,4 +1,4 @@
-import { useUIStore } from "../store/ui";
+import { useUIStore, type FilePickerOptions } from "../store/ui";
 import { useAPI } from "./api";
 
 /**
@@ -11,21 +11,21 @@ export const useShell = () => {
   /**
    * Open a file dialog
    */
-  const openFile = async (options: any = {}) => {
-    if ((window as any).electron) {
+  const openFile = async (options: Partial<FilePickerOptions> = {}) => {
+    if (window.electron) {
       try {
         // De-proxy reactive objects for Electron IPC
         const plainOptions = JSON.parse(JSON.stringify(options));
 
-        const result = await (window as any).pipelab.showOpenDialog({
+        const result = await window.pipelab!.showOpenDialog({
           ...plainOptions,
           properties: ["openFile", ...(plainOptions.properties || [])],
         });
         return { type: "success", result };
-      } catch (e: any) {
+      } catch (e) {
         return {
           type: "error",
-          ipcError: e.message,
+          ipcError: e instanceof Error ? e.message : String(e),
         };
       }
     }
@@ -43,11 +43,11 @@ export const useShell = () => {
   /**
    * Open a directory dialog
    */
-  const openDirectory = async (options: any = {}) => {
-    if ((window as any).electron) {
+  const openDirectory = async (options: Partial<FilePickerOptions> = {}) => {
+    if (window.electron) {
       try {
         const plainOptions = JSON.parse(JSON.stringify(options));
-        const result = await (window as any).pipelab.showOpenDialog({
+        const result = await window.pipelab!.showOpenDialog({
           ...plainOptions,
           properties: ["openDirectory", ...(plainOptions.properties || [])],
         });
@@ -55,10 +55,10 @@ export const useShell = () => {
           type: "success",
           result,
         };
-      } catch (e: any) {
+      } catch (e) {
         return {
           type: "error",
-          ipcError: e.message,
+          ipcError: e instanceof Error ? e.message : String(e),
         };
       }
     }
@@ -76,20 +76,18 @@ export const useShell = () => {
   /**
    * Open a save file dialog
    */
-  const saveFile = async (options: any = {}) => {
-    if ((window as any).electron) {
+  const saveFile = async (options: Partial<FilePickerOptions> = {}) => {
+    if (window.electron) {
       try {
-        const result = await (window as any).pipelab.showSaveDialog(
-          JSON.parse(JSON.stringify(options)),
-        );
+        const result = await window.pipelab!.showSaveDialog(JSON.parse(JSON.stringify(options)));
         return {
           type: "success",
           result,
         };
-      } catch (e: any) {
+      } catch (e) {
         return {
           type: "error",
-          ipcError: e.message,
+          ipcError: e instanceof Error ? e.message : String(e),
         };
       }
     }
@@ -108,8 +106,8 @@ export const useShell = () => {
    * Open an external URL
    */
   const openExternal = async (url: string) => {
-    if ((window as any).electron) {
-      return await (window as any).pipelab.openExternal(url);
+    if (window.electron) {
+      return await window.pipelab!.openExternal(url);
     }
     window.open(url, "_blank");
   };
@@ -118,8 +116,8 @@ export const useShell = () => {
    * Show a file in the system file explorer
    */
   const showItemInFolder = (path: string) => {
-    if ((window as any).electron) {
-      return (window as any).pipelab.showItemInFolder(path);
+    if (window.electron) {
+      return window.pipelab!.showItemInFolder(path);
     }
     console.warn("showItemInFolder not supported on web");
   };
@@ -128,8 +126,8 @@ export const useShell = () => {
    * Relaunch the application
    */
   const relaunch = async () => {
-    if ((window as any).electron) {
-      await (window as any).pipelab.relaunch();
+    if (window.electron) {
+      await window.pipelab!.relaunch();
     } else {
       console.warn("relaunch not supported on web, reloading page...");
       window.location.reload();
@@ -140,7 +138,7 @@ export const useShell = () => {
    * Quit and install the downloaded update
    */
   const installUpdate = async () => {
-    await (window as any).pipelab?.installUpdate();
+    await window.pipelab?.installUpdate();
   };
 
   return {

@@ -621,11 +621,16 @@ const connectionSaving = ref(false);
 const draftBuild = ref<ReleaseBuildProfileConfig>();
 const newBuildType = ref<string>();
 const newBuildEngine = ref<string>();
-const connectionDraft = ref({
+const connectionDraft = ref<{
+  name: string;
+  integration: string;
+  integrationName: string;
+  values: Record<string, string>;
+}>({
   name: "",
   integration: "",
   integrationName: "",
-  values: {} as Record<string, string>,
+  values: {},
 });
 const dialogStyle = { width: "560px", maxWidth: "94vw" };
 const wideDialogStyle = { width: "760px", maxWidth: "94vw" };
@@ -859,13 +864,13 @@ const targetDefinition = (engine: string, type: string, targetId: string) =>
 // The plan is authoritative because it also wires builds that name no input; the configuration
 // is only a fallback while there is no plan yet.
 const usedKeys = () =>
-  plan.value ? plannedUsedTargetKeys(plan.value) : flow.value ? usedTargetKeys(flow.value) : new Set<string>();
+  plan.value
+    ? plannedUsedTargetKeys(plan.value)
+    : flow.value
+      ? usedTargetKeys(flow.value)
+      : new Set<string>();
 const draftTargetUsed = (targetId: string) =>
-  Boolean(
-    flow.value &&
-    draftBuild.value &&
-    usedKeys().has(`${draftBuild.value.id}:${targetId}`),
-  );
+  Boolean(flow.value && draftBuild.value && usedKeys().has(`${draftBuild.value.id}:${targetId}`));
 const usedTargetLabels = (build: ReleaseBuildProfileConfig) => {
   const used = usedKeys();
   return buildTargetsFor(catalog.value, build.engine, build.type)
@@ -1187,7 +1192,7 @@ const inspectDraftBuild = async () => {
     });
     if (!isCurrent()) return;
     if (result.type === "error") throw new Error(result.ipcError);
-    const data = result.result as ProducerInspection;
+    const data = result.result;
     const applied = applyProducerInspection(
       build,
       buildIndex,
@@ -1237,13 +1242,7 @@ const onNewBuildTypeChange = () => {
   newBuildEngine.value = undefined;
 };
 const addBuild = () => {
-  if (
-    !flow.value ||
-    !canCreateBuild.value ||
-    !newBuildType.value ||
-    !newBuildEngine.value
-  )
-    return;
+  if (!flow.value || !canCreateBuild.value || !newBuildType.value || !newBuildEngine.value) return;
   const multiInput = isManyInputEngine(catalog.value, newBuildEngine.value);
   const create = multiInput ? createBundleBuild : createBuildProfile;
   const build = create(

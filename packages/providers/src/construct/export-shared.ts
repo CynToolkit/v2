@@ -1,10 +1,10 @@
+import { stringInput } from "@pipelab/shared";
 import {
   createNumberParam,
   createPasswordParam,
   createPathParam,
   createStringParam,
   InputsDefinition,
-  ParamsToInput,
   runWithLiveLogs,
   type fetchPackage,
 } from "@pipelab/plugin-core";
@@ -120,8 +120,6 @@ export const sharedParams = {
     label: "Custom profile",
   }),
 } satisfies InputsDefinition;
-
-type Inputs = ParamsToInput<typeof sharedParams>;
 
 const transientProfileEntries = new Set([
   "Cache",
@@ -471,7 +469,6 @@ export const exportc3p = async (
     log("Construct export aborted");
     void browserContext?.close().catch(() => {});
   };
-  const newInputs = inputs as Inputs;
 
   abortSignal.addEventListener("abort", onAbort);
 
@@ -532,11 +529,11 @@ export const exportc3p = async (
 
     log("Exporting construct project");
 
-    let version = typeof newInputs.version === "string" ? newInputs.version.trim() : "";
+    let version = typeof inputs.version === "string" ? inputs.version.trim() : "";
     if (version.toLowerCase() === "latest") version = "";
     if (/^\d+$/.test(version)) version = `r${version}`;
-    const headless = newInputs.headless ?? true;
-    const exportType = parseConstructExportType(newInputs.exportType);
+    const headless = typeof inputs.headless === "boolean" ? inputs.headless : true;
+    const exportType = parseConstructExportType(inputs.exportType);
     const browserChannel = "chromium";
     const recordVideo = shouldRecordPlaywrightVideo(process.env.NODE_ENV, isCI)
       ? { dir: downloadDir }
@@ -544,11 +541,10 @@ export const exportc3p = async (
 
     const browserSetupStartedAt = Date.now();
     const profileSetupStartedAt = Date.now();
-    const username = typeof newInputs.username === "string" ? newInputs.username.trim() : "";
-    const password = typeof newInputs.password === "string" ? newInputs.password : "";
+    const username = typeof inputs.username === "string" ? inputs.username.trim() : "";
+    const password = typeof inputs.password === "string" ? inputs.password : "";
     const useConnectionAccountSession = Boolean(username && password);
-    const seedProfile =
-      typeof newInputs.customProfile === "string" ? newInputs.customProfile.trim() : "";
+    const seedProfile = typeof inputs.customProfile === "string" ? inputs.customProfile.trim() : "";
     const profileIdentity = constructManagedProfileIdentity(
       projectId,
       username,
@@ -618,7 +614,7 @@ export const exportc3p = async (
       log("Construct renderer crashed");
     });
 
-    const configuredTimeoutSeconds = Number(newInputs.timeout ?? 120);
+    const configuredTimeoutSeconds = Number(inputs.timeout ?? 120);
     const exportTimeoutMs =
       Math.max(1, Number.isFinite(configuredTimeoutSeconds) ? configuredTimeoutSeconds : 120) *
       1000;
@@ -639,8 +635,8 @@ export const exportc3p = async (
       page,
       log,
       file,
-      newInputs.username as string,
-      newInputs.password as string,
+      stringInput(inputs, "username"),
+      stringInput(inputs, "password"),
       version,
       downloadDir,
       abortSignal,
@@ -652,7 +648,8 @@ export const exportc3p = async (
     log("Setting output result to ", result);
 
     return { zipFile: result };
-  } catch (e: any) {
+  } catch (caught) {
+    const e = caught instanceof Error ? caught : new Error(String(caught));
     log("error, no result, crashed", e);
     // Playwright finalizes the video when its context closes. Close it before
     // asking for the path so failed automation runs can expose the recording.
@@ -670,7 +667,6 @@ export const exportc3p = async (
   }
 };
 
-const constructVersionValidator = (options: any) => {
-  void options;
+const constructVersionValidator = () => {
   return v.pipe(v.string(), v.regex(/^\d+(-\d+)?$/, "Invalid version"));
 };

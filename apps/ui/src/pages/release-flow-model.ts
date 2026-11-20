@@ -145,8 +145,7 @@ export const missingRequiredFieldIssues = (
     if (value === null || value === undefined) return false;
     if (typeof value === "string") return value.trim().length > 0;
     if (Array.isArray(value)) return value.some(hasConfiguredValue);
-    if (typeof value === "object")
-      return Object.values(value as Record<string, unknown>).some(hasConfiguredValue);
+    if (typeof value === "object") return Object.values(value).some(hasConfiguredValue);
     return true;
   };
   const addMissingFields = (
@@ -449,7 +448,7 @@ export const duplicateBuildProfile = (
   const source = config.builds[index]!;
   // JSON round trip: the build may be a reactive proxy, which structuredClone rejects.
   const copy: ReleaseBuildProfileConfig = {
-    ...(JSON.parse(JSON.stringify(source)) as ReleaseBuildProfileConfig),
+    ...JSON.parse(JSON.stringify(source)),
     id: copyId,
     name: `${source.name?.trim() || label} copy`,
   };

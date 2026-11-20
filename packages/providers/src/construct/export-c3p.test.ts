@@ -8,6 +8,7 @@ import {
   formatSavedConstructVersion,
   type ConstructWorkflowTaskServices,
 } from "./export-c3p.js";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("./export-shared.js", () => ({
   exportc3p: vi.fn(async () => ({ zipFile: "/out/project.zip" })),
@@ -48,23 +49,23 @@ describe("Construct export type task input", () => {
     await rm(root, { recursive: true, force: true });
   });
 
-  const services = {
+  const services = partialDouble<ConstructWorkflowTaskServices>({
     context: { getThirdPartyPath: () => join(root, "thirdparty") },
     executables: { node: "node", pnpm: "pnpm" },
     run: { projectId: "project-1" },
-  } as unknown as ConstructWorkflowTaskServices;
+  });
 
   type ExportTask = Parameters<ReturnType<typeof constructExportWorkflowTaskFactory>>[0];
 
   const runTask = (inputs: Record<string, unknown>) => {
-    const task = {
+    const task = partialDouble<ExportTask>({
       inputs: { file: projectFile, ...inputs },
       connectionValues: {},
       workspace: { root },
       signal: new AbortController().signal,
       log: vi.fn(),
       setArtifact: vi.fn(),
-    } as unknown as ExportTask;
+    });
     return constructExportWorkflowTaskFactory(services)(task);
   };
 

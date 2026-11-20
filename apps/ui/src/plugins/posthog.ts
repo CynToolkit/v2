@@ -1,8 +1,9 @@
 //./plugins/posthog.js
+import type { App } from "vue";
 import posthog from "posthog-js";
 
 export default {
-  install(app: any) {
+  install(app: App) {
     const apiKey = process.env.POSTHOG_API_KEY;
 
     if (!apiKey || apiKey === "${POSTHOG_API_KEY}") {

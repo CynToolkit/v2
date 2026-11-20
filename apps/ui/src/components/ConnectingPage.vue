@@ -45,6 +45,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import { isRecord, type Events } from "@pipelab/shared";
 import { useWebSocketAPI } from "../composables/websocket-client";
 import { useAPI } from "../composables/api";
 import { useAppSettings } from "../store/settings";
@@ -71,7 +72,7 @@ const theme = computed(() =>
 let unbind: (() => void) | undefined;
 
 onMounted(async () => {
-  unbind = on("startup:progress", (event: any) => {
+  unbind = on("startup:progress", (event: Events<"startup:progress">) => {
     if (event.type === "progress") {
       currentStep.value = { id: stepCounter++, message: event.data.message };
     }
@@ -89,7 +90,10 @@ onUnmounted(() => unbind?.());
 
 const isElectron = computed(
   () =>
-    (typeof window !== "undefined" && (window as any).process?.type === "renderer") ||
+    (typeof window !== "undefined" &&
+      "process" in window &&
+      isRecord(window.process) &&
+      window.process.type === "renderer") ||
     navigator.userAgent.toLowerCase().includes(" electron/"),
 );
 </script>

@@ -52,7 +52,7 @@
                   />
                   <i
                     v-else
-                    :class="providerIconClass(data.icon, FALLBACK_ICON[data.kind as PlanNodeKind])"
+                    :class="providerIconClass(data.icon, fallbackIcon(data.kind))"
                     aria-hidden="true"
                   />
                 </span>
@@ -124,6 +124,9 @@ const FALLBACK_ICON = {
   automatic: "mdi mdi-auto-fix",
   destination: "mdi mdi-rocket-launch-outline",
 } as const;
+
+const fallbackIcon = (kind: string) =>
+  Object.entries(FALLBACK_ICON).find(([name]) => name === kind)?.[1];
 
 const route = useRoute();
 useWorkflowTab(() => void workflowDoc.sync());

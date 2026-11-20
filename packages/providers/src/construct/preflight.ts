@@ -1,6 +1,7 @@
+import { parseOrUndefined } from "@pipelab/shared";
 import type { ConnectionTestContext, PreflightContext, PreflightResult } from "@pipelab/shared";
 import { failed, preflightSignal, unverifiable, verified } from "../preflight";
-import { inspectChromiumProfile } from "./browser-profiles";
+import { constructLoginResponseSchema, inspectChromiumProfile } from "./browser-profiles";
 import type { ProviderHostContext } from "@pipelab/plugin-core";
 
 export interface ConstructPreflightServices {
@@ -31,10 +32,10 @@ const verifyConstructAccount = async (
     return unverifiable("Construct could not be reached.");
   }
   if (!response.ok) return unverifiable(`Construct answered with HTTP ${response.status}.`);
-  const body = (await response.json().catch((): null => null)) as {
-    request?: { status?: unknown };
-    response?: { userID?: unknown; token?: unknown };
-  } | null;
+  const body = parseOrUndefined(
+    constructLoginResponseSchema,
+    await response.json().catch((): null => null),
+  );
   if (body?.request?.status === "ok" && body.response?.token) return verified();
   if (body?.request?.status) return failed("Construct rejected this username and password.");
   return unverifiable("Construct gave no definitive answer.");

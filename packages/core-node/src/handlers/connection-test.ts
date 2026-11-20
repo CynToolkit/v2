@@ -48,7 +48,21 @@ export const testConnection = async (
   );
   try {
     // The connection tests only use `context`; the other run-scoped services do not exist here.
-    const services = { context } as ProviderServices;
+    const unavailable = (name: string): never => {
+      throw new Error(`${name} is not available while testing a connection.`);
+    };
+    const services: ProviderServices = {
+      context,
+      get executables() {
+        return unavailable("Run executables");
+      },
+      get run() {
+        return unavailable("Run identifiers");
+      },
+      get workflowCachePath() {
+        return unavailable("The workflow cache path");
+      },
+    };
     return redactResult(await Promise.race([test({ values, services, signal }), timedOut]), values);
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);

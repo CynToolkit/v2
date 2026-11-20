@@ -9,6 +9,7 @@ import pokiPlugin from "./index.js";
 import { normalizePokiAccountName, pokiAccountConfigRoot } from "./auth.js";
 import { fetchPackage, type PipelabContext } from "@pipelab/plugin-core";
 import type { PokiTaskServices } from "./export.js";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("@pipelab/plugin-core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@pipelab/plugin-core")>();
@@ -59,13 +60,13 @@ describe("End-to-End: Poki Upload Workflow task", () => {
     const thirdparty = join(sandboxPath, "user-data", "thirdparty");
     const tempRoot = join(sandboxPath, "user-data", "temp");
     return {
-      context: {
+      context: partialDouble<PipelabContext>({
         getThirdPartyPath: () => thirdparty,
         createTempFolder: async (prefix = "pipelab-") => {
           await mkdir(tempRoot, { recursive: true });
           return mkdtemp(join(tempRoot, prefix));
         },
-      } as unknown as PipelabContext,
+      }),
       executables: { node: process.execPath },
     };
   };
@@ -125,8 +126,8 @@ describe("End-to-End: Poki Upload Workflow task", () => {
           context: services.context,
           installDeps: true,
         });
-      } catch (e: any) {
-        console.error("Execution failed:", e.message);
+      } catch (e) {
+        console.error("Execution failed:", e instanceof Error ? e.message : e);
         throw e;
       }
 

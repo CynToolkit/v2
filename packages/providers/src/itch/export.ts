@@ -1,3 +1,5 @@
+import * as v from "valibot";
+import { stringInput, parseOrUndefined } from "@pipelab/shared";
 import { dirname, delimiter } from "node:path";
 import { ensureButler } from "./ensure.js";
 import { runWithLiveLogs } from "@pipelab/plugin-core";
@@ -8,27 +10,25 @@ import { failed, preflightSignal, unverifiable, verified } from "../preflight";
 
 export const WORKFLOW_TASK_ID = "@pipelab/plugin-itch/itch-upload";
 
-interface ButlerJSONOutputLog {
-  level: "info";
-  message: string;
-  time: number;
-  type: "log";
-}
+const butlerOutputSchema = v.variant("type", [
+  v.looseObject({ type: v.literal("log"), message: v.string() }),
+  v.looseObject({ type: v.literal("progress"), progress: v.number(), eta: v.number() }),
+]);
 
-interface ButlerJSONOutputProgress {
-  bps: number;
-  eta: number;
-  progress: number;
-  time: 1736873335;
-  type: "progress";
-}
+const itchUserSchema = v.looseObject({
+  user: v.optional(v.looseObject({ username: v.optional(v.string()) })),
+  errors: v.optional(v.unknown()),
+});
+const itchGamesSchema = v.looseObject({
+  games: v.optional(v.array(v.looseObject({ url: v.optional(v.string()) }))),
+});
 
 export const resolveItchUsername = async (apiKey: string): Promise<string> => {
   const response = await fetch(`https://itch.io/api/1/${encodeURIComponent(apiKey)}/me`);
   if (!response.ok)
     throw new Error(`Unable to resolve the Itch profile (HTTP ${response.status}).`);
-  const data = (await response.json()) as { user?: { username?: string } };
-  const username = data.user?.username;
+  const data = parseOrUndefined(itchUserSchema, await response.json());
+  const username = data?.user?.username;
   if (!username) throw new Error("The Itch account does not contain a username.");
   return username;
 };
@@ -45,8 +45,6 @@ const sanitizeApiKeyError = (error: unknown, apiKey: string): Error => {
   if (error instanceof Error) sanitizedError.name = error.name;
   return sanitizedError;
 };
-
-type ButlerJSONOutput = ButlerJSONOutputLog | ButlerJSONOutputProgress;
 
 export interface ItchTaskServices {
   context: PipelabContext;
@@ -91,8 +89,8 @@ export const createItchUploadTask =
       butlerPath,
       [
         "push",
-        runtimeInputs["input-folder"] as string,
-        `${runtimeInputs.user as string}/${runtimeInputs.project as string}:${runtimeInputs.channel as string}`,
+        stringInput(runtimeInputs, "input-folder"),
+        `${stringInput(runtimeInputs, "user")}/${stringInput(runtimeInputs, "project")}:${stringInput(runtimeInputs, "channel")}`,
         "--json",
         ...(String(runtimeInputs.version || "").trim()
           ? ["--userversion", String(runtimeInputs.version).trim()]
@@ -112,8 +110,8 @@ export const createItchUploadTask =
         onStdout(data) {
           const jsons = data.trim().split("\n");
           for (const jsonData of jsons) {
-            const json = JSON.parse(jsonData) as ButlerJSONOutput;
-            switch (json.type) {
+            const json = parseOrUndefined(butlerOutputSchema, JSON.parse(jsonData));
+            switch (json?.type) {
               case "log":
                 safeLog(json.message);
                 break;
@@ -146,9 +144,9 @@ const verifyItchApiKey = async (apiKey: string, signal?: AbortSignal): Promise<P
   if (response.status === 401 || response.status === 403)
     return failed("The Itch API key was rejected.");
   try {
-    const data = (await response.json()) as { user?: { username?: string }; errors?: unknown };
-    if (data.user?.username) return verified();
-    if (Array.isArray(data.errors) && data.errors.length)
+    const data = parseOrUndefined(itchUserSchema, await response.json());
+    if (data?.user?.username) return verified();
+    if (Array.isArray(data?.errors) && data.errors.length)
       return failed("The Itch API key was rejected.");
   } catch {
     // Fall through: an unreadable body is not a definitive answer.
@@ -169,8 +167,8 @@ const verifyItchGame = async (
       signal: preflightSignal(signal),
     });
     if (!response.ok) return unverifiable(`itch.io answered HTTP ${response.status}.`);
-    const data = (await response.json()) as { games?: Array<{ url?: string }> };
-    if (!Array.isArray(data.games)) return unverifiable("itch.io gave no list of games.");
+    const data = parseOrUndefined(itchGamesSchema, await response.json());
+    if (!Array.isArray(data?.games)) return unverifiable("itch.io gave no list of games.");
     const known = data.games.some((game) => {
       try {
         return new URL(game.url ?? "").pathname.split("/").filter(Boolean).pop() === slug;

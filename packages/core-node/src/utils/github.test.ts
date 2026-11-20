@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, vi, type MockInstance } from "vitest";
 import {
   fetchPackageReleases,
   fetchLatestPackageRelease,
@@ -6,11 +6,15 @@ import {
   getDesktopReleaseFeedUrl,
 } from "./github";
 
+/** Only the fields a test sets are provided; the code under test reads nothing else. */
+const fakeResponse = (init: Partial<Pick<Response, "ok" | "status" | "statusText" | "json">>) =>
+  init as Response;
+
 describe("GitHub Release Updates API", () => {
-  let fetchSpy: any;
-  let consoleLogSpy: any;
-  let consoleWarnSpy: any;
-  let consoleErrorSpy: any;
+  let fetchSpy: MockInstance<typeof fetch>;
+  let consoleLogSpy: MockInstance<typeof console.log>;
+  let consoleWarnSpy: MockInstance<typeof console.warn>;
+  let consoleErrorSpy: MockInstance<typeof console.error>;
 
   beforeEach(() => {
     fetchSpy = vi.spyOn(global, "fetch");
@@ -26,11 +30,13 @@ describe("GitHub Release Updates API", () => {
   });
 
   test("fetchPackageReleases - returns empty array when git matching-refs fails", async () => {
-    fetchSpy.mockResolvedValueOnce({
-      ok: false,
-      status: 404,
-      statusText: "Not Found",
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app");
     expect(releases).toEqual([]);
@@ -43,10 +49,12 @@ describe("GitHub Release Updates API", () => {
   });
 
   test("fetchPackageReleases - returns empty array when no tags match package", async () => {
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [],
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app");
     expect(releases).toEqual([]);
@@ -54,26 +62,30 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchPackageReleases - correctly filters prereleases when allowPrerelease is false", async () => {
     // 1. mock matching refs
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@1.0.0-beta.1" },
-        { ref: "refs/tags/@pipelab/app@1.0.0" },
-      ],
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@1.0.0-beta.1" },
+          { ref: "refs/tags/@pipelab/app@1.0.0" },
+        ],
+      }),
+    );
 
     // 2. mock tag lookup for 1.0.0 (since 1.0.0-beta.1 is filtered out)
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@1.0.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        html_url: "https://github.com/CynToolkit/v2/releases/tag/%40pipelab%2Fapp%401.0.0",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@1.0.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          html_url: "https://github.com/CynToolkit/v2/releases/tag/%40pipelab%2Fapp%401.0.0",
+          assets: [],
+        }),
       }),
-    } as any);
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", { allowPrerelease: false });
     expect(releases).toHaveLength(1);
@@ -82,26 +94,30 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchPackageReleases - includes prereleases when allowPrerelease is true", async () => {
     // 1. mock matching refs
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@1.0.0-beta.1" },
-        { ref: "refs/tags/@pipelab/app@1.0.0" },
-      ],
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@1.0.0-beta.1" },
+          { ref: "refs/tags/@pipelab/app@1.0.0" },
+        ],
+      }),
+    );
 
     // 2. mock tag lookup for 1.0.0 (since sorting puts 1.0.0 first)
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@1.0.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        html_url: "https://github.com/CynToolkit/v2/releases/tag/%40pipelab%2Fapp%401.0.0",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@1.0.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          html_url: "https://github.com/CynToolkit/v2/releases/tag/%40pipelab%2Fapp%401.0.0",
+          assets: [],
+        }),
       }),
-    } as any);
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", { allowPrerelease: true });
     expect(releases).toHaveLength(1);
@@ -109,26 +125,30 @@ describe("GitHub Release Updates API", () => {
   });
 
   test("fetchPackageReleases - stable updates stay on the installed major and exclude prereleases", async () => {
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@1.9.9" },
-        { ref: "refs/tags/@pipelab/app@2.0.0" },
-        { ref: "refs/tags/@pipelab/app@2.1.0-beta.1" },
-        { ref: "refs/tags/@pipelab/app@2.1.0" },
-        { ref: "refs/tags/@pipelab/app@3.0.0" },
-      ],
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.1.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@1.9.9" },
+          { ref: "refs/tags/@pipelab/app@2.0.0" },
+          { ref: "refs/tags/@pipelab/app@2.1.0-beta.1" },
+          { ref: "refs/tags/@pipelab/app@2.1.0" },
+          { ref: "refs/tags/@pipelab/app@3.0.0" },
+        ],
       }),
-    } as any);
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.1.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", {
       currentVersion: "2.0.0",
@@ -138,24 +158,28 @@ describe("GitHub Release Updates API", () => {
   });
 
   test("fetchPackageReleases - beta updates stay on the installed major and allow prereleases", async () => {
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@1.9.9-beta.1" },
-        { ref: "refs/tags/@pipelab/app@2.1.0-beta.1" },
-        { ref: "refs/tags/@pipelab/app@3.0.0-beta.1" },
-      ],
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.1.0-beta.1",
-        prerelease: true,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@1.9.9-beta.1" },
+          { ref: "refs/tags/@pipelab/app@2.1.0-beta.1" },
+          { ref: "refs/tags/@pipelab/app@3.0.0-beta.1" },
+        ],
       }),
-    } as any);
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.1.0-beta.1",
+          prerelease: true,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", {
       allowPrerelease: true,
@@ -166,23 +190,27 @@ describe("GitHub Release Updates API", () => {
   });
 
   test("fetchPackageReleases - beta updates may use stable releases from the installed major", async () => {
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@2.1.0" },
-        { ref: "refs/tags/@pipelab/app@3.0.0-beta.1" },
-      ],
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.1.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@2.1.0" },
+          { ref: "refs/tags/@pipelab/app@3.0.0-beta.1" },
+        ],
       }),
-    } as any);
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.1.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", {
       allowPrerelease: true,
@@ -194,32 +222,38 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchPackageReleases - handles tag that has no release (skips and falls back to older tag)", async () => {
     // 1. mock matching refs
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@1.1.0" },
-        { ref: "refs/tags/@pipelab/app@1.0.0" },
-      ],
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@1.1.0" },
+          { ref: "refs/tags/@pipelab/app@1.0.0" },
+        ],
+      }),
+    );
 
     // 2. mock tag lookup for 1.1.0 (returns 404 - no release yet, tag exists)
-    fetchSpy.mockResolvedValueOnce({
-      status: 404,
-      ok: false,
-      statusText: "Not Found",
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        status: 404,
+        ok: false,
+        statusText: "Not Found",
+      }),
+    );
 
     // 3. mock tag lookup for 1.0.0 (returns 200 - release exists)
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@1.0.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@1.0.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
       }),
-    } as any);
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app");
     expect(releases).toHaveLength(1);
@@ -230,16 +264,18 @@ describe("GitHub Release Updates API", () => {
     process.env.PIPELAB_OVERRIDE_RELEASE = "1.2.3";
 
     // Mock direct tag retrieval
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@1.2.3",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@1.2.3",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
       }),
-    } as any);
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app");
     expect(releases).toHaveLength(1);
@@ -252,33 +288,39 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchPackageReleases - rejects an override from another major and finds a compatible release", async () => {
     process.env.PIPELAB_OVERRIDE_RELEASE = "3.0.0";
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@3.0.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@3.0.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
       }),
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@2.4.0" },
-        { ref: "refs/tags/@pipelab/app@3.0.0" },
-      ],
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.4.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@2.4.0" },
+          { ref: "refs/tags/@pipelab/app@3.0.0" },
+        ],
       }),
-    } as any);
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.4.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", {
       currentVersion: "2.0.0",
@@ -289,30 +331,36 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchPackageReleases - stable clients reject prerelease overrides", async () => {
     process.env.PIPELAB_OVERRIDE_RELEASE = "2.1.0-beta.1";
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.1.0-beta.1",
-        prerelease: true,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.1.0-beta.1",
+          prerelease: true,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
       }),
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [{ ref: "refs/tags/@pipelab/app@2.2.0" }],
-    } as any);
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.2.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [{ ref: "refs/tags/@pipelab/app@2.2.0" }],
       }),
-    } as any);
+    );
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.2.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
+      }),
+    );
 
     const releases = await fetchPackageReleases("@pipelab/app", {
       currentVersion: "2.0.0",
@@ -323,26 +371,30 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchLatestPackageRelease - selects newest matching release", async () => {
     // Mock matching refs
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { ref: "refs/tags/@pipelab/app@1.0.0" },
-        { ref: "refs/tags/@pipelab/app@2.0.0" },
-        { ref: "refs/tags/@pipelab/app@1.5.0" },
-      ],
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [
+          { ref: "refs/tags/@pipelab/app@1.0.0" },
+          { ref: "refs/tags/@pipelab/app@2.0.0" },
+          { ref: "refs/tags/@pipelab/app@1.5.0" },
+        ],
+      }),
+    );
 
     // Mock release lookup for 2.0.0 (since 2.0.0 is highest version)
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@2.0.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@2.0.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
       }),
-    } as any);
+    );
 
     const latest = await fetchLatestPackageRelease("@pipelab/app");
     expect(latest).not.toBeNull();
@@ -351,22 +403,26 @@ describe("GitHub Release Updates API", () => {
 
   test("fetchLatestDesktopRelease - queries the @pipelab/app package specifically", async () => {
     // Mock matching refs
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [{ ref: "refs/tags/@pipelab/app@3.0.0" }],
-    } as any);
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        json: async () => [{ ref: "refs/tags/@pipelab/app@3.0.0" }],
+      }),
+    );
 
     // Mock release lookup
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        tag_name: "@pipelab/app@3.0.0",
-        prerelease: false,
-        published_at: "2026-06-04T00:00:00Z",
-        assets: [],
+    fetchSpy.mockResolvedValueOnce(
+      fakeResponse({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          tag_name: "@pipelab/app@3.0.0",
+          prerelease: false,
+          published_at: "2026-06-04T00:00:00Z",
+          assets: [],
+        }),
       }),
-    } as any);
+    );
 
     const latest = await fetchLatestDesktopRelease();
     expect(latest).not.toBeNull();

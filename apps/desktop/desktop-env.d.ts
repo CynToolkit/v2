@@ -6,7 +6,6 @@ declare global {
   interface Window {
     version: string;
     electron: ElectronAPI;
-    api: any;
     isPackaged: boolean;
     isTest: boolean;
     isCI: boolean;

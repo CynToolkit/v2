@@ -1,3 +1,4 @@
+import { hasErrorCode } from "@pipelab/shared";
 import { randomUUID } from "node:crypto";
 import { link, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -14,12 +15,12 @@ export const readJsonFile = async (filePath: string): Promise<unknown> => {
   try {
     content = await readFile(filePath, "utf8");
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT")
-      throw new JsonFileMissingError(filePath);
+    if (hasErrorCode(error, "ENOENT")) throw new JsonFileMissingError(filePath);
     throw error;
   }
   try {
-    return JSON.parse(content) as unknown;
+    const parsed: unknown = JSON.parse(content);
+    return parsed;
   } catch (error) {
     throw new Error(
       `Malformed JSON in ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
@@ -56,7 +57,7 @@ export const writeJsonFileAtomicallyIfMissing = async (
       await link(temporaryPath, filePath);
       return true;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
+      if (hasErrorCode(error, "EEXIST")) return false;
       throw error;
     }
   } finally {

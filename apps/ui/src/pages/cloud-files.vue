@@ -150,11 +150,28 @@ interface Artifact {
   hasShareLink: boolean;
 }
 
+interface OverviewUsage {
+  usedBytes: number;
+  quotaBytes: number | null;
+  retentionDays: number | null;
+}
+
+interface OverviewEntitlement {
+  status: string;
+  graceUntil: string | null;
+}
+
+interface OverviewNotification {
+  id: string;
+  message: string;
+  deadline_at: string;
+}
+
 interface Overview {
   artifacts: Artifact[];
-  usage: { usedBytes: number; quotaBytes: number | null; retentionDays: number | null };
-  entitlement: { status: string; graceUntil: string | null };
-  notifications: Array<{ id: string; message: string; deadline_at: string }>;
+  usage: OverviewUsage;
+  entitlement: OverviewEntitlement;
+  notifications: OverviewNotification[];
 }
 
 const auth = useAuth();
@@ -170,6 +187,38 @@ const usagePercent = computed(() => {
   if (!quota || quota <= 0) return 0;
   return Math.min(100, Math.round((overview.value!.usage.usedBytes / quota) * 100));
 });
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const numberOrNull = (value: unknown) => (typeof value === "number" ? value : null);
+
+/** The Worker response is untrusted JSON, so check the parts the page reads before using it. */
+const toOverview = (result: Record<string, unknown>): Overview => {
+  const { artifacts, usage, entitlement, notifications } = result;
+  if (
+    !Array.isArray(artifacts) ||
+    !Array.isArray(notifications) ||
+    !isRecord(usage) ||
+    typeof usage.usedBytes !== "number" ||
+    !isRecord(entitlement) ||
+    typeof entitlement.status !== "string"
+  )
+    throw new Error("Cloud returned an invalid file overview.");
+  return {
+    artifacts,
+    notifications,
+    usage: {
+      usedBytes: usage.usedBytes,
+      quotaBytes: numberOrNull(usage.quotaBytes),
+      retentionDays: numberOrNull(usage.retentionDays),
+    },
+    entitlement: {
+      status: entitlement.status,
+      graceUntil: typeof entitlement.graceUntil === "string" ? entitlement.graceUntil : null,
+    },
+  };
+};
 
 const callWorker = async (action: string, payload: Record<string, unknown> = {}) => {
   if (!workerUrl) throw new Error("Cloud files are not configured for this deployment.");
@@ -188,7 +237,8 @@ const callWorker = async (action: string, payload: Record<string, unknown> = {})
         : `Cloud request failed (${response.status}).`;
     throw new Error(message);
   }
-  return result as Record<string, unknown>;
+  if (!isRecord(result)) throw new Error("Cloud returned an invalid response.");
+  return result;
 };
 
 const load = async () => {
@@ -200,7 +250,7 @@ const load = async () => {
   loading.value = true;
   error.value = "";
   try {
-    overview.value = (await callWorker("listArtifacts")) as unknown as Overview;
+    overview.value = toOverview(await callWorker("listArtifacts"));
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : "Could not load Cloud files.";
   } finally {

@@ -1,5 +1,5 @@
 /// <reference path="./declarations.d.ts" />
-import { createProviderDefinition } from "@pipelab/shared";
+import { createProviderDefinition, pickLiteral } from "@pipelab/shared";
 import { requiresHostOfSamePlatform } from "../host-matrix";
 import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { tauriWorkflowTaskFactories } from "./package";
@@ -10,9 +10,9 @@ export const tauriTargetInputs = (
 ): { platform: "win32" | "linux" | "darwin"; arch: "x64" | "arm64" } => {
   const [target, arch] = targetId.split("-");
   const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
-  if (!(["x64", "arm64"] as string[]).includes(arch))
-    throw new Error(`Unsupported Tauri target: ${targetId}`);
-  return { platform, arch: arch as "x64" | "arm64" };
+  const supportedArch = pickLiteral(["x64", "arm64"], arch);
+  if (!supportedArch) throw new Error(`Unsupported Tauri target: ${targetId}`);
+  return { platform, arch: supportedArch };
 };
 
 const tauriTargetDescriptor = (id: string) => {

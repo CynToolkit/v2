@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import pokiPlugin, { createPokiUploadTask, WORKFLOW_TASK_ID } from "./index";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("Poki Release registry", () => {
   it("keeps the destination and task without legacy node metadata", () => {
@@ -14,11 +15,13 @@ describe("Poki Release registry", () => {
 
   it("takes the version name and notes from the release details", () => {
     const destination = pokiPlugin.release?.destinations?.[0];
-    const artifact = { reference: { stepId: "build" } } as never;
-    const target = { id: "d", config: { project: "game" }, slots: [] } as never;
-    const slot = { id: "s", config: {} } as never;
     const compile = (variables: Record<string, unknown>) =>
-      destination?.compile(artifact, target, slot, { host: {}, variables } as never)[0].with;
+      destination?.compile(
+        partialDouble({ reference: { stepId: "build" } }),
+        partialDouble({ id: "d", config: { project: "game" }, slots: [] }),
+        partialDouble({ id: "s", config: {} }),
+        partialDouble({ host: {}, variables }),
+      )[0].with;
     expect(compile({ version: "1.2.0", releaseNotes: "Fixes" })).toMatchObject({
       project: "game",
       name: "1.2.0",

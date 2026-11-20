@@ -11,7 +11,7 @@ export type MigrationFn<From, To> = (state: From, targetVersion: string) => Awai
 export interface MigrateOptions {
   debug?: boolean;
   target?: SemVer;
-  onStep?: (state: any, version: SemVer) => Promise<void> | void;
+  onStep?: (state: MigrationSchema, version: SemVer) => Promise<void> | void;
 }
 
 const MigrationSchemaValidator = object({
@@ -24,9 +24,11 @@ export type OmitVersion<T> = Omit<T, keyof MigrationSchema>;
 
 export type SemVer = `${number}.${number}.${number}`;
 
+export const isSemVer = (value: string): value is SemVer => /^\d+\.\d+\.\d+$/.test(value);
+
 export interface MigrationClass<Current, Up> {
   version: SemVer;
-  up: MigrationFn<Current, Up>;
+  up: MigrationFn<Current, OmitVersion<Up> & MigrationSchema>;
 }
 
 export interface MigrationObjInput<Current, Up> {
@@ -83,7 +85,7 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
       console.log("Migrating from", currentVersion, "to", targetVersion);
     }
 
-    let finalState = klona(state) as any; // Using any here because we'll be transforming between versions
+    let finalState: MigrationSchema & Record<string, unknown> = klona(state); // Transformed between versions, so only `version` is statically known
     const versions = this.getVersions();
     const currentIndex = versions.indexOf(currentVersion);
     const targetIndex = versions.indexOf(targetVersion);
@@ -153,7 +155,9 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
   }
 
   tryCoerce(version: SemVer): SemVer {
-    return this.coerce ? ((coerce(version)?.version as SemVer | undefined) ?? version) : version;
+    if (!this.coerce) return version;
+    const coerced = coerce(version)?.version;
+    return coerced !== undefined && isSemVer(coerced) ? coerced : version;
   }
 
   needMigration(version: SemVer) {

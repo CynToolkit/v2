@@ -11,6 +11,7 @@ import type {
   ReleaseRegistry,
   ReleaseSourceDefinition,
 } from "./types";
+import { invalidInput } from "../test-doubles";
 
 const project = (technology: string) =>
   ({ kind: "project", technology, container: "directory" }) as const;
@@ -27,7 +28,7 @@ const source = (
   output,
   createDefaultConfig: () => ({}),
   validate: () => [],
-  compile: () => ({ steps: [], artifact: null as never }),
+  compile: () => ({ steps: [], artifact: invalidInput(null) }),
 });
 
 const target = (

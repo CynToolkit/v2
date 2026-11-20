@@ -1,3 +1,5 @@
+import * as v from "valibot";
+import { parseOrUndefined } from "@pipelab/shared";
 import type { BrowserProfileAuthStatus, BrowserProfileCandidate } from "@pipelab/shared";
 import { access, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -13,6 +15,14 @@ export type BrowserProfileOption = Pick<
   "browser" | "profileName" | "path"
 >;
 
+/** What Construct's login endpoints answer; shared by the profile and credential checks. */
+export const constructLoginResponseSchema = v.looseObject({
+  request: v.optional(v.looseObject({ status: v.optional(v.unknown()) })),
+  response: v.optional(
+    v.looseObject({ userID: v.optional(v.unknown()), token: v.optional(v.unknown()) }),
+  ),
+});
+
 export const detectConstructAuthStatusFromResponse = (
   url: string,
   httpStatus: number,
@@ -27,10 +37,8 @@ export const detectConstructAuthStatusFromResponse = (
   if (requestUrl.hostname !== "account.construct.net") return "unknown";
   if (httpStatus === 401 || httpStatus === 403) return "not-authenticated";
   if (!payload || typeof payload !== "object") return "unknown";
-  const body = payload as {
-    request?: { status?: unknown };
-    response?: { userID?: unknown; token?: unknown };
-  };
+  const body = parseOrUndefined(constructLoginResponseSchema, payload);
+  if (!body) return "unknown";
   if (body.request?.status === "ok" && (body.response?.userID || body.response?.token)) {
     return "authenticated";
   }
@@ -173,11 +181,20 @@ interface ChromiumProfile {
   name: string;
 }
 
+const localStateSchema = v.looseObject({
+  profile: v.optional(
+    v.looseObject({
+      info_cache: v.optional(v.record(v.string(), v.looseObject({ name: v.optional(v.string()) }))),
+    }),
+  ),
+});
+
 export const chromiumProfiles = async (root: string): Promise<ChromiumProfile[]> => {
   try {
-    const state = JSON.parse(await readFile(join(root, "Local State"), "utf8")) as {
-      profile?: { info_cache?: Record<string, { name?: string }> };
-    };
+    const state = v.parse(
+      localStateSchema,
+      JSON.parse(await readFile(join(root, "Local State"), "utf8")),
+    );
     const profiles = Object.entries(state.profile?.info_cache || {}).map(([path, info]) => ({
       path,
       name: info.name || path,
@@ -348,20 +365,19 @@ const discoverFirefox = async (): Promise<BrowserProfileCandidate[]> => {
       if (!path) return [];
       const full = section.match(/^IsRelative=0$/m) ? path : join(root, path);
       const name = section.match(/^Name=(.+)$/m)?.[1] || full.split("/").pop() || "Firefox";
-      return [
-        {
-          browser: "Firefox",
-          profileName: name,
-          path: normalize(full),
-          isDefault: /^Default=1$/m.test(section),
-          addonCount: null as number | null,
-          authStatus: "unknown" as const,
-          lastUpdatedAt: null as number | null,
-          score: null as number | null,
-          usable: false,
-          reason: "Firefox profile discovery is read-only; Construct export uses Chromium",
-        },
-      ];
+      const profile: BrowserProfileCandidate = {
+        browser: "Firefox",
+        profileName: name,
+        path: normalize(full),
+        isDefault: /^Default=1$/m.test(section),
+        addonCount: null,
+        authStatus: "unknown",
+        lastUpdatedAt: null,
+        score: null,
+        usable: false,
+        reason: "Firefox profile discovery is read-only; Construct export uses Chromium",
+      };
+      return [profile];
     });
   } catch {
     return [];
@@ -383,18 +399,20 @@ const discoverSafari = async (): Promise<BrowserProfileCandidate[]> => {
   try {
     return (await readdir(root, { withFileTypes: true }))
       .filter((entry) => entry.isDirectory())
-      .map((entry) => ({
-        browser: "Safari",
-        profileName: entry.name,
-        path: join(root, entry.name),
-        isDefault: false,
-        addonCount: null as number | null,
-        authStatus: "unknown" as const,
-        lastUpdatedAt: null as number | null,
-        score: null as number | null,
-        usable: false,
-        reason: "Safari automation cannot access normal browsing storage",
-      }));
+      .map(
+        (entry): BrowserProfileCandidate => ({
+          browser: "Safari",
+          profileName: entry.name,
+          path: join(root, entry.name),
+          isDefault: false,
+          addonCount: null,
+          authStatus: "unknown",
+          lastUpdatedAt: null,
+          score: null,
+          usable: false,
+          reason: "Safari automation cannot access normal browsing storage",
+        }),
+      );
   } catch {
     return [];
   }

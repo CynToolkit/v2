@@ -1,3 +1,4 @@
+import { isRecord } from "@pipelab/shared";
 import { parseArgs } from "node:util";
 import { startServer } from "@pipelab/cli/serve";
 import { cancelAllWorkflowRuns, webSocketServer } from "@pipelab/core-node";
@@ -55,7 +56,7 @@ process.on("unhandledRejection", (reason) => {
 });
 
 process.on("message", (message) => {
-  if ((message as { type?: string } | undefined)?.type === "shutdown") void shutdown(0);
+  if (isRecord(message) && message.type === "shutdown") void shutdown(0);
 });
 // Desktop went away without asking us to stop: do not keep running unsupervised.
 process.on("disconnect", () => void shutdown(0));

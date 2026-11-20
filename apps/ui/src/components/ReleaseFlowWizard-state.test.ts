@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { computed, reactive } from "vue";
 import { resolveReleaseDefaults } from "@pipelab/shared";
-import type { ReleaseCatalog, ReleaseRegistry } from "@pipelab/shared";
+import { invalidInput } from "@pipelab/shared/test-doubles";
+import type { CompiledArtifact, ReleaseCatalog, ReleaseRegistry } from "@pipelab/shared";
 import { invalidEnvironmentBindingPaths } from "../utils/environment-bindings";
 import {
   buildReleaseWizardConfig,
@@ -83,7 +84,7 @@ const sourceDefinition = {
   output: project,
   createDefaultConfig: () => ({ path: "" }),
   validate: () => [],
-  compile: () => ({ steps: [], artifact: null as never }),
+  compile: () => ({ steps: [], artifact: invalidInput<CompiledArtifact>(null) }),
 };
 const registry = (
   destinationAccepts: ReleaseRegistry["destinations"][number]["accepts"],

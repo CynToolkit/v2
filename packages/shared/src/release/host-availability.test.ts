@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { withoutHostUnavailableBuilds } from "./host-availability";
 import type { ReleaseConfig, ReleaseRegistry } from "./types";
+import { partialDouble } from "../test-doubles";
 
-const registry = {
+const registry = partialDouble<ReleaseRegistry>({
   producers: [
     {
       id: "engine",
@@ -16,9 +17,9 @@ const registry = {
       ],
     },
   ],
-} as unknown as ReleaseRegistry;
+});
 
-const config = {
+const config = partialDouble<ReleaseConfig>({
   builds: [
     {
       id: "b",
@@ -38,7 +39,7 @@ const config = {
       ],
     },
   ],
-} as unknown as ReleaseConfig;
+});
 
 describe("withoutHostUnavailableBuilds", () => {
   it("drops unavailable targets and the deployments that take them", () => {

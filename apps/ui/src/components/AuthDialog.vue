@@ -454,7 +454,7 @@ const submitButtonLabel = computed(() => {
 });
 
 // Form submission handler
-const onSuccess = async (values: any) => {
+const onSuccess = async (values: AuthFormValues) => {
   if (!auth.isAuthTransportReady) return;
   try {
     if (activeTab.value === "register") {
@@ -463,7 +463,7 @@ const onSuccess = async (values: any) => {
         return;
       }
 
-      const { error } = await auth.register(values.email, values.password);
+      const { error } = await auth.register(values.email ?? "", values.password ?? "");
       if (error) {
         toast.add({
           severity: "error",
@@ -481,7 +481,7 @@ const onSuccess = async (values: any) => {
         });
       }
     } else if (activeTab.value === "forgot-password") {
-      const { error } = await auth.resetPassword(values.email);
+      const { error } = await auth.resetPassword(values.email ?? "");
       if (error) {
         toast.add({
           severity: "error",
@@ -500,7 +500,7 @@ const onSuccess = async (values: any) => {
       }
     } else {
       // login
-      const { error } = await auth.login(values.email, values.password);
+      const { error } = await auth.login(values.email ?? "", values.password ?? "");
       if (error) {
         toast.add({
           severity: "error",

@@ -67,8 +67,8 @@ const handleDrop = (e: DragEvent) => {
 };
 
 const handleFileSelect = (e: Event) => {
-  const target = e.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
+  const target = e.target;
+  if (target instanceof HTMLInputElement && target.files && target.files.length > 0) {
     file.value = target.files[0];
   }
 };
@@ -87,7 +87,7 @@ const triggerConfetti = () => {
     return Math.random() * (max - min) + min;
   };
 
-  const interval: any = setInterval(() => {
+  const interval: ReturnType<typeof setInterval> = setInterval(() => {
     const timeLeft = animationEnd - Date.now();
 
     if (timeLeft <= 0) {
@@ -186,7 +186,8 @@ const startPackaging = async () => {
       triggerConfetti();
     });
     
-  } catch (error: any) {
+  } catch (caught) {
+    const error = caught instanceof Error ? caught : new Error(String(caught));
     clearInterval(progressInterval);
     if (error.name === 'AbortError') {
       phase.value = 'setup';

@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch, provide } from "vue";
+import { isRecord } from "@pipelab/shared";
 import { onBeforeRouteLeave, RouterLink, RouterView, useRoute } from "vue-router";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { workflowActionsKey } from "../composables/workflow-header-state";
@@ -174,7 +175,7 @@ watch(
 const nav = ref<HTMLElement>();
 const tabRefs = new Map<TabId, HTMLElement>();
 const setTabRef = (id: TabId, el: unknown) => {
-  const element = (el as { $el?: HTMLElement } | null)?.$el;
+  const element = isRecord(el) && el.$el instanceof HTMLElement ? el.$el : undefined;
   if (element) tabRefs.set(id, element);
   else tabRefs.delete(id);
 };
@@ -186,7 +187,7 @@ const indicatorStyle = computed(() => ({
 }));
 const placeIndicator = async () => {
   await nextTick();
-  const element = tabRefs.get(active.value as TabId);
+  const element = tabRefs.get(active.value);
   if (!element) {
     indicator.value = { ...indicator.value, visible: false };
     return;

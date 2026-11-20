@@ -1,3 +1,4 @@
+import { isRecord } from "@pipelab/shared";
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { app, dialog } from "electron";
@@ -125,10 +126,10 @@ const spawnServer = (preferredPort: number): Promise<{ child: ChildProcess; port
       READY_TIMEOUT_MS,
     );
     child.on("message", (message: unknown) => {
-      const { type, port } = (message ?? {}) as { type?: string; port?: unknown };
-      if (type !== "ready" || typeof port !== "number") return;
+      if (!isRecord(message) || message.type !== "ready" || typeof message.port !== "number")
+        return;
       clearTimeout(timeout);
-      resolve({ child, port });
+      resolve({ child, port: message.port });
     });
     child.once("error", fail);
     child.once("exit", (code) =>
