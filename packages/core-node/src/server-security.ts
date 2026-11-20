@@ -15,6 +15,10 @@ export const isLoopbackHost = (host: string): boolean =>
 
 export const requiresAuthentication = (host: string): boolean => !isLoopbackHost(host);
 
+/** A configured token is always enforced, including on loopback binds. */
+export const isTokenEnforced = (options: ServerSecurityOptions & { host: string }): boolean =>
+  Boolean(options.authToken) || requiresAuthentication(options.host);
+
 export const hasValidAuthToken = (
   request: IncomingMessage,
   expectedToken: string | undefined,
@@ -48,7 +52,7 @@ export const isAuthorizedRequest = (
   request: IncomingMessage,
   options: ServerSecurityOptions & { host: string },
 ): boolean => {
-  if (options.allowUnauthenticated) {
+  if (options.allowUnauthenticated && !options.authToken) {
     const origin = request.headers.origin;
     if (!origin) return true;
     try {
@@ -60,6 +64,6 @@ export const isAuthorizedRequest = (
     }
   }
   if (!isAllowedOrigin(request, options.allowedOrigins, options.host)) return false;
-  if (!requiresAuthentication(options.host)) return true;
+  if (!isTokenEnforced(options)) return true;
   return hasValidAuthToken(request, options.authToken);
 };

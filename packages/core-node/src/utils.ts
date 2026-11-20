@@ -1,15 +1,12 @@
 import { builtInProviders } from "./providers-registry";
-import { transformUrl, type RendererProviderMetadata } from "@pipelab/shared";
+import type { RendererProviderMetadata } from "@pipelab/shared";
 
 export const toRendererProviderMetadata = (
   provider: RendererProviderMetadata,
 ): RendererProviderMetadata => ({
   id: provider.id,
   name: provider.name,
-  icon:
-    provider.icon.type === "image"
-      ? { ...provider.icon, image: transformUrl(provider.icon.image) }
-      : provider.icon,
+  icon: provider.icon,
   description: provider.description,
   isOfficial: provider.isOfficial,
   packageName: provider.packageName,
