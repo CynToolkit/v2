@@ -1,14 +1,15 @@
-import { computed, inject, onScopeDispose, provide, type InjectionKey, type Ref } from "vue";
+import { computed, inject, onScopeDispose, provide, type InjectionKey } from "vue";
 import { useAgentAvailability } from "./useAgentAvailability";
 import { useAPI } from "./api";
 import { useAppStore } from "../store/app";
 import { useConnectionsStore } from "../store/connections";
 import { invalidEnvironmentBindingPaths } from "../utils/environment-bindings";
 import { createWorkflowDocument, type WorkflowDocument } from "./workflow-document";
+import type { CreateIds } from "./useWorkflowDocument.types";
 
 const workflowDocumentKey: InjectionKey<WorkflowDocument> = Symbol("workflow-document");
 
-const create = (ids: { flowId: Ref<string>; projectId: Ref<string> }) => {
+const create = (ids: CreateIds) => {
   const agent = useAgentAvailability();
   const api = useAPI();
   const appStore = useAppStore();
@@ -29,7 +30,7 @@ const create = (ids: { flowId: Ref<string>; projectId: Ref<string> }) => {
 };
 
 /** The layout owns the workflow and shares it with every tab. */
-export const provideWorkflowDocument = (ids: { flowId: Ref<string>; projectId: Ref<string> }) => {
+export const provideWorkflowDocument = (ids: CreateIds) => {
   const document = create(ids);
   provide(workflowDocumentKey, document);
   return document;
@@ -39,5 +40,5 @@ export const provideWorkflowDocument = (ids: { flowId: Ref<string>; projectId: R
  * The shared workflow. Outside the layout (the dashboard's Ship dialog embeds the editor
  * page on its own) there is nothing to share, so the page gets its own.
  */
-export const useWorkflowDocument = (ids: { flowId: Ref<string>; projectId: Ref<string> }) =>
+export const useWorkflowDocument = (ids: CreateIds) =>
   inject(workflowDocumentKey, undefined) ?? create(ids);

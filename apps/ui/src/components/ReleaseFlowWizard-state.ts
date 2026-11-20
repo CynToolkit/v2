@@ -2,6 +2,7 @@ import { createReleaseConfig } from "@pipelab/shared";
 import type { ReleaseCatalog, ReleaseCatalogTarget, ReleaseConfig } from "@pipelab/shared";
 import { suggestMissingConnectionAliases } from "../pages/release-flow-model";
 import { releaseWorkflowConnectionAliases } from "../utils/release-connection-bindings";
+import type { ReleaseWizardCanCreateState } from "./ReleaseFlowWizard-state.types";
 
 export interface ReleaseWizardDraft {
   name: string;
@@ -125,13 +126,7 @@ export const releaseWizardCanReview = (draft: ReleaseWizardDraft, catalog: Relea
   releaseWizardSourceIsReady(draft.source, catalog) &&
   draft.destinations.length > 0;
 
-export const releaseWizardCanCreate = (state: {
-  isReady: boolean;
-  projectId?: string;
-  canContinueDestinations: boolean;
-  createPending: boolean;
-  invalidEnvironmentBindingCount: number;
-}) =>
+export const releaseWizardCanCreate = (state: ReleaseWizardCanCreateState) =>
   Boolean(
     state.isReady &&
     state.projectId &&

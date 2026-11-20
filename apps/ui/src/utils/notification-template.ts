@@ -3,6 +3,11 @@ import {
   NOTIFICATION_TEMPLATE_VARIABLES,
   type BuildHistoryEntry,
 } from "@pipelab/shared";
+import type {
+  TemplatePartText,
+  TemplatePartVariable,
+  InsertVariableResult,
+} from "./notification-template.types";
 
 type NotificationVariableName = (typeof NOTIFICATION_TEMPLATE_VARIABLES)[number];
 
@@ -66,9 +71,7 @@ export const notificationVariableInfos = (
   }));
 };
 
-export type TemplatePart =
-  | { kind: "text"; text: string }
-  | { kind: "variable"; text: string; name: string; known: boolean };
+export type TemplatePart = TemplatePartText | TemplatePartVariable;
 
 const variablePattern = /\{\{\s*([A-Za-z][A-Za-z0-9_]*)\s*\}\}/g;
 
@@ -93,7 +96,7 @@ export const insertVariable = (
   name: string,
   selectionStart: number,
   selectionEnd: number,
-): { value: string; caret: number } => {
+): InsertVariableResult => {
   const token = `{{${name}}}`;
   return {
     value: template.slice(0, selectionStart) + token + template.slice(selectionEnd),

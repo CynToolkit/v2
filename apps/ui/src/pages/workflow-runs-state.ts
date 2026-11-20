@@ -1,19 +1,25 @@
 import type { BuildHistoryEntry } from "@pipelab/shared";
+import type {
+  IsWorkflowRouteContextValidWorkflow,
+  LoadResultError,
+  ResolveWorkflowRunsStateHistory,
+  ResolveWorkflowRunsStateWorkflow,
+} from "./workflow-runs-state.types";
 
 export const scheduleWorkflowRunsRefresh = (entries: BuildHistoryEntry[], refresh: () => void) =>
   entries.some((entry) => entry.status === "running") ? setTimeout(refresh, 1000) : undefined;
 
 export const isWorkflowRouteContextValid = (
-  workflow: { id?: string; project?: string },
+  workflow: IsWorkflowRouteContextValidWorkflow,
   flowId: string,
   projectId: string,
 ) => workflow.id === flowId && workflow.project === projectId;
 
-type LoadResult<T> = { type: "success"; result: T } | { type: "error"; ipcError: string };
+type LoadResult<T> = { type: "success"; result: T } | LoadResultError;
 
 export const resolveWorkflowRunsState = (
-  history: LoadResult<{ entries: BuildHistoryEntry[] }>,
-  workflow: LoadResult<{ id: string; project: string; name?: string }>,
+  history: LoadResult<ResolveWorkflowRunsStateHistory>,
+  workflow: LoadResult<ResolveWorkflowRunsStateWorkflow>,
   flowId: string,
   projectId: string,
 ) => {

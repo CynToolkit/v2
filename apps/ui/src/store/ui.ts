@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import type { FilePickerOptionsFilter } from "./ui.types";
 
 export interface FilePickerOptions {
   title?: string;
@@ -19,7 +20,7 @@ export interface FilePickerOptions {
     | "dontAddToRecent"
     | "showOverwriteConfirmation"
   >;
-  filters?: { name: string; extensions: string[] }[];
+  filters?: FilePickerOptionsFilter[];
   mode: "open" | "save";
 }
 

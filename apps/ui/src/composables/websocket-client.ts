@@ -25,6 +25,7 @@ import {
 } from "@pipelab/shared";
 import { websocketPort } from "@pipelab/constants";
 import { nanoid } from "nanoid";
+import type { DisconnectOptions } from "./websocket-client.types";
 
 type WebSocketSendFn<KEY extends Channels> = WebSocketSendFunction<KEY>;
 
@@ -409,7 +410,7 @@ export class WebSocketClient {
     return this.ws?.readyState === WebSocket.OPEN;
   }
 
-  public disconnect(options: { clearQueue?: boolean } = { clearQueue: true }) {
+  public disconnect(options: DisconnectOptions = { clearQueue: true }) {
     void options;
     this.connectionState = "disconnected";
     this.isConnecting = false;

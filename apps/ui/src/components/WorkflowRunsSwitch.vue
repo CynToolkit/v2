@@ -12,9 +12,10 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import type { WorkflowRunsSwitchProps } from "./WorkflowRunsSwitch.types";
 import { RouterLink } from "vue-router";
 
-const props = defineProps<{ flowId: string; projectId: string; active: "runs" | "artifacts" }>();
+const props = defineProps<WorkflowRunsSwitchProps>();
 const base = computed(() => `/workflows/${props.flowId}/${props.projectId}/runs`);
 </script>
 

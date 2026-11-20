@@ -1,3 +1,5 @@
+import type { BillingPlanBenefit, BillingSubscriptionProduct } from "./billing.types";
+
 /**
  * Shapes returned by the `polar-available-plans` and `polar-user-plan` Edge Functions
  * (see supabase/functions/_shared/billing.ts). These are intentionally not the Polar SDK
@@ -15,7 +17,7 @@ export interface BillingPlan {
   description: string | null;
   recurringInterval: string | null;
   prices: BillingPlanPrice[];
-  benefits: { description: string }[];
+  benefits: BillingPlanBenefit[];
 }
 
 export interface BillingSubscription {
@@ -27,5 +29,5 @@ export interface BillingSubscription {
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   // `benefits` is not currently returned by the function; consumers must tolerate it being absent.
-  product: { id: string; name: string; benefits?: { id?: string }[] };
+  product: BillingSubscriptionProduct;
 }

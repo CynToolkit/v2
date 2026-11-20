@@ -1,5 +1,5 @@
-import type { WorkflowSaveState } from "../composables/workflow-document";
 import type { ReleaseBuildProfileConfig } from "@pipelab/shared";
+import type { HasUnsavedReleaseWorkflowStateInput } from "./workflow-builds-state.types";
 
 export const persistBuildChangesBeforeNavigation = async (
   hasUnsavedChanges: () => boolean,
@@ -48,14 +48,7 @@ export const hasUnsavedReleaseWorkflowState = ({
   buildSettingsOpen = false,
   draftBuild,
   currentBuild,
-}: {
-  changeRevision: number;
-  persistedRevision: number;
-  saveState: WorkflowSaveState;
-  buildSettingsOpen?: boolean;
-  draftBuild?: ReleaseBuildProfileConfig;
-  currentBuild?: ReleaseBuildProfileConfig;
-}) =>
+}: HasUnsavedReleaseWorkflowStateInput) =>
   changeRevision !== persistedRevision ||
   saveState === "saving" ||
   saveState === "error" ||

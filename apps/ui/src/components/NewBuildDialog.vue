@@ -109,34 +109,25 @@
 
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, toRaw, watch } from "vue";
-import type { ReleaseCatalog, ReleaseConfig } from "@pipelab/shared";
 import { useAPI } from "../composables/api";
 import {
   probeCompatibleBuildCandidates,
   type CompatibleBuildCandidate,
 } from "../pages/release-flow-model";
 import {
-  buildChoiceAlreadyAdded,
   buildChoicePlatform,
-  buildPlatformIcon,
-  buildPlatformLabel,
   filterBuildChoices,
   groupBuildChoices,
   type BuildChoiceFilters,
   type BuildPlatform,
+  buildChoiceAlreadyAdded,
+  buildPlatformIcon,
+  buildPlatformLabel,
 } from "../utils/build-choices";
+import type { NewBuildDialogProps, NewBuildDialogEmits, SearchInput } from "./NewBuildDialog.types";
 
-const props = defineProps<{
-  visible: boolean;
-  flow?: ReleaseConfig;
-  catalog: ReleaseCatalog;
-  destinationId?: string;
-  slotId?: string;
-}>();
-const emit = defineEmits<{
-  "update:visible": [value: boolean];
-  create: [choice: CompatibleBuildCandidate];
-}>();
+const props = defineProps<NewBuildDialogProps>();
+const emit = defineEmits<NewBuildDialogEmits>();
 
 const api = useAPI();
 const visible = computed({
@@ -144,7 +135,7 @@ const visible = computed({
   set: (value) => emit("update:visible", value),
 });
 const candidates = ref<CompatibleBuildCandidate[]>([]);
-const searchInput = ref<{ $el?: HTMLElement } | null>(null);
+const searchInput = ref<SearchInput | null>(null);
 const filters = reactive<BuildChoiceFilters>({ query: "", engine: "", platform: "" });
 // Filter chips only exist when there is a real choice to make.
 const engineOptions = computed(() => {

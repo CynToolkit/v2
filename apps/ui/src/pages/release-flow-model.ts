@@ -23,6 +23,14 @@ import {
   releaseWorkflowConnectionAliases,
   suggestWorkflowConnectionAlias,
 } from "../utils/release-connection-bindings";
+import type {
+  ReleaseOutputOwnerRefSource,
+  ReleaseOutputOwnerRefBuild,
+  OutputReferenceChangeActionSourceProvider,
+  OutputReferenceChangeActionBuildRemove,
+  DashboardShipIntentActionOptions,
+  ApplyProducerInspectionOptions,
+} from "./release-flow-model.types";
 
 export { invalidEnvironmentBindingPaths } from "../utils/environment-bindings";
 
@@ -32,7 +40,7 @@ export interface ReleaseOutputOption {
   ref: ReleaseOutputRef;
 }
 
-export type ReleaseOutputOwnerRef = { source: true } | { buildId: string };
+export type ReleaseOutputOwnerRef = ReleaseOutputOwnerRefSource | ReleaseOutputOwnerRefBuild;
 
 export interface OutputReferenceConsumer {
   kind: "build" | "destination-slot";
@@ -42,8 +50,8 @@ export interface OutputReferenceConsumer {
 }
 
 export type OutputReferenceChangeAction =
-  | { kind: "source-provider"; oldProvider: string; newProvider: string }
-  | { kind: "build-remove"; buildName: string };
+  | OutputReferenceChangeActionSourceProvider
+  | OutputReferenceChangeActionBuildRemove;
 
 export const suggestMissingConnectionAliases = (
   values: Record<string, unknown>,
@@ -771,13 +779,7 @@ export const releaseReadinessState = (readiness: ReleaseReadinessInput) =>
         ? "checking"
         : "ready";
 
-export const dashboardShipIntentAction = (options: {
-  intent: boolean;
-  workflowMatchesRoute: boolean;
-  loading: boolean;
-  readiness: ReturnType<typeof releaseReadinessState>;
-  canShip: boolean;
-}) => {
+export const dashboardShipIntentAction = (options: DashboardShipIntentActionOptions) => {
   if (!options.intent || !options.workflowMatchesRoute || options.loading) return "wait" as const;
   if (options.readiness === "checking") return "wait" as const;
   return options.readiness === "ready" && options.canShip
@@ -789,7 +791,7 @@ export const applyProducerInspection = (
   build: ReleaseBuildProfileConfig,
   buildIndex: number,
   inspection: ProducerInspection,
-  options: { applyFieldValues?: boolean } = {},
+  options: ApplyProducerInspectionOptions = {},
 ) => {
   for (const [key, value] of Object.entries(
     options.applyFieldValues === false ? {} : inspection.fieldValues || {},

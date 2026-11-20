@@ -3,6 +3,7 @@ import type { ReleaseConfig, ReleasePlan } from "@pipelab/shared";
 import type { useAPI } from "./api";
 import { createSerializedTaskQueue } from "../pages/release-flow-model";
 import { hasUnsavedReleaseWorkflowState } from "../pages/workflow-builds-state";
+import type { LoadResult } from "./workflow-document.types";
 
 type Execute = ReturnType<typeof useAPI>["execute"];
 
@@ -196,7 +197,7 @@ export const createWorkflowDocument = (deps: WorkflowDocumentDeps) => {
    * Fetch the saved workflow. Unsaved edits to the same workflow are kept. Switching to a
    * different workflow first saves whatever is pending for the old one.
    */
-  const load = async (): Promise<{ ok: boolean; hydrated: boolean }> => {
+  const load = async (): Promise<LoadResult> => {
     if (!isReady.value) return { ok: false, hydrated: false };
     const generation = ++loadGeneration;
     const requestedFlowId = flowId.value;

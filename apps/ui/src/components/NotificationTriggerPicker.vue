@@ -87,14 +87,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import Button from "primevue/button";
-import Select from "primevue/select";
-import type {
-  IconType,
-  ReleaseNotificationConfig,
-  ReleaseNotificationTrigger,
-} from "@pipelab/shared";
-import ServiceIcon from "./ServiceIcon.vue";
+import type { ReleaseNotificationTrigger } from "@pipelab/shared";
 import {
   effectiveTriggers,
   nextTrigger,
@@ -104,6 +97,10 @@ import {
   triggerOfKind,
   type TriggerEventKind,
 } from "../utils/notification-triggers";
+import type { NotificationTriggerPickerProps } from "./NotificationTriggerPicker.types";
+import Button from "primevue/button";
+import Select from "primevue/select";
+import ServiceIcon from "./ServiceIcon.vue";
 
 interface EventOption {
   on: TriggerEventKind;
@@ -111,10 +108,7 @@ interface EventOption {
   icon: string;
 }
 
-const props = defineProps<{
-  target: ReleaseNotificationConfig;
-  destinations: Array<{ id: string; label: string; icon?: IconType }>;
-}>();
+const props = defineProps<NotificationTriggerPickerProps>();
 
 const eventOptions: EventOption[] = [...TRIGGER_EVENTS];
 const eventOf = (kind: TriggerEventKind) => TRIGGER_EVENTS.find((event) => event.on === kind);

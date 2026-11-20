@@ -202,12 +202,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import Button from "primevue/button";
-import Checkbox from "primevue/checkbox";
-import ConfirmDialog from "primevue/confirmdialog";
 import { useConfirm } from "primevue/useconfirm";
-import InputNumber from "primevue/inputnumber";
-import Message from "primevue/message";
 import type { BuildHistoryEntry, ReleaseWorkflowSettings } from "@pipelab/shared";
 import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
@@ -216,6 +211,12 @@ import { useWorkflowTab } from "../composables/workflow-header-state";
 import { useWorkflowDocument } from "../composables/useWorkflowDocument";
 import { requestNotificationPermission } from "../utils/run-notifications";
 import { retentionPreview, type RetentionPreviewRow } from "./workflow-retention-preview";
+import type { RetentionGroup, RetentionRuleLimits } from "./workflow-settings.types";
+import Button from "primevue/button";
+import Checkbox from "primevue/checkbox";
+import ConfirmDialog from "primevue/confirmdialog";
+import InputNumber from "primevue/inputnumber";
+import Message from "primevue/message";
 
 const route = useRoute();
 const actionsTarget = useWorkflowTab(() => {
@@ -259,7 +260,7 @@ type RuleGroup = "history" | "artifacts";
 const retention = () => flow.value?.settings?.retention;
 const setGroupRule = (group: RuleGroup, key: "maxRuns" | "maxAgeDays", value?: number) => {
   const policy = { ...settings().retention };
-  const rules: { maxRuns?: number; maxAgeDays?: number } = { ...policy[group] };
+  const rules: RetentionRuleLimits = { ...policy[group] };
   if (value === undefined) delete rules[key];
   else rules[key] = value;
   if (Object.keys(rules).length) policy[group] = rules;
@@ -283,15 +284,7 @@ const commitRetention = (policy: NonNullable<ReleaseWorkflowSettings["retention"
   if (Object.keys(policy).length) settings().retention = policy;
   else delete settings().retention;
 };
-interface RetentionRule {
-  id: string;
-  before: string;
-  unit: string;
-  default: number;
-  get: () => number | undefined;
-  set: (value?: number) => void;
-}
-const retentionGroups: { title: string; rules: RetentionRule[] }[] = [
+const retentionGroups: RetentionGroup[] = [
   {
     title: "Run history",
     rules: [

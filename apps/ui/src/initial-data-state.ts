@@ -1,3 +1,9 @@
+import type {
+  InitialDataResultSuccess,
+  InitialDataResultError,
+  LoadInitialDataSteps,
+} from "./initial-data-state.types";
+
 export type InitialDataSection =
   | "projects"
   | "providers"
@@ -8,17 +14,15 @@ export type InitialDataSection =
 
 type InitialDataFailureKind = "backend-disconnected" | "project-config" | "connections" | "other";
 
-interface InitialDataFailure {
+export interface InitialDataFailure {
   kind: InitialDataFailureKind;
   message: string;
 }
 
-export type InitialDataResult =
-  | { type: "success" }
-  | { type: "error"; failure: InitialDataFailure };
+export type InitialDataResult = InitialDataResultSuccess | InitialDataResultError;
 
 export const loadInitialData = async (
-  steps: Array<{ section: InitialDataSection; load: () => Promise<unknown> }>,
+  steps: Array<LoadInitialDataSteps>,
   isBackendConnected: () => boolean,
 ): Promise<InitialDataResult> => {
   for (const step of steps) {

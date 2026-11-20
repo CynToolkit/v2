@@ -811,25 +811,19 @@
 import { computed, ref, toRaw, watch, inject } from "vue";
 import { useAppSettings } from "@renderer/store/settings";
 import { storeToRefs } from "pinia";
-import Button from "primevue/button";
 import Card from "primevue/card";
 import InputNumber from "primevue/inputnumber";
-import ToggleSwitch from "primevue/toggleswitch";
 import Select from "primevue/select";
 import { useAuth } from "@renderer/store/auth";
 import { openAsyncUrl } from "@renderer/utils/open-async-url";
 import { useBuildHistory } from "../store/build-history";
-import { SandboxFolder } from "@pipelab/constants";
-import UpgradeDialog from "@renderer/components/UpgradeDialog.vue";
 import { useAPI } from "@renderer/composables/api";
 import { websocketManager } from "@renderer/composables/websocket-manager";
 import { useShell } from "@renderer/composables/use-shell";
 
-import { format } from "date-fns";
 import { useI18n } from "vue-i18n";
-import { Locales, MessageSchema } from "@pipelab/shared";
+import { Locales } from "@pipelab/shared";
 import { watchDebounced } from "@vueuse/core";
-import InputText from "primevue/inputtext";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
@@ -839,8 +833,14 @@ import {
   findLocale,
 } from "@renderer/composables/browser-preferences";
 import { uiEnvironment } from "@renderer/composables/ui-runtime";
+import type { FolderPickerError, GetFolderLabelFolder } from "./Settings.types";
+import { format } from "date-fns";
+import Button from "primevue/button";
+import ToggleSwitch from "primevue/toggleswitch";
+import UpgradeDialog from "@renderer/components/UpgradeDialog.vue";
+import InputText from "primevue/inputtext";
 
-const { t, locale } = useI18n<{ message: MessageSchema }, Locales>();
+const { t, locale } = useI18n<FolderPickerError, Locales>();
 
 const confirm = useConfirm();
 const appSettings = useAppSettings();
@@ -938,8 +938,7 @@ watch(
 );
 
 const currentLocale = computed({
-  get: () =>
-    isBrowser ? browserPreferences.locale : settingsRef.value?.locale || "en-US",
+  get: () => (isBrowser ? browserPreferences.locale : settingsRef.value?.locale || "en-US"),
   set: (value: string) => {
     browserPreferenceError.value = "";
     const nextLocale = findLocale(value);
@@ -1020,7 +1019,7 @@ const formatSize = (bytes: number): string => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 };
 
-const getFolderLabel = (folder: { name: SandboxFolder; label: string }) => {
+const getFolderLabel = (folder: GetFolderLabelFolder) => {
   const key = `settings.storage-${folder.name}`;
   const translated = t(key);
   return translated === key ? folder.label : translated;

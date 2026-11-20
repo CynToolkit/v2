@@ -239,25 +239,13 @@
 <script setup lang="ts">
 import { computed, ref, toRaw, watch } from "vue";
 import { nanoid } from "nanoid";
-import Button from "primevue/button";
-import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
-import Message from "primevue/message";
-import ToggleSwitch from "primevue/toggleswitch";
 import type {
   PreflightResult,
   BuildHistoryEntry,
-  ReleaseCatalog,
-  ReleaseConfig,
   ReleaseFieldDefinition,
   ReleaseNotificationConfig,
   ValidationIssue,
 } from "@pipelab/shared";
-import ReleaseFieldControl from "./ReleaseFieldControl.vue";
-import NotificationTemplateEditor from "./NotificationTemplateEditor.vue";
-import NotificationTriggerPicker from "./NotificationTriggerPicker.vue";
-import ReleaseStatus from "./ReleaseStatus.vue";
-import ServiceIcon from "./ServiceIcon.vue";
 import { useAPI } from "../composables/api";
 import { useAppStore } from "../store/app";
 import { useConnectionsStore } from "../store/connections";
@@ -276,12 +264,23 @@ import {
   suggestWorkflowConnectionAlias,
   workflowConnectionBindingValue,
 } from "../utils/release-connection-bindings";
+import type {
+  NotificationTargetsProps,
+  PendingNotificationTarget,
+} from "./NotificationTargets.types";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Message from "primevue/message";
+import ToggleSwitch from "primevue/toggleswitch";
+import ReleaseFieldControl from "./ReleaseFieldControl.vue";
+import NotificationTemplateEditor from "./NotificationTemplateEditor.vue";
+import NotificationTriggerPicker from "./NotificationTriggerPicker.vue";
+import ReleaseStatus from "./ReleaseStatus.vue";
+import ServiceIcon from "./ServiceIcon.vue";
+import type { ConnectionDraft } from "../utils/release-connection-bindings.types";
 
-const props = defineProps<{
-  flow: ReleaseConfig;
-  catalog: ReleaseCatalog;
-  projectId?: string;
-}>();
+const props = defineProps<NotificationTargetsProps>();
 
 const api = useAPI();
 const appStore = useAppStore();
@@ -507,18 +506,13 @@ const sendTest = async () => {
 
 const connectionVisible = ref(false);
 const connectionSaving = ref(false);
-const connectionDraft = ref<{
-  name: string;
-  integration: string;
-  integrationName: string;
-  values: Record<string, string>;
-}>({
+const connectionDraft = ref<ConnectionDraft>({
   name: "",
   integration: "",
   integrationName: "",
   values: {},
 });
-let pending: { target: ReleaseNotificationConfig; field: ReleaseFieldDefinition } | undefined;
+let pending: PendingNotificationTarget | undefined;
 const connectionFields = computed(() => {
   try {
     return connectionFieldsForIntegration(

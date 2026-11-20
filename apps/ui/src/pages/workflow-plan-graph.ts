@@ -2,6 +2,7 @@ import { plannedUsedTargetKeys, usedTargetKeys } from "@pipelab/shared";
 import type { IconType, ReleaseCatalog, ReleaseConfig, ReleasePlan } from "@pipelab/shared";
 import type { ElkNode, ElkExtendedEdge } from "elkjs/lib/elk-api";
 import { destinationIcon, providerMetadataIcon, sourceIcon } from "../utils/provider-icons";
+import type { PlanGraphEdgePoints, NodeCopyResult } from "./workflow-plan-graph.types";
 
 export type PlanNodeKind = "source" | "build" | "automatic" | "destination";
 
@@ -20,7 +21,7 @@ interface PlanGraphEdge {
   from: string;
   to: string;
   /** Start, bends and end of an orthogonal route, in graph coordinates. */
-  points: Array<{ x: number; y: number }>;
+  points: Array<PlanGraphEdgePoints>;
 }
 
 export interface PlanGraphLayout {
@@ -42,7 +43,7 @@ const nodeCopy = (
   catalog: ReleaseCatalog | undefined,
   providers: IconProviders,
   plan?: ReleasePlan,
-): { label: string; detail?: string; icon?: IconType } => {
+): NodeCopyResult => {
   if (node.kind === "source") {
     const source = catalog?.sources.find((item) => item.id === config.source.provider);
     return {

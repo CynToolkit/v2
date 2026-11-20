@@ -816,16 +816,6 @@ import { computed, onUnmounted, ref, toRaw, watch } from "vue";
 import { nanoid } from "nanoid";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import Button from "primevue/button";
-import SplitButton from "primevue/splitbutton";
-import ConfirmDialog from "primevue/confirmdialog";
-import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
-import Message from "primevue/message";
-import Select from "primevue/select";
-import Tag from "primevue/tag";
-import Textarea from "primevue/textarea";
-import ToggleSwitch from "primevue/toggleswitch";
 import { useConfirm } from "primevue/useconfirm";
 import type {
   IconType,
@@ -838,8 +828,6 @@ import type {
   ValidationIssue,
 } from "@pipelab/shared";
 import { deploymentFolderName, deploymentFolderPath, isRecord } from "@pipelab/shared";
-import ReleaseFieldControl from "../components/ReleaseFieldControl.vue";
-import ReleaseDestinationAccountPreview from "../components/ReleaseDestinationAccountPreview.vue";
 import { useAPI } from "../composables/api";
 import { useWorkflowTab } from "../composables/workflow-header-state";
 import { useWorkflowDocument } from "../composables/useWorkflowDocument";
@@ -851,9 +839,6 @@ import {
   shouldNotify,
 } from "../utils/run-notifications";
 import { useAppStore } from "../store/app";
-import NewBuildDialog from "../components/NewBuildDialog.vue";
-import NotificationTargets from "../components/NotificationTargets.vue";
-import ReleaseStatus from "../components/ReleaseStatus.vue";
 import { useConnectionsStore } from "../store/connections";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { uiEnvironment } from "../composables/ui-runtime";
@@ -871,7 +856,6 @@ import {
   missingRequiredFieldIssues,
   planOutputOptions,
   selectSlotOutput,
-  slotOutputOptionsFor,
   readinessLabel,
   releaseCanRun,
   shouldInspectReleaseProviderConfig,
@@ -881,6 +865,7 @@ import {
   releaseOutputRefValue,
   runAfterSuccessfulSave,
   type CompatibleBuildCandidate,
+  slotOutputOptionsFor,
 } from "./release-flow-model";
 import {
   hasUnsavedReleaseWorkflowState,
@@ -906,23 +891,40 @@ import {
 import { submitDesktopWorkflowExecution } from "../utils/workflow-execution-input";
 import {
   destinationIcon,
+  sourceIcon,
   providerIconClass,
   providerIconImage,
-  sourceIcon,
 } from "../utils/provider-icons";
+import type {
+  ReleaseFlowProps,
+  ReleaseFlowEmits,
+  PendingBlockerConnection,
+  NewBuildTarget,
+  ShipOptions,
+} from "./release-flow.types";
+import Button from "primevue/button";
+import SplitButton from "primevue/splitbutton";
+import ConfirmDialog from "primevue/confirmdialog";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Message from "primevue/message";
+import Select from "primevue/select";
+import Tag from "primevue/tag";
+import Textarea from "primevue/textarea";
+import ToggleSwitch from "primevue/toggleswitch";
+import ReleaseFieldControl from "../components/ReleaseFieldControl.vue";
+import ReleaseDestinationAccountPreview from "../components/ReleaseDestinationAccountPreview.vue";
+import NewBuildDialog from "../components/NewBuildDialog.vue";
+import NotificationTargets from "../components/NotificationTargets.vue";
+import ReleaseStatus from "../components/ReleaseStatus.vue";
+import type { ConnectionDraft } from "../utils/release-connection-bindings.types";
+import type { PendingFieldConnection } from "../utils/release-connection-bindings.types";
 
 const route = useRoute();
 const actionsTarget = useWorkflowTab(() => void workflowDoc.sync());
 const router = useRouter();
-const props = withDefaults(
-  defineProps<{
-    dashboardMode?: boolean;
-    dashboardFlowId?: string;
-    dashboardProjectId?: string;
-  }>(),
-  { dashboardMode: false },
-);
-const emit = defineEmits<{ closeDashboard: [] }>();
+const props = withDefaults(defineProps<ReleaseFlowProps>(), { dashboardMode: false });
+const emit = defineEmits<ReleaseFlowEmits>();
 const { t } = useI18n();
 const api = useAPI();
 const confirm = useConfirm();
@@ -1060,23 +1062,8 @@ const releaseVersion = ref("1.0.0");
 const releaseDescription = ref("");
 const connectionVisible = ref(false);
 const connectionSaving = ref(false);
-const pendingBlockerConnection = ref<
-  | {
-      code: string;
-      message: string;
-      path: string;
-      flowId: string;
-      projectId: string;
-      integration: string;
-    }
-  | undefined
->();
-const connectionDraft = ref<{
-  name: string;
-  integration: string;
-  integrationName: string;
-  values: Record<string, string>;
-}>({
+const pendingBlockerConnection = ref<PendingBlockerConnection | undefined>();
+const connectionDraft = ref<ConnectionDraft>({
   name: "",
   integration: "",
   integrationName: "",
@@ -1763,7 +1750,7 @@ const newBuildChoice = "__new-build__";
 const newBuildVisible = ref(false);
 // "New build…" is an action, not a value: remounting the select makes it show its placeholder again.
 const outputPickerResets = ref(0);
-const newBuildTarget = ref<{ destinationId: string; slotId: string }>();
+const newBuildTarget = ref<NewBuildTarget>();
 const createNewBuild = (choice: CompatibleBuildCandidate) => {
   const target = newBuildTarget.value;
   if (!flow.value || !target) return;
@@ -1863,9 +1850,7 @@ const setSourceField = (key: string, value: unknown) => {
   }
 };
 // The field an inline "Add" was opened from, so the new Connection can be selected for it.
-let pendingFieldConnection:
-  | { config: Record<string, unknown>; field: ReleaseFieldDefinition }
-  | undefined;
+let pendingFieldConnection: PendingFieldConnection | undefined;
 const openConnection = (
   integration: string,
   config?: Record<string, unknown>,
@@ -2106,7 +2091,7 @@ const shipMenu = [
 ];
 // Set by the Ship menu for one run; ship() only opens the release dialog, runShip() executes.
 const skipPreflightOnce = ref(false);
-const ship = async (options: { skipPreflight?: boolean } = {}) => {
+const ship = async (options: ShipOptions = {}) => {
   skipPreflightOnce.value = options.skipPreflight === true;
   if (!flow.value || !canShip.value) return;
   try {

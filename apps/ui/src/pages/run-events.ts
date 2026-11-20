@@ -1,6 +1,7 @@
 import type { Events } from "@pipelab/shared";
+import type { RunWorkflowEvent } from "./run-events.types";
 
-export type WorkflowEvent = Extract<Events<"workflow:execute">, { type: "workflow-event" }>["data"];
+export type WorkflowEvent = Extract<Events<"workflow:execute">, RunWorkflowEvent>["data"];
 
 type RunEventListener = (event: WorkflowEvent) => void;
 

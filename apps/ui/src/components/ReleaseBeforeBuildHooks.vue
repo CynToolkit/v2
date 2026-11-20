@@ -82,14 +82,18 @@
 
 <script setup lang="ts">
 import { nanoid } from "nanoid";
+import type { ReleaseBeforeBuildHook } from "@pipelab/shared";
+import type {
+  ReleaseBeforeBuildHooksProps,
+  ReleaseBeforeBuildHooksEmits,
+} from "./ReleaseBeforeBuildHooks.types";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import ToggleSwitch from "primevue/toggleswitch";
 import InputText from "primevue/inputtext";
-import type { ReleaseBeforeBuildHook } from "@pipelab/shared";
 
-const props = defineProps<{ hooks: ReleaseBeforeBuildHook[]; supported: boolean }>();
-const emit = defineEmits<{ "update:hooks": [hooks: ReleaseBeforeBuildHook[]] }>();
+const props = defineProps<ReleaseBeforeBuildHooksProps>();
+const emit = defineEmits<ReleaseBeforeBuildHooksEmits>();
 
 const commit = (hooks: ReleaseBeforeBuildHook[]) => emit("update:hooks", hooks);
 const updateHook = (index: number, changes: Partial<ReleaseBeforeBuildHook>) =>

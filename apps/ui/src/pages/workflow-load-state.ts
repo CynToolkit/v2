@@ -1,4 +1,9 @@
-import type { ReleaseConfig } from "@pipelab/shared";
+import type {
+  WorkflowLoadResultSuccess,
+  WorkflowLoadResultError,
+  LoadedWorkflow,
+  BrokenWorkflow,
+} from "./workflow-load-state.types";
 
 export interface WorkflowIndexEntry {
   id: string;
@@ -7,16 +12,14 @@ export interface WorkflowIndexEntry {
   configName?: string;
 }
 
-export type WorkflowLoadResult =
-  | { type: "success"; result: ReleaseConfig }
-  | { type: "error"; ipcError: string };
+export type WorkflowLoadResult = WorkflowLoadResultSuccess | WorkflowLoadResultError;
 
 export const partitionWorkflowLoads = (
   entries: WorkflowIndexEntry[],
   results: WorkflowLoadResult[],
 ) => {
-  const loaded: Array<WorkflowIndexEntry & { content: ReleaseConfig }> = [];
-  const broken: Array<{ id: string; error: string }> = [];
+  const loaded: Array<WorkflowIndexEntry & LoadedWorkflow> = [];
+  const broken: Array<BrokenWorkflow> = [];
   entries.forEach((entry, index) => {
     const result = results[index];
     if (result?.type !== "success") {
