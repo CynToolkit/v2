@@ -1,6 +1,5 @@
 import { CORE_WORKFLOW_TASKS } from "@pipelab/workflow-runtime";
 import type {
-  ArtifactDescriptor,
   Availability,
   CompiledArtifact,
   ReleaseCompileContext,
@@ -10,20 +9,14 @@ import type {
 import type { WorkflowStep } from "@pipelab/workflow-runtime";
 import { constructExportInputs } from "./export-inputs";
 
-import type { ConstructExportType } from "./assets/script";
+import type { ConstructTargets } from "./producer.types";
 
 const desktopUnavailable: Availability = {
   available: false,
   reason: "Construct desktop exports are not available yet",
 };
 
-const constructTargets: Array<{
-  id: string;
-  buildType: "web" | "desktop";
-  exportType: ConstructExportType;
-  output: ArtifactDescriptor;
-  isAvailable: () => Availability;
-}> = [
+const constructTargets: Array<ConstructTargets> = [
   {
     id: "web",
     buildType: "web",

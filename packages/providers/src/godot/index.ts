@@ -12,6 +12,7 @@ import {
   hasGodotTemplates,
 } from "./export";
 import { godotProviderLogo } from "../provider-icons";
+import type { PresetInfoForProjectResult } from "./index.types";
 
 const targetDescriptors = {
   "windows-x64": {
@@ -49,10 +50,7 @@ const descriptorFor = (targetId: string) => {
   return descriptor;
 };
 
-const presetInfoForProject = (
-  projectPath: string,
-  preset: string,
-): { found: boolean; checked: boolean; platform?: string } => {
+const presetInfoForProject = (projectPath: string, preset: string): PresetInfoForProjectResult => {
   try {
     const config = readFileSync(join(projectPath, "export_presets.cfg"), "utf8");
     for (const section of config.split(/(?=^\[preset\.\d+\]\s*$)/m)) {

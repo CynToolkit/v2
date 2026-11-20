@@ -5,6 +5,7 @@ import { ExternalCommandError, runWithLiveLogs } from "@pipelab/plugin-core";
 import type { PipelabContext } from "@pipelab/plugin-core";
 import type { WorkflowTask, WorkflowTaskContext } from "@pipelab/workflow-runtime";
 import { ensureSteamCmd } from "./ensure";
+import type { StreamLogSubprocess } from "./upload-to-steam.types";
 
 export const WORKFLOW_TASK_ID = "@pipelab/plugin-steam/steam-upload";
 
@@ -125,7 +126,7 @@ export const createSteamUploadTask =
     const outputs = { "script-path": appBuildPath, "output-folder": buildOutput };
 
     let authPrompt = false;
-    const streamLog = (data: string, subprocess?: { kill: () => void }) => {
+    const streamLog = (data: string, subprocess?: StreamLogSubprocess) => {
       const lower = data.toLowerCase();
       if (
         [

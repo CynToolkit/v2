@@ -9,6 +9,7 @@ import { homedir, platform as osPlatform, arch as osArch } from "node:os";
 import { execa } from "execa";
 import { kebabCase } from "change-case";
 import { parseTOML, stringifyTOML } from "confbox";
+import type { TauriExecutionContextPaths, TauriResult } from "./tauri.types";
 
 /**
  * Searches for common cargo paths and resolves to a valid cargo executable path
@@ -92,7 +93,7 @@ export interface TauriExecutionContext {
   cwd: string;
   log: (...args: unknown[]) => void;
   inputs: Record<string, unknown>;
-  paths: { node: string; cache: string };
+  paths: TauriExecutionContextPaths;
   abortSignal: AbortSignal;
   context: Parameters<typeof runPnpm>[1]["context"];
   setOutput?: (key: "output" | "binary", value: string) => void;
@@ -103,7 +104,7 @@ export const tauri = async (
   appFolder: string | undefined,
   { cwd, log, inputs, setOutput, paths, abortSignal, context }: TauriExecutionContext,
   completeConfiguration: DesktopApp.Config,
-): Promise<{ folder: string; binary: string | undefined } | undefined> => {
+): Promise<TauriResult | undefined> => {
   log("Building tauri");
 
   if (action !== "preview") {

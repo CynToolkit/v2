@@ -30,6 +30,11 @@ import {
   readLinuxMemorySnapshot,
   shouldRecordPlaywrightVideo,
 } from "./runtime-diagnostics.js";
+import type {
+  PreparePlaywrightProfileOptions,
+  ConstructExportExecutionContextPaths,
+  Exportc3pResult,
+} from "./export-shared.types";
 
 const platform = process.platform;
 const { LOCALAPPDATA, XDG_CONFIG_HOME } = process.env;
@@ -343,7 +348,7 @@ export const preparePlaywrightProfile = async (
   destination: string,
   log: (...args: unknown[]) => void = () => {},
   abortSignal?: AbortSignal,
-  options: { preserveAccountOrigins?: readonly string[] } = {},
+  options: PreparePlaywrightProfileOptions = {},
 ) => {
   throwIfAborted(abortSignal);
   let sourceStats: Awaited<ReturnType<typeof stat>>;
@@ -415,7 +420,7 @@ export interface ConstructExportExecutionContext {
   cwd: string;
   log: (...args: unknown[]) => void;
   inputs: Record<string, unknown>;
-  paths: { thirdparty: string; node: string };
+  paths: ConstructExportExecutionContextPaths;
   abortSignal: AbortSignal;
   context: Parameters<typeof fetchPackage>[2]["context"];
   projectId: string;
@@ -447,7 +452,7 @@ export const exportc3p = async (
     context: ctx,
     projectId,
   }: ConstructExportExecutionContext,
-): Promise<{ zipFile: string }> => {
+): Promise<Exportc3pResult> => {
   const logElapsed = (label: string, startedAt: number) => {
     log(label, `${Date.now() - startedAt} ms`);
   };

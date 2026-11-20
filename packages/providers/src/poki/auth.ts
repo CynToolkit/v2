@@ -8,6 +8,7 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline/promises";
+import type { LoginToPokiOptions, PokiLoginServer } from "./auth.types";
 
 /** Where the Poki CLI itself keeps its login: `$XDG_CONFIG_HOME/poki` (or `%LOCALAPPDATA%\\Poki`). */
 const pokiUserConfigRoot = (env: NodeJS.ProcessEnv = process.env): string =>
@@ -114,9 +115,7 @@ const writeAuthFile = async (configRoot: string, auth: PokiAuthConfig) => {
 };
 
 /** Sign in through Poki's official browser flow and save a Poki CLI login without uploading: for a named account in Pipelab's managed directory, otherwise the standard one. */
-export const loginToPoki = async (
-  options: { thirdPartyPath?: string; account?: string } = {},
-): Promise<void> => {
+export const loginToPoki = async (options: LoginToPokiOptions = {}): Promise<void> => {
   if (options.account && !options.thirdPartyPath) {
     throw new Error("A Pipelab data directory is required to save a named Poki account.");
   }
@@ -177,7 +176,7 @@ export const loginToPoki = async (
 
   let timeout: NodeJS.Timeout | undefined;
   try {
-    const address = await new Promise<{ port: number }>((resolve, reject) => {
+    const address = await new Promise<PokiLoginServer>((resolve, reject) => {
       server.once("error", reject);
       server.listen(0, "localhost", () => {
         const listeningAddress = server.address();

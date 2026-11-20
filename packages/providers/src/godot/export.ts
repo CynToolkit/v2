@@ -4,6 +4,11 @@ import { createHash } from "node:crypto";
 import { readFile, readdir, rm, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import AdmZip from "adm-zip";
+import type {
+  RunResult,
+  ExportGodotProjectOptions,
+  ExportGodotProjectResult,
+} from "./export.types";
 
 export const findGodotExecutable = (): string | undefined => {
   for (const executable of ["godot", "godot4"]) {
@@ -60,7 +65,7 @@ const run = (
   cwd: string,
   signal: AbortSignal,
   log: (stream: "stdout" | "stderr", chunk: string) => void,
-): Promise<{ exitCode: number }> =>
+): Promise<RunResult> =>
   new Promise((resolveRun, reject) => {
     const child = spawn(executable, args, { cwd, stdio: ["ignore", "pipe", "pipe"] });
     const onAbort = () => child.kill();
@@ -86,17 +91,9 @@ const run = (
     });
   });
 
-export const exportGodotProject = async (options: {
-  executable: string;
-  project: string;
-  preset: string;
-  platform: string;
-  projectName: string;
-  outputDirectory: string;
-  signal: AbortSignal;
-  log: (stream: "stdout" | "stderr", chunk: string) => void;
-  ensureDirectory: (path: string) => Promise<void>;
-}): Promise<{ path: string; size: number; checksum: string }> => {
+export const exportGodotProject = async (
+  options: ExportGodotProjectOptions,
+): Promise<ExportGodotProjectResult> => {
   await rm(options.outputDirectory, { recursive: true, force: true });
   await options.ensureDirectory(options.outputDirectory);
   const name = options.projectName.replace(/[^a-zA-Z0-9_-]/g, "-");
@@ -109,7 +106,7 @@ export const exportGodotProject = async (options: {
           ? `${name}.app`
           : `${name}.zip`;
   const output = join(options.outputDirectory, filename);
-  let result: { exitCode: number };
+  let result: RunResult;
   try {
     result = await run(
       options.executable,

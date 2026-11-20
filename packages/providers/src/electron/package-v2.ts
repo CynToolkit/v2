@@ -3,10 +3,11 @@ import * as v from "valibot";
 import { forge, type ForgeExecutionContext } from "./forge";
 import { electronPhases } from "./phases";
 import { defaultElectronConfig } from "./utils";
+import type { ProviderExecutables } from "@pipelab/plugin-core";
 
 export interface ElectronWorkflowTaskServices {
   context: ForgeExecutionContext["context"];
-  executables: { node: string; pnpm: string };
+  executables: ProviderExecutables;
   workflowCachePath: string;
 }
 
