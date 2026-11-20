@@ -1,7 +1,7 @@
 {
   "name": "@pipelab/plugin-core",
-  "private": true,
   "version": "1.0.0-beta.40",
+  "private": true,
   "description": "Execution helpers for built-in Pipelab providers",
   "keywords": [
     "automation",

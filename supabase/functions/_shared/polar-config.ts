@@ -6,9 +6,7 @@ export type PolarEndpoints = {
 
 const LOCAL_ENDPOINT_HOSTS = ["localhost", "127.0.0.1", "::1", "[::1]", "host.docker.internal"];
 
-export function getPolarAccessToken(
-  env: (name: string) => string | undefined,
-): string | undefined {
+export function getPolarAccessToken(env: (name: string) => string | undefined): string | undefined {
   return env("POLAR_ACCESS_TOKEN")?.trim() || env("POLAR_TOKEN")?.trim() || undefined;
 }
 
@@ -27,11 +25,9 @@ export function isPolarPortalUrl(value: string, endpoints: PolarEndpoints): bool
 }
 
 export function isPolarCheckoutUrl(value: string, endpoints: PolarEndpoints): boolean {
-  return [
-    endpoints.frontendBaseUrl,
-    endpoints.checkoutLinkBaseUrl,
-    endpoints.apiBaseUrl,
-  ].some((baseUrl) => urlOnOrigin(value, baseUrl) !== undefined);
+  return [endpoints.frontendBaseUrl, endpoints.checkoutLinkBaseUrl, endpoints.apiBaseUrl].some(
+    (baseUrl) => urlOnOrigin(value, baseUrl) !== undefined,
+  );
 }
 
 function configuredUrl(value: string | undefined, originOnly: boolean): string | undefined {

@@ -15,14 +15,16 @@ export function resolveSaveDataFolder({
 
   if (platform === "win32") {
     const localAppData = env.LOCALAPPDATA;
-    basePath = localAppData && pathUtils.isAbsolute(localAppData)
-      ? localAppData
-      : pathUtils.join(homePath, "AppData", "Local");
+    basePath =
+      localAppData && pathUtils.isAbsolute(localAppData)
+        ? localAppData
+        : pathUtils.join(homePath, "AppData", "Local");
   } else if (platform === "linux") {
     const xdgDataHome = env.XDG_DATA_HOME;
-    basePath = xdgDataHome && pathUtils.isAbsolute(xdgDataHome)
-      ? xdgDataHome
-      : pathUtils.join(homePath, ".local", "share");
+    basePath =
+      xdgDataHome && pathUtils.isAbsolute(xdgDataHome)
+        ? xdgDataHome
+        : pathUtils.join(homePath, ".local", "share");
   } else {
     basePath = appDataPath;
   }

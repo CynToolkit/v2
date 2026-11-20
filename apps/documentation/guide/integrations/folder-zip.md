@@ -6,12 +6,12 @@ game or web app.
 
 ## Sources
 
-| Source | Required field | Artifact provided |
-|---|---|---|
-| Folder | **Folder path** | Files in a directory |
-| Web app folder | **Folder path** | Web application in a directory |
-| ZIP | **ZIP path** | Files in a ZIP archive |
-| Web app ZIP | **ZIP path** | Web application in a ZIP archive |
+| Source         | Required field  | Artifact provided                |
+| -------------- | --------------- | -------------------------------- |
+| Folder         | **Folder path** | Files in a directory             |
+| Web app folder | **Folder path** | Web application in a directory   |
+| ZIP            | **ZIP path**    | Files in a ZIP archive           |
+| Web app ZIP    | **ZIP path**    | Web application in a ZIP archive |
 
 Folder sources copy the selected directory and its contents into the workflow
 workspace. ZIP sources copy the selected archive. Choose a web app source when

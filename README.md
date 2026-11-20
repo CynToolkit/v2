@@ -94,14 +94,14 @@ Both commands build the CLI bundle and ship its UI and asset templates with the 
 
 ### Useful commands
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm dev` | Start the desktop app in development mode. |
-| `pnpm build` | Build all workspace packages. |
-| `pnpm package` | Create a production desktop bundle for the current platform. |
-| `pnpm make` | Create a production installer/archive for the current platform. |
-| `pnpm test` | Run the workspace test suites. |
-| `pnpm typecheck` | Run TypeScript checks across the workspace. |
+| Command          | Purpose                                                         |
+| ---------------- | --------------------------------------------------------------- |
+| `pnpm dev`       | Start the desktop app in development mode.                      |
+| `pnpm build`     | Build all workspace packages.                                   |
+| `pnpm package`   | Create a production desktop bundle for the current platform.    |
+| `pnpm make`      | Create a production installer/archive for the current platform. |
+| `pnpm test`      | Run the workspace test suites.                                  |
+| `pnpm typecheck` | Run TypeScript checks across the workspace.                     |
 
 ---
 

@@ -13,7 +13,7 @@ Create a `main` ruleset or branch protection rule. Set required reviews and
 required CI checks after the first safe CI run reports its exact check names.
 Review who can push, bypass reviews, and create release tags. Confirm Actions
 workflow permissions, fork-PR policy, Dependabot, webhooks, GitHub Apps, and
-organization policies. 
+organization policies.
 
 ### Actions secrets
 
@@ -21,20 +21,20 @@ Configure only the credentials for services that v2 will use. Do not put
 secret values in Git, issues, logs, or documentation. Confirm each target
 project and account with its owner before adding values.
 
-| Secret                                                                | Used for                                                                                  |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`                                                | Automatic Pages deployments; scope it to the intended v2 Pages projects.                  |
-| `CLOUDFLARE_ACCOUNT_ID`                                               | Cloudflare account containing the v2 Pages projects.                                      |
-| `CLOUDFLARE_EDITOR_UI_PROJECT_NAME`                                   | Editor UI Pages project.                                                                  |
-| `CLOUDFLARE_PAGES_PROJECT_NAME`                                       | Website Pages project.                                                                    |
-| `CLOUDFLARE_DOCS_PROJECT_NAME`                                        | Documentation Pages project.                                                              |
-| `SUPABASE_URL`                                                        | Production main builds and deploys.                                                       |
-| `SUPABASE_PUBLISHABLE_KEY`                                            | Production client builds;. |
-| `SUPABASE_PROJECT_ID`                                                 | Production client builds.                                                                 |
-| `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                              |
-| `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | Optional for macOS prereleases; required for stable signed builds.                       |
-| `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | Optional for macOS prereleases; required for stable signed and notarized builds.         |
-| `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                                     |
+| Secret                                                                | Used for                                                                         |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`                                                | Automatic Pages deployments; scope it to the intended v2 Pages projects.         |
+| `CLOUDFLARE_ACCOUNT_ID`                                               | Cloudflare account containing the v2 Pages projects.                             |
+| `CLOUDFLARE_EDITOR_UI_PROJECT_NAME`                                   | Editor UI Pages project.                                                         |
+| `CLOUDFLARE_PAGES_PROJECT_NAME`                                       | Website Pages project.                                                           |
+| `CLOUDFLARE_DOCS_PROJECT_NAME`                                        | Documentation Pages project.                                                     |
+| `SUPABASE_URL`                                                        | Production main builds and deploys.                                              |
+| `SUPABASE_PUBLISHABLE_KEY`                                            | Production client builds;.                                                       |
+| `SUPABASE_PROJECT_ID`                                                 | Production client builds.                                                        |
+| `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                     |
+| `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | Optional for macOS prereleases; required for stable signed builds.               |
+| `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | Optional for macOS prereleases; required for stable signed and notarized builds. |
+| `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                            |
 
 Set the three Pages project-name secrets to the intended projects and confirm
 each target with its owner. Deploy jobs fail with a
@@ -46,14 +46,14 @@ of the missing secrets. Stable macOS releases require all five.
 
 ### Automatic workflow behavior
 
-| Event                                              | CI and deployment behavior                                                                                                                                                                           |
-| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Push to `main`                                                     | Run CI, then deploy all three web apps to Pages branch `main` after the CI gate succeeds. Production Supabase values are available to main builds. |
-| Push to `develop`                                                  | Run CI, then deploy all three web apps to Pages branch `develop` as previews after the CI gate succeeds. Production Supabase values are omitted. |
-| Pull request targeting `main` or `develop` from this repository    | Run CI, then deploy changed web apps as Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
-| Pull request targeting `main` or `develop` from a fork             | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped. |
-| Manual dispatch from `main`                                        | Run validation and optionally authenticated Construct acceptance; no deployment or release. |
-| Manual dispatch from `develop`                                     | Run validation and optionally authenticated Construct acceptance; no deployment or release. |
+| Event                                                           | CI and deployment behavior                                                                                                                                                                        |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Push to `main`                                                  | Run CI, then deploy all three web apps to Pages branch `main` after the CI gate succeeds. Production Supabase values are available to main builds.                                                |
+| Push to `develop`                                               | Run CI, then deploy all three web apps to Pages branch `develop` as previews after the CI gate succeeds. Production Supabase values are omitted.                                                  |
+| Pull request targeting `main` or `develop` from this repository | Run CI, then deploy changed web apps as Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
+| Pull request targeting `main` or `develop` from a fork          | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped.                                                                         |
+| Manual dispatch from `main`                                     | Run validation and optionally authenticated Construct acceptance; no deployment or release.                                                                                                       |
+| Manual dispatch from `develop`                                  | Run validation and optionally authenticated Construct acceptance; no deployment or release.                                                                                                       |
 
 The single **CI & Release** workflow in `release.yml` uses `changesets/action@v1` to open a
 version pull request or publish the CLI to npm on `main`, after **CI passed** succeeds. Desktop, CLI, and UI share one
@@ -75,11 +75,11 @@ documentation build, without Cloudflare or production Supabase credentials.
 Cloudflare project names and domains are not encoded in these workflows. The
 Pages projects and their production branches are:
 
-| App | Pages project | Production branch | Known domain |
-| --- | --- | --- | --- |
-| Editor | `pipelab` | `main` | `editor.pipelab.app` |
-| Website | `pipelab-website` | `main` | — |
-| Documentation | `pipelab-docs` | `main` | — |
+| App           | Pages project     | Production branch | Known domain         |
+| ------------- | ----------------- | ----------------- | -------------------- |
+| Editor        | `pipelab`         | `main`            | `editor.pipelab.app` |
+| Website       | `pipelab-website` | `main`            | —                    |
+| Documentation | `pipelab-docs`    | `main`            | —                    |
 
 The editor Pages project's production branch must be `main`, like the website
 and documentation projects. Cloudflare Pages Direct Upload does not expose this setting in the

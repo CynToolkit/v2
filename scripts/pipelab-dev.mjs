@@ -51,7 +51,7 @@ if (!upToDate()) {
         setup(pluginBuild) {
           // Bundle the workspace (@pipelab/*); load every other package from node_modules.
           pluginBuild.onResolve({ filter: /^[^./]/ }, (args) =>
-            args.path.startsWith('@pipelab/') ||
+            args.path.startsWith("@pipelab/") ||
             args.path.startsWith("node:") ||
             /^[a-z]:/i.test(args.path)
               ? undefined

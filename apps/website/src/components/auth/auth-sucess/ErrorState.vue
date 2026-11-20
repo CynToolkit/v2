@@ -1,38 +1,38 @@
 <template>
+  <div>
     <div>
-        <div>
-            <div class="icon-container error">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                </svg>
-            </div>
-            <h1>Verification Failed</h1>
-            <p>{{ message }}</p>
-            <button
-                class="btn"
-                @click="$emit('retry')"
-            >Try Again</button>
-        </div>
+      <div class="icon-container error">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </div>
+      <h1>Verification Failed</h1>
+      <p>{{ message }}</p>
+      <button class="btn" @click="$emit('retry')">Try Again</button>
     </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-const props = withDefaults(defineProps<{
-    message: string
-}>(), {
-    message: 'Your email has been successfully verified. You can now close this window and continue using our services.'
-})
-
+const props = withDefaults(
+  defineProps<{
+    message: string;
+  }>(),
+  {
+    message:
+      "Your email has been successfully verified. You can now close this window and continue using our services.",
+  },
+);
 </script>
 
 <style lang="scss" scoped>

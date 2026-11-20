@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreWorkspaces": [
-    "assets/*",
-    "apps/mini-c3-electron"
-  ],
+  "ignoreWorkspaces": ["assets/*", "apps/mini-c3-electron"],
   "workspaces": {
     ".": {
       "entry": [
@@ -15,58 +12,31 @@
       ]
     },
     "apps/ui": {
-      "entry": [
-        "tests/browser/*.cjs"
-      ]
+      "entry": ["tests/browser/*.cjs"]
     },
     "apps/cli": {
-      "entry": [
-        "tests/e2e/**/*.spec.ts"
-      ]
+      "entry": ["tests/e2e/**/*.spec.ts"]
     },
     "workers": {
-      "entry": [
-        "pipelab-cloud/index.ts",
-        "local-r2/worker.ts",
-        "scripts/*.mjs"
-      ]
+      "entry": ["pipelab-cloud/index.ts", "local-r2/worker.ts", "scripts/*.mjs"]
     },
     "apps/desktop": {
-      "entry": [
-        "electron-builder.config.mjs"
-      ]
+      "entry": ["electron-builder.config.mjs"]
     },
     "packages/core-node": {
-      "entry": [
-        "scripts/*.ts"
-      ]
+      "entry": ["scripts/*.ts"]
     },
     "packages/providers": {
-      "entry": [
-        ".construct-benchmark.ts"
-      ]
+      "entry": [".construct-benchmark.ts"]
     },
     "packages/workflow-runtime": {
-      "entry": [
-        "src/phase-types.typecheck.ts"
-      ]
+      "entry": ["src/phase-types.typecheck.ts"]
     }
   },
-  "ignore": [
-    "apps/website/src/database.types.ts"
-  ],
+  "ignore": ["apps/website/src/database.types.ts"],
   "ignoreIssues": {
-    "packages/providers/src/*/index.ts": [
-      "duplicates"
-    ]
+    "packages/providers/src/*/index.ts": ["duplicates"]
   },
-  "ignoreDependencies": [
-    "@pipelab/tsconfig"
-  ],
-  "ignoreBinaries": [
-    "tsx",
-    "supabase",
-    "doppler",
-    "taskkill.exe"
-  ]
+  "ignoreDependencies": ["@pipelab/tsconfig"],
+  "ignoreBinaries": ["tsx", "supabase", "doppler", "taskkill.exe"]
 }

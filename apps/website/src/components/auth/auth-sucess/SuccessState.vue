@@ -1,36 +1,26 @@
 <template>
-    <div>
-        <div class="icon-container success">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M5 13l4 4L19 7"
-                />
-            </svg>
-        </div>
-        <h1>Email Verified Successfully!</h1>
-        <p>{{ message }}</p>
-        <button
-            class="btn"
-            @click="$emit('close')"
-        >Open Pipelab</button>
+  <div>
+    <div class="icon-container success">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
     </div>
+    <h1>Email Verified Successfully!</h1>
+    <p>{{ message }}</p>
+    <button class="btn" @click="$emit('close')">Open Pipelab</button>
+  </div>
 </template>
 
 <script lang="ts" setup>
-const props = withDefaults(defineProps<{
-    message: string
-}>(), {
-    message: 'Your email has been successfully verified. You can now close this window and continue using our services.'
-})
-
+const props = withDefaults(
+  defineProps<{
+    message: string;
+  }>(),
+  {
+    message:
+      "Your email has been successfully verified. You can now close this window and continue using our services.",
+  },
+);
 </script>
 
 <style lang="scss" scoped>

@@ -1,20 +1,22 @@
 <template>
+  <div>
     <div>
-        <div>
-            <div class="loading"></div>
-            <h1>Verifying your email...</h1>
-            <p>{{ message }}</p>
-        </div>
+      <div class="loading"></div>
+      <h1>Verifying your email...</h1>
+      <p>{{ message }}</p>
     </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-const props = withDefaults(defineProps<{
-    message: string
-}>(), {
-    message: 'Please wait while we complete the verification process.'
-})
-
+const props = withDefaults(
+  defineProps<{
+    message: string;
+  }>(),
+  {
+    message: "Please wait while we complete the verification process.",
+  },
+);
 </script>
 
 <style lang="scss" scoped>

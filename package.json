@@ -39,15 +39,15 @@
     "turbo": "^2.8.15",
     "typescript": "5.9.3"
   },
+  "resolutions": {
+    "@codemirror/state": "6.4.1",
+    "vue-demi": "0.14.10"
+  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs}": [
       "oxfmt",
       "oxlint --fix"
     ]
-  },
-  "resolutions": {
-    "@codemirror/state": "6.4.1",
-    "vue-demi": "0.14.10"
   },
   "packageManager": "pnpm@10.33.0"
 }

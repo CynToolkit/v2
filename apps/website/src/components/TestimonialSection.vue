@@ -5,7 +5,11 @@
         <h2 class="testimonial-title">Testimonial Section</h2>
       </div>
       <div class="testimonial-list">
-        <div class="testimonial-card" v-for="(testimonial, i) in testimonials" :key="testimonial.name">
+        <div
+          class="testimonial-card"
+          v-for="(testimonial, i) in testimonials"
+          :key="testimonial.name"
+        >
           <div class="testimonial-card-text">{{ testimonial.text }}</div>
           <div class="testimonial-card-footer">
             <img :src="testimonial.avatar" class="testimonial-avatar" alt="Avatar" />
@@ -13,14 +17,44 @@
               <div class="testimonial-name">
                 <a v-if="testimonial.authorLink" :href="testimonial.authorLink" target="_blank">
                   {{ testimonial.name }}
-                  <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none"><path d="M7.5 12.5L12.5 7.5M12.5 7.5H8.75M12.5 7.5V11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg
+                    class="link-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                  >
+                    <path
+                      d="M7.5 12.5L12.5 7.5M12.5 7.5H8.75M12.5 7.5V11.25"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
                 </a>
                 <span v-else>{{ testimonial.name }}</span>
               </div>
               <div class="testimonial-role" v-if="testimonial.game">
                 <a v-if="testimonial.gameLink" :href="testimonial.gameLink" target="_blank">
                   {{ testimonial.game }}
-                  <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none"><path d="M7.5 12.5L12.5 7.5M12.5 7.5H8.75M12.5 7.5V11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg
+                    class="link-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                  >
+                    <path
+                      d="M7.5 12.5L12.5 7.5M12.5 7.5H8.75M12.5 7.5V11.25"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
                 </a>
                 <span v-else>{{ testimonial.game }}</span>
               </div>
@@ -33,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { testimonials } from '@/data/testimonials';
+import { testimonials } from "@/data/testimonials";
 </script>
 
 <style scoped>
@@ -60,7 +94,6 @@ import { testimonials } from '@/data/testimonials';
 .testimonials a:hover .link-icon {
   opacity: 1;
 }
-
 
 testimonial-header {
   display: flex;
@@ -96,7 +129,7 @@ testimonial-header {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(20,8,45,0.08);
+  box-shadow: 0 2px 6px rgba(20, 8, 45, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -105,7 +138,8 @@ testimonial-header {
   cursor: pointer;
   transition: background 0.2s;
 }
-.arrow-btn.active, .arrow-btn:hover {
+.arrow-btn.active,
+.arrow-btn:hover {
   background: #14082d;
   color: #fff;
 }
@@ -118,7 +152,7 @@ testimonial-header {
 .testimonial-card {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 6px 32px rgba(20,8,45,0.07);
+  box-shadow: 0 6px 32px rgba(20, 8, 45, 0.07);
   padding: 2.2rem 2rem 1.5rem 2rem;
   max-width: 350px;
   min-width: 260px;

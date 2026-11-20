@@ -24,11 +24,7 @@ describe("third-party script loading", () => {
   it("loads analytics and the Tally widget on ordinary routes", () => {
     loadThirdPartyScripts("/");
 
-    expect(document.head.querySelector("script")?.src).toBe(
-      "https://cloud.umami.is/script.js",
-    );
-    expect(document.body.querySelector("script")?.src).toBe(
-      "https://tally.so/widgets/embed.js",
-    );
+    expect(document.head.querySelector("script")?.src).toBe("https://cloud.umami.is/script.js");
+    expect(document.body.querySelector("script")?.src).toBe("https://tally.so/widgets/embed.js");
   });
 });
