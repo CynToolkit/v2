@@ -25,7 +25,7 @@ export interface UsedValueSelectionDestinations {
   slots: ReadonlyArray<UsedValueSelectionDestinationsSlots>;
 }
 
-export interface UsedValueDefinitionsSources {
+interface UsedValueDefinitionsSources {
   id: string;
 }
 
@@ -33,7 +33,7 @@ export interface ForEachUsedValue {
   key: string;
 }
 
-export interface FieldBearer<TField> {
+interface FieldBearer<TField> {
   fields?: readonly TField[];
 }
 
