@@ -392,6 +392,12 @@ import {
   providerIconImage,
   providerMetadataIcon,
 } from "../utils/provider-icons";
+import type {
+  FailureDiagnosticRef,
+  SkippableStep,
+  PhaseToggleStep,
+  DeliveryGroup,
+} from "./run-detail.types";
 
 type Panel = "logs" | "artifacts" | "deliveries";
 const route = useRoute();
@@ -436,12 +442,12 @@ const activePanel = ref<Panel>("logs");
 const failureDiagnostics = computed(() =>
   entry.value ? buildRunFailureDiagnostics(entry.value) : [],
 );
-const diagnosticTitle = (diagnostic: { stepId?: string; title: string }) => {
+const diagnosticTitle = (diagnostic: FailureDiagnosticRef) => {
   const step = entry.value?.steps.find((candidate) => candidate.id === diagnostic.stepId);
   return step ? `${stepTitle(step)} failed` : diagnostic.title;
 };
 // Why a step did not run: the step whose failure (or skip) it was waiting on.
-const skipReason = (step: { status: string; blockedBy?: string[] }) => {
+const skipReason = (step: SkippableStep) => {
   if (step.status !== "skipped" || !step.blockedBy?.length) return "";
   const blocker = entry.value?.steps.find((candidate) => candidate.id === step.blockedBy![0]);
   return blocker
@@ -449,7 +455,7 @@ const skipReason = (step: { status: string; blockedBy?: string[] }) => {
     : "Skipped";
 };
 const expandedSteps = reactive(new Set<string>());
-const phasesOpen = (step: { id: string; status: string }) =>
+const phasesOpen = (step: PhaseToggleStep) =>
   expandedSteps.has(step.id) || step.status === "running" || step.status === "failed";
 const onStepClick = (stepId: string) => {
   selectStep(stepId);
@@ -533,15 +539,7 @@ watch(
   { flush: "post" },
 );
 const deliveryGroups = computed(() => {
-  const groups = new Map<
-    string,
-    {
-      id: string;
-      serviceId: string;
-      name: string;
-      items: NonNullable<BuildHistoryEntry["deliveries"]>;
-    }
-  >();
+  const groups = new Map<string, DeliveryGroup>();
   for (const delivery of entry.value?.deliveries || []) {
     const metadata = deliveryDisplayMetadata(delivery);
     const group = groups.get(metadata.id) || { ...metadata, items: [] };

@@ -1,7 +1,6 @@
-import type { BuildHistoryEntry } from "@pipelab/shared";
+import type { BuildHistoryEntry, EndEventDataError, EndEventDataSuccess } from "@pipelab/shared";
 import type {
   IsWorkflowRouteContextValidWorkflow,
-  LoadResultError,
   ResolveWorkflowRunsStateHistory,
   ResolveWorkflowRunsStateWorkflow,
 } from "./workflow-runs-state.types";
@@ -15,7 +14,7 @@ export const isWorkflowRouteContextValid = (
   projectId: string,
 ) => workflow.id === flowId && workflow.project === projectId;
 
-type LoadResult<T> = { type: "success"; result: T } | LoadResultError;
+type LoadResult<T> = EndEventDataSuccess<T> | EndEventDataError;
 
 export const resolveWorkflowRunsState = (
   history: LoadResult<ResolveWorkflowRunsStateHistory>,

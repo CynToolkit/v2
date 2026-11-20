@@ -47,6 +47,7 @@ import { useFiles } from "./store/files";
 import { useUIStore } from "./store/ui";
 import { browserPreferences } from "./composables/browser-preferences";
 import { shouldAutoConnectAgent, uiEnvironment } from "./composables/ui-runtime";
+import type { I18nSchema } from "./App.types";
 
 const UpgradeDialog = defineAsyncComponent(() => import("./components/UpgradeDialog.vue"));
 const DevBenefitsOverride = defineAsyncComponent(
@@ -56,7 +57,7 @@ const WebFilePicker = defineAsyncComponent(() => import("./components/WebFilePic
 
 const { logger } = useLogger();
 const { start, isReady, status: agentStatus } = useAgentAvailability();
-const { locale, availableLocales } = useI18n<{ message: MessageSchema }, Locales>();
+const { locale, availableLocales } = useI18n<I18nSchema, Locales>();
 const settingsStore = useAppSettings();
 const appStore = useAppStore();
 const fileStore = useFiles();

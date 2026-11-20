@@ -103,10 +103,24 @@ export interface Agent {
 }
 
 // Handler function types
+/** What a WebSocket handler receives: the request payload and a way to answer it. */
+export interface WebSocketHandlerArgs<KEY extends Channels> {
+  value: Data<KEY>;
+  send: WebSocketSendFunction<KEY>;
+}
+
 export type WebSocketHandler<KEY extends Channels> = (
   event: WebSocketEvent,
-  data: { value: Data<KEY>; send: WebSocketSendFunction<KEY> },
+  data: WebSocketHandlerArgs<KEY>,
 ) => Promise<void>;
+
+/** The payload of a request the client is about to send; the channel may take no data at all. */
+export interface OutgoingRequestData<KEY extends Channels> {
+  data: Data<KEY> | undefined;
+}
+
+export type OutgoingRequestMessage<KEY extends Channels> = Omit<RequestMessageFor<KEY>, "data"> &
+  OutgoingRequestData<KEY>;
 
 export type WebSocketSendFunction<KEY extends Channels> = (events: Events<KEY>) => Promise<void>;
 

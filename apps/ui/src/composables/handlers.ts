@@ -6,12 +6,13 @@ import {
   RendererEvents,
   RendererData,
   RendererMessage,
+  type HandleListenerRendererArgs,
   type HandleListenerRendererSendFn,
 } from "@pipelab/shared";
 
 export type HandleListenerRenderer<KEY extends RendererChannels> = (
   event: Electron.IpcRendererEvent,
-  data: { value: RendererData<KEY>; send: HandleListenerRendererSendFn<KEY> },
+  data: HandleListenerRendererArgs<KEY>,
 ) => Promise<void>;
 
 export const handle = <KEY extends RendererChannels>(

@@ -5,6 +5,7 @@ import {
   Events,
   RequestId,
   type EventMessageFor,
+  type OutgoingRequestMessage,
   type RequestMessageFor,
   type WebSocketEventMessage,
   type WebSocketListener,
@@ -316,7 +317,7 @@ export class WebSocketClient {
     }
 
     const requestId: RequestId = nanoidFn();
-    const message: Omit<RequestMessageFor<KEY>, "data"> & { data: Data<KEY> | undefined } = {
+    const message: OutgoingRequestMessage<KEY> = {
       channel,
       requestId,
       data: toRaw(klona(data)),

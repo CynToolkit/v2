@@ -9,6 +9,7 @@ import {
   type WorkflowArtifactDefinition,
   type WorkflowEvent,
   type WorkflowResult,
+  type WorkflowRunServices,
   type WorkflowConnectionValues,
   type WorkflowTask,
   type WorkflowTaskRegistry,
@@ -150,7 +151,7 @@ export function runWorkflowTask(
 /** Runs a task that reads host services, which the test must then provide. */
 export function runWorkflowTask<TServices>(
   task: WorkflowTask<TServices>,
-  options: RunWorkflowTaskOptions & { services: TServices },
+  options: RunWorkflowTaskOptions & WorkflowRunServices<TServices>,
 ): Promise<WorkflowTaskRun>;
 export async function runWorkflowTask(
   task: WorkflowTask,

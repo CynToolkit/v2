@@ -180,20 +180,14 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useUIStore, type FilePickerOptions } from "../store/ui";
 import { useAPI } from "../composables/api";
 import { useLogger } from "@pipelab/shared";
-interface FileItem {
-  name: string;
-  isDirectory: boolean;
-  isSymbolicLink: boolean;
-  size: number;
-  mtime: number;
-}
+import type { FileItem, FileRoot, FileRowDoubleClick } from "./WebFilePicker.types";
 const uiStore = useUIStore();
 const api = useAPI();
 const { logger } = useLogger();
 const options = computed(() => uiStore.filePickerOptions);
 const currentPath = ref("");
 const files = ref<FileItem[]>([]);
-const roots = ref<{ name: string; path: string }[]>([]);
+const roots = ref<FileRoot[]>([]);
 const selection = ref<FileItem | FileItem[] | null>(null);
 const saveFileName = ref("");
 const isLoading = ref(false);
@@ -292,7 +286,7 @@ const goUp = async () => {
     await loadDirectory();
   }
 };
-const onRowDblClick = async ({ data }: { data: FileItem }) => {
+const onRowDblClick = async ({ data }: FileRowDoubleClick) => {
   if (data.isDirectory) {
     currentPath.value = joinPath(currentPath.value, data.name);
     await loadDirectory();

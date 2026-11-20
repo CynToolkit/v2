@@ -32,3 +32,19 @@ export interface UsedValueDefinitionsSources {
 export interface ForEachUsedValue {
   key: string;
 }
+
+export interface FieldBearer<TField> {
+  fields?: readonly TField[];
+}
+
+export type UsedValueDefinitionsEntry<TField> = FieldBearer<TField> & UsedValueDefinitionsSources;
+
+export interface UsedValueDefinitionsProducer<TField> extends FieldBearer<TField> {
+  id: string;
+  targets: ReadonlyArray<UsedValueDefinitionsEntry<TField>>;
+}
+
+export interface UsedValueDefinitionsDestination<TField> extends FieldBearer<TField> {
+  id: string;
+  slotFields?: readonly TField[];
+}

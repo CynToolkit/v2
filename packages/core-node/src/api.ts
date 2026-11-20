@@ -6,6 +6,7 @@ import {
   RendererEnd,
   RendererMessage,
   RequestId,
+  HandleListenerRendererArgs,
   HandleListenerRendererSendFn,
   HandleListenerRenderer as BaseHandleListenerRenderer,
 } from "@pipelab/shared";
@@ -23,5 +24,5 @@ export type {
 
 export type HandleListenerRenderer<KEY extends RendererChannels> = (
   event: Electron.IpcMainInvokeEvent,
-  data: { value: RendererData<KEY>; send: HandleListenerRendererSendFn<KEY> },
+  data: HandleListenerRendererArgs<KEY>,
 ) => Promise<void>;

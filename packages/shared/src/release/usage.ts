@@ -3,7 +3,9 @@ import type {
   IsSourceRefResult,
   UsedValueSelectionProducers,
   UsedValueSelectionDestinations,
-  UsedValueDefinitionsSources,
+  UsedValueDefinitionsDestination,
+  UsedValueDefinitionsEntry,
+  UsedValueDefinitionsProducer,
   ForEachUsedValue,
 } from "./usage.types";
 
@@ -101,20 +103,11 @@ export const usedSelectionFromConfig = (config: ReleaseConfig): UsedValueSelecti
   };
 };
 
-interface FieldBearer<TField> {
-  fields?: readonly TField[];
-}
-
 /** Field definitions a walk reads: the release registry and the renderer catalog both fit. */
 export interface UsedValueDefinitions<TField> {
-  sources: ReadonlyArray<FieldBearer<TField> & UsedValueDefinitionsSources>;
-  producers: ReadonlyArray<
-    FieldBearer<TField> & {
-      id: string;
-      targets: ReadonlyArray<FieldBearer<TField> & UsedValueDefinitionsSources>;
-    }
-  >;
-  destinations: ReadonlyArray<FieldBearer<TField> & { id: string; slotFields?: readonly TField[] }>;
+  sources: ReadonlyArray<UsedValueDefinitionsEntry<TField>>;
+  producers: ReadonlyArray<UsedValueDefinitionsProducer<TField>>;
+  destinations: ReadonlyArray<UsedValueDefinitionsDestination<TField>>;
 }
 
 /**
