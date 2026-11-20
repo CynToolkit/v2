@@ -1,3 +1,12 @@
+import type { ListrRendererFactory, ListrTaskWrapper } from "listr2";
+
+/** A Listr task the workflow commands update; the context and renderers are not inspected. */
+export type WorkflowListrTask = ListrTaskWrapper<
+  unknown,
+  ListrRendererFactory,
+  ListrRendererFactory
+>;
+
 export interface RunWorkflowCommandOptions {
   userData?: string;
   output?: string;

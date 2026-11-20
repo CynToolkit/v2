@@ -73,7 +73,7 @@ export class JsonFileStorage {
   /**
    * Helper to get the entire data object
    */
-  getAll = (): Record<string, any> => {
+  getAll = (): Record<string, unknown> => {
     try {
       if (!fs.existsSync(this.filePath)) return {};
       const content = fs.readFileSync(this.filePath, "utf8");

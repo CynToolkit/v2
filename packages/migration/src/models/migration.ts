@@ -33,7 +33,16 @@ export const isSemVer = (value: string): value is SemVer => /^\d+\.\d+\.\d+$/.te
 
 export interface MigrationClass<Current, Up> {
   version: SemVer;
-  up: MigrationFn<Current, OmitVersion<Up> & MigrationSchema>;
+  /**
+   * Receives the state without its `version`, which the migrator strips and sets again afterwards.
+   * Method syntax on purpose: it makes a `MigrationClass<V1, V2>` assignable to the
+   * `MigrationClass<MigrationSchema, MigrationSchema>` the migrator stores, where each step is only
+   * ever called with the state of its own version.
+   */
+  up(
+    state: OmitVersion<Current>,
+    targetVersion: string,
+  ): Awaitable<OmitVersion<Up> & MigrationSchema>;
 }
 
 export interface MigrationObjInput<Current, Up> {
@@ -42,7 +51,7 @@ export interface MigrationObjInput<Current, Up> {
 }
 
 export interface MigratorConfig<InitialState, FinalState> {
-  migrations: MigrationClass<any, any>[];
+  migrations: MigrationClass<MigrationSchema, MigrationSchema>[];
   coerce?: boolean;
   /** State used when there is nothing persisted yet; also seeds new files. */
   defaultValue: FinalState;
@@ -61,7 +70,7 @@ export class MigrationValidationError extends Error {
 export class Migrator<InitialState extends MigrationSchema, OutputState extends MigrationSchema> {
   current: SemVer;
 
-  migrations: Record<SemVer, MigrationClass<any, any>> = {};
+  migrations: Record<SemVer, MigrationClass<MigrationSchema, MigrationSchema>> = {};
 
   coerce: boolean;
   defaultValue: OutputState;
