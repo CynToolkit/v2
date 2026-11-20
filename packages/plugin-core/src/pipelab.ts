@@ -14,6 +14,12 @@ export interface ProviderHostContext {
   resolveBundledAsset(packageName: string): Promise<string>;
 }
 
+/** Absolute paths to the Node.js and pnpm binaries a task runs with. */
+export interface ProviderExecutables {
+  node: string;
+  pnpm: string;
+}
+
 /**
  * Provider-facing compatibility alias for ProviderHostContext.
  * This is a structural type, not the concrete PipelabContext class from core-node.

@@ -52,9 +52,7 @@ export interface WorkflowPhaseResult extends WorkflowPhaseDefinition {
   warnings: string[];
 }
 
-export type WorkflowPhaseOutcome =
-  | { status: "completed"; message?: string }
-  | { status: "skipped"; reason: string };
+export type WorkflowPhaseOutcome = WorkflowPhaseCompleted | WorkflowPhaseSkipped;
 
 export interface WorkflowPhaseTools {
   skip(reason: string): WorkflowPhaseOutcome;
@@ -146,11 +144,7 @@ export interface WorkflowTaskContext<TServices = unknown> {
   signal: AbortSignal;
   log(...args: unknown[]): void;
   logStream(stream: WorkflowLogStream, ...args: unknown[]): void;
-  setArtifact(
-    outputId: string,
-    path: string,
-    metadata?: { checksum?: string; size?: number; name?: string },
-  ): void;
+  setArtifact(outputId: string, path: string, metadata?: SetArtifactMetadata): void;
   withPhases<const T extends readonly WorkflowPhaseDefinition[]>(
     phases: T,
   ): WorkflowPhaseRunner<PhaseIds<T>>;
@@ -171,8 +165,8 @@ export type WorkflowTaskRegistry<TServices = unknown> = Record<string, WorkflowT
 export type WorkflowConnectionValues = Readonly<Record<string, Readonly<Record<string, string>>>>;
 
 export type WorkflowConnectionOverrideValue =
-  | { kind: "environment"; name: string }
-  | { kind: "literal"; value: string };
+  | WorkflowConnectionOverrideEnvironment
+  | WorkflowConnectionOverrideLiteral;
 
 export interface WorkflowConnectionOverride {
   alias: string;
@@ -184,7 +178,7 @@ export interface WorkflowConnectionRequirement {
   alias: string;
   required: boolean;
   /** `secret: false` marks a field as non-sensitive; it is then kept readable in logs. */
-  fields: readonly { key: string; required: boolean; secret?: boolean }[];
+  fields: readonly WorkflowConnectionRequirementField[];
   providerId?: string;
   integrationName?: string;
 }
@@ -234,95 +228,22 @@ export interface WorkflowResult {
 }
 
 export type WorkflowEventInput =
-  | {
-      type: "workflow.started";
-      workflow: Workflow;
-    }
-  | {
-      type: "step.started";
-      stepId: string;
-      uses: string;
-    }
-  | {
-      type: "step.log";
-      stepId: string;
-      stream: WorkflowLogStream;
-      message: string;
-      chunk?: boolean;
-    }
-  | {
-      type: "step.completed";
-      stepId: string;
-      uses: string;
-      outputs: Record<string, unknown>;
-      artifacts: Array<WorkflowArtifactInstance>;
-      duration: number;
-    }
-  | {
-      type: "step.failed";
-      stepId: string;
-      uses: string;
-      error: WorkflowError;
-      duration: number;
-    }
-  | {
-      type: "step.skipped";
-      stepId: string;
-      uses: string;
-      blockedBy: string[];
-    }
-  | {
-      type: "phase.started";
-      stepId: string;
-      phaseId: string;
-      title: string;
-    }
-  | {
-      type: "phase.completed";
-      stepId: string;
-      phaseId: string;
-      message?: string;
-      duration: number;
-    }
-  | {
-      type: "phase.skipped";
-      stepId: string;
-      phaseId: string;
-      reason: string;
-      duration: number;
-    }
-  | {
-      type: "phase.failed";
-      stepId: string;
-      phaseId: string;
-      error: WorkflowError;
-      duration: number;
-    }
-  | {
-      type: "phase.warning";
-      stepId: string;
-      phaseId: string;
-      message: string;
-      diagnostic?: boolean;
-    }
-  | {
-      type: "phase.not-reached" | "phase.not-reported";
-      stepId: string;
-      phaseId: string;
-      title: string;
-    }
-  | {
-      type: "workflow.completed";
-      result: WorkflowResult;
-      duration: number;
-    }
-  | {
-      type: "workflow.failed";
-      error: WorkflowError;
-      duration: number;
-    };
+  | WorkflowEventInputWorkflowStarted
+  | WorkflowEventInputStepStarted
+  | WorkflowEventInputStepLog
+  | WorkflowEventInputStepCompleted
+  | WorkflowEventInputStepFailed
+  | WorkflowEventInputStepSkipped
+  | WorkflowEventInputPhaseStarted
+  | WorkflowEventInputPhaseCompleted
+  | WorkflowEventInputPhaseSkipped
+  | WorkflowEventInputPhaseFailed
+  | WorkflowEventInputPhaseWarning
+  | WorkflowEventInputPhaseUnreported
+  | WorkflowEventInputWorkflowCompleted
+  | WorkflowEventInputWorkflowFailed;
 
-export type WorkflowEvent = WorkflowEventInput & { timestamp: number };
+export type WorkflowEvent = WorkflowEventInput & WorkflowEventTimestamp;
 
 export interface WorkflowRunContext<TServices = unknown> {
   host: WorkflowHost;
@@ -352,4 +273,141 @@ export interface WorkflowHost {
   filesystem: FileSystem;
   processes: ProcessExecutor;
   logger: Logger;
+}
+
+export interface WorkflowPhaseCompleted {
+  status: "completed";
+  message?: string;
+}
+
+export interface WorkflowPhaseSkipped {
+  status: "skipped";
+  reason: string;
+}
+
+export interface SetArtifactMetadata {
+  checksum?: string;
+  size?: number;
+  name?: string;
+}
+
+export interface WorkflowConnectionOverrideEnvironment {
+  kind: "environment";
+  name: string;
+}
+
+export interface WorkflowConnectionOverrideLiteral {
+  kind: "literal";
+  value: string;
+}
+
+export interface WorkflowConnectionRequirementField {
+  key: string;
+  required: boolean;
+  secret?: boolean;
+}
+
+export interface WorkflowEventInputWorkflowStarted {
+  type: "workflow.started";
+  workflow: Workflow;
+}
+
+export interface WorkflowEventInputStepStarted {
+  type: "step.started";
+  stepId: string;
+  uses: string;
+}
+
+export interface WorkflowEventInputStepLog {
+  type: "step.log";
+  stepId: string;
+  stream: WorkflowLogStream;
+  message: string;
+  chunk?: boolean;
+}
+
+export interface WorkflowEventInputStepCompleted {
+  type: "step.completed";
+  stepId: string;
+  uses: string;
+  outputs: Record<string, unknown>;
+  artifacts: Array<WorkflowArtifactInstance>;
+  duration: number;
+}
+
+export interface WorkflowEventInputStepFailed {
+  type: "step.failed";
+  stepId: string;
+  uses: string;
+  error: WorkflowError;
+  duration: number;
+}
+
+export interface WorkflowEventInputStepSkipped {
+  type: "step.skipped";
+  stepId: string;
+  uses: string;
+  blockedBy: string[];
+}
+
+export interface WorkflowEventInputPhaseStarted {
+  type: "phase.started";
+  stepId: string;
+  phaseId: string;
+  title: string;
+}
+
+export interface WorkflowEventInputPhaseCompleted {
+  type: "phase.completed";
+  stepId: string;
+  phaseId: string;
+  message?: string;
+  duration: number;
+}
+
+export interface WorkflowEventInputPhaseSkipped {
+  type: "phase.skipped";
+  stepId: string;
+  phaseId: string;
+  reason: string;
+  duration: number;
+}
+
+export interface WorkflowEventInputPhaseFailed {
+  type: "phase.failed";
+  stepId: string;
+  phaseId: string;
+  error: WorkflowError;
+  duration: number;
+}
+
+export interface WorkflowEventInputPhaseWarning {
+  type: "phase.warning";
+  stepId: string;
+  phaseId: string;
+  message: string;
+  diagnostic?: boolean;
+}
+
+export interface WorkflowEventInputPhaseUnreported {
+  type: "phase.not-reached" | "phase.not-reported";
+  stepId: string;
+  phaseId: string;
+  title: string;
+}
+
+export interface WorkflowEventInputWorkflowCompleted {
+  type: "workflow.completed";
+  result: WorkflowResult;
+  duration: number;
+}
+
+export interface WorkflowEventInputWorkflowFailed {
+  type: "workflow.failed";
+  error: WorkflowError;
+  duration: number;
+}
+
+export interface WorkflowEventTimestamp {
+  timestamp: number;
 }

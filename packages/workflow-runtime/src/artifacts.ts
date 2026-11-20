@@ -1,3 +1,5 @@
+import type { WorkflowArtifactInstanceCloud } from "./artifacts.types";
+
 export type ArtifactKind = "project" | "application" | "files";
 
 export interface ArtifactDescriptor {
@@ -17,10 +19,7 @@ export interface WorkflowArtifactInstance {
   readonly path: string;
   readonly stepId: string;
   readonly artifact: string;
-  readonly cloud?: {
-    readonly hostedArtifactId: string;
-    readonly uploadedAt: string;
-  };
+  readonly cloud?: WorkflowArtifactInstanceCloud;
   readonly checksum?: string;
   readonly size?: number;
   readonly [key: string]: unknown;

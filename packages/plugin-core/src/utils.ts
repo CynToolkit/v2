@@ -1,7 +1,8 @@
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
-import { execa, type Options, type Subprocess } from "execa";
+import { execa, type Options } from "execa";
 import type { ProviderHostContext } from "./pipelab";
+import type { DownloadProgress, RunWithLiveLogsHooks } from "./utils.types";
 
 export { fetchPackage, runPnpm, isOnline, type FetchOptions } from "./package-utils";
 export type Hooks = DownloadHooks;
@@ -15,7 +16,7 @@ export const resolveBundledAsset = (
  * Downloads a file with progress tracking.
  */
 export interface DownloadHooks {
-  onProgress?: (data: { progress: number; downloadedSize: number }) => void;
+  onProgress?: (data: DownloadProgress) => void;
 }
 
 export const downloadFile = async (
@@ -49,12 +50,7 @@ export const runWithLiveLogs = async (
   args: string[],
   execaOptions: Options,
   log: typeof console.log,
-  hooks?: {
-    onStdout?: (data: string, subprocess: Subprocess) => void;
-    onStderr?: (data: string, subprocess: Subprocess) => void;
-    onExit?: (code: number) => void;
-    onCreated?: (subprocess: Subprocess) => void;
-  },
+  hooks?: RunWithLiveLogsHooks,
   abortSignal?: AbortSignal,
 ): Promise<void> => {
   const subprocess = execa(command, args, {

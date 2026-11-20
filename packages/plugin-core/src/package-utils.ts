@@ -6,6 +6,7 @@ import pacote from "pacote";
 import semver from "semver";
 import { execa } from "execa";
 import type { ProviderHostContext } from "./pipelab";
+import type { FetchPackageResult, RunPnpmOptions } from "./package-utils.types";
 
 interface FetchedPackage {
   packageDir: string;
@@ -109,12 +110,7 @@ export async function fetchPackage(
   packageName: string,
   versionOrRange: string,
   options: FetchOptions,
-): Promise<{
-  packageDir: string;
-  resolvedVersion: string;
-  isLocal?: boolean;
-  entryPoint?: string;
-}> {
+): Promise<FetchPackageResult> {
   const start = Date.now();
 
   if (packageName.startsWith("@pipelab/")) {
@@ -361,15 +357,7 @@ export async function fetchPackage(
 /**
  * Executes a pnpm install in a specific directory with a portable environment.
  */
-export async function runPnpm(
-  cwd: string,
-  options: {
-    args?: string[];
-    extraEnv?: Record<string, string>;
-    signal?: AbortSignal;
-    context: ProviderHostContext;
-  },
-) {
+export async function runPnpm(cwd: string, options: RunPnpmOptions) {
   const {
     args = [
       "install",
