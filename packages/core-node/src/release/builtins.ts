@@ -9,6 +9,7 @@ import {
   type ReleaseSourceDefinition,
 } from "@pipelab/shared";
 import { CORE_WORKFLOW_TASKS, type WorkflowStep } from "@pipelab/workflow-runtime";
+import type { SlotTaskConfigSlot } from "./builtins.types";
 export { CORE_WORKFLOW_TASKS } from "@pipelab/workflow-runtime";
 
 const folderOutput = { kind: "files", container: "directory" } as const;
@@ -20,7 +21,7 @@ const webFolderOutput = {
 
 /** Renames the slot's destination field to the task input it feeds; other slot config passes through. */
 const slotTaskConfig = (
-  slot: { config: Record<string, unknown> },
+  slot: SlotTaskConfigSlot,
   field: string,
   input: string,
 ): Record<string, unknown> => {

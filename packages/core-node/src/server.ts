@@ -10,6 +10,7 @@ import {
   type ServerSecurityOptions,
 } from "./server-security";
 import { markDesktopHosted } from "./desktop-host";
+import type { ServerSecurityHost } from "./server.types";
 
 export interface ServeOptions {
   port: string | number;
@@ -51,7 +52,7 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
     userDataPath: options.userData,
     releaseTag,
   });
-  const security: ServerSecurityOptions & { host: string } = {
+  const security: ServerSecurityOptions & ServerSecurityHost = {
     host: options.host || DEFAULT_SERVER_HOST,
     authToken: options.authToken || process.env.PIPELAB_AUTH_TOKEN,
     allowUnauthenticated: isDev,

@@ -1,4 +1,5 @@
 import type { IncomingMessage } from "node:http";
+import type { IsTokenEnforcedOptions } from "./server-security.types";
 
 export const DEFAULT_SERVER_HOST = "127.0.0.1";
 export const DEFAULT_ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"];
@@ -16,7 +17,7 @@ export const isLoopbackHost = (host: string): boolean =>
 export const requiresAuthentication = (host: string): boolean => !isLoopbackHost(host);
 
 /** A configured token is always enforced, including on loopback binds. */
-export const isTokenEnforced = (options: ServerSecurityOptions & { host: string }): boolean =>
+export const isTokenEnforced = (options: ServerSecurityOptions & IsTokenEnforcedOptions): boolean =>
   Boolean(options.authToken) || requiresAuthentication(options.host);
 
 export const hasValidAuthToken = (
@@ -50,7 +51,7 @@ export const isAllowedOrigin = (
 
 export const isAuthorizedRequest = (
   request: IncomingMessage,
-  options: ServerSecurityOptions & { host: string },
+  options: ServerSecurityOptions & IsTokenEnforcedOptions,
 ): boolean => {
   if (options.allowUnauthenticated && !options.authToken) {
     const origin = request.headers.origin;

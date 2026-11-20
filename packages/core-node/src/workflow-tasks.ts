@@ -10,18 +10,15 @@ import {
   RELEASE_BEFORE_BUILD_TASK_ID,
   releaseBeforeBuildWorkflowTask,
 } from "./workflow-tasks/release-before-build";
+import type { ProviderServicesRun } from "./workflow-tasks.types";
+import type { ProviderExecutables } from "@pipelab/plugin-core";
 
 export interface ProviderServices {
   context: PipelabContext;
   /** Node and pnpm executables ensured for this workflow run. */
-  executables: { node: string; pnpm: string };
+  executables: ProviderExecutables;
   /** Runtime-only release identifiers. Never written into workflow configuration. */
-  run: {
-    id: string;
-    workflowId: string;
-    projectId: string;
-    releaseVersion: string;
-  };
+  run: ProviderServicesRun;
   /** Per-run build cache directory. Other managed directories come from context. */
   workflowCachePath: string;
 }

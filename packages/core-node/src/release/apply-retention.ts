@@ -1,8 +1,9 @@
-import { planRetention, useLogger, type ReleaseRetentionPolicy } from "@pipelab/shared";
+import { planRetention, useLogger } from "@pipelab/shared";
 import type { PipelabContext } from "../context";
 import { BuildHistoryStorage } from "../handlers/build-history";
 import { loadStrictProjects } from "../strict-config-persistence";
 import { ReleasePersistence } from "../release-persistence";
+import type { ApplyRetentionInput } from "./apply-retention.types";
 
 export interface RetentionResult {
   runs: number;
@@ -15,17 +16,7 @@ export interface RetentionResult {
  */
 export const applyRetention = async (
   history: Pick<BuildHistoryStorage, "getByProject" | "deleteWithArtifacts" | "deleteArtifacts">,
-  {
-    projectId,
-    workflowId,
-    policy,
-    keepId = "",
-  }: {
-    projectId: string;
-    workflowId: string;
-    policy: ReleaseRetentionPolicy | undefined;
-    keepId?: string;
-  },
+  { projectId, workflowId, policy, keepId = "" }: ApplyRetentionInput,
 ): Promise<RetentionResult> => {
   if (!policy) return { runs: 0, files: 0 };
   const { deleteRuns, deleteArtifacts } = planRetention(await history.getByProject(projectId), {

@@ -12,13 +12,14 @@ import {
   connectionsMigrator,
   fileRepoMigrations,
 } from "@pipelab/shared";
+import type { SetupConfigFile } from "./config.types";
 
 /** A persisted config file; its `version` selects the migrations to run. */
 interface VersionedDocument {
   version: `${number}.${number}.${number}`;
 }
 
-export const setupConfigFile = async <T extends { version: string }>(
+export const setupConfigFile = async <T extends SetupConfigFile>(
   filesPath: string,
   options: { context: PipelabContext; migrator: Migrator<T> },
 ) => {

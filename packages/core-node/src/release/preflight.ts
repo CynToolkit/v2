@@ -5,8 +5,9 @@ import type {
   ReleaseConfig,
   ReleaseRegistry,
 } from "@pipelab/shared";
-import type { Workflow, WorkflowValueResolver } from "@pipelab/workflow-runtime";
+import type { Workflow } from "@pipelab/workflow-runtime";
 import type { ProviderServices } from "../workflow-tasks";
+import type { RunPreflightsInput } from "./preflight.types";
 
 export interface PreflightOutcome {
   stepId: string;
@@ -100,11 +101,7 @@ export const runPreflights = async ({
   services,
   signal,
   ...scope
-}: PreflightScope & {
-  valueResolver: WorkflowValueResolver;
-  services: ProviderServices;
-  signal?: AbortSignal;
-}): Promise<PreflightOutcome[]> =>
+}: PreflightScope & RunPreflightsInput): Promise<PreflightOutcome[]> =>
   Promise.all(
     preflightTargets(scope).map(
       async ({ step, check, destinationId, destination }): Promise<PreflightOutcome> => {

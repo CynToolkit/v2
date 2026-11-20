@@ -10,13 +10,16 @@ import type { PipelabContext } from "./context";
 import type { ProviderServices } from "./workflow-tasks";
 import { createPipelabCloudAuthClient } from "./pipelab-cloud-auth";
 import { zipFolder } from "./utils/fs-extras";
+import type {
+  PreparedUploadReservation,
+  PreparedSingleUpload,
+  PreparedMultipartUpload,
+  CreateCloudArtifactUploadMetadataArtifact,
+  CreateCloudArtifactUploadMetadataIdentity,
+  MultipartParts,
+} from "./pipelab-cloud.types";
 
-type PreparedUpload = {
-  reservationId: string;
-} & (
-  | { uploadUrl: string; headers: Record<string, string> }
-  | { multipart: true; uploadId: string; partSize: number }
-);
+type PreparedUpload = PreparedUploadReservation & (PreparedSingleUpload | PreparedMultipartUpload);
 
 const cloudArtifactOutputId = (artifact: WorkflowArtifactInstance) => {
   const { kind, technology, platform, architecture } = artifact.descriptor;
@@ -60,12 +63,9 @@ const streamingPut = (
 });
 
 export const createCloudArtifactUploadMetadata = (
-  artifact: Pick<WorkflowArtifactInstance, "id" | "artifact"> & {
-    version: string;
-    originalName: string;
-    artifactKind: "file" | "directory";
-  },
-  identity: { projectId: string; buildProfileId: string; buildTargetId: string },
+  artifact: Pick<WorkflowArtifactInstance, "id" | "artifact"> &
+    CreateCloudArtifactUploadMetadataArtifact,
+  identity: CreateCloudArtifactUploadMetadataIdentity,
   size: number,
   checksum: string,
 ) => ({
@@ -333,7 +333,7 @@ export const createPipelabCloudUploadTask =
       }
 
       log(`Uploading ${artifactName} to Pipelab Cloud`);
-      let multipartParts: Array<{ PartNumber: number; ETag: string }> | undefined;
+      let multipartParts: Array<MultipartParts> | undefined;
       if ("uploadUrl" in prepared) {
         try {
           const uploadResponse = await fetch(

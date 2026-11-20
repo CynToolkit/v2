@@ -1,4 +1,5 @@
 import semver from "semver";
+import type { GitHubReleaseAssets } from "./github.types";
 
 /** A ref entry from the GitHub matching-refs API. */
 interface GitRef {
@@ -10,10 +11,7 @@ export interface GitHubRelease {
   prerelease: boolean;
   published_at: string;
   html_url: string;
-  assets: Array<{
-    name: string;
-    browser_download_url: string;
-  }>;
+  assets: Array<GitHubReleaseAssets>;
 }
 
 export interface FetchReleaseOptions {

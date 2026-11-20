@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { isPathBlacklisted } from "../fs-utils";
 
 import { PipelabContext } from "../context";
+import type { RootsItem } from "./fs.types";
 
 export const registerFsHandlers = (_context: PipelabContext) => {
   const { handle } = useAPI();
@@ -117,7 +118,7 @@ export const registerFsHandlers = (_context: PipelabContext) => {
 
   handle("fs:getRoots", async (event, { send }) => {
     try {
-      const roots: { name: string; path: string }[] = [{ name: "Home", path: homedir() }];
+      const roots: RootsItem[] = [{ name: "Home", path: homedir() }];
       if (platform() === "win32") {
         const available = await Promise.all(
           Array.from({ length: 26 }, (_, i) => {
@@ -128,7 +129,7 @@ export const registerFsHandlers = (_context: PipelabContext) => {
               .catch((): null => null);
           }),
         );
-        roots.push(...available.filter((root): root is { name: string; path: string } => !!root));
+        roots.push(...available.filter((root): root is RootsItem => !!root));
       } else {
         roots.push({ name: "Computer", path: "/" });
         for (const mountRoot of ["/Volumes", "/mnt", "/media", "/run/media"]) {

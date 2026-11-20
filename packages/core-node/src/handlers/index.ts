@@ -8,13 +8,10 @@ import { registerAuthHandlers } from "./auth";
 import { registerSystemHandlers } from "./system";
 import { registerWorkflowHandlers } from "./workflow";
 import { BuildHistoryStorage } from "./build-history";
-import { PipelabContext } from "../context";
 import { sweepRetention } from "../release/apply-retention";
+import type { RegisterAllHandlersOptions } from "./index.types";
 
-export const registerAllHandlers = async (options: {
-  version: string;
-  context: PipelabContext;
-}) => {
+export const registerAllHandlers = async (options: RegisterAllHandlersOptions) => {
   const context = options.context;
   await new BuildHistoryStorage(context).reconcileInterruptedRuns();
 

@@ -1,7 +1,8 @@
 import { useAPI } from "../ipc-core";
-import { PipelabContext, isDev, projectRoot } from "../context";
+import { isDev, projectRoot } from "../context";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { RegisterSystemHandlersOptions } from "./system.types";
 
 // In dev the caller passes version "local" (monorepo source, not a release).
 // Report the real CLI version from the workspace instead of a pseudo-version.
@@ -16,7 +17,7 @@ function resolveDevVersion(fallback: string): string {
   return fallback;
 }
 
-export const registerSystemHandlers = (options: { version: string; context: PipelabContext }) => {
+export const registerSystemHandlers = (options: RegisterSystemHandlersOptions) => {
   const { handle } = useAPI();
 
   handle("agent:version:get", async (_, { send }) => {
