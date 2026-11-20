@@ -17,14 +17,14 @@ be attributed to a new optimization.
 
 The user-selected input was [`discord.c3p`](https://github.com/CynToolkit/construct-plugin/blob/main/examples/discord.c3p), downloaded at 167,766 bytes (SHA-256 `7a151977b7e719177274a128364443613e7777b73211cae7fbec624bc4be38ba`). It selects Construct `r466-2`. The local CLI ran a temporary copy of `zeqf` with all publishing destinations removed. Each run refreshed the project-scoped profile from the selected Chromium profile and authenticated through the Doppler-provided Construct credentials. Playwright logged full Chromium, `channel: chromium`, headless mode. One successful full workflow warm-up was excluded below.
 
-| Measured run | Setup through Next | Construct export task | Extract | Linux x64 build | Result |
-| --- | ---: | ---: | ---: | ---: | --- |
-| 1 | 13.500 s | 15.86 s | 0.093 s | 22.89 s | Complete |
-| 2 | 12.623 s | 15.03 s | 0.090 s | 22.55 s | Complete |
-| 3 | 13.716 s | 16.37 s | 0.166 s | 23.36 s | Complete |
-| 4 | 13.614 s | 16.43 s | 0.086 s | 24.96 s | Complete |
-| 5 | 12.411 s | 15.09 s | 0.063 s | — | Construct export and extraction completed; Electron Forge produced no output directory |
-| **Mean** | **13.173 s** | **15.756 s** | **0.100 s** | **23.440 s** | Four full workflows completed |
+| Measured run | Setup through Next | Construct export task |     Extract | Linux x64 build | Result                                                                                 |
+| ------------ | -----------------: | --------------------: | ----------: | --------------: | -------------------------------------------------------------------------------------- |
+| 1            |           13.500 s |               15.86 s |     0.093 s |         22.89 s | Complete                                                                               |
+| 2            |           12.623 s |               15.03 s |     0.090 s |         22.55 s | Complete                                                                               |
+| 3            |           13.716 s |               16.37 s |     0.166 s |         23.36 s | Complete                                                                               |
+| 4            |           13.614 s |               16.43 s |     0.086 s |         24.96 s | Complete                                                                               |
+| 5            |           12.411 s |               15.09 s |     0.063 s |               — | Construct export and extraction completed; Electron Forge produced no output directory |
+| **Mean**     |       **13.173 s** |          **15.756 s** | **0.100 s** |    **23.440 s** | Four full workflows completed                                                          |
 
 The mean sum of the three Listr2 task durations for the four complete measured
 workflows was **39.47 seconds**. The Construct task mean is based on five
@@ -46,15 +46,15 @@ profile. Source-profile refresh ran inside every measured task. One warm-up
 (7.414 s setup / 9.704 s full) was excluded, followed by exactly five measured
 exports; no measured samples were discarded.
 
-| Run | Setup through Next | Full source task | CPU pressure before → after (`some avg10`) |
-| --- | ---: | ---: | ---: |
-| 1 | 8.871 s | 11.183 s | 30.89% → 42.44% |
-| 2 | 8.073 s | 10.578 s | 38.06% → 46.06% |
-| 3 | 7.623 s | 10.249 s | 41.34% → 44.00% |
-| 4 | 7.657 s | 10.260 s | 39.29% → 47.35% |
-| 5 | 7.880 s | 12.333 s | 42.58% → 54.92% |
-| **Mean** | **8.021 s** | **10.921 s** | — |
-| **Median** | **7.880 s** | **10.578 s** | — |
+| Run        | Setup through Next | Full source task | CPU pressure before → after (`some avg10`) |
+| ---------- | -----------------: | ---------------: | -----------------------------------------: |
+| 1          |            8.871 s |         11.183 s |                            30.89% → 42.44% |
+| 2          |            8.073 s |         10.578 s |                            38.06% → 46.06% |
+| 3          |            7.623 s |         10.249 s |                            41.34% → 44.00% |
+| 4          |            7.657 s |         10.260 s |                            39.29% → 47.35% |
+| 5          |            7.880 s |         12.333 s |                            42.58% → 54.92% |
+| **Mean**   |        **8.021 s** |     **10.921 s** |                                          — |
+| **Median** |        **7.880 s** |     **10.578 s** |                                          — |
 
 Full time includes Construct's internal export, ZIP download, artifact
 registration and browser cleanup; archive inspection and extraction are
@@ -64,18 +64,18 @@ large projects.
 
 Thirty distinct candidates were screened in ten rounds of three:
 
-| Round | Candidates | Outcome |
-| --- | --- | --- |
-| 1 | Offline cached URL; remove dialog pollers; smaller viewport | Offline failed; no confirmed speedup; removing dialog handling is diagnostic only. |
-| 2 | Canonical offline URL; SwiftShader; CSS animations disabled | Offline failed; no several-second improvement. |
-| 3 | Suppress restored tabs; lower canvas scale; disable GPU | No gain; repeated GPU trials were slower than controls. |
-| 4 | Skip final dialog/page close; newer Chromium; block tracking | No confirmed gain; newer browser failed export. |
-| 5 | One raster thread; single-threaded V8; renderer process limit | No confirmed gain; V8 retested below. |
-| 6 | Synchronous processing; skip WebGPU probe; disable WebGL | No confirmed gain. |
-| 7 | One Construct worker; native animation toggle; default workspace | Differences remained within noise. |
-| 8 | Disable JS optimization; disable Wasm tiering; eager JS compilation | Retested with separate warm caches below. |
-| 9 | Skip Start Page; simplified UI; mobile UI | No gain; mobile UI failed export. |
-| 10 | Disable ZIP workers; one hardware-thread hint; disable UI effects | Applied overrides verified; no gain. Initial unapplied ZIP/hardware samples excluded. |
+| Round | Candidates                                                          | Outcome                                                                               |
+| ----- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 1     | Offline cached URL; remove dialog pollers; smaller viewport         | Offline failed; no confirmed speedup; removing dialog handling is diagnostic only.    |
+| 2     | Canonical offline URL; SwiftShader; CSS animations disabled         | Offline failed; no several-second improvement.                                        |
+| 3     | Suppress restored tabs; lower canvas scale; disable GPU             | No gain; repeated GPU trials were slower than controls.                               |
+| 4     | Skip final dialog/page close; newer Chromium; block tracking        | No confirmed gain; newer browser failed export.                                       |
+| 5     | One raster thread; single-threaded V8; renderer process limit       | No confirmed gain; V8 retested below.                                                 |
+| 6     | Synchronous processing; skip WebGPU probe; disable WebGL            | No confirmed gain.                                                                    |
+| 7     | One Construct worker; native animation toggle; default workspace    | Differences remained within noise.                                                    |
+| 8     | Disable JS optimization; disable Wasm tiering; eager JS compilation | Retested with separate warm caches below.                                             |
+| 9     | Skip Start Page; simplified UI; mobile UI                           | No gain; mobile UI failed export.                                                     |
+| 10    | Disable ZIP workers; one hardware-thread hint; disable UI effects   | Applied overrides verified; no gain. Initial unapplied ZIP/hardware samples excluded. |
 
 [V8 rejects compiled-code caches when compiler flags differ](https://github.com/v8/v8/blob/main/src/snapshot/code-serializer.cc). Compiler candidates
 therefore received separate cloned profiles, two successful warm-ups each,
@@ -83,13 +83,13 @@ and three measured exports each, interleaved with controls in reversed order.
 Source-profile refresh still ran every time. All 15 measured exports produced
 verified ZIPs. Identical project CPU telemetry was enabled for this comparison.
 
-| Compiler mode | Mean setup | Mean full task | Full-task difference from control |
-| --- | ---: | ---: | ---: |
-| Control | 8.230 s | 10.792 s | — |
-| Eager compilation | 8.077 s | 10.755 s | −0.037 s |
-| JS optimization disabled | 7.970 s | 10.220 s | −0.572 s |
-| Wasm tiering disabled | 8.467 s | 10.952 s | +0.160 s |
-| Single-threaded V8 | 8.142 s | 10.692 s | −0.100 s |
+| Compiler mode            | Mean setup | Mean full task | Full-task difference from control |
+| ------------------------ | ---------: | -------------: | --------------------------------: |
+| Control                  |    8.230 s |       10.792 s |                                 — |
+| Eager compilation        |    8.077 s |       10.755 s |                          −0.037 s |
+| JS optimization disabled |    7.970 s |       10.220 s |                          −0.572 s |
+| Wasm tiering disabled    |    8.467 s |       10.952 s |                          +0.160 s |
+| Single-threaded V8       |    8.142 s |       10.692 s |                          −0.100 s |
 
 None meets the requested several-second improvement. No experimental provider
 behavior was retained. CPU pressure varied throughout; these small differences
@@ -128,12 +128,12 @@ Node 24.19.0, full Chromium 151.0.7922.34, headless mode and the same r397 fixtu
 were used. No local builds or tests ran alongside the benchmark.
 
 | Measured run | Control setup | Retained setup | Control full | Retained full |
-| --- | ---: | ---: | ---: | ---: |
-| 1 | 7.477 s | 2.479 s | 12.136 s | 3.912 s |
-| 2 | 7.651 s | 2.490 s | 10.885 s | 3.580 s |
-| 3 | 7.191 s | 2.777 s | 10.028 s | 4.103 s |
-| **Mean** | **7.440 s** | **2.582 s** | **11.016 s** | **3.865 s** |
-| **Median** | **7.477 s** | **2.490 s** | **10.885 s** | **3.912 s** |
+| ------------ | ------------: | -------------: | -----------: | ------------: |
+| 1            |       7.477 s |        2.479 s |     12.136 s |       3.912 s |
+| 2            |       7.651 s |        2.490 s |     10.885 s |       3.580 s |
+| 3            |       7.191 s |        2.777 s |     10.028 s |       4.103 s |
+| **Mean**     |   **7.440 s** |    **2.582 s** | **11.016 s** |   **3.865 s** |
+| **Median**   |   **7.477 s** |    **2.490 s** | **10.885 s** |   **3.912 s** |
 
 Mean savings were **4.858 seconds setup** and **7.151 seconds full export**
 (64.9% lower full duration). All six measured exports and their six warm-ups
@@ -202,16 +202,16 @@ One warm-up completed in 25.812 seconds (21.552 seconds through Next), then
 exactly five exports were measured sequentially. The warm-up is excluded from
 the statistics, and no measured samples were discarded or replaced.
 
-| Run | CPU pressure before (`some avg10`) | CPU pressure after | Setup through **Next** | Full source task |
-| --- | ---: | ---: | ---: | ---: |
-| 1 | 51.79% | 81.45% | 19.582 s | 25.000 s |
-| 2 | 62.44% | 82.50% | 17.528 s | 23.518 s |
-| 3 | 69.98% | 84.16% | 21.111 s | 30.270 s |
-| 4 | 86.23% | 85.35% | 31.139 s | 35.902 s |
-| 5 | 38.46% | 72.72% | 12.929 s | 18.188 s |
-| **Mean** | — | — | **20.458 s** | **26.576 s** |
-| **Median** | — | — | **19.582 s** | **25.000 s** |
-| **Range** | — | — | **12.929–31.139 s** | **18.188–35.902 s** |
+| Run        | CPU pressure before (`some avg10`) | CPU pressure after | Setup through **Next** |    Full source task |
+| ---------- | ---------------------------------: | -----------------: | ---------------------: | ------------------: |
+| 1          |                             51.79% |             81.45% |               19.582 s |            25.000 s |
+| 2          |                             62.44% |             82.50% |               17.528 s |            23.518 s |
+| 3          |                             69.98% |             84.16% |               21.111 s |            30.270 s |
+| 4          |                             86.23% |             85.35% |               31.139 s |            35.902 s |
+| 5          |                             38.46% |             72.72% |               12.929 s |            18.188 s |
+| **Mean**   |                                  — |                  — |           **20.458 s** |        **26.576 s** |
+| **Median** |                                  — |                  — |           **19.582 s** |        **25.000 s** |
+| **Range**  |                                  — |                  — |    **12.929–31.139 s** | **18.188–35.902 s** |
 
 Full duration uses a monotonic timer around `runWorkflowTask`, ending after
 the task returns with its registered ZIP artifact, including browser cleanup.
@@ -253,11 +253,11 @@ Four runs from one saved local release workflow's development history on
 2026-10-16 produced these setup durations:
 
 | Run (UTC) | Duration |
-| --- | ---: |
-| 09:28:30 | 19.206 s |
-| 11:19:58 | 50.436 s |
-| 11:31:35 | 33.473 s |
-| 11:38:18 | 23.645 s |
+| --------- | -------: |
+| 09:28:30  | 19.206 s |
+| 11:19:58  | 50.436 s |
+| 11:31:35  | 33.473 s |
+| 11:38:18  | 23.645 s |
 
 - Median: **28.559 s** (recorded as 28.6 s)
 - Mean: 31.69 s
@@ -398,19 +398,19 @@ Playwright 1.62.1 full Chromium headless setup reached **Next** in **27.624
 seconds**. The harness stopped at the click, before Construct's internal export
 preparation and ZIP download. It ran without Xvfb. The target remains unmet.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 15 ms |
-| Browser binary check | 2 ms |
-| Browser initialization | 1.553 s |
-| Construct account API authentication | 846 ms |
-| Initial document ready | 555 ms |
-| Authentication setup | 1.560 s |
-| Auth reload | 219 ms |
-| Project picker ready | 4.975 s |
-| File chooser opened | 59 ms |
+| Phase                                    | Duration |
+| ---------------------------------------- | -------: |
+| Playwright package resolution            |    15 ms |
+| Browser binary check                     |     2 ms |
+| Browser initialization                   |  1.553 s |
+| Construct account API authentication     |   846 ms |
+| Initial document ready                   |   555 ms |
+| Authentication setup                     |  1.560 s |
+| Auth reload                              |   219 ms |
+| Project picker ready                     |  4.975 s |
+| File chooser opened                      |    59 ms |
 | Project open, including picker readiness | 16.001 s |
-| Web export options through **Next** | 6.026 s |
+| Web export options through **Next**      |  6.026 s |
 
 The auth reload confirms that pre-navigation `localforage` seeding did not
 apply; the task used its existing session-injection and reload fallback. The
@@ -429,26 +429,26 @@ after this run the host showed a load average of 11.24 with 2 CPUs visible, and
 CPU pressure `some avg10` was 80.09%. Host contention likely contributed to the
 slow phases; this is an inference from the post-run host snapshot.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 16 ms |
-| Browser binary check | 6 ms |
-| Browser initialization | 2.835 s |
-| Construct account API authentication | 971 ms |
-| Initial document ready | 557 ms |
-| Authentication setup | 1.772 s |
-| Auth reload | 241 ms |
-| Project picker ready | 6.790 s |
-| File chooser opened | 1.683 s |
-| File selection completed | 9.195 s |
-| Project loading dialog appeared | 60 ms |
-| Project loading dialog dismissed | 15.308 s |
-| Project open, including picker and loading | 33.045 s |
-| Export menu selection | 13.131 s |
-| Export platform selection | 12.170 s |
-| Standard export options selection | 5.937 s |
-| Web export options through **Next** | 31.241 s |
-| Setup through **Next** | **71.730 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |        16 ms |
+| Browser binary check                       |         6 ms |
+| Browser initialization                     |      2.835 s |
+| Construct account API authentication       |       971 ms |
+| Initial document ready                     |       557 ms |
+| Authentication setup                       |      1.772 s |
+| Auth reload                                |       241 ms |
+| Project picker ready                       |      6.790 s |
+| File chooser opened                        |      1.683 s |
+| File selection completed                   |      9.195 s |
+| Project loading dialog appeared            |        60 ms |
+| Project loading dialog dismissed           |     15.308 s |
+| Project open, including picker and loading |     33.045 s |
+| Export menu selection                      |     13.131 s |
+| Export platform selection                  |     12.170 s |
+| Standard export options selection          |      5.937 s |
+| Web export options through **Next**        |     31.241 s |
+| Setup through **Next**                     | **71.730 s** |
 
 These phase timers also overlap their parent timers and should not be summed.
 
@@ -467,51 +467,51 @@ unmet. A post-run host snapshot showed CPU pressure `some avg10` at 23.21%; the
 no matching host snapshot, so the difference does not isolate the auth-order
 change.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 4 ms |
-| Browser binary check | 1 ms |
-| Browser initialization | 1.090 s |
-| Initial document ready | 304 ms |
-| Construct account API authentication | 1.336 s |
-| Authentication setup | 3.106 s |
-| Auth reload | 352 ms |
-| Project picker ready | 2.107 s |
-| File chooser opened | 67 ms |
-| File selection completed | 1.214 s |
-| Project loading dialog appeared | 2.011 s |
-| Project loading dialog dismissed | 6.367 s |
-| Project open, including picker and loading | 11.768 s |
-| Export menu selection | 1.100 s |
-| Export platform selection | 2.882 s |
-| Standard export options selection | 988 ms |
-| Web export options through **Next** | 4.970 s |
-| Setup through **Next** | **21.901 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |         4 ms |
+| Browser binary check                       |         1 ms |
+| Browser initialization                     |      1.090 s |
+| Initial document ready                     |       304 ms |
+| Construct account API authentication       |      1.336 s |
+| Authentication setup                       |      3.106 s |
+| Auth reload                                |       352 ms |
+| Project picker ready                       |      2.107 s |
+| File chooser opened                        |        67 ms |
+| File selection completed                   |      1.214 s |
+| Project loading dialog appeared            |      2.011 s |
+| Project loading dialog dismissed           |      6.367 s |
+| Project open, including picker and loading |     11.768 s |
+| Export menu selection                      |      1.100 s |
+| Export platform selection                  |      2.882 s |
+| Standard export options selection          |       988 ms |
+| Web export options through **Next**        |      4.970 s |
+| Setup through **Next**                     | **21.901 s** |
 
 A repeat with this same code path reached **Next in 30.018 seconds**. Its
 post-run CPU pressure `some avg10` was 79.66%, which is consistent with host
 contention contributing to the variance, though not proof of the cause.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 1 ms |
-| Browser binary check | 1 ms |
-| Browser initialization | 726 ms |
-| Initial document ready | 433 ms |
-| Construct account API authentication | 1.251 s |
-| Authentication setup | 2.452 s |
-| Auth reload | 191 ms |
-| Project picker ready | 2.757 s |
-| File chooser opened | 127 ms |
-| File selection completed | 3.836 s |
-| Project loading dialog appeared | 196 ms |
-| Project loading dialog dismissed | 7.384 s |
-| Project open, including picker and loading | 14.311 s |
-| Export menu selection | 6.212 s |
-| Export platform selection | 3.711 s |
-| Standard export options selection | 1.501 s |
-| Web export options through **Next** | 11.428 s |
-| Setup through **Next** | **30.018 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |         1 ms |
+| Browser binary check                       |         1 ms |
+| Browser initialization                     |       726 ms |
+| Initial document ready                     |       433 ms |
+| Construct account API authentication       |      1.251 s |
+| Authentication setup                       |      2.452 s |
+| Auth reload                                |       191 ms |
+| Project picker ready                       |      2.757 s |
+| File chooser opened                        |       127 ms |
+| File selection completed                   |      3.836 s |
+| Project loading dialog appeared            |       196 ms |
+| Project loading dialog dismissed           |      7.384 s |
+| Project open, including picker and loading |     14.311 s |
+| Export menu selection                      |      6.212 s |
+| Export platform selection                  |      3.711 s |
+| Standard export options selection          |      1.501 s |
+| Web export options through **Next**        |     11.428 s |
+| Setup through **Next**                     | **30.018 s** |
 
 An experiment started the direct account-API request while Construct's
 `localforage` session store initialized, then checked whether the copied profile
@@ -519,26 +519,26 @@ already had a session before using that request. Typecheck passed. It reached
 **Next in 30.773 seconds**; post-run CPU pressure `some avg10` was 82.69%, so
 this result is not a controlled comparison with the preceding run.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 1 ms |
-| Browser binary check | 1 ms |
-| Browser initialization | 618 ms |
-| Initial document ready | 417 ms |
-| Construct account API authentication | 1.278 s |
-| Authentication setup | 1.633 s |
-| Auth reload | 317 ms |
-| Project picker ready | 4.230 s |
-| File chooser opened | 109 ms |
-| File selection completed | 311 ms |
-| Project loading dialog appeared | 164 ms |
-| Project loading dialog dismissed | 12.513 s |
-| Project open, including picker and loading | 17.332 s |
-| Export menu selection | 3.939 s |
-| Export platform selection | 4.320 s |
-| Standard export options selection | 1.658 s |
-| Web export options through **Next** | 9.922 s |
-| Setup through **Next** | **30.773 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |         1 ms |
+| Browser binary check                       |         1 ms |
+| Browser initialization                     |       618 ms |
+| Initial document ready                     |       417 ms |
+| Construct account API authentication       |      1.278 s |
+| Authentication setup                       |      1.633 s |
+| Auth reload                                |       317 ms |
+| Project picker ready                       |      4.230 s |
+| File chooser opened                        |       109 ms |
+| File selection completed                   |       311 ms |
+| Project loading dialog appeared            |       164 ms |
+| Project loading dialog dismissed           |     12.513 s |
+| Project open, including picker and loading |     17.332 s |
+| Export menu selection                      |      3.939 s |
+| Export platform selection                  |      4.320 s |
+| Standard export options selection          |      1.658 s |
+| Web export options through **Next**        |      9.922 s |
+| Setup through **Next**                     | **30.773 s** |
 
 ## API request overlapped with navigation
 
@@ -555,26 +555,26 @@ snapshot showed CPU pressure `some avg10` at 18.08%, lower than the preceding
 82.69% snapshot, so improvement from the earlier run cannot be attributed solely
 to the change.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 0 ms |
-| Browser binary check | 0 ms |
-| Browser initialization | 554 ms |
-| Initial document ready | 310 ms |
-| Construct account API authentication | 1.167 s |
-| Authentication setup | 1.263 s |
-| Auth reload | 330 ms |
-| Project picker ready | 3.498 s |
-| File chooser opened | 1.489 s |
-| File selection completed | 87 ms |
-| Project loading dialog appeared | 12 ms |
-| Project loading dialog dismissed | 6.005 s |
-| Project open, including picker and loading | 11.093 s |
-| Export menu selection | 1.159 s |
-| Export platform selection | 2.589 s |
-| Standard export options selection | 543 ms |
-| Web export options through **Next** | 4.294 s |
-| Setup through **Next** | **18.032 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |         0 ms |
+| Browser binary check                       |         0 ms |
+| Browser initialization                     |       554 ms |
+| Initial document ready                     |       310 ms |
+| Construct account API authentication       |      1.167 s |
+| Authentication setup                       |      1.263 s |
+| Auth reload                                |       330 ms |
+| Project picker ready                       |      3.498 s |
+| File chooser opened                        |      1.489 s |
+| File selection completed                   |        87 ms |
+| Project loading dialog appeared            |        12 ms |
+| Project loading dialog dismissed           |      6.005 s |
+| Project open, including picker and loading |     11.093 s |
+| Export menu selection                      |      1.159 s |
+| Export platform selection                  |      2.589 s |
+| Standard export options selection          |       543 ms |
+| Web export options through **Next**        |      4.294 s |
+| Setup through **Next**                     | **18.032 s** |
 
 A reload-free authentication attempt used `page.exposeFunction` and a
 `localforage` proxy. Although the account API result was available to the page
@@ -584,52 +584,52 @@ session-injection and reload fallback still ran. The attempt reached **Next in
 post-run CPU pressure `some avg10` was 27.09%; the result is not a controlled
 comparison with the 18.032-second run.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 3 ms |
-| Browser binary check | 1 ms |
-| Browser initialization | 747 ms |
-| Initial document ready | 522 ms |
-| Construct account API authentication | 1.995 s |
-| Authentication setup | 1.729 s |
-| Auth reload | 361 ms |
-| Project picker ready | 4.006 s |
-| File chooser opened | 846 ms |
-| File selection completed | 3.611 s |
-| Project loading dialog appeared | 48 ms |
-| Project loading dialog dismissed | 9.122 s |
-| Project open, including picker and loading | 17.639 s |
-| Export menu selection | 2.057 s |
-| Export platform selection | 5.305 s |
-| Standard export options selection | 695 ms |
-| Web export options through **Next** | 8.057 s |
-| Setup through **Next** | **29.469 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |         3 ms |
+| Browser binary check                       |         1 ms |
+| Browser initialization                     |       747 ms |
+| Initial document ready                     |       522 ms |
+| Construct account API authentication       |      1.995 s |
+| Authentication setup                       |      1.729 s |
+| Auth reload                                |       361 ms |
+| Project picker ready                       |      4.006 s |
+| File chooser opened                        |       846 ms |
+| File selection completed                   |      3.611 s |
+| Project loading dialog appeared            |        48 ms |
+| Project loading dialog dismissed           |      9.122 s |
+| Project open, including picker and loading |     17.639 s |
+| Export menu selection                      |      2.057 s |
+| Export platform selection                  |      5.305 s |
+| Standard export options selection          |       695 ms |
+| Web export options through **Next**        |      8.057 s |
+| Setup through **Next**                     | **29.469 s** |
 
 After removing the unsuccessful seed hook, the current auth-overlap flow was
 measured again under full Chromium headless. It reached **Next in 20.955
 seconds**. CPU pressure `some avg10` was 8.31% before the run and 20.20%
 afterward, so host load increased while it ran. The target remains unmet.
 
-| Phase | Duration |
-| --- | ---: |
-| Playwright package resolution | 1 ms |
-| Browser binary check | 0 ms |
-| Browser initialization | 575 ms |
-| Initial document ready | 330 ms |
-| Construct account API authentication | 1.059 s |
-| Authentication setup | 1.123 s |
-| Auth reload | 352 ms |
-| Project picker ready | 2.446 s |
-| File chooser opened | 67 ms |
-| File selection completed | 325 ms |
-| Project loading dialog appeared | 80 ms |
-| Project loading dialog dismissed | 10.631 s |
-| Project open, including picker and loading | 13.553 s |
-| Export menu selection | 1.051 s |
-| Export platform selection | 3.312 s |
-| Standard export options selection | 537 ms |
-| Web export options through **Next** | 4.904 s |
-| Setup through **Next** | **20.955 s** |
+| Phase                                      |     Duration |
+| ------------------------------------------ | -----------: |
+| Playwright package resolution              |         1 ms |
+| Browser binary check                       |         0 ms |
+| Browser initialization                     |       575 ms |
+| Initial document ready                     |       330 ms |
+| Construct account API authentication       |      1.059 s |
+| Authentication setup                       |      1.123 s |
+| Auth reload                                |       352 ms |
+| Project picker ready                       |      2.446 s |
+| File chooser opened                        |        67 ms |
+| File selection completed                   |       325 ms |
+| Project loading dialog appeared            |        80 ms |
+| Project loading dialog dismissed           |     10.631 s |
+| Project open, including picker and loading |     13.553 s |
+| Export menu selection                      |      1.051 s |
+| Export platform selection                  |      3.312 s |
+| Standard export options selection          |       537 ms |
+| Web export options through **Next**        |      4.904 s |
+| Setup through **Next**                     | **20.955 s** |
 
 ## Disposable persistent-profile experiment
 
@@ -642,22 +642,22 @@ environment-dependent. The profile stored the test session under `/tmp` and is
 deleted after this experiment; persistent-profile behavior is not enabled by
 default.
 
-| Warm-run phase | Duration |
-| --- | ---: |
-| Browser initialization | 448 ms |
-| Initial document ready | 163 ms |
-| Authentication setup, existing session | 432 ms |
-| Project picker ready | 1.258 s |
-| File chooser opened | 96 ms |
-| File selection completed | 110 ms |
-| Project loading dialog appeared | 78 ms |
-| Project loading dialog dismissed | 7.262 s |
-| Project open, including picker and loading | 8.814 s |
-| Export menu selection | 966 ms |
-| Export platform selection | 3.149 s |
-| Standard export options selection | 437 ms |
-| Web export options through **Next** | 4.558 s |
-| Setup through **Next** | **14.882 s** |
+| Warm-run phase                             |     Duration |
+| ------------------------------------------ | -----------: |
+| Browser initialization                     |       448 ms |
+| Initial document ready                     |       163 ms |
+| Authentication setup, existing session     |       432 ms |
+| Project picker ready                       |      1.258 s |
+| File chooser opened                        |        96 ms |
+| File selection completed                   |       110 ms |
+| Project loading dialog appeared            |        78 ms |
+| Project loading dialog dismissed           |      7.262 s |
+| Project open, including picker and loading |      8.814 s |
+| Export menu selection                      |       966 ms |
+| Export platform selection                  |      3.149 s |
+| Standard export options selection          |       437 ms |
+| Web export options through **Next**        |      4.558 s |
+| Setup through **Next**                     | **14.882 s** |
 
 This default latest-editor warm run still missed the target. The same profile
 was later tested with the fixture-matching editor release, where fully warmed
@@ -671,22 +671,22 @@ repeat still spent 6.312 seconds in the project-loading dialog, with 1.587
 seconds to reach the picker and 1.967 seconds through export options. This
 release-matching warm-profile path also did not meet the target.
 
-| Warm r397 repeat phase | Duration |
-| --- | ---: |
-| Browser initialization | 633 ms |
-| Initial document ready | 536 ms |
-| Authentication setup, existing session | 516 ms |
-| Project picker ready | 1.587 s |
-| File chooser opened | 34 ms |
-| File selection completed | 209 ms |
-| Project loading dialog appeared | 62 ms |
-| Project loading dialog dismissed | 6.312 s |
-| Project open, including picker and loading | 8.212 s |
-| Export menu selection | 498 ms |
-| Export platform selection | 971 ms |
-| Standard export options selection | 493 ms |
-| Web export options through **Next** | 1.967 s |
-| Setup through **Next** | **12.443 s** |
+| Warm r397 repeat phase                     |     Duration |
+| ------------------------------------------ | -----------: |
+| Browser initialization                     |       633 ms |
+| Initial document ready                     |       536 ms |
+| Authentication setup, existing session     |       516 ms |
+| Project picker ready                       |      1.587 s |
+| File chooser opened                        |        34 ms |
+| File selection completed                   |       209 ms |
+| Project loading dialog appeared            |        62 ms |
+| Project loading dialog dismissed           |      6.312 s |
+| Project open, including picker and loading |      8.212 s |
+| Export menu selection                      |       498 ms |
+| Export platform selection                  |       971 ms |
+| Standard export options selection          |       493 ms |
+| Web export options through **Next**        |      1.967 s |
+| Setup through **Next**                     | **12.443 s** |
 
 After this trial, a default latest-editor run on the same warm profile took
 **19.191 seconds** to reach **Next**. It spent 7.272 seconds with the project
@@ -705,21 +705,21 @@ profile. No Construct login UI was used. The first repeat began with CPU
 pressure `some avg10` at 4.39%; the second began after a 23.93% snapshot. The
 host was not otherwise normalized.
 
-| Phase | Run 1 (9.641 s) | Run 2 (8.788 s) | Run 3 (9.091 s) |
-| --- | ---: | ---: | ---: |
-| Browser initialization | 504 ms | 505 ms | 515 ms |
-| Initial document ready | 361 ms | 324 ms | 423 ms |
-| Authentication setup, existing session | 452 ms | 395 ms | 505 ms |
-| Project picker ready | 1.163 s | 1.141 s | 1.156 s |
-| File chooser opened | 127 ms | 49 ms | 66 ms |
-| File selection completed | 160 ms | 114 ms | 256 ms |
-| Project loading dialog dismissed | 4.840 s | 4.099 s | 4.176 s |
-| Project open, including picker and loading | 6.335 s | 5.461 s | 5.711 s |
-| Export menu selection | 437 ms | 523 ms | 508 ms |
-| Export platform selection | 679 ms | 666 ms | 584 ms |
-| Standard export options selection | 315 ms | 422 ms | 298 ms |
-| Web export options through **Next** | 1.435 s | 1.615 s | 1.390 s |
-| Setup through **Next** | **9.641 s** | **8.788 s** | **9.091 s** |
+| Phase                                      | Run 1 (9.641 s) | Run 2 (8.788 s) | Run 3 (9.091 s) |
+| ------------------------------------------ | --------------: | --------------: | --------------: |
+| Browser initialization                     |          504 ms |          505 ms |          515 ms |
+| Initial document ready                     |          361 ms |          324 ms |          423 ms |
+| Authentication setup, existing session     |          452 ms |          395 ms |          505 ms |
+| Project picker ready                       |         1.163 s |         1.141 s |         1.156 s |
+| File chooser opened                        |          127 ms |           49 ms |           66 ms |
+| File selection completed                   |          160 ms |          114 ms |          256 ms |
+| Project loading dialog dismissed           |         4.840 s |         4.099 s |         4.176 s |
+| Project open, including picker and loading |         6.335 s |         5.461 s |         5.711 s |
+| Export menu selection                      |          437 ms |          523 ms |          508 ms |
+| Export platform selection                  |          679 ms |          666 ms |          584 ms |
+| Standard export options selection          |          315 ms |          422 ms |          298 ms |
+| Web export options through **Next**        |         1.435 s |         1.615 s |         1.390 s |
+| Setup through **Next**                     |     **9.641 s** |     **8.788 s** |     **9.091 s** |
 
 These runs establish a repeatable sub-10 path when the matching editor assets
 and Construct session are already warm. They do not establish sub-10 setup for
@@ -749,39 +749,39 @@ still contended. This confirms that cached editor assets without a saved login
 did not reach 10 seconds in the observed runs; a low-contention repeat would be
 needed to isolate how much the host contributed.
 
-| Phase | Duration |
-| --- | ---: |
-| Browser initialization | 544 ms |
-| Initial document ready | 199 ms |
-| Construct account API authentication | 1.448 s |
-| Authentication setup, including injection and reload | 1.673 s |
-| Project picker ready | 1.037 s |
-| File chooser opened | 76 ms |
-| File selection completed | 249 ms |
-| Project loading dialog dismissed | 6.434 s |
-| Project open, including picker and loading | 7.884 s |
-| Export menu selection | 617 ms |
-| Export platform selection | 747 ms |
-| Standard export options selection | 442 ms |
-| Web export options through **Next** | 1.816 s |
-| Setup through **Next** | **12.625 s** |
+| Phase                                                |     Duration |
+| ---------------------------------------------------- | -----------: |
+| Browser initialization                               |       544 ms |
+| Initial document ready                               |       199 ms |
+| Construct account API authentication                 |      1.448 s |
+| Authentication setup, including injection and reload |      1.673 s |
+| Project picker ready                                 |      1.037 s |
+| File chooser opened                                  |        76 ms |
+| File selection completed                             |       249 ms |
+| Project loading dialog dismissed                     |      6.434 s |
+| Project open, including picker and loading           |      7.884 s |
+| Export menu selection                                |       617 ms |
+| Export platform selection                            |       747 ms |
+| Standard export options selection                    |       442 ms |
+| Web export options through **Next**                  |      1.816 s |
+| Setup through **Next**                               | **12.625 s** |
 
-| Second repeat phase | Duration |
-| --- | ---: |
-| Browser initialization | 1.131 s |
-| Initial document ready | 489 ms |
-| Construct account API authentication | 1.596 s |
-| Authentication setup, including injection and reload | 1.212 s |
-| Project picker ready | 1.095 s |
-| File chooser opened | 84 ms |
-| File selection completed | 321 ms |
-| Project loading dialog dismissed | 5.853 s |
-| Project open, including picker and loading | 7.430 s |
-| Export menu selection | 620 ms |
-| Export platform selection | 585 ms |
-| Standard export options selection | 331 ms |
-| Web export options through **Next** | 1.540 s |
-| Setup through **Next** | **12.476 s** |
+| Second repeat phase                                  |     Duration |
+| ---------------------------------------------------- | -----------: |
+| Browser initialization                               |      1.131 s |
+| Initial document ready                               |       489 ms |
+| Construct account API authentication                 |      1.596 s |
+| Authentication setup, including injection and reload |      1.212 s |
+| Project picker ready                                 |      1.095 s |
+| File chooser opened                                  |        84 ms |
+| File selection completed                             |       321 ms |
+| Project loading dialog dismissed                     |      5.853 s |
+| Project open, including picker and loading           |      7.430 s |
+| Export menu selection                                |       620 ms |
+| Export platform selection                            |       585 ms |
+| Standard export options selection                    |       331 ms |
+| Web export options through **Next**                  |      1.540 s |
+| Setup through **Next**                               | **12.476 s** |
 
 ## Early Ctrl+O experiment (reverted)
 
@@ -932,19 +932,18 @@ setup through **Next**, Construct's export preparation and ZIP download, and
 artifact registration; it excludes subsequent workflow steps such as archive
 extraction.
 
-| Run | Pre-run CPU pressure (`some avg10`) | Setup through **Next** | Full source task |
-| --- | ---: | ---: | ---: |
-| 1 | 4.43% | 10.374 s | 13.597 s |
-| 2 | 34.27% | 10.258 s | 13.357 s |
-| 3 | 41.88% | 10.574 s | 20.989 s |
-| **Mean** | — | **10.402 s** | **15.981 s** |
+| Run      | Pre-run CPU pressure (`some avg10`) | Setup through **Next** | Full source task |
+| -------- | ----------------------------------: | ---------------------: | ---------------: |
+| 1        |                               4.43% |               10.374 s |         13.597 s |
+| 2        |                              34.27% |               10.258 s |         13.357 s |
+| 3        |                              41.88% |               10.574 s |         20.989 s |
+| **Mean** |                                   — |           **10.402 s** |     **15.981 s** |
 
 The third run took longer after **Next** than the first two. The first run
 started under lower CPU pressure; the later two started under elevated
 pressure. These are local observations, not a controlled benchmark. The
 full-export mean is specific to this small fixture and should not be treated
 as a universal project export duration.
-
 
 ## Export shortcut investigation
 
@@ -958,12 +957,12 @@ same r397 fixture, Node 24.19.0, full Chromium headless, and the reproduction
 command above. Every run verified a 389,254-byte ZIP containing a readable
 root index.html. Host CPU pressure varied substantially.
 
-| Invocation order | Opener | CPU pressure before → after | Setup | Full export | Opener dispatch |
-| --- | --- | --- | ---: | ---: | ---: |
-| 1 | Menu | 16.79 → 90.25 | 24.939 s | 36.398 s | 6.813 s |
-| 2 | F6 | 56.40 → 69.18 | 13.288 s | 17.040 s | 0.009 s |
-| 3 | Menu | 30.75 → 58.27 | 10.703 s | 14.009 s | 0.551 s |
-| 4 | F6 | 69.02 → 84.86 | 23.058 s | 25.829 s | 0.028 s |
+| Invocation order | Opener | CPU pressure before → after |    Setup | Full export | Opener dispatch |
+| ---------------- | ------ | --------------------------- | -------: | ----------: | --------------: |
+| 1                | Menu   | 16.79 → 90.25               | 24.939 s |    36.398 s |         6.813 s |
+| 2                | F6     | 56.40 → 69.18               | 13.288 s |    17.040 s |         0.009 s |
+| 3                | Menu   | 30.75 → 58.27               | 10.703 s |    14.009 s |         0.551 s |
+| 4                | F6     | 69.02 → 84.86               | 23.058 s |    25.829 s |         0.028 s |
 
 These full samples do not prove an overall speedup: the menu setup mean was
 17.821 s and the F6 setup mean was 18.173 s. The full means were 25.204 s and
@@ -976,12 +975,12 @@ Each opener was followed by Cancel; order alternated between pairs. The
 instrumented run's setup/full durations include these extra interactions and
 are not ordinary-export measurements.
 
-| Pair | Order | Menu opener | F6 opener | Saving |
-| --- | --- | ---: | ---: | ---: |
-| 1 | Menu, F6 | 844 ms | 44 ms | 800 ms |
-| 2 | F6, Menu | 469 ms | 54 ms | 415 ms |
-| 3 | Menu, F6 | 461 ms | 35 ms | 426 ms |
-| 4 | F6, Menu | 551 ms | 55 ms | 496 ms |
+| Pair | Order    | Menu opener | F6 opener | Saving |
+| ---- | -------- | ----------: | --------: | -----: |
+| 1    | Menu, F6 |      844 ms |     44 ms | 800 ms |
+| 2    | F6, Menu |      469 ms |     54 ms | 415 ms |
+| 3    | Menu, F6 |      461 ms |     35 ms | 426 ms |
+| 4    | F6, Menu |      551 ms |     55 ms | 496 ms |
 
 Mean isolated saving was **534.25 ms**, with all four F6 samples below all
 four menu samples. CPU pressure was 29.56 before and 53.67 after. F6 avoids

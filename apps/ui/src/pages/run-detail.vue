@@ -25,8 +25,8 @@
                 @click="copyRunId"
               >
                 <code>#{{ shortId }}</code
-                ><i :class="runIdCopied ? 'pi pi-check' : 'pi pi-copy'" /></button
-              >
+                ><i :class="runIdCopied ? 'pi pi-check' : 'pi pi-copy'" />
+              </button>
             </div>
           </div>
         </div>
@@ -725,8 +725,7 @@ const applyFailureFix = async (fix: RunFailureFix) => {
       name: "Connections",
       ...(connectionId ? { params: { connectionId } } : {}),
     });
-  }
-  else if (fix.kind === "builds") void router.push({ name: "WorkflowBuilds", params });
+  } else if (fix.kind === "builds") void router.push({ name: "WorkflowBuilds", params });
   else if (fix.kind === "deployment" && fix.destinationId)
     void router.push(
       fix.slotId

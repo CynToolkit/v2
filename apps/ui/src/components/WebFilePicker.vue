@@ -76,8 +76,19 @@
           @keydown.enter="createDirectory"
           @keydown.esc="creatingDirectory = false"
         />
-        <Button label="Create" size="small" :disabled="!newDirectoryName.trim()" @click="createDirectory" />
-        <Button label="Cancel" size="small" text severity="secondary" @click="creatingDirectory = false" />
+        <Button
+          label="Create"
+          size="small"
+          :disabled="!newDirectoryName.trim()"
+          @click="createDirectory"
+        />
+        <Button
+          label="Cancel"
+          size="small"
+          text
+          severity="secondary"
+          @click="creatingDirectory = false"
+        />
       </div>
       <div class="picker-body">
         <nav class="roots-sidebar" aria-label="Locations">
@@ -306,8 +317,7 @@ const createDirectory = async () => {
   if (r.type === "success") {
     creatingDirectory.value = false;
     await loadDirectory();
-  }
-  else errorMessage.value = r.ipcError || "Unable to create directory";
+  } else errorMessage.value = r.ipcError || "Unable to create directory";
 };
 const ensureExtension = (name: string) => {
   const ext = options.value?.filters?.[0]?.extensions?.[0];

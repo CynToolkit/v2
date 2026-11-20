@@ -164,7 +164,6 @@ watch(isReady, (ready) => {
 });
 
 handle("log:message", async (event, { value, send }) => {
-
   // Validate that value exists and is an object before accessing properties
   if (!value || typeof value !== "object") {
     console.warn("log:message: Invalid value received:", {
