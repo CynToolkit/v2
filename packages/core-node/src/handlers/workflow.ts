@@ -45,6 +45,7 @@ import { testConnection } from "./connection-test";
 import { applyRetention } from "../release/apply-retention";
 import { dispatchRunNotifications } from "../release/notifications";
 import { PreflightFailedError, runPreflights, type PreflightOutcome } from "../release/preflight";
+import type { ExecuteWorkflowOptionsRelease } from "./workflow.types";
 
 const host = () => ({ platform: process.platform, architecture: process.arch });
 const registry = () => buildCoreReleaseRegistry();
@@ -231,7 +232,7 @@ const historyArtifacts = (
   });
 
 export interface ExecuteWorkflowOptions {
-  release?: { version?: string; description?: string };
+  release?: ExecuteWorkflowOptionsRelease;
   workflowConfig?: ReleaseConfig;
   env?: WorkflowEnvironment;
   connectionValues?: WorkflowConnectionValues;

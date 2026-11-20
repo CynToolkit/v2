@@ -2,6 +2,7 @@ import type { WorkflowTask } from "@pipelab/workflow-runtime";
 import * as v from "valibot";
 import { tauri, type TauriExecutionContext } from "./tauri";
 import { defaultTauriConfig } from "./utils";
+import type { ProviderExecutables } from "@pipelab/plugin-core";
 
 const d = defaultTauriConfig;
 // Each input keeps its default when it is unset or has an unexpected type.
@@ -39,7 +40,7 @@ const tauriInputsSchema = v.object({
 
 export interface TauriWorkflowTaskServices {
   context: TauriExecutionContext["context"];
-  executables: { node: string; pnpm: string };
+  executables: ProviderExecutables;
   workflowCachePath: string;
 }
 

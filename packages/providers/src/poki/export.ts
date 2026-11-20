@@ -8,6 +8,7 @@ import { writeFile, cp, readFile } from "node:fs/promises";
 import { findPokiConfigRoot } from "./auth";
 import type { ConnectionTestContext, PreflightContext, PreflightResult } from "@pipelab/shared";
 import { failed, unverifiable, verified } from "../preflight";
+import type { PokiTaskServicesExecutables } from "./export.types";
 
 const loginCommand = (account?: string) =>
   `pipelab settings integrations poki login${account ? ` ${account}` : ""}`;
@@ -20,7 +21,7 @@ export const POKI_CLI_VERSION = "0.1.19";
 
 export interface PokiTaskServices {
   context: PipelabContext;
-  executables: { node: string };
+  executables: PokiTaskServicesExecutables;
 }
 
 export const createPokiUploadTask =

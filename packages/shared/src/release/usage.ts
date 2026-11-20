@@ -1,4 +1,11 @@
 import type { ArtifactRef, ReleaseConfig, ReleaseOutputRef, ReleasePlan } from "./types";
+import type {
+  IsSourceRefResult,
+  UsedValueSelectionProducers,
+  UsedValueSelectionDestinations,
+  UsedValueDefinitionsSources,
+  ForEachUsedValue,
+} from "./usage.types";
 
 /**
  * Keys (`buildId:targetId`) of the build outputs something active reads: an enabled deployment slot
@@ -26,7 +33,7 @@ export const usedTargetKeys = (config: ReleaseConfig): Set<string> => {
 /** Id prefix of producers the planner inserts itself (automatic transforms). */
 export const AUTOMATIC_PRODUCER_PREFIX = "__auto__";
 
-const isSourceRef = (ref: ArtifactRef): ref is { source: true } =>
+const isSourceRef = (ref: ArtifactRef): ref is IsSourceRefResult =>
   "source" in ref && ref.source === true;
 
 /**
@@ -67,16 +74,8 @@ export const plannedUsedTargetKeys = (plan: ReleasePlan): Set<string> =>
  * satisfies it; {@link usedSelectionFromConfig} is the syntactic stand-in when no plan exists.
  */
 export interface UsedValueSelection {
-  producers: ReadonlyArray<{
-    provider: string;
-    config: Record<string, unknown>;
-    targets: ReadonlyArray<{ id: string; enabled: boolean; config: Record<string, unknown> }>;
-  }>;
-  destinations: ReadonlyArray<{
-    provider: string;
-    config: Record<string, unknown>;
-    slots: ReadonlyArray<{ enabled: boolean; config: Record<string, unknown> }>;
-  }>;
+  producers: ReadonlyArray<UsedValueSelectionProducers>;
+  destinations: ReadonlyArray<UsedValueSelectionDestinations>;
 }
 
 /** Selection from the saved config alone: use only when no plan is available (see {@link usedTargetKeys}). */
@@ -108,11 +107,11 @@ interface FieldBearer<TField> {
 
 /** Field definitions a walk reads: the release registry and the renderer catalog both fit. */
 export interface UsedValueDefinitions<TField> {
-  sources: ReadonlyArray<FieldBearer<TField> & { id: string }>;
+  sources: ReadonlyArray<FieldBearer<TField> & UsedValueDefinitionsSources>;
   producers: ReadonlyArray<
     FieldBearer<TField> & {
       id: string;
-      targets: ReadonlyArray<FieldBearer<TField> & { id: string }>;
+      targets: ReadonlyArray<FieldBearer<TField> & UsedValueDefinitionsSources>;
     }
   >;
   destinations: ReadonlyArray<FieldBearer<TField> & { id: string; slotFields?: readonly TField[] }>;
@@ -124,7 +123,7 @@ export interface UsedValueDefinitions<TField> {
  * workflow uses" for values (environment bindings, Connections); callers differ only in what they
  * do with a field and its value.
  */
-export const forEachUsedValue = <TField extends { key: string }>(
+export const forEachUsedValue = <TField extends ForEachUsedValue>(
   config: ReleaseConfig,
   selection: UsedValueSelection,
   definitions: UsedValueDefinitions<TField>,

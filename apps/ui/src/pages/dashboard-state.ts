@@ -1,3 +1,8 @@
+import type {
+  ResolveSelectedProjectIdProjectsItem,
+  GetDashboardDisplayStateCounts,
+} from "./dashboard-state.types";
+
 /**
  * Auth is settled once session restoration finished: signed-out, error and validation states
  * need no subscription, while a signed-in user also needs a settled (ready/error) subscription.
@@ -15,18 +20,16 @@ export const isDashboardAuthSettled = (
 export type DashboardDisplayState = "empty" | "search-empty" | "list";
 
 export const resolveSelectedProjectId = (
-  projects: readonly { id: string }[],
+  projects: readonly ResolveSelectedProjectIdProjectsItem[],
   selectedId?: string,
 ): string | undefined => {
   if (selectedId && projects.some((project) => project.id === selectedId)) return selectedId;
   return projects[0]?.id;
 };
 
-export const getDashboardDisplayState = (counts: {
-  workflows: number;
-  brokenWorkflows: number;
-  filteredWorkflows: number;
-}): DashboardDisplayState => {
+export const getDashboardDisplayState = (
+  counts: GetDashboardDisplayStateCounts,
+): DashboardDisplayState => {
   if (counts.workflows === 0 && counts.brokenWorkflows === 0) return "empty";
   if (counts.filteredWorkflows === 0 && counts.brokenWorkflows === 0) return "search-empty";
   return "list";

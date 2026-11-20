@@ -31,16 +31,27 @@ a hidden one (a type predicate that only claims the relationship) or a much larg
 - `tauri.ts` writes `name` / `version` as top-level `Cargo.toml` keys instead of under
   `[package]`, so they have no effect. It predates this change and is unchanged.
 
-## Inline object types (repo-wide pass)
+## Inline object types
 
-The cast-removal PR named the inline object types it added (bridge results, storage info, auth
-results, WebSocket messages, cloud overview, worker rows, config documents). The rest of the
-repo still has inline object shapes in annotations, generics and return types, for example
-`Promise<{ path: string; size: number }>`, `Array<{ ... }>` and `: { a: string; b: number }`
-parameters. Convert them to named `interface`s (object shapes) or `type`s (unions,
-intersections, mapped types), per `AGENTS.md`, and define each shape once.
+The repo-wide pass is done for source files: inline object shapes in annotations, generics and
+return types now live as named interfaces in a `<module>.types.ts` next to their user (or in the
+package's existing types file). What is left:
 
-- Find them with a search for `: {`, `<{`, `Array<{` and `Promise<{` in non-test source,
-  and check the result by hand: object literals and valibot schemas are values, not types.
-- Start with `packages/providers/src` (provider inputs, `godot/export.ts`), `packages/core-node`
-  handlers and `apps/ui/src` components.
+- **Shapes that depend on a generic parameter** need a generic interface by hand (for example
+  `{ type: "success"; result: T }`, `{ value: RendererData<KEY>; send: ... }`,
+  `{ services: TServices }`): `ui/src/pages/workflow-runs-state.ts`,
+  `ui/src/composables/handlers.ts`, `ui/src/composables/websocket-client.ts`,
+  `ui/src/utils/workflow-execution-input.ts`, `core-node/src/api.ts`, `core-node/src/config.ts`,
+  `shared/src/ipc.types.ts`, `shared/src/release/usage.ts`, `shared/src/websocket.types.ts`,
+  `test-utils/src/index.ts`, `workflow-runtime/src/runtime.ts`.
+- **Files that had unrelated local formatting changes** when the pass ran, so they were skipped:
+  `ui/src/App.vue`, `ui/src/components/WebFilePicker.vue`, `ui/src/pages/run-detail.vue`.
+- **Identical shapes in different packages** that could be one shared type if the packages agree
+  on a meaning: `FsGetRootsEventRoot` (shared) and `RootsItem` (core-node fs handler),
+  `ConnectionTestInput` (shared) and `TestConnectionRequest` (core-node), the `{ getThirdPartyPath }`
+  context shape in the Construct and Electron providers, and the `ForgeResult`/`TauriResult` and
+  `ElectronTargetInputsResult`/`TauriTargetInputsResult` pairs.
+- Tests, generated files (`apps/ui/src/generated`, `database.types.ts`), `apps/website` and
+  `apps/documentation` were left out on purpose.
+- Where a type must be assignable to `Record<string, unknown>` (an interface is not), it stays a
+  `type` alias, for example `Exportc3pResult`.

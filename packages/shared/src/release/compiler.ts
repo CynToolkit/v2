@@ -16,14 +16,20 @@ import type {
 import { isSafePersistedId } from "../persisted-id";
 import type { Workflow, WorkflowStep } from "@pipelab/workflow-runtime";
 import { CORE_WORKFLOW_TASKS } from "@pipelab/workflow-runtime/task-ids";
+import type {
+  ProviderRef,
+  IsSourceRefResult,
+  CompileErrorsPlan,
+  CompileBeforeBuildHooksResult,
+} from "./compiler.types";
 
-const provider = <T extends { id: string }>(providers: T[], id: string, kind: string): T => {
+const provider = <T extends ProviderRef>(providers: T[], id: string, kind: string): T => {
   const result = providers.find((candidate) => candidate.id === id);
   if (!result) throw new Error(`Unknown release ${kind} provider: ${id}`);
   return result;
 };
 
-const isSourceRef = (ref: ArtifactRef): ref is { source: true } =>
+const isSourceRef = (ref: ArtifactRef): ref is IsSourceRefResult =>
   "source" in ref && ref.source === true;
 
 const toOutputRef = (ref: ArtifactRef): ReleaseOutputRef =>
@@ -46,7 +52,7 @@ const addArtifactDependencies = (step: WorkflowStep): WorkflowStep => {
   };
 };
 
-const compileErrors = (plan: { issues: Array<{ severity: string; message: string }> }): string[] =>
+const compileErrors = (plan: CompileErrorsPlan): string[] =>
   plan.issues.filter((issue) => issue.severity === "error").map((issue) => issue.message);
 
 const validateCompiledArtifact = (
@@ -104,7 +110,7 @@ export const compileReleasePlan = (
     producerId: string,
     input: CompiledArtifact,
     supportsHooks: boolean | undefined,
-  ): { steps: WorkflowStep[]; artifact: CompiledArtifact } => {
+  ): CompileBeforeBuildHooksResult => {
     const profile = buildProfiles.get(producerId);
     const hooks = profile?.beforeBuild?.filter((hook) => hook.enabled) ?? [];
     if (!hooks.length) return { steps: [], artifact: input };

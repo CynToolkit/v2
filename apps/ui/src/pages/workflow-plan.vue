@@ -96,12 +96,8 @@
 import { useWorkflowTab } from "../composables/workflow-header-state";
 import { computed, nextTick, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import Button from "primevue/button";
-import Message from "primevue/message";
-import { BaseEdge, Handle, MarkerType, Position, useVueFlow, VueFlow } from "@vue-flow/core";
+import { MarkerType, useVueFlow, BaseEdge, Handle, Position, VueFlow } from "@vue-flow/core";
 import type { Edge, Node } from "@vue-flow/core";
-import { Background } from "@vue-flow/background";
-import { Controls } from "@vue-flow/controls";
 import "@vue-flow/core/dist/style.css";
 import "@vue-flow/core/dist/theme-default.css";
 import "@vue-flow/controls/dist/style.css";
@@ -109,7 +105,6 @@ import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { useWorkflowDocument } from "../composables/useWorkflowDocument";
 import { useAppStore } from "../store/app";
-import { providerIconClass, providerIconImage } from "../utils/provider-icons";
 import {
   layoutPlanGraph,
   PLAN_NODE_HEIGHT,
@@ -117,6 +112,12 @@ import {
   type PlanGraphLayout,
   type PlanNodeKind,
 } from "./workflow-plan-graph";
+import type { EdgePathPoints } from "./workflow-plan.types";
+import { providerIconClass, providerIconImage } from "../utils/provider-icons";
+import { Controls } from "@vue-flow/controls";
+import { Background } from "@vue-flow/background";
+import Button from "primevue/button";
+import Message from "primevue/message";
 
 const FALLBACK_ICON = {
   source: "mdi mdi-file-code-outline",
@@ -171,7 +172,7 @@ const flowEdges = computed<Edge[]>(() =>
   })),
 );
 // Sharp corners on purpose: the points already come with right angles.
-const edgePath = (points: Array<{ x: number; y: number }>) =>
+const edgePath = (points: Array<EdgePathPoints>) =>
   points.map((point, index) => `${index ? "L" : "M"}${point.x} ${point.y}`).join(" ");
 
 let viewportReady = false;

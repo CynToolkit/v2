@@ -211,13 +211,10 @@
 import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { RouterLink, useRouter } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
-import Button from "primevue/button";
-import Message from "primevue/message";
 import Menu from "primevue/menu";
-import ReleaseFlow from "./release-flow.vue";
 import type { BuildHistoryEntry } from "@pipelab/shared";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { useAPI } from "@renderer/composables/api";
@@ -225,6 +222,10 @@ import { uiEnvironment } from "@renderer/composables/ui-runtime";
 import { useAppStore } from "@renderer/store/app";
 import { useFiles } from "@renderer/store/files";
 import { partitionWorkflowLoads } from "./workflow-load-state";
+import type { WorkflowShortcuts, DashboardShipWorkflow } from "./index.types";
+import Button from "primevue/button";
+import Message from "primevue/message";
+import ReleaseFlow from "./release-flow.vue";
 
 const router = useRouter();
 const api = useAPI();
@@ -246,12 +247,8 @@ const workflowCount = computed(() => projectWorkflows.value.length);
 const workflowEntryVersion = computed(() =>
   projectWorkflows.value.map((workflow) => `${workflow.id}:${workflow.lastModified}`).join("|"),
 );
-const workflowShortcuts = ref<Array<{ id: string; name: string; projectId: string }>>([]);
-const dashboardShipWorkflow = ref<{
-  id: string;
-  name: string;
-  projectId: string;
-}>();
+const workflowShortcuts = ref<Array<WorkflowShortcuts>>([]);
+const dashboardShipWorkflow = ref<DashboardShipWorkflow>();
 const workflowShortcutsLoading = ref(false);
 let workflowShortcutRequest = 0;
 
@@ -347,7 +344,7 @@ const onShipClick = (event: Event) => {
 };
 
 const startWorkflowCreation = () => router.push({ path: "/workflows", query: { create: "new" } });
-const shipWorkflow = (workflow: { id: string; name: string; projectId: string }) => {
+const shipWorkflow = (workflow: WorkflowShortcuts) => {
   if (workflow.projectId !== selectedProjectId.value) return;
   if (!agent.isReady.value) {
     toast.add({

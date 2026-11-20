@@ -55,9 +55,9 @@ export interface ReleaseProducerConfig {
   inputs?: ArtifactRef[];
 }
 
-export type ArtifactRef = { source: true } | { producerId: string; outputId: string };
+export type ArtifactRef = ArtifactRefSource | ArtifactRefProducer;
 
-export type ReleaseOutputRef = { source: true } | { buildId: string; targetId: string };
+export type ReleaseOutputRef = ArtifactRefSource | ReleaseOutputRefBuild;
 
 export interface ReleaseBuildProfileConfig {
   id: string;
@@ -104,9 +104,7 @@ export interface ReleaseDestinationConfig {
 }
 
 /** What makes a notification target fire. A destination trigger names a destination of the workflow. */
-export type ReleaseNotificationTrigger =
-  | { on: "success" | "failure" }
-  | { on: "destination-completed" | "destination-failed"; destinationId: string };
+export type ReleaseNotificationTrigger = ReleaseRunTrigger | ReleaseDestinationTrigger;
 
 /** A place a finished run is announced, such as a Discord channel. Runs in the engine for every host. */
 export interface ReleaseNotificationConfig {
@@ -122,9 +120,9 @@ export interface ReleaseNotificationConfig {
 /** How long a workflow keeps its runs. A rule that is absent is not applied. */
 export interface ReleaseRetentionPolicy {
   /** Run history. Pruning a run also removes its artifacts. */
-  history?: { maxRuns?: number; maxAgeDays?: number };
+  history?: ReleaseRetentionPolicyHistory;
   /** Artifacts only: the run stays in history, its files are removed. Usually stricter than history. */
-  artifacts?: { maxRuns?: number; maxAgeDays?: number };
+  artifacts?: ReleaseRetentionPolicyHistory;
   /** Failed and completed-with-errors runs are noise sooner than good ones. */
   failedMaxAgeDays?: number;
   /** Never prune the newest successful run, whatever the other rules say. Default: true. */
@@ -142,7 +140,7 @@ export interface ReleaseWorkflowSettings {
    * Which finished runs announce themselves, to the desktop (UI-started runs) and to every
    * notification target (any host). Cancelled runs never notify. Both default: true.
    */
-  notifications?: { onSuccess?: boolean; onFailure?: boolean };
+  notifications?: ReleaseWorkflowSettingsNotifications;
 }
 
 export interface ReleaseConfig {
@@ -208,10 +206,7 @@ export interface ReleaseProviderContext {
 export interface ReleaseCompileContext extends ReleaseProviderContext {
   variables?: Record<string, unknown>;
   /** Query run-environment availability without exposing credential values to compilers. */
-  getEnvironmentVariableStatus?: (name: string) => {
-    configured: boolean;
-    nonEmpty: boolean;
-  };
+  getEnvironmentVariableStatus?: (name: string) => ReleaseValueStatus;
 }
 
 export interface ReleaseValidationContext extends ReleaseProviderContext {
@@ -343,7 +338,7 @@ export interface ReleaseProducerPlanning {
   mode: "build" | "automatic";
 }
 
-export type ArtifactAcceptance = { accepted: true } | { accepted: false; reason?: string };
+export type ArtifactAcceptance = ArtifactAccepted | ArtifactRejected;
 
 export interface ReleaseAcceptanceContext extends ReleaseProviderContext {
   producer?: ReleaseProducerDefinition;
@@ -380,14 +375,7 @@ export interface ReleaseNotificationEvent {
   /** Run time in milliseconds. */
   durationMs: number;
   /** One entry per delivery the run attempted. */
-  destinations: Array<{
-    /** The workflow destination this delivery went to, so a trigger can name it. */
-    destinationId?: string;
-    name: string;
-    status: "completed" | "failed";
-    url?: string;
-    error?: string;
-  }>;
+  destinations: Array<ReleaseNotificationEventDestinations>;
   /** Redacted summary of what failed, when something did. */
   error?: string;
 }
@@ -519,8 +507,8 @@ export interface PlannedReleaseOutput {
 }
 
 export interface ReleasePlanGraph {
-  nodes: Array<{ id: string; kind: "source" | "build" | "automatic" | "destination" }>;
-  edges: Array<{ from: string; to: string }>;
+  nodes: Array<ReleasePlanGraphNodes>;
+  edges: Array<ReleasePlanGraphEdges>;
 }
 
 export interface ReleasePlan {
@@ -529,4 +517,70 @@ export interface ReleasePlan {
   destinations: ResolvedReleaseDestinationConfig[];
   issues: ValidationIssue[];
   graph: ReleasePlanGraph;
+}
+
+export interface ArtifactRefSource {
+  source: true;
+}
+
+export interface ArtifactRefProducer {
+  producerId: string;
+  outputId: string;
+}
+
+export interface ReleaseOutputRefBuild {
+  buildId: string;
+  targetId: string;
+}
+
+export interface ReleaseRunTrigger {
+  on: "success" | "failure";
+}
+
+export interface ReleaseDestinationTrigger {
+  on: "destination-completed" | "destination-failed";
+  destinationId: string;
+}
+
+export interface ReleaseRetentionPolicyHistory {
+  maxRuns?: number;
+  maxAgeDays?: number;
+}
+
+export interface ReleaseWorkflowSettingsNotifications {
+  onSuccess?: boolean;
+  onFailure?: boolean;
+}
+
+export interface ReleaseValueStatus {
+  configured: boolean;
+  nonEmpty: boolean;
+}
+
+export interface ArtifactAccepted {
+  accepted: true;
+}
+
+export interface ArtifactRejected {
+  accepted: false;
+  reason?: string;
+}
+
+export interface ReleaseNotificationEventDestinations {
+  /** The workflow destination this delivery went to, so a trigger can name it. */
+  destinationId?: string;
+  name: string;
+  status: "completed" | "failed";
+  url?: string;
+  error?: string;
+}
+
+export interface ReleasePlanGraphNodes {
+  id: string;
+  kind: "source" | "build" | "automatic" | "destination";
+}
+
+export interface ReleasePlanGraphEdges {
+  from: string;
+  to: string;
 }

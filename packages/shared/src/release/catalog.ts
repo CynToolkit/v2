@@ -1,5 +1,6 @@
 import type { ProviderDefinition, RendererProviderMetadata } from "../plugins/definitions";
 import type { ReleaseRegistry } from "./types";
+import type { MergeCatalogItems, MergeDefinition } from "./catalog.types";
 
 export const buildReleaseRegistry = (
   providers: Array<ProviderDefinition | RendererProviderMetadata>,
@@ -78,7 +79,7 @@ export const buildReleaseCatalog = (
   })),
 });
 
-const mergeCatalogItems = <T extends { id: string }>(
+const mergeCatalogItems = <T extends MergeCatalogItems>(
   bundled: T[],
   runtime: T[],
   merge: (bundled: T, runtime: T) => T,
@@ -99,19 +100,7 @@ export const mergeReleaseCatalog = (
   bundled: import("./types").ReleaseCatalog,
   runtime: import("./types").ReleaseCatalog,
 ): import("./types").ReleaseCatalog => {
-  const mergeDefinition = <
-    T extends {
-      id: string;
-      label: string;
-      description?: string;
-      icon?: unknown;
-      fields?: unknown[];
-      defaultConfig: Record<string, unknown>;
-    },
-  >(
-    base: T,
-    current: T,
-  ): T => ({
+  const mergeDefinition = <T extends MergeDefinition>(base: T, current: T): T => ({
     ...base,
     ...current,
     id: base.id,

@@ -21,6 +21,7 @@ import type {
   ReleaseProducerTargetDefinition,
   ReleaseRegistry,
 } from "./types";
+import type { IsSourceRefResult } from "./preferences.types";
 
 /** The most builds the defaults add in one chain for one slot. */
 const MAX_CHAIN_BUILDS = 4;
@@ -62,7 +63,7 @@ const cloneConfig = (config: ReleaseConfig): ReleaseConfig => structuredClone(co
 const slotInputPath = ({ destinationIndex, slotIndex }: SlotPosition) =>
   `destinations.${destinationIndex}.slots.${slotIndex}.input`;
 
-const isSourceRef = (ref: ReleaseOutputRef): ref is { source: true } => "source" in ref;
+const isSourceRef = (ref: ReleaseOutputRef): ref is IsSourceRefResult => "source" in ref;
 
 const artifactRefOf = (ref: ReleaseOutputRef) =>
   isSourceRef(ref)

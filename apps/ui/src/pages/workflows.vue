@@ -219,25 +219,27 @@
 import { computed, ref, watch, defineAsyncComponent } from "vue";
 import { useToast } from "primevue/usetoast";
 import { storeToRefs } from "pinia";
-import Menu from "primevue/menu";
 import type { ReleaseCatalog, ReleaseConfig } from "@pipelab/shared";
-import { RouterLink, useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, RouterLink } from "vue-router";
 import { useAPI } from "@renderer/composables/api";
 import { useFiles } from "@renderer/store/files";
 
 import { useAppStore } from "@renderer/store/app";
 import { useI18n } from "vue-i18n";
-import Skeleton from "primevue/skeleton";
 import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { useConfirm } from "primevue/useconfirm";
-import Message from "primevue/message";
-import IconField from "primevue/iconfield";
-import InputIcon from "primevue/inputicon";
 import { loadWorkflowEntries, mergeWorkflowLoadState } from "./workflow-load-state";
 import { readableProviderId } from "./workflow-presentation";
 import { getDashboardDisplayState } from "./dashboard-state";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { uiEnvironment } from "@renderer/composables/ui-runtime";
+import type { WorkflowsEnhanced } from "./workflows.types";
+import Menu from "primevue/menu";
+import Skeleton from "primevue/skeleton";
+import Message from "primevue/message";
+import IconField from "primevue/iconfield";
+import InputIcon from "primevue/inputicon";
+import type { BrokenWorkflow } from "./workflow-load-state.types";
 
 const ReleaseFlowWizard = defineAsyncComponent(
   () => import("@renderer/components/ReleaseFlowWizard.vue"),
@@ -263,15 +265,8 @@ const catalog = ref<ReleaseCatalog>({
   destinations: [],
 });
 
-const workflowsEnhanced = ref<
-  Array<{
-    id: string;
-    project: string;
-    lastModified: string;
-    content: ReleaseConfig;
-  }>
->([]);
-const brokenWorkflows = ref<Array<{ id: string; error: string }>>([]);
+const workflowsEnhanced = ref<Array<WorkflowsEnhanced>>([]);
+const brokenWorkflows = ref<Array<BrokenWorkflow>>([]);
 let workflowLoadRevision = 0;
 const isWorkflowWizardVisible = ref(false);
 

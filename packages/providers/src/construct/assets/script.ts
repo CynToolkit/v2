@@ -8,6 +8,11 @@ import {
   registerNotNowListener,
   isConstructFreeEditionLimit,
 } from "./listeners.js";
+import type {
+  ConstructLoginSuccess,
+  ConstructLoginFailure,
+  WaitForLocatorWithAbortOptions,
+} from "./script.types";
 
 const CONSTRUCT_READY_TIMEOUT_MS = 15_000;
 const CONSTRUCT_SETTINGS_SEED_TIMEOUT_MS = 15_000;
@@ -67,13 +72,11 @@ const logElapsed = (log: typeof console.log, label: string, startedAt: number) =
   log(label, `${Date.now() - startedAt} ms`);
 };
 
-interface ConstructLoginData {
+export interface ConstructLoginData {
   userID: string | number;
   token: string;
 }
-type ConstructLoginResult =
-  | { loginData: ConstructLoginData; startedAt: number }
-  | { error: unknown; startedAt: number };
+type ConstructLoginResult = ConstructLoginSuccess | ConstructLoginFailure;
 type ConstructApiLogin = Promise<ConstructLoginResult> | (() => Promise<ConstructLoginResult>);
 
 export const constructAccountOrigin = (version: string | undefined) => {
@@ -612,7 +615,7 @@ export const prepareConstructEditor = async (
 
 const waitForLocatorWithAbort = async (
   locator: Locator,
-  options: { state?: "attached" | "detached" | "visible" | "hidden"; timeout: number },
+  options: WaitForLocatorWithAbortOptions,
   signal: AbortSignal,
 ) => {
   throwIfAborted(signal);

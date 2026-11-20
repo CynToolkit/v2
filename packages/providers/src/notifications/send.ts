@@ -1,4 +1,5 @@
 import { escapeJsonString } from "@pipelab/shared";
+import type { SendEmailInput } from "./send.types";
 
 export const DISCORD_MESSAGE_LIMIT = 2000;
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
@@ -130,10 +131,7 @@ export const isValidSender = (value: string): boolean => {
 };
 
 /** Never includes the key or the response body: only what to fix. */
-export const sendEmail = async (
-  input: { apiKey: string; from: string; to: string; subject: string; text: string },
-  signal?: AbortSignal,
-): Promise<void> => {
+export const sendEmail = async (input: SendEmailInput, signal?: AbortSignal): Promise<void> => {
   if (!input.apiKey.trim()) throw new Error("The Resend API key is missing.");
   if (!isValidSender(input.from)) throw new Error("The From address is not valid.");
   const to = parseRecipients(input.to);

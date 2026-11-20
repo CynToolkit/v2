@@ -68,13 +68,9 @@ import {
   splitTemplate,
   type NotificationVariableInfo,
 } from "../utils/notification-template";
+import type { NotificationTemplateEditorProps } from "./NotificationTemplateEditor.types";
 
-const props = defineProps<{
-  variables: NotificationVariableInfo[];
-  defaultValue?: string;
-  /** Longest message the channel accepts; longer text is cut when sent. */
-  maxLength?: number;
-}>();
+const props = defineProps<NotificationTemplateEditorProps>();
 const model = defineModel<string>({ required: true });
 
 const host = ref<HTMLDivElement>();

@@ -23,6 +23,7 @@ import {
   requiresAuthentication,
   type ServerSecurityOptions,
 } from "./server-security";
+import type { ErrorResponse } from "./websocket-server.types";
 
 export interface ConnectedClient {
   id: string;
@@ -225,9 +226,7 @@ export class WebSocketServer {
     code?: string,
   ) {
     try {
-      const errorResponse: Omit<WebSocketErrorMessage, "requestId"> & {
-        requestId: string | undefined;
-      } = {
+      const errorResponse: Omit<WebSocketErrorMessage, "requestId"> & ErrorResponse = {
         type: "error",
         requestId,
         error: errorMessage,

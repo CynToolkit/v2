@@ -1,9 +1,15 @@
 import type { BuildHistoryEntry, ExecutionStep, Events } from "@pipelab/shared";
 import { nanoid } from "nanoid";
 import type { WorkflowEvent } from "./run-events";
+import type {
+  WorkflowArtifactsArtifacts,
+  RunLogGroups,
+  WorkflowCancellationFeedbackResult,
+  FailureFixStep,
+} from "./run-detail-state.types";
 
 const workflowArtifacts = (
-  artifacts: Extract<WorkflowEvent, { type: "workflow.completed" }>["result"]["artifacts"],
+  artifacts: Extract<WorkflowEvent, WorkflowArtifactsArtifacts>["result"]["artifacts"],
 ): NonNullable<BuildHistoryEntry["artifacts"]> =>
   artifacts.map((artifact) => {
     return {
@@ -58,10 +64,7 @@ export const isRunContextValid = (
 ) => entry.projectId === projectId && entry.workflowId === flowId;
 
 const mergeLogs = (current: BuildHistoryEntry["logs"], persisted: BuildHistoryEntry["logs"]) => {
-  const groups = new Map<
-    string,
-    { current: BuildHistoryEntry["logs"]; persisted: BuildHistoryEntry["logs"] }
-  >();
+  const groups = new Map<string, RunLogGroups>();
   for (const [logs, side] of [
     [current, "current"],
     [persisted, "persisted"],
@@ -141,10 +144,7 @@ const mergePhases = (
   });
 };
 
-export const workflowCancellationFeedback = (result: {
-  type: string;
-  result?: { result?: string };
-}) =>
+export const workflowCancellationFeedback = (result: WorkflowCancellationFeedbackResult) =>
   result.type === "success" && result.result?.result === "ko"
     ? "This run is no longer active."
     : "";
@@ -253,10 +253,7 @@ const DEPLOYMENT_SETTING_PATTERN =
   /\b(?:app ?id|depot|channel|project|branch|game|slug|username|namespace)\b|not configured|is required|missing|invalid .*\bid\b|does not exist|not found/i;
 
 /** Picks where a failure is best fixed from what the step and message reveal. */
-export const failureFix = (
-  message: string,
-  step?: { destinationId?: string; slotId?: string; destinationName?: string; uses?: string },
-): RunFailureFix | undefined => {
+export const failureFix = (message: string, step?: FailureFixStep): RunFailureFix | undefined => {
   if (/choose an output/i.test(message)) {
     return step?.destinationId
       ? {

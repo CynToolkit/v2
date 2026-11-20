@@ -1,9 +1,8 @@
-export async function installUpdateAfterServerStops(options: {
-  stopServer: () => Promise<void>;
-  quitAndInstall: () => void;
-  setInstalling: (installing: boolean) => void;
-  onFailure: (error: unknown) => void;
-}): Promise<void> {
+import type { InstallUpdateAfterServerStopsOptions } from "./update-shutdown.types";
+
+export async function installUpdateAfterServerStops(
+  options: InstallUpdateAfterServerStopsOptions,
+): Promise<void> {
   try {
     await options.stopServer();
     options.setInstalling(true);

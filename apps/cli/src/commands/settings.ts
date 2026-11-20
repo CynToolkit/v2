@@ -3,6 +3,7 @@ import { createPipelabCloudAuthClient, PipelabContext } from "@pipelab/core-node
 import { loginToPoki, loginToSteam } from "@pipelab/providers";
 import { Command, Option } from "commander";
 import { getDefaultUserDataPath } from "../paths";
+import type { RegisterSettingsCommandsOptions } from "./settings.types";
 
 const contextFor = (userDataPath?: string) =>
   new PipelabContext({ userDataPath: userDataPath || getDefaultUserDataPath() });
@@ -23,7 +24,7 @@ export const registerSettingsCommands = (program: Command) => {
     .command("login")
     .description("Sign in to Pipelab Cloud for local artifact uploads")
     .addOption(userDataOption())
-    .action(async (options: { userData?: string }) => {
+    .action(async (options: RegisterSettingsCommandsOptions) => {
       if (!process.stdin.isTTY || !process.stdout.isTTY) {
         console.error(
           "Pipelab Cloud login needs an interactive terminal. CI authentication is not available.",
@@ -66,7 +67,7 @@ export const registerSettingsCommands = (program: Command) => {
     .command("status")
     .description("Check local Pipelab Cloud sign-in")
     .addOption(userDataOption())
-    .action(async (options: { userData?: string }) => {
+    .action(async (options: RegisterSettingsCommandsOptions) => {
       try {
         const client = createPipelabCloudAuthClient(contextFor(options.userData));
         if (!client) throw new Error("Pipelab Cloud is not configured for this installation.");
@@ -86,7 +87,7 @@ export const registerSettingsCommands = (program: Command) => {
     .command("logout")
     .description("Remove the local Pipelab Cloud session")
     .addOption(userDataOption())
-    .action(async (options: { userData?: string }) => {
+    .action(async (options: RegisterSettingsCommandsOptions) => {
       try {
         const client = createPipelabCloudAuthClient(contextFor(options.userData));
         if (!client) throw new Error("Pipelab Cloud is not configured for this installation.");
@@ -107,7 +108,7 @@ export const registerSettingsCommands = (program: Command) => {
       "Sign in to Poki without uploading a build. Name an account to keep it in Pipelab's managed directory.",
     )
     .addOption(userDataOption())
-    .action(async (account: string | undefined, options: { userData?: string }) => {
+    .action(async (account: string | undefined, options: RegisterSettingsCommandsOptions) => {
       try {
         const context = contextFor(options.userData);
         await loginToPoki({ thirdPartyPath: context.getThirdPartyPath(), account });
@@ -124,7 +125,7 @@ export const registerSettingsCommands = (program: Command) => {
     .command("login")
     .description("Sign in to SteamCMD and save its login cache")
     .addOption(userDataOption())
-    .action(async (options: { userData?: string }) => {
+    .action(async (options: RegisterSettingsCommandsOptions) => {
       if (!process.stdin.isTTY || !process.stdout.isTTY) {
         console.error(
           "Steam login needs an interactive terminal for your password and Steam Guard code.",

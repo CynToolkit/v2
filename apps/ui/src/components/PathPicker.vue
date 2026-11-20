@@ -18,27 +18,18 @@
 </template>
 
 <script setup lang="ts">
+import { useAPI } from "@renderer/composables/api";
+import type { PathPickerProps } from "./PathPicker.types";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import { useAPI } from "@renderer/composables/api";
 
-const props = withDefaults(
-  defineProps<{
-    kind?: "directory" | "file";
-    /** `save` lets the user name a file that does not exist yet (output paths). */
-    mode?: "open" | "save";
-    label?: string;
-    placeholder?: string;
-    fileExtensions?: string[];
-  }>(),
-  {
-    kind: "directory",
-    mode: "open",
-    label: "path",
-    placeholder: "Select a location",
-    fileExtensions: undefined,
-  },
-);
+const props = withDefaults(defineProps<PathPickerProps>(), {
+  kind: "directory",
+  mode: "open",
+  label: "path",
+  placeholder: "Select a location",
+  fileExtensions: undefined,
+});
 const model = defineModel<string>();
 const api = useAPI();
 

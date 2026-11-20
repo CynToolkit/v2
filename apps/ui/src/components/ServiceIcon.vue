@@ -7,13 +7,13 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { IconType } from "@pipelab/shared";
 import { providerIconClass, providerIconImage } from "../utils/provider-icons";
+import type { ServiceIconProps } from "./ServiceIcon.types";
 
-const props = withDefaults(
-  defineProps<{ icon?: IconType; fallback?: string; size?: "sm" | "md" | "lg" }>(),
-  { fallback: "mdi mdi-puzzle-outline", size: "md" },
-);
+const props = withDefaults(defineProps<ServiceIconProps>(), {
+  fallback: "mdi mdi-puzzle-outline",
+  size: "md",
+});
 const image = computed(() => providerIconImage(props.icon));
 const iconClass = computed(() => providerIconClass(props.icon, props.fallback));
 </script>

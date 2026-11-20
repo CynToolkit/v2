@@ -15,6 +15,12 @@ import {
   type WorkflowHost,
 } from "@pipelab/workflow-runtime";
 import { execa } from "execa";
+import type {
+  MockBinaryOptions,
+  RunCLIOptions,
+  RunWorkflowTaskServicesOption,
+  RunElectronAppOptions,
+} from "./index.types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,11 +71,7 @@ export const createSandbox = async (prefix: string) => {
     /**
      * Creates a mock binary/script in the sandbox.
      */
-    mockBinary: async (
-      relativePath: string,
-      content?: string,
-      options: { extension?: string | false } = {},
-    ) => {
+    mockBinary: async (relativePath: string, content?: string, options: MockBinaryOptions = {}) => {
       const fullPath = join(sandboxPath, relativePath);
       let platformPath = fullPath;
 
@@ -109,13 +111,7 @@ export const createSandbox = async (prefix: string) => {
 /**
  * Runs the Pipelab CLI out-of-process.
  */
-export const runCLI = async (
-  args: string[],
-  options: {
-    cwd?: string;
-    env?: Record<string, string>;
-  } = {},
-) => {
+export const runCLI = async (args: string[], options: RunCLIOptions = {}) => {
   const projectRoot = findProjectRoot(__dirname);
   const cliPath = resolve(projectRoot, "apps/cli/src/index.ts");
 
@@ -158,7 +154,7 @@ export function runWorkflowTask<TServices>(
 ): Promise<WorkflowTaskRun>;
 export async function runWorkflowTask(
   task: WorkflowTask,
-  options: RunWorkflowTaskOptions & { services?: unknown },
+  options: RunWorkflowTaskOptions & RunWorkflowTaskServicesOption,
 ): Promise<WorkflowTaskRun> {
   const events: WorkflowEvent[] = [];
   const logs: string[] = [];
@@ -207,7 +203,7 @@ export async function runWorkflowTask(
 /**
  * Runs the packaged electron app (smoke test)
  */
-export const runElectronApp = async (app_path: string, options: { timeoutMs?: number } = {}) => {
+export const runElectronApp = async (app_path: string, options: RunElectronAppOptions = {}) => {
   const child = execa(app_path, [], {
     cleanup: true,
     timeout: options.timeoutMs || 120000,

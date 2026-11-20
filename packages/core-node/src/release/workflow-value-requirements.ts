@@ -10,6 +10,10 @@ import { collectEnvironmentReferences } from "@pipelab/workflow-runtime";
 import { forEachUsedValue } from "@pipelab/shared";
 import { planReleaseForHost } from "./plan-for-host";
 import type { WorkflowConnectionRequirement } from "@pipelab/workflow-runtime";
+import type {
+  RequirementsFieldsEntry,
+  IntegrationRequirements,
+} from "./workflow-value-requirements.types";
 
 const environmentBindingPattern = /^\$\{\{\s*env\.([^\s{}]+)\s*\}\}$/;
 const environmentVariableNamePattern = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -112,16 +116,7 @@ export const resolveWorkflowConnectionRequirements = (
   references: readonly ConnectionReference[],
   providers: readonly Pick<ProviderDefinition, "id" | "integrations">[],
 ): WorkflowConnectionRequirement[] => {
-  const requirements = new Map<
-    string,
-    {
-      identity: string;
-      providerId: string;
-      integrationName: string;
-      required: boolean;
-      fields: Map<string, { key: string; required: boolean; secret: boolean }>;
-    }
-  >();
+  const requirements = new Map<string, IntegrationRequirements>();
 
   for (const reference of references) {
     const { identity, providerId, definition } = integrationForReference(reference, providers);
@@ -137,7 +132,7 @@ export const resolveWorkflowConnectionRequirements = (
       providerId,
       integrationName: definition.name,
       required: false,
-      fields: new Map<string, { key: string; required: boolean; secret: boolean }>(),
+      fields: new Map<string, RequirementsFieldsEntry>(),
     };
     requirement.required ||= reference.required;
     requirement.providerId = providerId;

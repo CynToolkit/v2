@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, realpath, mkdtemp } from "node:fs/promises";
 import { SandboxFolder, DEFAULT_NODE_VERSION, DEFAULT_PNPM_VERSION } from "@pipelab/constants";
+import type { GetSandboxFoldersResult, FoldersRecordEntry } from "./context.types";
 
 // @ts-ignore import.meta is only allowed in ES Modules (the desktop app compiles this file as CommonJS)
 const metaUrl = typeof import.meta !== "undefined" ? import.meta.url : undefined;
@@ -224,8 +225,8 @@ export class PipelabContext {
     return this.getPackagesPath("pnpm", version, "bin", "pnpm.cjs");
   }
 
-  getSandboxFolders(): Array<{ name: SandboxFolder; label: string; path: string }> {
-    const foldersRecord: Record<SandboxFolder, { label: string; path: string }> = {
+  getSandboxFolders(): Array<GetSandboxFoldersResult> {
+    const foldersRecord: Record<SandboxFolder, FoldersRecordEntry> = {
       [SandboxFolder.Packages]: { label: "Packages", path: this.getPackagesPath() },
       [SandboxFolder.ThirdParty]: { label: "Third-Party Tools", path: this.getThirdPartyPath() },
       [SandboxFolder.Config]: { label: "Configuration", path: this.getConfigPath() },

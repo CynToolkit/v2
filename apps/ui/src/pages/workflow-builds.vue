@@ -473,13 +473,6 @@ import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { computed, nextTick, onScopeDispose, onUnmounted, ref, toRaw, watch } from "vue";
 import { nanoid } from "nanoid";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
-import Button from "primevue/button";
-import ConfirmDialog from "primevue/confirmdialog";
-import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
-import Message from "primevue/message";
-import Select from "primevue/select";
-import ReleaseStatus from "../components/ReleaseStatus.vue";
 import { useConfirm } from "primevue/useconfirm";
 import type {
   IconType,
@@ -491,8 +484,6 @@ import type {
   ValidationIssue,
 } from "@pipelab/shared";
 import { RELEASE_CONFIG_VERSION, plannedUsedTargetKeys, usedTargetKeys } from "@pipelab/shared";
-import ReleaseFieldControl from "../components/ReleaseFieldControl.vue";
-import ReleaseBeforeBuildHooks from "../components/ReleaseBeforeBuildHooks.vue";
 import { useAPI } from "../composables/api";
 import { useWorkflowTab } from "../composables/workflow-header-state";
 import { useWorkflowDocument } from "../composables/useWorkflowDocument";
@@ -502,10 +493,7 @@ import { useAgentAvailability } from "@renderer/composables/useAgentAvailability
 import {
   addCompatibleBuild,
   applyProducerInspection,
-  buildInputControlVisible,
-  buildUsesExplicitInput,
   bundleCandidateOutputs,
-  compatibleBuildInputLabel,
   createBundleBuild,
   isManyInputEngine,
   setBuildInputs,
@@ -516,14 +504,12 @@ import {
   buildTargetsFor,
   createBuildProfile,
   duplicateBuildProfile,
-  deploymentSlotLabel,
   deduplicateValidationIssues,
   invalidEnvironmentBindingPaths,
   issuesForPath,
   outputReferenceChangeImpact,
   outputReferenceConsumers,
   planOutputOptions,
-  plannedBuildInputLabel,
   probeBuildInputCandidates,
   probeCompatibleBuildCandidates,
   releaseOutputRefValue,
@@ -532,6 +518,11 @@ import {
   shouldInspectReleaseProviderConfig,
   type CompatibleBuildCandidate,
   type ReleaseOutputOption,
+  buildInputControlVisible,
+  buildUsesExplicitInput,
+  compatibleBuildInputLabel,
+  deploymentSlotLabel,
+  plannedBuildInputLabel,
 } from "./release-flow-model";
 import {
   buildIssueControlId,
@@ -556,6 +547,18 @@ import {
   suggestUniqueConnectionBinding,
   workflowConnectionBindingValue,
 } from "../utils/release-connection-bindings";
+
+import Button from "primevue/button";
+import ConfirmDialog from "primevue/confirmdialog";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Message from "primevue/message";
+import Select from "primevue/select";
+import ReleaseStatus from "../components/ReleaseStatus.vue";
+import ReleaseFieldControl from "../components/ReleaseFieldControl.vue";
+import ReleaseBeforeBuildHooks from "../components/ReleaseBeforeBuildHooks.vue";
+import type { ConnectionDraft } from "../utils/release-connection-bindings.types";
+import type { PendingFieldConnection } from "../utils/release-connection-bindings.types";
 
 const route = useRoute();
 const actionsTarget = useWorkflowTab(() => void workflowDoc.sync().then(loadWorkflow));
@@ -621,12 +624,7 @@ const connectionSaving = ref(false);
 const draftBuild = ref<ReleaseBuildProfileConfig>();
 const newBuildType = ref<string>();
 const newBuildEngine = ref<string>();
-const connectionDraft = ref<{
-  name: string;
-  integration: string;
-  integrationName: string;
-  values: Record<string, string>;
-}>({
+const connectionDraft = ref<ConnectionDraft>({
   name: "",
   integration: "",
   integrationName: "",
@@ -1428,9 +1426,7 @@ const providerIcon = (icon: IconType | undefined) =>
     : "mdi mdi-hammer-wrench";
 const producerIcon = (id: string) => providerIcon(engineDefinition(id)?.icon);
 // The field an inline "Add" was opened from, so the new Connection can be selected for it.
-let pendingFieldConnection:
-  | { config: Record<string, unknown>; field: ReleaseFieldDefinition }
-  | undefined;
+let pendingFieldConnection: PendingFieldConnection | undefined;
 const openConnection = (
   integration: string,
   config?: Record<string, unknown>,

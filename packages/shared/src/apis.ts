@@ -1,11 +1,5 @@
-import type { PreflightResult, RendererProviderMetadata } from "./plugins/definitions";
-import {
-  AuthError,
-  AuthResponse,
-  FunctionInvokeOptions,
-  User,
-  UserResponse,
-} from "@supabase/supabase-js";
+import type { PreflightResult } from "./plugins/definitions";
+import { AuthError, AuthResponse, UserResponse } from "@supabase/supabase-js";
 import { AppConfig, ConnectionsConfig } from "./config.schema";
 import { FileRepo } from "./config/projects-definition";
 import type {
@@ -14,22 +8,9 @@ import type {
   ReleasePlan,
   ProducerInspection,
   ReleaseFieldOption,
-  ReleaseProducerConfig,
   ValidationIssue,
 } from "./release/types";
-import { Agent } from "./websocket.types";
-import {
-  BuildHistoryEntry,
-  BuildHistoryQuery,
-  BuildHistoryResponse,
-  BuildHistoryStorageInfo,
-} from "./build-history";
-import type {
-  WorkflowConnectionOverride,
-  WorkflowConnectionValues,
-  WorkflowEvent,
-  WorkflowResult,
-} from "@pipelab/workflow-runtime";
+import { BuildHistoryResponse, BuildHistoryStorageInfo } from "./build-history";
 export interface ReleaseSourceInspection {
   issues?: ValidationIssue[];
   fieldOptions?: Record<string, ReleaseFieldOption[]>;
@@ -69,151 +50,112 @@ export type ReleaseChannel = "stable" | "beta" | "dev";
 export type IpcDefinition = {
   "fs:read": [
     // input
-    { path: string },
-    EndEvent<{ content: string }>,
+    FsReadInput,
+    EndEvent<FsReadEvent>,
   ];
   "fs:remove": [
     // input
-    { path: string },
+    FsReadInput,
     EndEvent<boolean>,
   ];
   "fs:write": [
     // input
-    {
-      path: string;
-      content: string;
-    },
-    EndEvent<{ ok: boolean }>,
+    FsWriteInput,
+    EndEvent<FsWriteEvent>,
   ];
   "fs:rm": [
     // input
-    {
-      path: string;
-      recursive: boolean;
-      force: boolean;
-    },
-    EndEvent<{ ok: boolean }>,
+    FsRmInput,
+    EndEvent<FsWriteEvent>,
   ];
   "fs:listDirectory": [
     // input
-    { path: string },
-    EndEvent<{
-      files: {
-        name: string;
-        isDirectory: boolean;
-        isSymbolicLink: boolean;
-        size: number;
-        mtime: number;
-      }[];
-    }>,
+    FsReadInput,
+    EndEvent<FsListDirectoryEvent>,
   ];
-  "fs:createDirectory": [{ path: string }, EndEvent<{ ok: boolean }>];
-  "fs:getRoots": [void, EndEvent<{ roots: { name: string; path: string }[] }>];
-  "fs:isPathBlacklisted": [{ path: string }, EndEvent<{ isBlacklisted: boolean }>];
-  "fs:getHomeDirectory": [void, EndEvent<{ path: string }>];
-  "shell:openPath": [{ path: string }, EndEvent<void>];
+  "fs:createDirectory": [FsReadInput, EndEvent<FsWriteEvent>];
+  "fs:getRoots": [void, EndEvent<FsGetRootsEvent>];
+  "fs:isPathBlacklisted": [FsReadInput, EndEvent<FsIsPathBlacklistedEvent>];
+  "fs:getHomeDirectory": [void, EndEvent<FsReadInput>];
+  "shell:openPath": [FsReadInput, EndEvent<void>];
   "dialog:showOpenDialog": [
     // input
     Electron.OpenDialogOptions,
-    EndEvent<{ canceled: boolean; filePaths: string[] }>,
+    EndEvent<DialogShowOpenDialogEvent>,
   ];
   "dialog:showSaveDialog": [
     // input
     Electron.SaveDialogOptions,
-    EndEvent<{ canceled: boolean; filePath: string | undefined }>,
+    EndEvent<DialogShowSaveDialogEvent>,
   ];
-  "providers:metadata:get": [void, EndEvent<{ providers: RendererProviderMetadata[] }>];
+  "providers:metadata:get": [void, EndEvent<ProvidersMetadataGetEvent>];
 
   "settings:load": [void, EndEvent<AppConfig>];
-  "settings:save": [{ data: AppConfig }, EndEvent<"ok">];
-  "settings:reset": [{ key: string }, EndEvent<"ok">];
+  "settings:save": [SettingsSaveInput, EndEvent<"ok">];
+  "settings:reset": [SettingsResetInput, EndEvent<"ok">];
 
   "connections:load": [void, EndEvent<ConnectionsConfig>];
-  "connections:save": [{ data: ConnectionsConfig }, EndEvent<"ok">];
-  "connections:reset": [{ key: string }, EndEvent<"ok">];
+  "connections:save": [ConnectionsSaveInput, EndEvent<"ok">];
+  "connections:reset": [SettingsResetInput, EndEvent<"ok">];
   "construct:profiles:discover": [
-    { path?: string; forceRefresh?: boolean },
+    ConstructProfilesDiscoverInput,
     EndEvent<BrowserProfileCandidate[]>,
   ];
 
   "projects:load": [void, EndEvent<FileRepo>];
-  "projects:save": [{ data: FileRepo }, EndEvent<"ok">];
-  "projects:reset": [{ key: string }, EndEvent<"ok">];
+  "projects:save": [ProjectsSaveInput, EndEvent<"ok">];
+  "projects:reset": [SettingsResetInput, EndEvent<"ok">];
 
-  "workflow:load": [{ workflowId: string; projectId?: string }, EndEvent<ReleaseConfig>];
+  "workflow:load": [WorkflowLoadInput, EndEvent<ReleaseConfig>];
   "release:catalog:get": [void, EndEvent<ReleaseCatalog>];
-  "release:source:inspect": [
-    { provider: string; config: Record<string, unknown> },
-    EndEvent<ReleaseSourceInspection>,
-  ];
-  "release:producer:inspect": [
-    { provider: string; config: ReleaseProducerConfig; sourceConfig?: Record<string, unknown> },
-    EndEvent<ProducerInspection>,
-  ];
-  "release:validate": [{ config: ReleaseConfig }, EndEvent<{ issues: ValidationIssue[] }>];
-  "release:plan": [{ config: ReleaseConfig }, EndEvent<ReleasePlan>];
-  "release:resolve-defaults": [{ config: ReleaseConfig }, EndEvent<ReleaseConfig>];
+  "release:source:inspect": [ReleaseSourceInspectInput, EndEvent<ReleaseSourceInspection>];
+  "release:producer:inspect": [ReleaseProducerInspectInput, EndEvent<ProducerInspection>];
+  "release:validate": [ReleaseValidateInput, EndEvent<ReleaseValidateEvent>];
+  "release:plan": [ReleaseValidateInput, EndEvent<ReleasePlan>];
+  "release:resolve-defaults": [ReleaseValidateInput, EndEvent<ReleaseConfig>];
   /** Read-only credential check for a connection; never throws, unsupported types are unverifiable. */
-  "connection:test": [
-    { pluginName: string; values: Record<string, string> },
-    EndEvent<PreflightResult>,
-  ];
-  "workflow:save": [
-    { workflowId: string; data: ReleaseConfig; projectId?: string },
-    EndEvent<"ok">,
-  ];
-  "workflow:delete": [{ workflowId: string; projectId?: string }, EndEvent<"ok">];
+  "connection:test": [ConnectionTestInput, EndEvent<PreflightResult>];
+  "workflow:save": [WorkflowSaveInput, EndEvent<"ok">];
+  "workflow:delete": [WorkflowLoadInput, EndEvent<"ok">];
   /** Applies the workflow's saved retention policy now; returns what was removed. */
-  "workflow:retention:apply": [
-    { workflowId: string; projectId?: string },
-    EndEvent<{ runs: number; files: number }>,
-  ];
+  "workflow:retention:apply": [WorkflowLoadInput, EndEvent<WorkflowRetentionApplyEvent>];
   "workflow:execute": [
-    {
-      name: string;
-      destinations?: string[];
-      release?: { version: string; description: string };
-      env?: Readonly<Record<string, string | undefined>>;
-      connectionValues?: WorkflowConnectionValues;
-      connectionOverrides?: readonly WorkflowConnectionOverride[];
-      /** Run without checking destination accounts first. Same as the CLI's `--skip-preflight`. */
-      skipPreflight?: boolean;
-    },
+    WorkflowExecuteInput,
     (
-      | { type: "workflow-event"; data: WorkflowEvent }
-      | { type: "workflow-run"; data: { runId: string } }
-      | EndEvent<{ result: WorkflowResult; runId: string }>
+      | WorkflowExecuteEventWorkflowEvent
+      | WorkflowExecuteEventWorkflowRun
+      | EndEvent<WorkflowExecuteEvent>
     ),
   ];
-  "workflow:cancel": [{ runId: string }, EndEvent<{ result: "ok" | "ko" }>];
-  "pipelab-cloud:artifact-download-url": [{ hostedArtifactId: string }, EndEvent<{ url: string }>];
+  "workflow:cancel": [WorkflowExecuteEventWorkflowRunData, EndEvent<WorkflowCancelEvent>];
+  "pipelab-cloud:artifact-download-url": [
+    PipelabCloudArtifactDownloadUrlInput,
+    EndEvent<PipelabCloudArtifactDownloadUrlEvent>,
+  ];
 
   // Build History APIs
-  "build-history:save": [{ entry: BuildHistoryEntry }, EndEvent<{ result: "ok" | "ko" }>];
-  "build-history:get": [
-    { id: string; projectId?: string },
-    EndEvent<{ entry?: BuildHistoryEntry }>,
+  "build-history:save": [BuildHistorySaveInput, EndEvent<WorkflowCancelEvent>];
+  "build-history:get": [BuildHistoryGetInput, EndEvent<BuildHistoryGetEvent>];
+  "build-history:get-all": [BuildHistoryGetAllInput, EndEvent<BuildHistoryResponse>];
+  "build-history:update": [BuildHistoryUpdateInput, EndEvent<WorkflowCancelEvent>];
+  "build-history:delete": [BuildHistoryGetInput, EndEvent<WorkflowCancelEvent>];
+  "build-history:clear": [void, EndEvent<WorkflowCancelEvent>];
+  "build-history:clear-by-project": [
+    BuildHistoryClearByProjectInput,
+    EndEvent<WorkflowCancelEvent>,
   ];
-  "build-history:get-all": [{ query?: BuildHistoryQuery }, EndEvent<BuildHistoryResponse>];
-  "build-history:update": [
-    { id: string; updates: Partial<BuildHistoryEntry>; projectId?: string },
-    EndEvent<{ result: "ok" | "ko" }>,
-  ];
-  "build-history:delete": [{ id: string; projectId?: string }, EndEvent<{ result: "ok" | "ko" }>];
-  "build-history:clear": [void, EndEvent<{ result: "ok" | "ko" }>];
-  "build-history:clear-by-project": [{ projectId: string }, EndEvent<{ result: "ok" | "ko" }>];
   "build-history:get-storage-info": [void, EndEvent<BuildHistoryStorageInfo>];
-  "agents:get": [void, EndEvent<{ agents: Agent[] }>];
-  "auth:getUser": [void, EndEvent<{ user: User | null }>];
-  "auth:getCloudAccessToken": [void, EndEvent<{ accessToken: string | null }>];
-  "auth:signInWithPassword": [{ email: string; password: string }, EndEvent<UserResponse>];
-  "auth:signUp": [{ email: string; password: string }, EndEvent<AuthResponse>];
+  "agents:get": [void, EndEvent<AgentsGetEvent>];
+  "auth:getUser": [void, EndEvent<AuthGetUserEvent>];
+  "auth:getCloudAccessToken": [void, EndEvent<AuthGetCloudAccessTokenEvent>];
+  "auth:signInWithPassword": [AuthSignInWithPasswordInput, EndEvent<UserResponse>];
+  "auth:signUp": [AuthSignInWithPasswordInput, EndEvent<AuthResponse>];
   "auth:signOut": [void, EndEvent<void>];
-  "auth:resetPasswordForEmail": [{ email: string }, EndEvent<AuthErrorResult>];
-  "auth:invoke": [{ name: string; options?: FunctionInvokeOptions }, EndEvent<AuthInvokeResult>];
-  "agent:version:get": [void, EndEvent<{ version: string; channel: ReleaseChannel }>];
+  "auth:resetPasswordForEmail": [AuthResetPasswordForEmailInput, EndEvent<AuthErrorResult>];
+  "auth:invoke": [AuthInvokeInput, EndEvent<AuthInvokeResult>];
+  "agent:version:get": [void, EndEvent<AgentVersionGetEvent>];
   "system:packages:cleanup": [void, EndEvent<boolean>];
-  "startup:progress": [void, { type: "progress"; data: { message: string } } | { type: "done" }];
+  "startup:progress": [void, StartupProgressEventProgress | StartupProgressEventDone];
 };
 
 export type Channels = keyof IpcDefinition;
@@ -223,9 +165,59 @@ export type ShellChannel = "dialog:showOpenDialog" | "dialog:showSaveDialog" | "
 
 export type Data<KEY extends Channels> = IpcDefinition[KEY][0];
 export type Events<KEY extends Channels> = IpcDefinition[KEY][1];
-export type End<KEY extends Channels> = Extract<IpcDefinition[KEY][1], { type: "end" }>["data"];
+export type End<KEY extends Channels> = Extract<IpcDefinition[KEY][1], EndEventShape>["data"];
 
 export type { RequestId } from "./ipc.types";
 import type { RequestId } from "./ipc.types";
+import type {
+  FsReadInput,
+  FsReadEvent,
+  FsWriteInput,
+  FsWriteEvent,
+  FsRmInput,
+  FsListDirectoryEvent,
+  FsGetRootsEvent,
+  FsIsPathBlacklistedEvent,
+  DialogShowOpenDialogEvent,
+  DialogShowSaveDialogEvent,
+  ProvidersMetadataGetEvent,
+  SettingsSaveInput,
+  SettingsResetInput,
+  ConnectionsSaveInput,
+  ConstructProfilesDiscoverInput,
+  ProjectsSaveInput,
+  WorkflowLoadInput,
+  ReleaseSourceInspectInput,
+  ReleaseProducerInspectInput,
+  ReleaseValidateInput,
+  ReleaseValidateEvent,
+  ConnectionTestInput,
+  WorkflowSaveInput,
+  WorkflowRetentionApplyEvent,
+  WorkflowExecuteInput,
+  WorkflowExecuteEventWorkflowEvent,
+  WorkflowExecuteEventWorkflowRunData,
+  WorkflowExecuteEventWorkflowRun,
+  WorkflowExecuteEvent,
+  WorkflowCancelEvent,
+  PipelabCloudArtifactDownloadUrlInput,
+  PipelabCloudArtifactDownloadUrlEvent,
+  BuildHistorySaveInput,
+  BuildHistoryGetInput,
+  BuildHistoryGetEvent,
+  BuildHistoryGetAllInput,
+  BuildHistoryUpdateInput,
+  BuildHistoryClearByProjectInput,
+  AgentsGetEvent,
+  AuthGetUserEvent,
+  AuthGetCloudAccessTokenEvent,
+  AuthSignInWithPasswordInput,
+  AuthResetPasswordForEmailInput,
+  AuthInvokeInput,
+  AgentVersionGetEvent,
+  StartupProgressEventProgress,
+  StartupProgressEventDone,
+  EndEventShape,
+} from "./apis.types";
 
 // type Output = End<'fs:openFolder'>

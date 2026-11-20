@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { ReleaseDestinationAccountPreview } from "../utils/release-connection-bindings";
+import type { ReleaseDestinationAccountPreviewProps } from "./ReleaseDestinationAccountPreview.types";
 
-const props = defineProps<{ previews: ReleaseDestinationAccountPreview[] }>();
+const props = defineProps<ReleaseDestinationAccountPreviewProps>();
 const reusedAccounts = computed(() => {
   const destinationsByConnection = new Map<string, Map<string, ReleaseDestinationAccountPreview>>();
   for (const preview of props.previews) {

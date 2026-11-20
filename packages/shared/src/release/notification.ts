@@ -1,5 +1,6 @@
 import type { ReleaseNotificationConfig, ReleaseNotificationEvent } from "./types";
 import { NOTIFICATION_TEMPLATE_VARIABLES } from "./types";
+import type { ShouldNotifyRunSettings } from "./notification.types";
 
 const templateVariablePattern = /\{\{\s*([A-Za-z][A-Za-z0-9_]*)\s*\}\}/g;
 
@@ -56,7 +57,7 @@ export const renderNotificationTemplate = (
 
 /** Whether a run's outcome is announced under the workflow's global toggles. Cancelled never is. */
 export const shouldNotifyRun = (
-  settings: { onSuccess?: boolean; onFailure?: boolean } | undefined,
+  settings: ShouldNotifyRunSettings | undefined,
   status: ReleaseNotificationEvent["status"] | "cancelled",
 ): boolean => {
   if (status === "cancelled") return false;
@@ -76,7 +77,7 @@ export const DEFAULT_NOTIFICATION_TRIGGERS: NonNullable<ReleaseNotificationConfi
 export const notificationTargetFires = (
   target: Pick<ReleaseNotificationConfig, "triggers">,
   event: ReleaseNotificationEvent,
-  settings: { onSuccess?: boolean; onFailure?: boolean } | undefined,
+  settings: ShouldNotifyRunSettings | undefined,
   outcome: ReleaseNotificationEvent["status"] | "cancelled",
 ): boolean => {
   if (outcome === "cancelled") return false;

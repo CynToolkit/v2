@@ -1,4 +1,10 @@
 import type { PreflightResult } from "@pipelab/shared";
+import type {
+  ConnectionSaveDecisionSave,
+  ConnectionSaveDecisionTest,
+  ConnectionSaveDecisionBlock,
+  DecideConnectionSaveInput,
+} from "./connection-test.types";
 
 export interface TestedConnection {
   /** Fingerprint of the values the result was obtained for. */
@@ -7,9 +13,9 @@ export interface TestedConnection {
 }
 
 export type ConnectionSaveDecision =
-  | { action: "save" }
-  | { action: "test" }
-  | { action: "block"; message: string };
+  | ConnectionSaveDecisionSave
+  | ConnectionSaveDecisionTest
+  | ConnectionSaveDecisionBlock;
 
 /** Identifies the exact credentials a result belongs to, so any edit invalidates it. */
 export const connectionTestFingerprint = (
@@ -27,11 +33,7 @@ export const connectionTestFingerprint = (
  * Only a rejected credential blocks saving. Unverifiable (offline, timeout,
  * unsupported) saves, and untestable types save without a test.
  */
-export const decideConnectionSave = (input: {
-  testable: boolean;
-  fingerprint: string;
-  tested?: TestedConnection;
-}): ConnectionSaveDecision => {
+export const decideConnectionSave = (input: DecideConnectionSaveInput): ConnectionSaveDecision => {
   if (!input.testable) return { action: "save" };
   if (!input.tested || input.tested.fingerprint !== input.fingerprint) return { action: "test" };
   const { result } = input.tested;

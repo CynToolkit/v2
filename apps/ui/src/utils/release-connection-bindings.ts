@@ -11,6 +11,12 @@ import type {
   WorkflowConnectionBinding,
 } from "@pipelab/shared";
 import { connectionIntegrationFieldValue } from "./connection-field-values";
+import type {
+  ConnectionDraftMatchesIntegrationDraft,
+  RenameWorkflowConnectionAliasResult,
+  RenameWorkflowConnectionAliasWithDraftResult,
+  PersistWorkflowConnectionAliasRenameInput,
+} from "./release-connection-bindings.types";
 
 const connectionAliasPattern = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
@@ -150,7 +156,7 @@ export const connectionDraftForIntegration = (
 
 export const connectionDraftMatchesIntegration = (
   integration: string | undefined,
-  draft: { integration: string; integrationName: string },
+  draft: ConnectionDraftMatchesIntegrationDraft,
 ) =>
   Boolean(
     integration && (draft.integration === integration || draft.integrationName === integration),
@@ -506,7 +512,7 @@ export const renameWorkflowConnectionAlias = (
   workflowBindings: WorkflowConnectionBinding[] = [],
   from: string,
   to: string,
-): { config: ReleaseConfig; workflowBindings: WorkflowConnectionBinding[] } => {
+): RenameWorkflowConnectionAliasResult => {
   if (!connectionAliasPattern.test(to))
     throw new Error(
       "Alias must start with a letter or underscore and contain only letters, numbers, underscores, or hyphens.",
@@ -568,11 +574,7 @@ export const renameWorkflowConnectionAliasWithDraft = (
   workflowBindings: WorkflowConnectionBinding[] = [],
   from: string,
   to: string,
-): {
-  config: ReleaseConfig;
-  draftBuild?: ReleaseBuildProfileConfig;
-  workflowBindings: WorkflowConnectionBinding[];
-} => {
+): RenameWorkflowConnectionAliasWithDraftResult => {
   const persistedAliasExists = releaseWorkflowConnectionAliases(config, catalog).includes(from);
   const bindingExists = workflowBindings.some(
     (binding) => binding.workflowId === config.id && binding.alias === from,
@@ -610,14 +612,7 @@ export const persistWorkflowConnectionAliasRename = async ({
   nextBindings,
   saveConnections,
   saveWorkflow,
-}: {
-  workflowId: string;
-  previousAlias: string;
-  previousBindings: WorkflowConnectionBinding[];
-  nextBindings: WorkflowConnectionBinding[];
-  saveConnections: (bindings: WorkflowConnectionBinding[]) => Promise<void>;
-  saveWorkflow: () => Promise<void>;
-}): Promise<void> => {
+}: PersistWorkflowConnectionAliasRenameInput): Promise<void> => {
   const previousAliasBindings = previousBindings.filter(
     (binding) => binding.workflowId === workflowId && binding.alias === previousAlias,
   );

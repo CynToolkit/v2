@@ -12,12 +12,13 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import type { ReleaseStatusProps } from "./ReleaseStatus.types";
 
 /**
  * Quiet readiness indicator: a dot for things that need work, nothing visible for "Ready", and
  * muted text for neutral states such as "Disabled". The label stays available to assistive tech.
  */
-const props = defineProps<{ label: string }>();
+const props = defineProps<ReleaseStatusProps>();
 const kind = computed(() =>
   props.label === "Ready"
     ? "ready"

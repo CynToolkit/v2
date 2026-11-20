@@ -18,6 +18,7 @@ import type {
   ResolvedReleaseDestinationSlot,
   ValidationIssue,
 } from "./types";
+import type { SourceRefResult, AutomaticQueueItem } from "./planner.types";
 
 const error = (code: string, message: string, path?: string): ValidationIssue => ({
   code,
@@ -25,7 +26,7 @@ const error = (code: string, message: string, path?: string): ValidationIssue =>
   severity: "error",
   path,
 });
-const sourceRef = (ref: ReleaseOutputRef): ref is { source: true } =>
+const sourceRef = (ref: ReleaseOutputRef): ref is SourceRefResult =>
   "source" in ref && ref.source === true;
 const internalRef = (ref: ReleaseOutputRef): ArtifactRef =>
   sourceRef(ref) ? { source: true } : { producerId: ref.buildId, outputId: ref.targetId };
@@ -44,13 +45,13 @@ const accepted = (
   );
 };
 
-interface Candidate {
+export interface Candidate {
   ref: ReleaseOutputRef;
   artifactRef: ArtifactRef;
   descriptor: ArtifactDescriptor;
 }
 
-interface AutomaticStep {
+export interface AutomaticStep {
   definition: ReleaseProducerDefinition;
   input: Candidate;
   targetId: string;
@@ -69,7 +70,7 @@ const findAutomaticPath = (
   host: ReleaseHostContext,
 ): AutomaticStep[] | undefined => {
   if (accepted(candidate.descriptor, definition, host).accepted) return [];
-  const queue: Array<{ candidate: Candidate; steps: AutomaticStep[] }> = [{ candidate, steps: [] }];
+  const queue: Array<AutomaticQueueItem> = [{ candidate, steps: [] }];
   const visited = new Set<string>([
     candidate.descriptor.kind + JSON.stringify(candidate.descriptor),
   ]);

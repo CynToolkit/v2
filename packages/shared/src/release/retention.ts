@@ -1,5 +1,5 @@
 import type { BuildHistoryEntry } from "../build-history";
-import type { ReleaseRetentionPolicy } from "./types";
+import type { PlanRetentionInput, ExceedsRules } from "./retention.types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -20,17 +20,7 @@ const isFailure = (entry: BuildHistoryEntry) =>
  */
 export const planRetention = (
   entries: readonly BuildHistoryEntry[],
-  {
-    workflowId,
-    keepId,
-    policy,
-    now = Date.now(),
-  }: {
-    workflowId: string;
-    keepId: string;
-    policy: ReleaseRetentionPolicy | undefined;
-    now?: number;
-  },
+  { workflowId, keepId, policy, now = Date.now() }: PlanRetentionInput,
 ): RetentionPlan => {
   const plan: RetentionPlan = { deleteRuns: [], deleteArtifacts: [] };
   if (!policy) return plan;
@@ -41,11 +31,7 @@ export const planRetention = (
     policy.keepLatestSuccessful === false
       ? undefined
       : runs.find((entry) => entry.status === "completed");
-  const exceeds = (
-    entry: BuildHistoryEntry,
-    index: number,
-    rules: { maxRuns?: number; maxAgeDays?: number } | undefined,
-  ) =>
+  const exceeds = (entry: BuildHistoryEntry, index: number, rules: ExceedsRules | undefined) =>
     rules !== undefined &&
     ((rules.maxRuns !== undefined && index >= rules.maxRuns) ||
       (rules.maxAgeDays !== undefined && now - entry.createdAt > rules.maxAgeDays * DAY_MS));

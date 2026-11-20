@@ -14,12 +14,20 @@ import { createEventHook } from "@vueuse/core";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { withRequestTimeout } from "@renderer/utils/request-timeout";
 import type { BillingSubscription } from "@renderer/types/billing";
+import type {
+  AuthActionResponseData,
+  InFlightSubscription,
+  OnAuthChanged,
+  OnSubscriptionChanged,
+  InvokeFunctionOptions,
+  ResetPasswordResult,
+} from "./auth.types";
 
-type Subscription = BillingSubscription;
+export type Subscription = BillingSubscription;
 
 export type SubscriptionStatus = "idle" | "loading" | "ready" | "error";
 interface AuthActionResponse {
-  data: { user: User | null; session: Session | null };
+  data: AuthActionResponseData;
   error: Error | null;
 }
 
@@ -43,9 +51,7 @@ export const useAuth = defineStore("auth", () => {
   const subscriptionStatus = ref<SubscriptionStatus>("idle");
   const isLoadingSubscriptions = computed(() => subscriptionStatus.value === "loading");
   let subscriptionRequestId = 0;
-  let inFlightSubscription:
-    | { requestId: number; userId: string; promise: Promise<void> }
-    | undefined;
+  let inFlightSubscription: InFlightSubscription | undefined;
   let initPromise: Promise<void> | undefined;
   let authRequestId = 0;
   const { isReady } = useAgentAvailability();
@@ -87,8 +93,8 @@ export const useAuth = defineStore("auth", () => {
   const authModalTitle = ref<string>();
   const authModalSubTitle = ref<string>();
 
-  const onAuthChanged = createEventHook<{ event: AuthChangeEvent; session: Session | null }>();
-  const onSubscriptionChanged = createEventHook<{ subscriptions: Subscription[] }>();
+  const onAuthChanged = createEventHook<OnAuthChanged>();
+  const onSubscriptionChanged = createEventHook<OnSubscriptionChanged>();
 
   const api = useAPI();
   if (!isBrowserRuntime)
@@ -175,7 +181,7 @@ export const useAuth = defineStore("auth", () => {
     return error instanceof Error ? error : new Error("Billing request failed. Please retry.");
   };
 
-  const invokeFunction = async (name: string, options?: { body?: Record<string, unknown> }) => {
+  const invokeFunction = async (name: string, options?: InvokeFunctionOptions) => {
     try {
       if (isBrowserRuntime) {
         if (!browserClient) {
@@ -582,7 +588,7 @@ export const useAuth = defineStore("auth", () => {
     }
   };
 
-  const resetPassword = async (email: string): Promise<{ error: Error | null }> => {
+  const resetPassword = async (email: string): Promise<ResetPasswordResult> => {
     authRequestId++;
     initPromise = undefined;
     isAuthenticating.value = true;
@@ -624,7 +630,7 @@ export const useAuth = defineStore("auth", () => {
     }
   };
 
-  const updatePassword = async (password: string): Promise<{ error: Error | null }> => {
+  const updatePassword = async (password: string): Promise<ResetPasswordResult> => {
     if (!isBrowserRuntime || !browserClient) {
       return { error: new Error("Password recovery is unavailable in this runtime.") };
     }
@@ -653,7 +659,7 @@ export const useAuth = defineStore("auth", () => {
     }
   };
 
-  const completeAuthCallback = async (code: string): Promise<{ error: Error | null }> => {
+  const completeAuthCallback = async (code: string): Promise<ResetPasswordResult> => {
     if (!isBrowserRuntime || !browserClient) {
       return { error: new Error("Browser authentication is unavailable in this runtime.") };
     }

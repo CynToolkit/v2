@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { uiDevPort, getUiDevServerFatalError } from "@pipelab/constants";
 import { getDefaultUserDataPath, projectRoot } from "@pipelab/core-node/desktop";
 import { killProcessTree } from "./process-tree";
+import type { SpawnServerResult } from "./server-process.types";
 
 const READY_TIMEOUT_MS = 60_000;
 const STOP_TIMEOUT_MS = 10_000;
@@ -82,7 +83,7 @@ const isUp = (
 const getCliDirectory = () =>
   is.dev && projectRoot ? join(projectRoot, "apps", "cli") : join(app.getAppPath(), "dist", "cli");
 
-const spawnServer = (preferredPort: number): Promise<{ child: ChildProcess; port: number }> => {
+const spawnServer = (preferredPort: number): Promise<SpawnServerResult> => {
   const releaseTag = app.getVersion().includes("beta") ? "beta" : "latest";
   const userDataPath =
     (process.env.PIPELAB_TEST_DESKTOP === "1" && process.env.PIPELAB_TEST_DESKTOP_USER_DATA_PATH) ||

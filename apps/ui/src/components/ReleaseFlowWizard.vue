@@ -252,28 +252,18 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, toRaw, watch } from "vue";
-import Dialog from "primevue/dialog";
-import Stepper from "primevue/stepper";
-import StepList from "primevue/steplist";
-import Step from "primevue/step";
-import StepPanels from "primevue/steppanels";
-import StepPanel from "primevue/steppanel";
-import InputText from "primevue/inputtext";
-import Textarea from "primevue/textarea";
-import Button from "primevue/button";
 import { nanoid } from "nanoid";
-import type { IconType, ReleaseConfig, ReleaseFieldDefinition } from "@pipelab/shared";
+import type { IconType, ReleaseFieldDefinition } from "@pipelab/shared";
 import { useAPI } from "../composables/api";
 import { useAgentAvailability } from "../composables/useAgentAvailability";
 import { uiEnvironment } from "../composables/ui-runtime";
 import { useAppStore } from "../store/app";
 import {
   destinationIcon as resolveDestinationIcon,
+  sourceIcon as resolveSourceIcon,
   providerIconClass,
   providerIconImage,
-  sourceIcon as resolveSourceIcon,
 } from "../utils/provider-icons";
-import ReleaseFieldControl from "./ReleaseFieldControl.vue";
 
 const wizardFields = (fields?: ReleaseFieldDefinition[]) =>
   fields?.filter((field) => field.showInWizard) ?? [];
@@ -286,8 +276,6 @@ import {
   releaseWizardCanCreate,
   releaseWizardCanReview,
   releaseWizardDestination,
-  releaseWizardNextStep,
-  releaseWizardPreviousStep,
   releaseWizardRecap,
   releaseWizardIsOfflineBrowserDraft,
   releaseWizardSourceIsReady,
@@ -295,13 +283,23 @@ import {
   releaseWizardTargetAvailability,
   RELEASE_WIZARD_STEPS,
   type ReleaseWizardStep,
+  releaseWizardNextStep,
+  releaseWizardPreviousStep,
 } from "./ReleaseFlowWizard-state";
+import type { ReleaseFlowWizardProps, ReleaseFlowWizardEmits } from "./ReleaseFlowWizard.types";
+import Dialog from "primevue/dialog";
+import Stepper from "primevue/stepper";
+import StepList from "primevue/steplist";
+import Step from "primevue/step";
+import StepPanels from "primevue/steppanels";
+import StepPanel from "primevue/steppanel";
+import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
+import Button from "primevue/button";
+import ReleaseFieldControl from "./ReleaseFieldControl.vue";
 
-const props = defineProps<{ visible: boolean; projectId?: string }>();
-const emit = defineEmits<{
-  "update:visible": [value: boolean];
-  create: [flow: ReleaseConfig];
-}>();
+const props = defineProps<ReleaseFlowWizardProps>();
+const emit = defineEmits<ReleaseFlowWizardEmits>();
 const api = useAPI();
 const appStore = useAppStore();
 const { isReady } = useAgentAvailability();

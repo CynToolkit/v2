@@ -5,10 +5,9 @@ import { electronWorkflowTaskFactories } from "./package-v2";
 import { electronPhases } from "./phases";
 import { requiresMacHostForMacTargets } from "../host-matrix";
 import { electronProviderLogo } from "../provider-icons";
+import type { ElectronTargetInputsResult } from "./index.types";
 
-export const electronTargetInputs = (
-  targetId: string,
-): { platform: "win32" | "linux" | "darwin"; arch: "x64" | "arm64" } => {
+export const electronTargetInputs = (targetId: string): ElectronTargetInputsResult => {
   const [target, arch] = targetId.split("-");
   const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
   const supportedArch = pickLiteral(["x64", "arm64"], arch);

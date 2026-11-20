@@ -1,6 +1,7 @@
 import { cp, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
+import type { RemovePathOptions } from "./filesystem.types";
 
 declare global {
   namespace NodeJS {
@@ -190,10 +191,7 @@ export async function copyPath({
   return { output: to, input: from, parentDirectory: dirname(to) };
 }
 
-export async function removePath(
-  from: string,
-  options: { recursive?: boolean; log?: (...args: unknown[]) => void } = {},
-): Promise<void> {
+export async function removePath(from: string, options: RemovePathOptions = {}): Promise<void> {
   if (!from) throw new Error("Missing source");
   const { recursive = true, log = () => undefined } = options;
   log("Removing", from, recursive);

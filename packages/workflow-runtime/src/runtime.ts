@@ -21,6 +21,7 @@ import {
 } from "./types";
 import { RUN_COMMAND_TASK_ID, runCommandTask } from "./tasks/run-command";
 import type { WorkflowArtifactReference } from "./types";
+import type { FieldsByAlias } from "./runtime.types";
 
 const builtInTasks: WorkflowTaskRegistry = {
   [RUN_COMMAND_TASK_ID]: runCommandTask,
@@ -221,7 +222,7 @@ const validateConnectionRequirements = (
 ): void => {
   if (requirements === undefined) return;
 
-  const fieldsByAlias = new Map<string, { required: boolean; fields: Map<string, boolean> }>();
+  const fieldsByAlias = new Map<string, FieldsByAlias>();
   for (const requirement of requirements) {
     if (
       !requirement.alias.trim() ||

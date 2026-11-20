@@ -1,3 +1,5 @@
+import type { RunStepLabelStep } from "./run-step-label.types";
+
 const KNOWN_TASKS: Record<string, string> = {
   passthrough: "Prepare source",
   "export-construct-project": "Export Construct project",
@@ -24,12 +26,7 @@ const TARGETS: Array<[RegExp, string]> = [
 ];
 
 /** A readable label for a run step, derived from its task; falls back to the raw id. */
-export const runStepLabel = (step: {
-  id: string;
-  name?: string;
-  uses?: string;
-  destinationName?: string;
-}): string => {
+export const runStepLabel = (step: RunStepLabelStep): string => {
   if (!step.uses) return step.name || step.id;
   const task = step.uses.replace(/^@pipelab\/(core|plugin-[^/]+)\//, "");
   const plugin = /^@pipelab\/plugin-([^/]+)\//.exec(step.uses)?.[1];

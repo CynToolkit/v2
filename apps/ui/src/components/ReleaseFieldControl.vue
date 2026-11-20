@@ -215,27 +215,18 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from "vue";
+import type {
+  ReleaseFieldControlProps,
+  ReleaseFieldControlEmits,
+} from "./ReleaseFieldControl.types";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
-import type { ReleaseFieldDefinition, ReleaseFieldOption, ValidationIssue } from "@pipelab/shared";
 import PathPicker from "./PathPicker.vue";
 
-const props = defineProps<{
-  field: ReleaseFieldDefinition;
-  options: ReleaseFieldOption[];
-  inputId: string;
-  connectionBinding?: string;
-  connectionBindingSuggestion?: ReleaseFieldOption;
-  issues?: ValidationIssue[];
-  allowPathEdit?: boolean;
-  hideAdvanced?: boolean;
-}>();
+const props = defineProps<ReleaseFieldControlProps>();
 const model = defineModel<string>("value", { required: true });
-const emit = defineEmits<{
-  "update:connection-binding": [connectionId: string];
-  "add-connection": [integration: string];
-}>();
+const emit = defineEmits<ReleaseFieldControlEmits>();
 const environmentReference = /^\$\{\{\s*env\.([\s\S]*?)\s*\}\}$/;
 const environmentVariableNamePattern = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const workflowConnectionAliasPattern = /^[A-Za-z_][A-Za-z0-9_-]*$/;
