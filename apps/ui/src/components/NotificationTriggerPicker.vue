@@ -6,7 +6,7 @@
         <Select
           class="rule-event"
           :model-value="trigger.on"
-          :options="TRIGGER_EVENTS as unknown as EventOption[]"
+          :options="eventOptions"
           option-label="label"
           option-value="on"
           :aria-label="`Event ${index + 1}`"
@@ -116,6 +116,7 @@ const props = defineProps<{
   destinations: Array<{ id: string; label: string; icon?: IconType }>;
 }>();
 
+const eventOptions: EventOption[] = [...TRIGGER_EVENTS];
 const eventOf = (kind: TriggerEventKind) => TRIGGER_EVENTS.find((event) => event.on === kind);
 const destinationOf = (id: string) =>
   props.destinations.find((destination) => destination.id === id);

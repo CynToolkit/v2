@@ -7,6 +7,7 @@ import { runWorkflowTask } from "@pipelab/test-utils";
 import type { ConstructWorkflowTaskServices } from "../../export-c3p";
 import { constructExportWorkflowTaskFactory } from "../../export-c3p";
 import { exportc3p } from "../../export-shared.js";
+import { partialDouble } from "@pipelab/shared";
 
 vi.mock("../../export-shared.js", () => ({ exportc3p: vi.fn() }));
 
@@ -31,11 +32,11 @@ const makeSandbox = async () => {
   return { root, file };
 };
 
-const taskServices = {
+const taskServices = partialDouble<ConstructWorkflowTaskServices>({
   context: { getThirdPartyPath: () => join(tmpdir(), "pipelab-thirdparty") },
   executables: { node: process.execPath, pnpm: "pnpm" },
   run: { projectId: "construct-test-project" },
-} as unknown as ConstructWorkflowTaskServices;
+});
 
 afterEach(async () => {
   exportMock.mockReset();

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ReleaseConfig } from "@pipelab/shared";
 import { withoutUnavailableDestinations } from "./unavailable-destinations";
+import { partialDouble } from "@pipelab/shared";
 
-const config = {
+const config = partialDouble<ReleaseConfig>({
   destinations: [
     {
       id: "cloud",
@@ -19,7 +20,7 @@ const config = {
       slots: [],
     },
   ],
-} as unknown as ReleaseConfig;
+});
 
 describe("withoutUnavailableDestinations", () => {
   it("disables Pipelab Cloud when no Cloud Worker is configured", () => {

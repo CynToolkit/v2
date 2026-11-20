@@ -133,7 +133,7 @@ export class PipelabContext {
     return this.getConfigPath("projects.json");
   }
 
-  private _cachedSettings: any = null;
+  private _cachedSettings: { tempFolder?: string; cacheFolder?: string } | null = null;
   private _cachedSettingsTime: number = 0;
 
   private getSettings() {
@@ -229,7 +229,7 @@ export class PipelabContext {
       [SandboxFolder.Artifacts]: { label: "Artifacts", path: this.getArtifactsPath() },
     };
 
-    return (Object.keys(foldersRecord) as SandboxFolder[]).map((key) => ({
+    return Object.values(SandboxFolder).map((key) => ({
       name: key,
       ...foldersRecord[key],
     }));

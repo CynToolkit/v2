@@ -16,13 +16,24 @@ if (!username || !password) throw new Error("Required Construct credentials are 
 
 const appDataPath = join(homedir(), ".config", "@pipelab", "app-dev");
 const benchmarkProjectId = "construct-benchmark-project";
-const context = {
+const unsupported = (name: string) => () => {
+  throw new Error(`${name} is not available in the Construct benchmark host.`);
+};
+const context: ConstructWorkflowTaskServices["context"] = {
   releaseTag: "dev",
+  getTempPath: unsupported("getTempPath"),
+  createTempFolder: unsupported("createTempFolder"),
+  getPnpmPath: unsupported("getPnpmPath"),
+  getNodePath: unsupported("getNodePath"),
+  getConnectionsPath: unsupported("getConnectionsPath"),
+  ensureNodeJS: unsupported("ensureNodeJS"),
+  ensurePNPM: unsupported("ensurePNPM"),
+  resolveBundledAsset: unsupported("resolveBundledAsset"),
   getPackagesPath: (...segments: string[]) => join(appDataPath, "packages", ...segments),
   getThirdPartyPath: (...segments: string[]) => join(appDataPath, "thirdparty", ...segments),
   getCachePath: (folder = "pipelines", ...segments: string[]) =>
     join(appDataPath, "cache", folder, ...segments),
-} as unknown as ConstructWorkflowTaskServices["context"];
+};
 const services: ConstructWorkflowTaskServices = {
   context,
   executables: { node: process.execPath, pnpm: "pnpm" },

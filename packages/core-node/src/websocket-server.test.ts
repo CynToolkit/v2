@@ -28,6 +28,7 @@ vi.mock("ws", async (importOriginal) => {
 
 import { WebSocketServer } from "./websocket-server";
 import { useAPI } from "./ipc-core";
+import { partialDouble } from "@pipelab/shared";
 
 describe("WebSocket request logging", () => {
   afterEach(() => {
@@ -46,16 +47,16 @@ describe("WebSocket request logging", () => {
     });
     const debug = vi.spyOn(useLogger().logger(), "debug");
     const server = new WebSocketServer();
-    const httpServer = {
+    const httpServer = partialDouble<Server>({
       listening: true,
       on: vi.fn(),
       address: () => ({ port: 3000 }),
       close: vi.fn(),
-    } as unknown as Server;
+    });
     await server.start(3000, httpServer);
 
     const clientListeners: Record<string, (data: Buffer) => void> = {};
-    const client = {
+    const client = partialDouble<WSWebSocket>({
       url: "ws://localhost",
       readyState: WSWebSocket.OPEN,
       on: vi.fn((event: string, listener: (data: Buffer) => void) => {
@@ -63,7 +64,7 @@ describe("WebSocket request logging", () => {
       }),
       send: vi.fn(),
       close: vi.fn(),
-    } as unknown as WSWebSocket;
+    });
     const request = { headers: {}, url: "/" } as IncomingMessage;
     websocketMocks.handlers.connection?.(client, request);
     clientListeners.message?.(

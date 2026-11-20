@@ -19,6 +19,10 @@ const browserStorage = (): PreferenceStorage | undefined => {
   }
 };
 
+/** The supported locale equal to `value`, if any. */
+export const findLocale = (value: unknown): Locales | undefined =>
+  supportedLocales.find((locale) => locale === value);
+
 export const readBrowserPreferences = (
   storage: Pick<Storage, "getItem"> | undefined = browserStorage(),
 ): BrowserPreferences => {
@@ -28,9 +32,7 @@ export const readBrowserPreferences = (
     const locale = storage.getItem("pipelab.locale");
     return {
       theme: theme === "dark" || theme === "light" ? theme : defaultPreferences.theme,
-      locale: supportedLocales.includes(locale as Locales)
-        ? (locale as Locales)
-        : defaultPreferences.locale,
+      locale: findLocale(locale) ?? defaultPreferences.locale,
     };
   } catch {
     return { ...defaultPreferences };

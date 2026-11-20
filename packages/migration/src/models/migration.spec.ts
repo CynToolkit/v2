@@ -136,7 +136,7 @@ describe("migrator", () => {
       version: "1.0.0",
     };
 
-    const steps: any[] = [];
+    const steps: unknown[] = [];
     await migratorMigrations.migrate(input, {
       onStep: async (state, version) => {
         steps.push({ ...state, version });

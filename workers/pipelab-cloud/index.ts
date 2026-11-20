@@ -137,8 +137,8 @@ const randomShareToken = () => toBase64Url(crypto.getRandomValues(new Uint8Array
 
 function getDefaultKey(value: string | undefined): string | undefined {
   if (!value) return undefined;
-  const parsed = JSON.parse(value) as { default?: unknown };
-  return typeof parsed.default === "string" ? parsed.default : undefined;
+  const parsed: unknown = JSON.parse(value);
+  return isRecord(parsed) && typeof parsed.default === "string" ? parsed.default : undefined;
 }
 
 function getSupabaseConfig(env: Env) {
@@ -153,7 +153,9 @@ function getSupabaseConfig(env: Env) {
 }
 
 function getR2(env: Env) {
-  const config = getR2StorageConfig((name) => env[name as keyof Env]);
+  const config = getR2StorageConfig(
+    (name) => Object.entries(env).find(([key]) => key === name)?.[1],
+  );
   const client = new S3Client({
     region: "auto",
     endpoint: config.endpoint,
@@ -1132,11 +1134,12 @@ export async function cleanupExpiredArtifacts(env: Env) {
   if (reservationClaimError) throw reservationClaimError;
   let reservationsDeleted = 0;
   let reservationsFailed = 0;
-  for (const reservation of (reservations ?? []) as Array<{
+  const claimedReservations: Array<{
     id: string;
     storage_key: string;
     multipart_upload_id?: string | null;
-  }>) {
+  }> = reservations ?? [];
+  for (const reservation of claimedReservations) {
     try {
       if (reservation.multipart_upload_id) {
         await storage.client.send(
@@ -1166,19 +1169,19 @@ export async function cleanupExpiredArtifacts(env: Env) {
     }
   }
 
-  let warnings: unknown[] = [];
-  if (entitlementChecksSucceeded) {
-    const { data, error } = await admin.rpc("claim_pipelab_cloud_deletion_warnings");
-    if (error) throw error;
-    warnings = data ?? [];
-  }
-  let emailsSent = 0;
-  let emailsFailed = 0;
-  for (const warning of warnings as Array<{
+  let pendingWarnings: Array<{
     user_id: string;
     email: string | null;
     deadline_at: string;
-  }>) {
+  }> = [];
+  if (entitlementChecksSucceeded) {
+    const { data, error } = await admin.rpc("claim_pipelab_cloud_deletion_warnings");
+    if (error) throw error;
+    pendingWarnings = data ?? [];
+  }
+  let emailsSent = 0;
+  let emailsFailed = 0;
+  for (const warning of pendingWarnings) {
     let acknowledged = false;
     try {
       if (!warning.email || !env.RESEND_API_KEY || !env.PIPELAB_CLOUD_FROM_EMAIL) {
@@ -1230,7 +1233,8 @@ export async function cleanupExpiredArtifacts(env: Env) {
 
   let deleted = 0;
   let failed = 0;
-  for (const artifact of (artifacts ?? []) as Artifact[]) {
+  const claimedArtifacts: Artifact[] = artifacts ?? [];
+  for (const artifact of claimedArtifacts) {
     try {
       await storage.client.send(
         new DeleteObjectCommand({

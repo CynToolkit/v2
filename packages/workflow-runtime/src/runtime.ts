@@ -104,6 +104,11 @@ const replaceReferences = (value: string, resolve: (reference: string) => string
   return cursor === 0 ? value : result + value.slice(cursor);
 };
 
+const isArtifactCloud = (value: unknown): value is NonNullable<WorkflowArtifactInstance["cloud"]> =>
+  isRecord(value) &&
+  typeof value.hostedArtifactId === "string" &&
+  typeof value.uploadedAt === "string";
+
 const isWorkflowArtifactWithPath = (value: Record<string, unknown>): boolean =>
   typeof value.path === "string" &&
   (typeof value.name === "string" ||
@@ -488,7 +493,9 @@ const resolveInputs = (
   env: Record<string, string | undefined>,
 ): Record<string, unknown> => {
   if (!step.with) return {};
-  return resolveValue(step.with, variables, outputs, env) as Record<string, unknown>;
+  const resolved = resolveValue(step.with, variables, outputs, env);
+  if (!isRecord(resolved)) throw new Error(`Step ${step.uses} inputs did not resolve to an object`);
+  return resolved;
 };
 
 const resolveArtifactInputs = (
@@ -746,7 +753,7 @@ export const runWorkflow = async <TServices = unknown>(
       const phaseResults = new Map<string, WorkflowPhaseResult>(
         (step.phases ?? []).map((phase) => [
           phase.id,
-          { ...phase, status: "pending", warnings: [] as string[] },
+          { ...phase, status: "pending", warnings: new Array<string>() },
         ]),
       );
       const phaseDiagnostics: string[] = [];
@@ -1059,8 +1066,8 @@ export const runWorkflow = async <TServices = unknown>(
         if (!isRecord(result))
           throw new Error(`Workflow task ${step.uses} returned invalid outputs`);
 
-        const cloud = result.cloud as WorkflowArtifactInstance["cloud"] | undefined;
-        if (resolvedDeliveryArtifact && cloud && typeof cloud.hostedArtifactId === "string") {
+        const cloud = isArtifactCloud(result.cloud) ? result.cloud : undefined;
+        if (resolvedDeliveryArtifact && cloud) {
           const updatedArtifact = Object.freeze({ ...resolvedDeliveryArtifact, cloud });
           const artifactIndex = artifacts.findIndex(
             (artifact) => artifact.id === resolvedDeliveryArtifact.id,
@@ -1178,7 +1185,7 @@ export const runWorkflow = async <TServices = unknown>(
                 phases: step.phases.map((phase) => ({
                   ...phase,
                   status: "not-reached" as const,
-                  warnings: [] as string[],
+                  warnings: new Array<string>(),
                 })),
               }
             : {}),
@@ -1235,7 +1242,7 @@ export const runWorkflow = async <TServices = unknown>(
                   phases: step.phases.map((phase) => ({
                     ...phase,
                     status: "not-reached" as const,
-                    warnings: [] as string[],
+                    warnings: new Array<string>(),
                   })),
                 }
               : {}),

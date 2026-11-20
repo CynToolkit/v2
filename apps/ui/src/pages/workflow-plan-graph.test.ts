@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ReleaseConfig, ReleasePlan } from "@pipelab/shared";
 import { layoutPlanGraph, PLAN_NODE_HEIGHT, PLAN_NODE_WIDTH } from "./workflow-plan-graph";
+import { partialDouble } from "@pipelab/shared";
 
-const config = {
+const config = partialDouble<ReleaseConfig>({
   source: { provider: "construct" },
   builds: [
     {
@@ -30,7 +31,7 @@ const config = {
       ],
     },
   ],
-} as unknown as ReleaseConfig;
+});
 
 const graph: ReleasePlan["graph"] = {
   nodes: [

@@ -6,6 +6,7 @@ import { EventEmitter } from "node:events";
 import yauzl from "yauzl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { extractZip, zipFolder } from "./fs-extras";
+import { partialDouble } from "@pipelab/shared";
 
 const tempDirs: string[] = [];
 
@@ -54,7 +55,7 @@ describe("extractZip cancellation", () => {
       sourceStopped = true;
       return readStream;
     };
-    const zipfile = new EventEmitter() as unknown as yauzl.ZipFile;
+    const zipfile = partialDouble<yauzl.ZipFile>(new EventEmitter());
     zipfile.close = vi.fn();
     zipfile.readEntry = vi.fn(() => zipfile.emit("entry", entry));
     zipfile.openReadStream = vi.fn((_entry, callback) => callback(null, readStream));

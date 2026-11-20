@@ -20,6 +20,7 @@ vi.mock("@renderer/composables/useConfig", () => ({
 }));
 
 import { useFiles } from "./files";
+import { partialDouble } from "@pipelab/shared";
 
 describe("useFiles persistence boundaries", () => {
   beforeEach(() => {
@@ -83,7 +84,7 @@ describe("useFiles persistence boundaries", () => {
   });
 
   it("removes a project only when it has no workflows", async () => {
-    files.value.workflows = [{ id: "release-1", project: "project-1" } as never];
+    files.value.workflows = [partialDouble({ id: "release-1", project: "project-1" })];
     const store = useFiles();
 
     await expect(store.removeProject("project-1")).rejects.toThrow("cannot be deleted");

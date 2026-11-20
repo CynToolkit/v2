@@ -148,9 +148,7 @@ export const layoutPlanGraph = async (
     x: positions.get(node.id)?.x ?? 0,
     y: positions.get(node.id)?.y ?? 0,
   }));
-  const routed = new Map(
-    ((laidOut.edges ?? []) as ElkExtendedEdge[]).map((edge) => [edge.id, edge]),
-  );
+  const routed = new Map((laidOut.edges ?? []).map((edge) => [edge.id, edge]));
   return {
     nodes,
     edges: edges.map((edge, index) => {

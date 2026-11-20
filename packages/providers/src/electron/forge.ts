@@ -1,3 +1,11 @@
+import {
+  fail,
+  pickLiteral,
+  NODE_PLATFORMS,
+  NODE_ARCHITECTURES,
+  parseJsonRecord,
+  isStringRecord,
+} from "@pipelab/shared";
 import { getBinName, outFolderName } from "@pipelab/constants";
 import { runPnpm, runWithLiveLogs, resolveBundledAsset } from "@pipelab/plugin-core";
 import { detectRuntime } from "../web-runtime";
@@ -152,7 +160,7 @@ export const forge = async (
     const installLegacySupport = configuredCJSOnly || customElectronMayBeLegacy;
     let isCJSOnly = configuredCJSOnly;
 
-    const pkgJSON = JSON.parse(pkgJSONContent) as Record<string, unknown>;
+    const pkgJSON = parseJsonRecord(pkgJSONContent);
     const dependencySection = (field: "dependencies" | "devDependencies") => {
       const section = pkgJSON[field];
       if (section === undefined) {
@@ -160,15 +168,10 @@ export const forge = async (
         pkgJSON[field] = created;
         return created;
       }
-      if (
-        typeof section !== "object" ||
-        section === null ||
-        Array.isArray(section) ||
-        !Object.values(section).every((value) => typeof value === "string")
-      ) {
+      if (!isStringRecord(section)) {
         throw new Error(`Electron template package.json has an invalid ${field} section`);
       }
-      return section as Record<string, string>;
+      return section;
     };
     log("Setting name to", sanitizedName);
     pkgJSON.name = sanitizedName;
@@ -239,9 +242,9 @@ export const forge = async (
     });
 
     if (customElectronSpec !== undefined) {
-      const installedElectron = JSON.parse(
+      const installedElectron = parseJsonRecord(
         await readFile(join(destinationFolder, "node_modules", "electron", "package.json"), "utf8"),
-      ) as { version?: unknown };
+      );
       if (
         typeof installedElectron.version !== "string" ||
         !semver.valid(installedElectron.version)
@@ -251,10 +254,7 @@ export const forge = async (
       completeConfiguration.electronVersion = installedElectron.version;
       isCJSOnly = semver.lt(installedElectron.version, "28.0.0");
 
-      const installedManifest = JSON.parse(await readFile(pkgJSONPath, "utf8")) as Record<
-        string,
-        unknown
-      >;
+      const installedManifest = parseJsonRecord(await readFile(pkgJSONPath, "utf8"));
       installedManifest.type = isCJSOnly ? "commonjs" : "module";
       await writeFile(pkgJSONPath, JSON.stringify(installedManifest, null, 2));
       await writeFile(
@@ -354,9 +354,14 @@ export const forge = async (
 
     try {
       log("typeof inputs.platform", typeof inputs.platform);
-      const finalPlatform = inputPlatform ?? osPlatform() ?? "";
+      const finalPlatform: NodeJS.Platform = inputPlatform
+        ? (pickLiteral(NODE_PLATFORMS, inputPlatform) ??
+          fail(`Unsupported platform: ${inputPlatform}`))
+        : osPlatform();
       log("finalPlatform", finalPlatform);
-      const finalArch = inputArch ?? osArch() ?? "";
+      const finalArch: NodeJS.Architecture = inputArch
+        ? (pickLiteral(NODE_ARCHITECTURES, inputArch) ?? fail(`Unsupported arch: ${inputArch}`))
+        : osArch();
 
       await phase("package", async ({ success }) => {
         await runWithLiveLogs(
@@ -397,11 +402,7 @@ export const forge = async (
             throw new Error("Electron Forge completed without producing an output directory");
           }
           if (action === "package" && completeConfiguration.patchExecutable) {
-            const outName = outFolderName(
-              completeConfiguration.name,
-              finalPlatform as NodeJS.Platform,
-              finalArch as NodeJS.Architecture,
-            );
+            const outName = outFolderName(completeConfiguration.name, finalPlatform, finalArch);
             const binary = join(
               outDir,
               outName,
@@ -411,7 +412,7 @@ export const forge = async (
               if (finalPlatform !== "win32") {
                 return skip("Executable patching is only supported on Windows");
               }
-              await patchExecutableWithGpupatch(binary, finalPlatform as NodeJS.Platform, {
+              await patchExecutableWithGpupatch(binary, finalPlatform, {
                 context,
                 log,
                 abortSignal,
@@ -428,11 +429,7 @@ export const forge = async (
       }
 
       if (action === "package") {
-        const outName = outFolderName(
-          completeConfiguration.name,
-          finalPlatform as NodeJS.Platform,
-          finalArch as NodeJS.Architecture,
-        );
+        const outName = outFolderName(completeConfiguration.name, finalPlatform, finalArch);
         const binName = getBinName(completeConfiguration.name, finalPlatform);
 
         const output = join(cwd, "out", outName);

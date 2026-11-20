@@ -4,6 +4,7 @@ import {
   appSettingsMigrator,
   defaultConnections,
   defaultFileRepo,
+  type AppConfig,
   type ConnectionsConfig,
   type FileRepo,
   type BrowserProfileCandidate,
@@ -107,11 +108,13 @@ export const registerConfigHandlers = (context: PipelabContext) => {
     try {
       const manager = await setupSettingsConfigFile(context);
       const currentConfig = await manager.getConfig();
-      const defaultValue = (appSettingsMigrator.defaultValue as any)[key];
+      const defaultValue = Object.entries(appSettingsMigrator.defaultValue).find(
+        ([name]) => name === key,
+      )?.[1];
       await manager.setConfig({
-        ...(currentConfig ? (currentConfig as any) : {}),
+        ...currentConfig,
         [key]: defaultValue,
-      } as any);
+      });
       send({
         type: "end",
         data: { type: "success", result: "ok" },

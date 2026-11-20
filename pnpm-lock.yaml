@@ -527,6 +527,9 @@ importers:
       tar:
         specifier: 7.5.21
         version: 7.5.21
+      valibot:
+        specifier: 1.4.2
+        version: 1.4.2(typescript@5.9.3)
       ws:
         specifier: 8.21.0
         version: 8.21.0

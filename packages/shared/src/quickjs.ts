@@ -19,7 +19,9 @@ class EvaluationError extends Error {
  * Callers are responsible for importing and passing the correct variant
  * for their environment (Node vs browser) using a static import.
  */
-export const createQuickJsFromVariant = async (variant: any) => {
+export const createQuickJsFromVariant = async (
+  variant: Parameters<typeof newQuickJSWASMModuleFromVariant>[0],
+) => {
   const { logger } = useLogger();
 
   const quickjs = await newQuickJSWASMModuleFromVariant(variant);

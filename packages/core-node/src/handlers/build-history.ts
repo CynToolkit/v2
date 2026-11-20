@@ -8,6 +8,8 @@ import {
   isSafePersistedId,
   BuildHistoryEntry,
   IBuildHistoryStorage,
+  hasErrorCode,
+  type BuildHistoryStorageInfo,
 } from "@pipelab/shared";
 import { checkDiskSpace } from "check-disk-space";
 import { getFolderSize } from "../utils/fs-extras";
@@ -47,7 +49,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
     try {
       data = await readFile(historyPath, "utf-8");
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+      if (hasErrorCode(error, "ENOENT")) return [];
       throw error;
     }
     try {
@@ -355,7 +357,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
 
           for (const entry of entries) await this.removeRunArtifacts(projectId, entry);
           await unlink(join(this.getStoragePath(), file)).catch((error) => {
-            if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+            if (!hasErrorCode(error, "ENOENT")) throw error;
           });
         });
       }
@@ -377,12 +379,12 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
 
         for (const entry of entries) await this.removeRunArtifacts(projectId, entry);
         await unlink(historyPath).catch((error) => {
-          if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+          if (!hasErrorCode(error, "ENOENT")) throw error;
         });
         this.logger.logger().info(`Cleared history for project "${projectId}"`);
       });
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
+    } catch (error) {
+      if (hasErrorCode(error, "ENOENT")) {
         this.logger
           .logger()
           .warn(`No history file found for project "${projectId}". Nothing to clear.`);
@@ -393,20 +395,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
     }
   }
 
-  async getStorageInfo(): Promise<{
-    totalEntries: number;
-    totalSize: number;
-    oldestEntry?: number;
-    newestEntry?: number;
-    numberOfProjects: number;
-    userDataPath: string;
-    disk: {
-      total: number;
-      free: number;
-      pipelab: number;
-      folders: Array<{ name: SandboxFolder; label: string; size: number }>;
-    };
-  }> {
+  async getStorageInfo(): Promise<BuildHistoryStorageInfo> {
     try {
       const allEntries = await this.getAll();
       const files = await this.getAllProjectFiles();
@@ -478,7 +467,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       const files = await readdir(this.getStoragePath());
       return files.filter((file) => file.endsWith(".history.json"));
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+      if (hasErrorCode(error, "ENOENT")) return [];
       throw error;
     }
   }

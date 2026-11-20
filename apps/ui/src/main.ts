@@ -116,7 +116,7 @@ const app = createApp(Root);
 
 app.use(router);
 app.use(pinia);
-app.use(VueDOMPurifyHTML as any);
+app.use(VueDOMPurifyHTML);
 app.use(PrimeVue, {
   // PrimeVue 5 verifies a PrimeUI license; without a key it shows an "Invalid PrimeUI License" banner.
   license: process.env.PRIME_UI_KEY || undefined,
@@ -127,13 +127,13 @@ app.use(PrimeVue, {
     },
   },
 });
-app.use(ToastService as any);
-app.use(ConfirmationService as any);
+app.use(ToastService);
+app.use(ConfirmationService);
 if (window.isPackaged && process.env.TEST !== "true") {
-  app.use(posthogPlugin as any);
+  app.use(posthogPlugin);
 }
 app.use(i18n);
-app.directive("tooltip", Tooltip as any);
+app.directive("tooltip", Tooltip);
 
 const { logger } = useLogger();
 

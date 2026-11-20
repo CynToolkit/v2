@@ -8,9 +8,7 @@ import { join } from "node:path";
 function resolveDevVersion(fallback: string): string {
   if (!isDev || !projectRoot || fallback !== "local") return fallback;
   try {
-    const pkg = JSON.parse(
-      readFileSync(join(projectRoot, "apps", "cli", "package.json"), "utf-8"),
-    );
+    const pkg = JSON.parse(readFileSync(join(projectRoot, "apps", "cli", "package.json"), "utf-8"));
     if (pkg.version) return pkg.version;
   } catch {
     // fall through to caller-provided version
@@ -53,12 +51,12 @@ export const registerSystemHandlers = (options: { version: string; context: Pipe
           result: true,
         },
       });
-    } catch (e: any) {
+    } catch (e) {
       send({
         type: "end",
         data: {
           type: "error",
-          ipcError: e.message,
+          ipcError: e instanceof Error ? e.message : String(e),
         },
       });
     }

@@ -91,14 +91,14 @@ export const registerAuthHandlers = (context: PipelabContext) => {
     const { email, password } = value;
     logger().info("[Auth] signInWithPassword");
     const result = await client.auth.signInWithPassword({ email, password });
-    return send({ type: "end", data: { type: "success", result: result as any } });
+    return send({ type: "end", data: { type: "success", result } });
   });
 
   handle("auth:signUp", async (_, { value, send }) => {
     const { email, password } = value;
     logger().info("[Auth] signUp");
     const result = await client.auth.signUp({ email, password });
-    return send({ type: "end", data: { type: "success", result: result as any } });
+    return send({ type: "end", data: { type: "success", result } });
   });
 
   handle("auth:signOut", async (_, { send }) => {
@@ -140,12 +140,9 @@ export const registerAuthHandlers = (context: PipelabContext) => {
   // Maintain logs for the backend state change and broadcast to all clients
   client.auth.onAuthStateChange(async (event, session) => {
     logger().info("[Auth] State changed, broadcasting:", event);
-    webSocketServer.broadcast(
-      "auth:getUser" as any,
-      {
-        type: "end",
-        data: { type: "success", result: { user: session?.user || null } },
-      } as any,
-    );
+    webSocketServer.broadcast("auth:getUser", {
+      type: "end",
+      data: { type: "success", result: { user: session?.user || null } },
+    });
   });
 };

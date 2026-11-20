@@ -7,9 +7,10 @@ import {
   SAVE_DELAY_MS,
   type WorkflowDocumentDeps,
 } from "./workflow-document";
+import { partialDouble } from "@pipelab/shared";
 
 const config = (over: Partial<ReleaseConfig> = {}): ReleaseConfig =>
-  ({
+  partialDouble<ReleaseConfig>({
     version: "3.1.0",
     id: "flow-1",
     project: "main",
@@ -18,7 +19,7 @@ const config = (over: Partial<ReleaseConfig> = {}): ReleaseConfig =>
     builds: [],
     destinations: [],
     ...over,
-  }) as unknown as ReleaseConfig;
+  });
 
 const setup = (stored: ReleaseConfig = config()) => {
   let saved = stored;
@@ -37,7 +38,7 @@ const setup = (stored: ReleaseConfig = config()) => {
   const flowId = ref("flow-1");
   const projectId = ref("main");
   const isReady = ref(true);
-  const deps = { flowId, projectId, isReady, execute } as unknown as WorkflowDocumentDeps;
+  const deps = partialDouble<WorkflowDocumentDeps>({ flowId, projectId, isReady, execute });
   const doc = createWorkflowDocument(deps);
   return {
     doc,
@@ -153,13 +154,15 @@ describe("workflow document", () => {
   it("refuses to save when told it is blocked", async () => {
     const { execute } = setup();
     const flowId = ref("flow-1");
-    const doc = createWorkflowDocument({
-      flowId,
-      projectId: ref("main"),
-      isReady: ref(true),
-      execute,
-      saveBlockedReason: () => "Fix invalid names",
-    } as unknown as WorkflowDocumentDeps);
+    const doc = createWorkflowDocument(
+      partialDouble<WorkflowDocumentDeps>({
+        flowId,
+        projectId: ref("main"),
+        isReady: ref(true),
+        execute,
+        saveBlockedReason: () => "Fix invalid names",
+      }),
+    );
     await doc.load();
     doc.flow.value!.name = "x";
     await expect(doc.flush()).rejects.toThrow("Fix invalid names");

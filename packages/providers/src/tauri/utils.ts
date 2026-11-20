@@ -21,7 +21,7 @@ export const defaultTauriConfig = {
   steamGameId: 480,
   enableDiscordSupport: false,
   discordAppId: "",
-  ignore: [] as string[],
+  ignore: new Array<string>(),
   backgroundColor: "#FFF",
   openDevtoolsOnStart: false,
   enableDoctor: false,

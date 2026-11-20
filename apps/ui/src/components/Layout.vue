@@ -473,7 +473,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, watch, onUnmounted, defineAsyncComponent } from "vue";
+import {
+  ref,
+  computed,
+  inject,
+  watch,
+  onUnmounted,
+  defineAsyncComponent,
+  type HTMLAttributes,
+  type StyleValue,
+} from "vue";
 import { useAuth } from "@renderer/store/auth";
 import { OpenUpgradeDialogKey } from "../utils/injection-keys";
 import { useShell } from "@renderer/composables/use-shell";
@@ -481,18 +490,18 @@ import { uiEnvironment } from "@renderer/composables/ui-runtime";
 interface MenuItem {
   label?: string;
   icon?: string;
-  command?: (event: any) => void;
+  command?: (event: unknown) => void;
   url?: string;
   items?: MenuItem[];
   disabled?: boolean;
   visible?: boolean;
   target?: string;
   separator?: boolean;
-  style?: any;
-  class?: any;
+  style?: StyleValue;
+  class?: HTMLAttributes["class"];
   key?: string;
 }
-import { useLogger } from "@pipelab/shared";
+import { fail, useLogger } from "@pipelab/shared";
 import UpgradeNowButton from "@renderer/components/UpgradeNowButton.vue";
 import Menu from "primevue/menu";
 import Button from "primevue/button";
@@ -580,7 +589,8 @@ const agentNoticeIcon = computed(() =>
 
 const isElectron = !!window.electron;
 
-const openUpgradeDialog = inject(OpenUpgradeDialogKey) as () => void;
+const openUpgradeDialog =
+  inject(OpenUpgradeDialogKey) ?? fail("The upgrade dialog was not provided to the layout.");
 
 const $helpMenu = ref();
 

@@ -7,6 +7,7 @@ import {
   filterBuildChoices,
   groupBuildChoices,
 } from "./build-choices";
+import { partialDouble } from "@pipelab/shared";
 
 const choice = (engine: string, engineLabel: string, target: string): CompatibleBuildCandidate => ({
   type: "desktop",
@@ -63,7 +64,7 @@ describe("build choices", () => {
   });
 
   it("recognises a build the workflow already has for the same engine, type and target", () => {
-    const flow = {
+    const flow = partialDouble<ReleaseConfig>({
       builds: [
         {
           id: "b1",
@@ -92,7 +93,7 @@ describe("build choices", () => {
           ],
         },
       ],
-    } as unknown as ReleaseConfig;
+    });
 
     expect(buildChoiceAlreadyAdded(flow, choices[0]!)).toBe(true);
     expect(buildChoiceAlreadyAdded(flow, choices[1]!)).toBe(false);

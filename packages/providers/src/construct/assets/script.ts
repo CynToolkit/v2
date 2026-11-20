@@ -82,6 +82,13 @@ export const constructAccountOrigin = (version: string | undefined) => {
   return isBeta ? "https://accountbeta.construct.net" : "https://account.construct.net";
 };
 
+declare global {
+  interface Window {
+    /** Set by the preference seeding script injected into the Construct editor page. */
+    __pipelabConstructPreferencesReady?: Promise<ConstructSettingsSeedResult>;
+  }
+}
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -395,13 +402,10 @@ export const navigateToConstruct = async (
 
   const seededPreferences = await awaitWithAbort(
     page.evaluate(async () => {
-      const state = window as Window & {
-        __pipelabConstructPreferencesReady?: Promise<ConstructSettingsSeedResult>;
-      };
-      if (!state.__pipelabConstructPreferencesReady) {
+      if (!window.__pipelabConstructPreferencesReady) {
         throw new Error("Construct editor preference seeding did not run for this origin");
       }
-      return await state.__pipelabConstructPreferencesReady;
+      return await window.__pipelabConstructPreferencesReady;
     }),
     signal,
   );
@@ -536,8 +540,8 @@ export const prepareConstructEditor = async (
   );
   const authState = await awaitWithAbort(
     page.evaluate(async () => {
-      const data = await localforage.getItem("login-data");
-      return data as unknown;
+      const data: unknown = await localforage.getItem("login-data");
+      return data;
     }),
     abortSignal,
   );

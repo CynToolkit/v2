@@ -1,4 +1,5 @@
 import { useAPI } from "../ipc-core";
+import type { Stats } from "node:fs";
 import { useLogger } from "@pipelab/shared";
 import { writeFile, readFile, readdir, stat, mkdir, access } from "node:fs/promises";
 import { constants } from "node:fs";
@@ -60,7 +61,7 @@ export const registerFsHandlers = (_context: PipelabContext) => {
       const files = await Promise.all(
         entries.map(async (entry) => {
           const fullPath = join(value.path, entry.name);
-          let stats: any = {};
+          let stats: Stats | undefined;
           try {
             stats = await stat(fullPath);
           } catch (e) {
@@ -71,8 +72,8 @@ export const registerFsHandlers = (_context: PipelabContext) => {
             name: entry.name,
             isDirectory: entry.isDirectory(),
             isSymbolicLink: entry.isSymbolicLink(),
-            size: stats.size || 0,
-            mtime: stats.mtime?.getTime() || 0,
+            size: stats?.size || 0,
+            mtime: stats?.mtime?.getTime() || 0,
           };
         }),
       );

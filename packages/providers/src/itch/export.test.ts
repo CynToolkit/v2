@@ -6,6 +6,7 @@ import { runWithLiveLogs, type PipelabContext } from "@pipelab/plugin-core";
 import { createLocalHost, runWorkflow } from "@pipelab/workflow-runtime";
 import { ensureButler } from "./ensure.js";
 import { createItchUploadTask, type ItchTaskServices, WORKFLOW_TASK_ID } from "./export.js";
+import { invalidInput, partialDouble } from "@pipelab/shared";
 
 vi.mock("./ensure.js", () => ({ ensureButler: vi.fn(async () => "/mock/butler") }));
 vi.mock("@pipelab/plugin-core", async (importOriginal) => {
@@ -16,7 +17,7 @@ vi.mock("@pipelab/plugin-core", async (importOriginal) => {
       args[4]?.onStdout?.(
         '{"type":"log","level":"info","message":"Upload started","time":1}\n' +
           '{"type":"progress","progress":50,"eta":10,"bps":2,"time":1736873335}\n',
-        undefined as never,
+        invalidInput(undefined),
       );
     }),
   };
@@ -42,10 +43,10 @@ describe("Itch native upload task", () => {
     );
     const signal = new AbortController().signal;
     const services: ItchTaskServices = {
-      context: {
+      context: partialDouble<PipelabContext>({
         getConnectionsPath: () => connectionsPath,
         getNodePath: () => "/node/bin/node",
-      } as unknown as PipelabContext,
+      }),
     };
 
     await expect(
@@ -76,14 +77,14 @@ describe("Itch native upload task", () => {
     vi.mocked(runWithLiveLogs).mockImplementationOnce(async (...args) => {
       args[4]?.onStdout?.(
         `{"type":"log","level":"info","message":"credential ${apiKey}","time":1}\n`,
-        undefined as never,
+        invalidInput(undefined),
       );
     });
     const services: ItchTaskServices = {
-      context: {
+      context: partialDouble<PipelabContext>({
         getConnectionsPath: () => connectionsPath,
         getNodePath: () => "/node/bin/node",
-      } as unknown as PipelabContext,
+      }),
     };
 
     const result = await runWorkflow(
@@ -133,10 +134,10 @@ describe("Itch native upload task", () => {
     sandbox = await createSandbox("itch-missing-alias-api-key");
     const alias = "itch-publisher";
     const services: ItchTaskServices = {
-      context: {
+      context: partialDouble<PipelabContext>({
         getConnectionsPath: () => join(sandbox.paths.userData, "missing-connections.json"),
         getNodePath: () => "/node/bin/node",
-      } as unknown as PipelabContext,
+      }),
     };
 
     await expect(
@@ -185,15 +186,15 @@ describe("Itch native upload task", () => {
     vi.mocked(runWithLiveLogs).mockImplementationOnce(async (...args) => {
       args[4]?.onStdout?.(
         `{"type":"log","level":"info","message":"Invalid API key ${apiKey}","time":1}\n`,
-        undefined as never,
+        invalidInput(undefined),
       );
       throw new Error(`Butler failed with credential ${apiKey}`);
     });
     const services: ItchTaskServices = {
-      context: {
+      context: partialDouble<PipelabContext>({
         getConnectionsPath: () => connectionsPath,
         getNodePath: () => "/node/bin/node",
-      } as unknown as PipelabContext,
+      }),
     };
 
     const failure = await runWorkflowTask(createItchUploadTask(services), {

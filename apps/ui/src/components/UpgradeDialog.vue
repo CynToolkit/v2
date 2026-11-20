@@ -106,7 +106,7 @@ const fetchPlansFromPolar = async () => {
     if (!data || typeof data !== "object" || !("plans" in data) || !Array.isArray(data.plans)) {
       throw new Error("Invalid plans response");
     }
-    plans.value = data.plans as Plan[];
+    plans.value = data.plans;
   } catch (cause) {
     error.value =
       cause instanceof Error ? cause.message : "Unable to load plans. Please try again.";
@@ -115,7 +115,7 @@ const fetchPlansFromPolar = async () => {
   }
 };
 
-const isCurrentPlan = (plan: any) => {
+const isCurrentPlan = (plan: Plan) => {
   if (auth.subscriptionStatus !== "ready") return false;
   // If plan is Free, it's current if user has no subscriptions
   if (plan.name === "Free") {
@@ -130,7 +130,7 @@ const isCurrentPlan = (plan: any) => {
   });
 };
 
-const isPlanDisabled = (plan: any) => {
+const isPlanDisabled = (plan: Plan) => {
   if (!auth.isAuthTransportReady || auth.subscriptionStatus !== "ready") return true;
   // Always disable if it's the current plan
   if (isCurrentPlan(plan)) return true;
@@ -145,7 +145,7 @@ const isPlanDisabled = (plan: any) => {
   return false;
 };
 
-const getPlanButtonText = (plan: any) => {
+const getPlanButtonText = (plan: Plan) => {
   if (auth.subscriptionStatus !== "ready")
     return auth.subscriptionStatus === "error" ? "Plan unavailable" : "Checking plan…";
   if (isCurrentPlan(plan)) {
@@ -159,7 +159,7 @@ const getPlanButtonText = (plan: any) => {
   return `Upgrade to ${plan.name}`;
 };
 
-const handlePlanAction = (plan: any) => {
+const handlePlanAction = (plan: Plan) => {
   if (!auth.isLoggedIn) {
     if (auth.hasLoginProvider) {
       auth.displayAuthModal("Login Required", "Please login or register to upgrade your plan.");
@@ -170,7 +170,7 @@ const handlePlanAction = (plan: any) => {
   upgradeToPlan(plan);
 };
 
-const upgradeToPlan = async (plan: any) => {
+const upgradeToPlan = async (plan: Plan) => {
   if (!auth.isAuthTransportReady || auth.subscriptionStatus !== "ready") return;
   error.value = null;
   let requestError: string | undefined;

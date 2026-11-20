@@ -1,7 +1,41 @@
 import type { WorkflowTask } from "@pipelab/workflow-runtime";
-import { merge } from "ts-deepmerge";
+import * as v from "valibot";
 import { tauri, type TauriExecutionContext } from "./tauri";
 import { defaultTauriConfig } from "./utils";
+
+const d = defaultTauriConfig;
+// Each input keeps its default when it is unset or has an unexpected type.
+const withDefault = <const S extends v.GenericSchema>(schema: S, fallback: v.InferOutput<S>) =>
+  v.fallback(schema, fallback);
+
+const tauriInputsSchema = v.object({
+  alwaysOnTop: withDefault(v.boolean(), d.alwaysOnTop),
+  appBundleId: withDefault(v.string(), d.appBundleId),
+  appCategoryType: withDefault(v.string(), d.appCategoryType),
+  appCopyright: withDefault(v.string(), d.appCopyright),
+  appVersion: withDefault(v.string(), d.appVersion),
+  author: withDefault(v.string(), d.author),
+  description: withDefault(v.string(), d.description),
+  tauriVersion: withDefault(v.string(), d.tauriVersion),
+  enableExtraLogging: withDefault(v.boolean(), d.enableExtraLogging),
+  clearServiceWorkerOnBoot: withDefault(v.boolean(), d.clearServiceWorkerOnBoot),
+  frame: withDefault(v.boolean(), d.frame),
+  fullscreen: withDefault(v.boolean(), d.fullscreen),
+  icon: withDefault(v.string(), d.icon),
+  height: withDefault(v.number(), d.height),
+  name: withDefault(v.string(), d.name),
+  toolbar: withDefault(v.boolean(), d.toolbar),
+  transparent: withDefault(v.boolean(), d.transparent),
+  width: withDefault(v.number(), d.width),
+  enableSteamSupport: withDefault(v.boolean(), d.enableSteamSupport),
+  steamGameId: withDefault(v.number(), d.steamGameId),
+  ignore: withDefault(v.array(v.string()), d.ignore),
+  openDevtoolsOnStart: withDefault(v.boolean(), d.openDevtoolsOnStart),
+  enableDiscordSupport: withDefault(v.boolean(), d.enableDiscordSupport),
+  discordAppId: withDefault(v.string(), d.discordAppId),
+  customPackages: v.fallback(v.optional(v.array(v.string())), undefined),
+  backgroundColor: withDefault(v.string(), d.backgroundColor),
+});
 
 export interface TauriWorkflowTaskServices {
   context: TauriExecutionContext["context"];
@@ -13,34 +47,10 @@ export const tauriPackageWorkflowTaskFactory =
   (services: TauriWorkflowTaskServices): WorkflowTask<TauriWorkflowTaskServices> =>
   async (task) => {
     const appFolder = task.inputs["input-folder"];
-    const completeConfiguration = merge(defaultTauriConfig, {
-      alwaysOnTop: task.inputs.alwaysOnTop,
-      appBundleId: task.inputs.appBundleId,
-      appCategoryType: task.inputs.appCategoryType,
-      appCopyright: task.inputs.appCopyright,
-      appVersion: task.inputs.appVersion,
-      author: task.inputs.author,
-      description: task.inputs.description,
-      tauriVersion: task.inputs.tauriVersion,
-      enableExtraLogging: task.inputs.enableExtraLogging,
-      clearServiceWorkerOnBoot: task.inputs.clearServiceWorkerOnBoot,
-      frame: task.inputs.frame,
-      fullscreen: task.inputs.fullscreen,
-      icon: task.inputs.icon,
-      height: task.inputs.height,
-      name: task.inputs.name,
-      toolbar: task.inputs.toolbar,
-      transparent: task.inputs.transparent,
-      width: task.inputs.width,
-      enableSteamSupport: task.inputs.enableSteamSupport,
-      steamGameId: task.inputs.steamGameId,
-      ignore: task.inputs.ignore,
-      openDevtoolsOnStart: task.inputs.openDevtoolsOnStart,
-      enableDiscordSupport: task.inputs.enableDiscordSupport,
-      discordAppId: task.inputs.discordAppId,
-      customPackages: task.inputs.customPackages,
-      backgroundColor: task.inputs.backgroundColor,
-    }) as unknown as DesktopApp.Tauri;
+    const completeConfiguration: DesktopApp.Tauri = {
+      ...defaultTauriConfig,
+      ...v.parse(tauriInputsSchema, task.inputs),
+    };
 
     const execution: TauriExecutionContext = {
       cwd: task.workspace.root,

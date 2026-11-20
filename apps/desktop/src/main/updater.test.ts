@@ -3,6 +3,7 @@ import { describe, it } from "vitest";
 import type { UpdateState } from "@pipelab/shared";
 import type { GitHubRelease } from "@pipelab/core-node/desktop";
 import { createUpdater, resolveAvailableUpdate, type NativeUpdater } from "./updater";
+import { partialDouble } from "@pipelab/shared";
 
 const release: GitHubRelease = {
   prerelease: false,
@@ -18,11 +19,11 @@ const release: GitHubRelease = {
 function fakeNative() {
   const handlers: Record<string, (...args: unknown[]) => void> = {};
   const calls: string[] = [];
-  const native = {
+  const native = partialDouble<NativeUpdater>({
     setFeedURL: ({ url }: { url: string }) => calls.push(`feed:${url}`),
     checkForUpdates: () => calls.push("check"),
     on: (event: string, cb: (...args: unknown[]) => void): void => void (handlers[event] = cb),
-  } as unknown as NativeUpdater;
+  });
   return { native, handlers, calls };
 }
 

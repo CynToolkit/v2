@@ -7,6 +7,7 @@ import type {
   ReleaseOutputRef,
   ReleaseRegistry,
 } from "./types";
+import { partialDouble } from "../test-doubles";
 
 const project = { kind: "project" as const, technology: "engine", container: "directory" as const };
 const web = { kind: "application" as const, platform: "web", container: "directory" as const };
@@ -1142,7 +1143,7 @@ describe("release planner with multi-input producers", () => {
   });
 
   it("reports malformed input references in the config shape", () => {
-    const result = plan([...threeEngines, bundleBuild([{ buildId: "win" } as never])]);
+    const result = plan([...threeEngines, bundleBuild([partialDouble({ buildId: "win" })])]);
     expect(codes(result)).toContain("release.build.inputs.invalid");
   });
 

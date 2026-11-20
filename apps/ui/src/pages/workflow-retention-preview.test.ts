@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 import type { BuildHistoryEntry } from "@pipelab/shared";
 import { retentionPreview } from "./workflow-retention-preview";
+import { partialDouble } from "@pipelab/shared";
 
 const DAY = 24 * 60 * 60 * 1000;
 const now = 100 * DAY;
 const run = (id: string, ageDays: number, size = 100, status = "completed") =>
-  ({
+  partialDouble<BuildHistoryEntry>({
     id,
     workflowId: "wf",
     status,
     createdAt: now - ageDays * DAY,
     artifacts: [{ id: `${id}-a`, size }],
-  }) as unknown as BuildHistoryEntry;
+  });
 
 describe("retentionPreview", () => {
   const entries = [run("new", 1), run("mid", 2), run("old", 3), run("older", 4)];

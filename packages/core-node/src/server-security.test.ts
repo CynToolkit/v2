@@ -8,9 +8,10 @@ import {
   isTokenEnforced,
   requiresAuthentication,
 } from "./server-security";
+import { partialDouble } from "@pipelab/shared";
 
 const request = (headers: Record<string, string>, url = "/") =>
-  ({ headers, url }) as unknown as IncomingMessage;
+  partialDouble<IncomingMessage>({ headers, url });
 
 describe("server security policy", () => {
   test("treats loopback hosts as local and remote hosts as protected", () => {

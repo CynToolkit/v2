@@ -1,3 +1,4 @@
+import type { App } from "vue";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { init } = vi.hoisted(() => ({ init: vi.fn() }));
@@ -6,9 +7,10 @@ vi.mock("posthog-js", () => ({
 }));
 
 import posthogPlugin from "./posthog";
+import { partialDouble } from "@pipelab/shared";
 
 const install = () => {
-  const app = { config: { globalProperties: {} } };
+  const app = partialDouble<App>({ config: { globalProperties: {} } });
   posthogPlugin.install(app);
   return app;
 };

@@ -94,7 +94,11 @@ function getIconPath() {
 
 let pendingUrl: string | null = null;
 
-function findProtocolUrl(args: string[], values: any, positionals: string[]): string | null {
+function findProtocolUrl(
+  args: string[],
+  values: Record<string, string | boolean | (string | boolean)[] | undefined>,
+  positionals: string[],
+): string | null {
   const pUrl = positionals.find(
     (arg) => arg.startsWith("pipelab://") || arg.startsWith("pipelab-beta://"),
   );

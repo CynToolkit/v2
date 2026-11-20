@@ -95,7 +95,7 @@ export async function fetchPackageReleases(
 
     // Extract tags matching the packageName@ pattern
     const eligibleTags = refs
-      .map((r: any) => r.ref.replace("refs/tags/", ""))
+      .map((r: { ref: string }) => r.ref.replace("refs/tags/", ""))
       .filter((tag: string) => getEligibleVersion(packageName, tag, options));
 
     if (eligibleTags.length === 0) {

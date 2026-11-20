@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
 import type { BuildHistoryEntry } from "../build-history";
 import { planRetention } from "./retention";
+import { partialDouble } from "../test-doubles";
 
 const DAY = 24 * 60 * 60 * 1000;
 const now = 100 * DAY;
 const run = (id: string, ageDays: number, extra: Partial<BuildHistoryEntry> = {}) =>
-  ({
+  partialDouble<BuildHistoryEntry>({
     id,
     workflowId: "wf",
     status: "completed",
     createdAt: now - ageDays * DAY,
     artifacts: [{ id: `${id}-artifact` }],
     ...extra,
-  }) as unknown as BuildHistoryEntry;
+  });
 const ids = (entries: BuildHistoryEntry[]) => entries.map((entry) => entry.id);
 const plan = (
   entries: BuildHistoryEntry[],

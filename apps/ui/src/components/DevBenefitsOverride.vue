@@ -16,7 +16,7 @@
             <select
               :value="auth.devOverrides[benefit.key] || 'actual'"
               class="override-select"
-              @change="setOverride(benefit.key, ($event.target as HTMLSelectElement).value)"
+              @change="onOverrideChange(benefit.key, $event)"
             >
               <option value="actual">Use Actual</option>
               <option value="force-on">Force On</option>
@@ -60,8 +60,8 @@ const effectiveStatus = computed(() => ({
   "cloud-save": auth.hasBenefit("cloud-save"),
 }));
 
-const setOverride = (benefit: string, value: string) => {
-  auth.setDevOverride(benefit, value);
+const onOverrideChange = (benefit: string, event: Event) => {
+  if (event.target instanceof HTMLSelectElement) auth.setDevOverride(benefit, event.target.value);
 };
 </script>
 

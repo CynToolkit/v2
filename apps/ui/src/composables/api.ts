@@ -2,7 +2,7 @@ import { Channels, Data, End, Events, ShellChannels } from "@pipelab/shared";
 import { useLogger } from "@pipelab/shared";
 import { useWebSocketAPI } from "./websocket-client";
 import { WebSocketListener } from "@pipelab/shared";
-import { useUIStore } from "../store/ui";
+import { useUIStore, type FilePickerOptions } from "../store/ui";
 
 // Re-export for backwards compatibility
 export type { WebSocketListener };
@@ -31,36 +31,36 @@ export const useAPI = () => {
           return {
             type: "success",
             result,
-          } as any;
-        } catch (error: any) {
+          } as End<KEY>;
+        } catch (error) {
           logger().error("Shell channel IPC invoke error:", error);
           return {
             type: "error",
-            ipcError: error.message,
-          } as any;
+            ipcError: error instanceof Error ? error.message : String(error),
+          } as End<KEY>;
         }
       } else {
         // Fallback for headless mode
         if (channel === "dialog:showOpenDialog") {
           logger().debug("Falling back to web file picker (open):", data);
           const result = await uiStore.showFilePicker({
-            ...(data as any),
+            ...(data as Partial<FilePickerOptions>),
             mode: "open",
           });
           return {
             type: "success",
             result,
-          } as any;
+          } as End<KEY>;
         } else if (channel === "dialog:showSaveDialog") {
           logger().debug("Falling back to web file picker (save):", data);
           const result = await uiStore.showFilePicker({
-            ...(data as any),
+            ...(data as Partial<FilePickerOptions>),
             mode: "save",
           });
           return {
             type: "success",
             result,
-          } as any;
+          } as End<KEY>;
         }
       }
     }
@@ -86,10 +86,7 @@ export const useAPI = () => {
   /**
    * On method (placeholder for backwards compatibility)
    */
-  const on = <KEY extends Channels>(
-    channel: KEY | string,
-    listener: (data: Events<KEY>) => void,
-  ) => {
+  const on = <KEY extends Channels>(channel: KEY, listener: (data: Events<KEY>) => void) => {
     return wsOn(channel, listener);
   };
 

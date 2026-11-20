@@ -487,7 +487,7 @@ const sendTest = async () => {
       connection.integrationName || connection.pluginName,
       appStore.providerDefinitions,
     )) {
-      const value = (connection as Record<string, unknown>)[field.key];
+      const value = Object.entries(connection).find(([name]) => name === field.key)?.[1];
       if (typeof value === "string") values[field.key] = value;
     }
     const response = await api.execute("connection:test", {
@@ -507,11 +507,16 @@ const sendTest = async () => {
 
 const connectionVisible = ref(false);
 const connectionSaving = ref(false);
-const connectionDraft = ref({
+const connectionDraft = ref<{
+  name: string;
+  integration: string;
+  integrationName: string;
+  values: Record<string, string>;
+}>({
   name: "",
   integration: "",
   integrationName: "",
-  values: {} as Record<string, string>,
+  values: {},
 });
 let pending: { target: ReleaseNotificationConfig; field: ReleaseFieldDefinition } | undefined;
 const connectionFields = computed(() => {

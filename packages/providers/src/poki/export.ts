@@ -1,3 +1,5 @@
+import * as v from "valibot";
+import { stringInput, parseOrUndefined } from "@pipelab/shared";
 import { fetchPackage, runWithLiveLogs } from "@pipelab/plugin-core";
 import type { PipelabContext } from "@pipelab/plugin-core";
 import type { WorkflowTask, WorkflowTaskContext } from "@pipelab/workflow-runtime";
@@ -29,7 +31,7 @@ export const createPokiUploadTask =
     const node = executables.node;
     const thirdparty = context.getThirdPartyPath();
 
-    const absoluteInputFolder = resolve(inputs["input-folder"] as string);
+    const absoluteInputFolder = resolve(stringInput(inputs, "input-folder"));
 
     log("Starting Poki upload action...");
     log(`- Game ID: ${inputs.project}`);
@@ -111,7 +113,14 @@ export const createPokiUploadTask =
     try {
       await runWithLiveLogs(
         node,
-        [poki, "upload", "--name", inputs.name as string, "--notes", inputs.notes as string],
+        [
+          poki,
+          "upload",
+          "--name",
+          stringInput(inputs, "name"),
+          "--notes",
+          stringInput(inputs, "notes"),
+        ],
         {
           cwd: tempUploadFolder,
           env,
@@ -179,14 +188,22 @@ const pokiHeaders = (authorization: string) => ({
   "User-Agent": "poki-cli",
 });
 
+const pokiSavedAuthSchema = v.looseObject({
+  access_token: v.optional(v.string()),
+  access_type: v.optional(v.string()),
+  refresh_token: v.optional(v.string()),
+});
+const pokiGameResponseSchema = v.looseObject({
+  data: v.optional(v.looseObject({ type: v.optional(v.unknown()), id: v.optional(v.unknown()) })),
+});
+
 const readPokiAuth = async (root: string) => {
   for (const directory of ["poki", "Poki"]) {
     try {
-      return JSON.parse(await readFile(join(root, directory, "auth.json"), "utf8")) as {
-        access_token?: string;
-        access_type?: string;
-        refresh_token?: string;
-      };
+      return v.parse(
+        pokiSavedAuthSchema,
+        JSON.parse(await readFile(join(root, directory, "auth.json"), "utf8")),
+      );
     } catch {
       // Try the other directory name.
     }
@@ -226,15 +243,16 @@ export const verifyPokiGame = async (
         signal: abort,
       });
       if (!refreshed.ok) return failed("Poki rejected the saved login. Sign in to Poki again.");
-      const token = ((await refreshed.json()) as { access_token?: string }).access_token;
+      const token = parseOrUndefined(pokiSavedAuthSchema, await refreshed.json())?.access_token;
       if (!token) return unverifiable("Poki gave no refreshed login.");
       response = await open(token);
     }
     if (response.ok) {
       // Poki does not publish this endpoint, so "verified" needs its JSON:API game shape.
-      const body = (await response.json().catch((): null => null)) as {
-        data?: { type?: unknown; id?: unknown };
-      } | null;
+      const body = parseOrUndefined(
+        pokiGameResponseSchema,
+        await response.json().catch((): null => null),
+      );
       return body?.data?.type === "games" && typeof body.data.id === "string"
         ? verified()
         : unverifiable("Poki's answer was not recognized; its API may have changed.");

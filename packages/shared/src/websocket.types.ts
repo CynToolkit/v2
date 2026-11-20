@@ -1,4 +1,4 @@
-import { Channels, Data, Events, End, IpcMessage, RequestId } from "./apis";
+import { Channels, Data, Events, End, RequestId } from "./apis";
 import { WebSocket as WSWebSocket } from "ws";
 
 // WebSocket connection states
@@ -46,16 +46,20 @@ export interface WebSocketEvent {
 }
 
 // WebSocket message types
-export interface WebSocketRequestMessage {
-  channel: Channels;
-  requestId: RequestId;
-  data: any;
-}
+/** One member per channel, so `channel` and `data` stay paired when the message is narrowed. */
+export type WebSocketRequestMessage = {
+  [KEY in Channels]: { channel: KEY; requestId: RequestId; data: Data<KEY> };
+}[Channels];
+
+/** A server-pushed event, paired with its channel the same way as a request. */
+export type WebSocketEventMessage = {
+  [KEY in Channels]: { type: "event"; channel: KEY; data: Events<KEY> };
+}[Channels];
 
 export interface WebSocketResponseMessage {
   type: "response";
   requestId: RequestId;
-  events: Events<any>;
+  events: Events<Channels>;
 }
 
 export interface WebSocketErrorMessage {
@@ -157,17 +161,23 @@ export class WebSocketTimeoutError extends WebSocketError {
 }
 
 // Type guards
-export const isWebSocketRequestMessage = (message: any): message is WebSocketRequestMessage => {
-  return message && typeof message.channel === "string" && message.requestId;
-};
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
-export const isWebSocketResponseMessage = (message: any): message is WebSocketResponseMessage => {
-  return message && message.type === "response" && message.requestId && message.events;
-};
+export const isWebSocketRequestMessage = (message: unknown): message is WebSocketRequestMessage =>
+  isRecord(message) && typeof message.channel === "string" && Boolean(message.requestId);
 
-export const isWebSocketErrorMessage = (message: any): message is WebSocketErrorMessage => {
-  return message && message.type === "error" && message.requestId && message.error;
-};
+export const isWebSocketResponseMessage = (message: unknown): message is WebSocketResponseMessage =>
+  isRecord(message) &&
+  message.type === "response" &&
+  Boolean(message.requestId) &&
+  Boolean(message.events);
+
+export const isWebSocketErrorMessage = (message: unknown): message is WebSocketErrorMessage =>
+  isRecord(message) &&
+  message.type === "error" &&
+  Boolean(message.requestId) &&
+  Boolean(message.error);
 
 // Utility types for better type inference
 export type WebSocketMessageType<T extends Channels> = {

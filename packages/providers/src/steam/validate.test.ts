@@ -1,17 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { steamDestination } from "./index";
+import { partialDouble } from "@pipelab/shared";
 
 const issueCodes = (appId: string, depotId: string) =>
   steamDestination
     .validate(
-      {
+      partialDouble({
         id: "steam",
         provider: steamDestination.id,
         enabled: true,
         config: { accountConnectionId: "a", appId },
         slots: [{ id: "s", enabled: true, config: { depotId } }],
-      } as never,
-      { host: { platform: "linux", architecture: "x64" } } as never,
+      }),
+      partialDouble({ host: { platform: "linux", architecture: "x64" } }),
     )
     .map((issue) => issue.code);
 

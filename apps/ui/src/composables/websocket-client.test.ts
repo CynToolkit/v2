@@ -49,7 +49,7 @@ class FakeWebSocket {
 
 const responseTo = (requestId: string): WebSocketMessage => ({
   type: "response",
-  requestId: requestId as RequestId,
+  requestId,
   events: { type: "end", data: { type: "success", result: { user: null } } },
 });
 

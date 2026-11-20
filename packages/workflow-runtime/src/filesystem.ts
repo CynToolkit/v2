@@ -2,6 +2,15 @@ import { cp, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 
+declare global {
+  namespace NodeJS {
+    interface Process {
+      /** Set by Electron: stops `fs` from treating `.asar` paths as archives. */
+      noAsar: boolean;
+    }
+  }
+}
+
 const normalizePath = (value: string) =>
   value
     .replace(/[\\/]+$/, "")
@@ -151,14 +160,13 @@ export async function copyPath({
     try {
       await assertSafeDirectoryCleanup(to);
       log("Cleaning up", to);
-      const processWithAsar = process as NodeJS.Process & { noAsar?: boolean };
-      const previousNoAsar = processWithAsar.noAsar;
-      processWithAsar.noAsar = true;
+      const previousNoAsar = process.noAsar;
+      process.noAsar = true;
       try {
         await rm(to, { recursive: true, force: true, maxRetries: 3 });
         if (!sourceIsFile) await mkdir(to, { recursive: true });
       } finally {
-        processWithAsar.noAsar = previousNoAsar;
+        process.noAsar = previousNoAsar;
       }
     } catch (error) {
       log("Error cleaning up file", error);
@@ -166,9 +174,8 @@ export async function copyPath({
     }
   }
 
-  const processWithAsar = process as NodeJS.Process & { noAsar?: boolean };
-  const previousNoAsar = processWithAsar.noAsar;
-  processWithAsar.noAsar = true;
+  const previousNoAsar = process.noAsar;
+  process.noAsar = true;
   try {
     await cp(from, to, { recursive: recursive && !sourceIsFile, force: overwrite });
     if (!sourceIsFile) await writePipelabFolderMarker(to, "fs:copy");
@@ -177,7 +184,7 @@ export async function copyPath({
     log("Error copying file", error);
     throw error;
   } finally {
-    processWithAsar.noAsar = previousNoAsar;
+    process.noAsar = previousNoAsar;
   }
 
   return { output: to, input: from, parentDirectory: dirname(to) };
@@ -191,13 +198,12 @@ export async function removePath(
   const { recursive = true, log = () => undefined } = options;
   log("Removing", from, recursive);
   await assertSafeDirectoryCleanup(from);
-  const processWithAsar = process as NodeJS.Process & { noAsar?: boolean };
-  const previousNoAsar = processWithAsar.noAsar;
-  processWithAsar.noAsar = true;
+  const previousNoAsar = process.noAsar;
+  process.noAsar = true;
   try {
     await rm(from, { recursive, force: true, maxRetries: 3 });
   } finally {
-    processWithAsar.noAsar = previousNoAsar;
+    process.noAsar = previousNoAsar;
   }
   log("Removed", from);
 }

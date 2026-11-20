@@ -18,6 +18,7 @@ import {
   waitForConstructExportDownload,
 } from "./script";
 import { isConstructFreeEditionLimit } from "./listeners";
+import { invalidInput, partialDouble } from "@pipelab/shared";
 
 const exportRunPath = join(tmpdir(), "export-run");
 
@@ -199,7 +200,7 @@ describe("Construct edition detection", () => {
     try {
       await expect(
         script(
-          page as unknown as Page,
+          partialDouble<Page>(page),
           vi.fn(),
           "/project.c3p",
           "construct-user@example.test",
@@ -244,12 +245,12 @@ describe("Construct editor settings preseed", () => {
         startPageHidden: true,
       };
     });
-    const page = {
+    const page = partialDouble<Page>({
       addInitScript,
       goto,
       evaluate,
       url: vi.fn().mockReturnValue(url),
-    } as unknown as Page;
+    });
     const log = vi.fn();
 
     await navigateToConstruct(page, url, log, new AbortController().signal);
@@ -266,12 +267,12 @@ describe("Construct editor settings preseed", () => {
     const addInitScript = vi.fn().mockResolvedValue(undefined);
     const goto = vi.fn().mockResolvedValue(null);
     const evaluate = vi.fn().mockRejectedValue(new Error("IndexedDB seed failed"));
-    const page = {
+    const page = partialDouble<Page>({
       addInitScript,
       goto,
       evaluate,
       url: vi.fn().mockReturnValue(url),
-    } as unknown as Page;
+    });
 
     await expect(
       navigateToConstruct(page, url, vi.fn(), new AbortController().signal),
@@ -286,7 +287,7 @@ describe("Construct editor settings preseed", () => {
       .fn()
       .mockRejectedValueOnce(new Error("page.goto: net::ERR_NETWORK_CHANGED"))
       .mockResolvedValueOnce(null);
-    const page = {
+    const page = partialDouble<Page>({
       addInitScript: vi.fn().mockResolvedValue(undefined),
       goto,
       evaluate: vi.fn().mockResolvedValue({
@@ -297,7 +298,7 @@ describe("Construct editor settings preseed", () => {
         startPageHidden: true,
       }),
       url: vi.fn().mockReturnValue(url),
-    } as unknown as Page;
+    });
     const log = vi.fn();
 
     await navigateToConstruct(page, url, log, new AbortController().signal);
@@ -311,11 +312,11 @@ describe("Construct editor settings preseed", () => {
     const controller = new AbortController();
     const addInitScript = vi.fn(() => new Promise<void>(() => {}));
     const goto = vi.fn();
-    const page = {
+    const page = partialDouble<Page>({
       addInitScript,
       goto,
       url: vi.fn().mockReturnValue(url),
-    } as unknown as Page;
+    });
 
     const navigation = navigateToConstruct(page, url, vi.fn(), controller.signal);
     controller.abort();
@@ -330,14 +331,14 @@ describe("Construct editor settings preseed", () => {
     const controller = new AbortController();
     const rejectedOperation = Promise.reject(new Error("browser context closed"));
     const observeRejection = vi.spyOn(rejectedOperation, "catch");
-    const page = {
+    const page = partialDouble<Page>({
       addInitScript: vi.fn(() => {
         controller.abort();
         return rejectedOperation;
       }),
       goto: vi.fn(),
       url: vi.fn().mockReturnValue(url),
-    } as unknown as Page;
+    });
     const unhandledRejections: unknown[] = [];
     const captureUnhandledRejection = (reason: unknown) => {
       unhandledRejections.push(reason);
@@ -373,7 +374,7 @@ describe("Construct account authentication", () => {
     const session = { userID: 42, token: "test-session" };
 
     await prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       "r466-2",
       "user@example.com",
       "test-password",
@@ -415,7 +416,7 @@ describe("Construct account authentication", () => {
     page.stores.set("https://account.construct.net", new Map([["login-data", cachedSession]]));
 
     await prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       "r466-2",
       "user@example.com",
       "test-password",
@@ -443,7 +444,7 @@ describe("Construct account authentication", () => {
     page.stores.set("https://account.construct.net", new Map([["login-data", cachedSession]]));
 
     await prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       "r466-2",
       "bound-user@example.com",
       "bound-password",
@@ -470,7 +471,7 @@ describe("Construct account authentication", () => {
     const apiLogin = vi.fn(async () => ({ loginData: freshSession, startedAt: Date.now() }));
 
     await prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       "r466-2",
       "user@example.com",
       "test-password",
@@ -492,7 +493,7 @@ describe("Construct account authentication", () => {
   it("uses the beta account origin for beta editor sessions", async () => {
     const page = new AccountOriginPage();
     const session = { userID: 42, token: "test-session" };
-    const betaPage = page as unknown as Page;
+    const betaPage = partialDouble<Page>(page);
     const editorGoto = page.goto.bind(page);
     page.goto = async (url: string) => {
       await editorGoto(url);
@@ -529,7 +530,7 @@ describe("Construct account authentication", () => {
     const page = new AccountOriginPage();
 
     await prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       undefined,
       undefined,
       undefined,
@@ -553,7 +554,7 @@ describe("Construct account authentication", () => {
 
     await expect(
       prepareConstructEditor(
-        page as unknown as Page,
+        partialDouble<Page>(page),
         undefined,
         undefined,
         undefined,
@@ -572,7 +573,7 @@ describe("Construct account authentication", () => {
 
     await expect(
       prepareConstructEditor(
-        page as unknown as Page,
+        partialDouble<Page>(page),
         undefined,
         undefined,
         undefined,
@@ -589,7 +590,7 @@ describe("Construct account authentication", () => {
     const page = new AccountOriginPage();
     const controller = new AbortController();
     const preparation = prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       undefined,
       undefined,
       undefined,
@@ -604,12 +605,12 @@ describe("Construct account authentication", () => {
 
   it("cancels while waiting for account storage readiness", async () => {
     const controller = new AbortController();
-    const page = {
+    const page = partialDouble<Page>({
       goto: vi.fn().mockResolvedValue(undefined),
       url: vi.fn().mockReturnValue("https://account.construct.net/"),
       waitForFunction: vi.fn(() => new Promise<void>(() => {})),
       evaluate: vi.fn(),
-    } as unknown as Page;
+    });
 
     const preparation = prepareConstructEditor(
       page,
@@ -634,7 +635,7 @@ describe("Construct account authentication", () => {
 
     await expect(
       prepareConstructEditor(
-        page as unknown as Page,
+        partialDouble<Page>(page),
         "r466-2",
         "user@example.com",
         "test-password",
@@ -656,7 +657,7 @@ describe("Construct account authentication", () => {
 
     await expect(
       prepareConstructEditor(
-        page as unknown as Page,
+        partialDouble<Page>(page),
         "r466-2",
         "user@example.com",
         "test-password",
@@ -693,7 +694,7 @@ describe("Construct account authentication", () => {
     };
 
     const preparation = prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       "r466-2",
       "user@example.com",
       "test-password",
@@ -733,7 +734,7 @@ describe("Construct account authentication", () => {
     const controller = new AbortController();
 
     const preparation = prepareConstructEditor(
-      page as unknown as Page,
+      partialDouble<Page>(page),
       "r466-2",
       "user@example.com",
       "test-password",
@@ -856,7 +857,7 @@ describe("Construct project load readiness", () => {
     const loadingOverlay = {
       isVisible: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
     };
-    const page = {
+    const page = partialDouble<Page>({
       getByRole: vi.fn((_role: string, options: { name: string | RegExp }) =>
         options.name === "Menu" ? menuButton : unavailableOpenControl,
       ),
@@ -874,7 +875,7 @@ describe("Construct project load readiness", () => {
             resolveFileChooser = resolve;
           }),
       ),
-    } as unknown as Page;
+    });
     const log = vi.fn();
 
     await openConstructProjectFile(
@@ -911,9 +912,9 @@ describe("Construct project load readiness", () => {
       waitFor,
       locator: vi.fn().mockReturnValue(progressBar),
     };
-    const page = {
+    const page = partialDouble<Page>({
       locator: vi.fn().mockReturnValue(progressDialog),
-    } as unknown as Page;
+    });
     const controller = new AbortController();
     const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
 
@@ -939,9 +940,9 @@ describe("Construct project load readiness", () => {
       waitFor,
       locator: vi.fn().mockReturnValue(progressBar),
     };
-    const page = {
+    const page = partialDouble<Page>({
       locator: vi.fn().mockReturnValue(progressDialog),
-    } as unknown as Page;
+    });
     const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
 
     try {
@@ -961,7 +962,7 @@ describe("Construct project load readiness", () => {
 describe("Construct export download readiness", () => {
   it("waits for the configured export timeout", async () => {
     const waitFor = vi.fn().mockResolvedValue(undefined);
-    const page = {
+    const page = partialDouble<Page>({
       locator: vi.fn((selector: string) =>
         selector === ".downloadExportedProject"
           ? { waitFor, isEnabled: vi.fn().mockResolvedValue(true) }
@@ -969,7 +970,7 @@ describe("Construct export download readiness", () => {
       ),
       isClosed: vi.fn().mockReturnValue(false),
       screenshot: vi.fn(),
-    } as unknown as Page;
+    });
 
     await waitForConstructExportDownload(page, 120_000, exportRunPath);
 
@@ -980,7 +981,7 @@ describe("Construct export download readiness", () => {
     const waitFor = vi.fn().mockRejectedValue(new Error("Timeout 120000ms exceeded"));
     const pageText = "Preparing project data...";
     const screenshot = vi.fn().mockResolvedValue(undefined);
-    const page = {
+    const page = partialDouble<Page>({
       locator: vi.fn((selector: string) =>
         selector === ".downloadExportedProject"
           ? { waitFor }
@@ -988,7 +989,7 @@ describe("Construct export download readiness", () => {
       ),
       isClosed: vi.fn().mockReturnValue(false),
       screenshot,
-    } as unknown as Page;
+    });
 
     await expect(waitForConstructExportDownload(page, 120_000, exportRunPath)).rejects.toThrow(
       /Construct did not make its project download available within 120 seconds.*Preparing project data/,
@@ -1001,11 +1002,11 @@ describe("Construct export download readiness", () => {
   it("preserves cancellation when closing the browser interrupts the wait", async () => {
     const waitFor = vi.fn().mockRejectedValue(new Error("Target closed"));
     const screenshot = vi.fn();
-    const page = {
+    const page = partialDouble<Page>({
       locator: vi.fn(() => ({ waitFor })),
       isClosed: vi.fn().mockReturnValue(true),
       screenshot,
-    } as unknown as Page;
+    });
     const abortController = new AbortController();
     abortController.abort();
 
@@ -1016,12 +1017,12 @@ describe("Construct export download readiness", () => {
   });
 
   it("handles the pending download rejection when clicking the control fails", async () => {
-    const page = {
+    const page = partialDouble<Page>({
       waitForEvent: vi.fn().mockRejectedValue(new Error("download event failed")),
-    } as unknown as Page;
-    const button = {
+    });
+    const button = partialDouble<Locator>({
       click: vi.fn().mockRejectedValue(new Error("Construct download button failed")),
-    } as unknown as Locator;
+    });
 
     await expect(clickConstructDownload(page, button, 120_000)).rejects.toThrow(
       "Construct download button failed",
@@ -1131,7 +1132,7 @@ class ExportFlowPage extends AccountOriginPage {
       getAttribute: async (name: string) => this.attributes.get(key)?.[name] ?? null,
       allInnerTexts: async () => [],
     };
-    return locator as unknown as Locator;
+    return partialDouble<Locator>(locator);
   }
 }
 
@@ -1166,7 +1167,7 @@ const runExport = (page: ExportFlowPage, exportType?: string) => {
   );
   vi.stubGlobal("fetch", login);
   return script(
-    page as unknown as Page,
+    partialDouble<Page>(page),
     vi.fn(),
     "/project.c3p",
     "construct-user@example.test",
@@ -1176,7 +1177,7 @@ const runExport = (page: ExportFlowPage, exportType?: string) => {
     new AbortController().signal,
     1_000,
     false,
-    exportType as never,
+    invalidInput(exportType),
   ).finally(() => vi.unstubAllGlobals());
 };
 

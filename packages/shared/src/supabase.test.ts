@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createClient } from "@supabase/supabase-js";
 import { isSupabaseAvailable, supabase } from "./supabase";
+import { partialDouble } from "./test-doubles";
 
 vi.mock("@supabase/supabase-js", () => ({
-  createClient: vi.fn(() => ({}) as never),
+  createClient: vi.fn(() => partialDouble({})),
 }));
 
 describe("Supabase client configuration", () => {

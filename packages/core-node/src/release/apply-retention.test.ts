@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 import type { BuildHistoryEntry } from "@pipelab/shared";
 import { applyRetention } from "./apply-retention";
+import { partialDouble } from "@pipelab/shared";
 
 const DAY = 24 * 60 * 60 * 1000;
 const run = (id: string, ageDays: number) =>
-  ({
+  partialDouble<BuildHistoryEntry>({
     id,
     workflowId: "wf",
     status: "completed",
     createdAt: Date.now() - ageDays * DAY,
     artifacts: [{ id: `${id}-a` }],
-  }) as unknown as BuildHistoryEntry;
+  });
 
 const fakeHistory = (entries: BuildHistoryEntry[]) => {
   const calls: string[] = [];

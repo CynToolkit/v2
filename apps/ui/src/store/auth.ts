@@ -35,7 +35,7 @@ export type AuthStateType =
 export const useAuth = defineStore("auth", () => {
   const logger = useLogger();
   const user = shallowRef<User>();
-  const authState = ref<AuthStateType>("INITIALIZING") as Ref<AuthStateType>; // Start in INITIALIZING state
+  const authState = ref<AuthStateType>("INITIALIZING"); // Start in INITIALIZING state
   const isAuthenticating = ref(false); // Track loading state for auth actions
   const errorMessage = ref<string | null>(); // For storing error messages to display to the user
   const subscriptions = ref<Subscription[]>([]); // Store user subscriptions
@@ -258,7 +258,7 @@ export const useAuth = defineStore("auth", () => {
           throw new Error("Invalid response: subscriptions is not an array");
         }
         if (requestId !== subscriptionRequestId || user.value?.id !== userId) return;
-        subscriptions.value = data.subscriptions as Subscription[];
+        subscriptions.value = data.subscriptions;
         subscriptionStatus.value = "ready";
       } catch (error) {
         if (requestId !== subscriptionRequestId || user.value?.id !== userId) return;

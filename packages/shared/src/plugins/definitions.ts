@@ -96,7 +96,7 @@ export type InputDefinition<T extends ControlType = ControlType> = {
   control: T;
   value: unknown;
   platforms?: NodeJS.Platform[];
-  onNodeUpdate?: (value: any, settings: InputDefinition<any>) => void;
+  onNodeUpdate?: (value: unknown, settings: InputDefinition) => void;
 };
 
 export type InputsDefinition = Record<string, InputDefinition>;
@@ -227,7 +227,7 @@ export interface MainPluginDefinition<TServices = unknown> extends ProviderDefin
   validators?: Array<{
     id: string;
     description: string;
-    validator: (options: any) => any;
+    validator: (options: Record<string, unknown>) => unknown;
   }>;
 }
 

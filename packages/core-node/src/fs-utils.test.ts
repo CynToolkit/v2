@@ -10,8 +10,8 @@ const isWindows = process.platform === "win32";
 describe("isPathBlacklisted", () => {
   test("should return false for empty or falsy paths", () => {
     expect(isPathBlacklisted("")).toBe(false);
-    expect(isPathBlacklisted(undefined as any)).toBe(false);
-    expect(isPathBlacklisted(null as any)).toBe(false);
+    expect(Reflect.apply(isPathBlacklisted, undefined, [undefined])).toBe(false);
+    expect(Reflect.apply(isPathBlacklisted, undefined, [null])).toBe(false);
   });
 
   test("should return false for safe user workspace paths", () => {

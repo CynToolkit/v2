@@ -1,3 +1,4 @@
+import { fail, NODE_ARCHITECTURES, pickLiteral } from "@pipelab/shared";
 import { getBinName } from "@pipelab/constants";
 import { runPnpm, runWithLiveLogs, resolveBundledAsset } from "@pipelab/plugin-core";
 import { detectRuntime } from "../web-runtime";
@@ -162,7 +163,7 @@ export const tauri = async (
   log("Cargo.toml update");
   const cargoTomlPath = join(destinationFolder, "src-tauri", "Cargo.toml");
   const cargoTomlContent = await readFilePromise(cargoTomlPath, "utf8");
-  const cargoToml = parseTOML(cargoTomlContent) as { name: string; version: string };
+  const cargoToml: Record<string, unknown> = parseTOML(cargoTomlContent);
   log("Setting name to", sanitizedName);
   cargoToml.name = sanitizedName;
   log("Setting version to", completeConfiguration.appVersion);
@@ -208,7 +209,10 @@ export const tauri = async (
     log("typeof inputs.platform", typeof inputs.platform);
     const finalPlatform: NodeJS.Platform = inputPlatform ?? osPlatform();
     log("finalPlatform", finalPlatform);
-    const finalArch: NodeJS.Architecture = inputArch ?? (osArch() as NodeJS.Architecture);
+    const finalArch: NodeJS.Architecture =
+      inputArch ??
+      pickLiteral(NODE_ARCHITECTURES, osArch()) ??
+      fail(`Unsupported host architecture: ${osArch()}`);
     log("finalArch", finalArch);
 
     let tauriPlatform = "";

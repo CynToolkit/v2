@@ -6,6 +6,7 @@ import type {
   ReleaseRegistry,
 } from "@pipelab/shared";
 import { dispatchRunNotifications, type DispatchRunNotificationsInput } from "./notifications";
+import { partialDouble } from "@pipelab/shared";
 
 const event: ReleaseNotificationEvent = {
   workflow: "My game",
@@ -15,7 +16,7 @@ const event: ReleaseNotificationEvent = {
   destinations: [],
 };
 
-const registry = {
+const registry = partialDouble<ReleaseRegistry>({
   sources: [],
   producers: [],
   destinations: [],
@@ -28,7 +29,7 @@ const registry = {
       validate: () => [],
     },
   ],
-} as unknown as ReleaseRegistry;
+});
 
 const config = (patch: Partial<ReleaseConfig> = {}): ReleaseConfig =>
   ({

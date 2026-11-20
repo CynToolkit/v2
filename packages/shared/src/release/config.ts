@@ -7,13 +7,12 @@ import {
 import type { ConnectionsConfig } from "../config.schema";
 import { isSafePersistedId } from "../persisted-id";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+import { isRecord } from "../guards";
 const requiredString = (value: unknown): boolean =>
   typeof value === "string" && value.trim().length > 0;
 export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] => {
   const issues: ValidationIssue[] = [];
-  if (!config || typeof config !== "object" || Array.isArray(config)) {
+  if (!isRecord(config)) {
     return [
       {
         code: "release.config.invalid",
@@ -22,7 +21,7 @@ export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] =
       },
     ];
   }
-  const value = config as Record<string, unknown>;
+  const value = config;
   if (value.version !== RELEASE_CONFIG_VERSION)
     issues.push({
       code: "release.config.version",

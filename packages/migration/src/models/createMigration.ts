@@ -4,7 +4,7 @@ import {
   MigrationClass,
   MigrationSchema,
   OmitVersion,
-  SemVer,
+  isSemVer,
 } from "./migration";
 
 export function createMigration<Current extends MigrationSchema, Up extends MigrationSchema>(
@@ -13,8 +13,9 @@ export function createMigration<Current extends MigrationSchema, Up extends Migr
   return {
     version: migration.version,
     up: async (state, nextVersion) => {
-      const migrated = (await migration.up(state, nextVersion)) as unknown as Up;
-      return { ...migrated, version: nextVersion as SemVer };
+      const migrated = await migration.up(state, nextVersion);
+      if (!isSemVer(nextVersion)) throw new Error(`"${nextVersion}" is not a valid version`);
+      return { ...migrated, version: nextVersion };
     },
   };
 }

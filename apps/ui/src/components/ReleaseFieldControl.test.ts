@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReleaseConfig, ReleaseFieldDefinition } from "@pipelab/shared";
 import ReleaseFieldControl from "./ReleaseFieldControl.vue";
 import { invalidEnvironmentBindingPaths } from "../pages/release-flow-model";
+import { partialDouble } from "@pipelab/shared";
 
 vi.mock("primevue/select", () => ({
   default: defineComponent({
@@ -46,11 +47,11 @@ vi.mock("primevue/button", () => ({
 const field: ReleaseFieldDefinition = { key: "title", type: "text", label: "Title" };
 const mountedApps: App[] = [];
 const flowWithSourcePath = (path: string) =>
-  ({
+  partialDouble<ReleaseConfig>({
     source: { provider: "source/local", config: { path } },
     builds: [],
     destinations: [],
-  }) as unknown as ReleaseConfig;
+  });
 
 const mountField = (
   value: string,

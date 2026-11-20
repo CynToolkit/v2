@@ -2,23 +2,12 @@ import { defineStore } from "pinia";
 import { ref, computed, readonly } from "vue";
 import { useLogger } from "@pipelab/shared";
 import { useAPI } from "@renderer/composables/api";
-import { SandboxFolder } from "@pipelab/constants";
-import type { BuildHistoryEntry, BuildHistoryQuery, BuildHistoryResponse } from "@pipelab/shared";
-
-interface StorageInfo {
-  totalEntries: number;
-  totalSize: number;
-  oldestEntry?: number;
-  newestEntry?: number;
-  numberOfProjects: number;
-  userDataPath: string;
-  disk: {
-    total: number;
-    free: number;
-    pipelab: number;
-    folders: Array<{ name: SandboxFolder; label: string; size: number }>;
-  };
-}
+import type {
+  BuildHistoryEntry,
+  BuildHistoryQuery,
+  BuildHistoryResponse,
+  BuildHistoryStorageInfo,
+} from "@pipelab/shared";
 
 export const useBuildHistory = defineStore("build-history", () => {
   const api = useAPI();
@@ -77,12 +66,12 @@ export const useBuildHistory = defineStore("build-history", () => {
       }
     },
 
-    async getStorageInfo(): Promise<StorageInfo> {
+    async getStorageInfo(): Promise<BuildHistoryStorageInfo> {
       const result = await api.execute("build-history:get-storage-info");
       if (result.type === "error") {
         throw new Error(result.ipcError || "Failed to get build history storage info");
       }
-      return result.result as StorageInfo;
+      return result.result;
     },
   };
 
@@ -91,7 +80,7 @@ export const useBuildHistory = defineStore("build-history", () => {
   const currentEntry = ref<BuildHistoryEntry | undefined>();
   const isLoading = ref(false);
   const error = ref<string | undefined>();
-  const storageInfo = ref<StorageInfo | undefined>();
+  const storageInfo = ref<BuildHistoryStorageInfo | undefined>();
 
   // Filtering state
   const currentProjectId = ref<string | undefined>();

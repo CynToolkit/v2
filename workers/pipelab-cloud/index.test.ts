@@ -45,6 +45,7 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 }));
 
 import worker, { handleRequest, handleScheduled } from "./index";
+import { partialDouble } from "../shared/test-doubles.ts";
 
 const env = {
   SUPABASE_URL: "http://127.0.0.1:54321",
@@ -240,7 +241,7 @@ describe("Pipelab Cloud Worker", () => {
   it("returns CORS preflight without requiring credentials", async () => {
     const response = await handleRequest(
       new Request("http://localhost:8788/", { method: "OPTIONS" }),
-      {} as never,
+      partialDouble({}),
     );
 
     expect(response.status).toBe(200);
@@ -664,11 +665,15 @@ describe("Pipelab Cloud Worker", () => {
       .mockResolvedValueOnce({ data: null, error: null });
     let scheduled: Promise<unknown> | undefined;
 
-    await handleScheduled({ cron: "17 * * * *", scheduledTime: Date.now() } as never, env, {
-      waitUntil: (promise: Promise<unknown>) => {
-        scheduled = promise;
-      },
-    } as never);
+    await handleScheduled(
+      partialDouble({ cron: "17 * * * *", scheduledTime: Date.now() }),
+      env,
+      partialDouble({
+        waitUntil: (promise: Promise<unknown>) => {
+          scheduled = promise;
+        },
+      }),
+    );
     await scheduled;
 
     expect(mocks.send).toHaveBeenCalledWith(
@@ -686,11 +691,15 @@ describe("Pipelab Cloud Worker", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("unavailable", { status: 503 })));
     let scheduled: Promise<unknown> | undefined;
 
-    await handleScheduled({ cron: "17 * * * *", scheduledTime: Date.now() } as never, env, {
-      waitUntil: (promise: Promise<unknown>) => {
-        scheduled = promise;
-      },
-    } as never);
+    await handleScheduled(
+      partialDouble({ cron: "17 * * * *", scheduledTime: Date.now() }),
+      env,
+      partialDouble({
+        waitUntil: (promise: Promise<unknown>) => {
+          scheduled = promise;
+        },
+      }),
+    );
     await scheduled;
 
     expect(mocks.rpc).not.toHaveBeenCalledWith("start_pipelab_cloud_grace_periods");
@@ -735,11 +744,15 @@ describe("Pipelab Cloud Worker", () => {
     mocks.from.mockReturnValue(query);
 
     let scheduled: Promise<unknown> | undefined;
-    await handleScheduled({ cron: "17 * * * *", scheduledTime: Date.now() } as never, env, {
-      waitUntil: (promise: Promise<unknown>) => {
-        scheduled = promise;
-      },
-    } as never);
+    await handleScheduled(
+      partialDouble({ cron: "17 * * * *", scheduledTime: Date.now() }),
+      env,
+      partialDouble({
+        waitUntil: (promise: Promise<unknown>) => {
+          scheduled = promise;
+        },
+      }),
+    );
     await scheduled;
 
     const verifiedIds = accounts.slice(0, 100).map((account) => account.user_id);
@@ -788,13 +801,13 @@ describe("Pipelab Cloud Worker", () => {
 
     let scheduled: Promise<unknown> | undefined;
     await handleScheduled(
-      { cron: "17 * * * *", scheduledTime: Date.now() } as never,
+      partialDouble({ cron: "17 * * * *", scheduledTime: Date.now() }),
       { ...env, RESEND_API_KEY: "local-resend-key", PIPELAB_CLOUD_FROM_EMAIL: "cloud@example.com" },
-      {
+      partialDouble({
         waitUntil: (promise: Promise<unknown>) => {
           scheduled = promise;
         },
-      } as never,
+      }),
     );
     await expect(scheduled).resolves.toBeDefined();
 

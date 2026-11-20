@@ -1,5 +1,5 @@
 /// <reference path="./declarations.d.ts" />
-import { createProviderDefinition } from "@pipelab/shared";
+import { createProviderDefinition, pickLiteral } from "@pipelab/shared";
 import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { electronWorkflowTaskFactories } from "./package-v2";
 import { electronPhases } from "./phases";
@@ -11,9 +11,9 @@ export const electronTargetInputs = (
 ): { platform: "win32" | "linux" | "darwin"; arch: "x64" | "arm64" } => {
   const [target, arch] = targetId.split("-");
   const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
-  if (!(["x64", "arm64"] as string[]).includes(arch))
-    throw new Error(`Unsupported Electron target: ${targetId}`);
-  return { platform, arch: arch as "x64" | "arm64" };
+  const supportedArch = pickLiteral(["x64", "arm64"], arch);
+  if (!supportedArch) throw new Error(`Unsupported Electron target: ${targetId}`);
+  return { platform, arch: supportedArch };
 };
 
 const electronTargetDescriptor = (id: string) => {

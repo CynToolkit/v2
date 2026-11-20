@@ -1,12 +1,7 @@
 import { join } from "node:path";
 import { access, chmod, mkdir, mkdtemp, rename, rm } from "node:fs/promises";
 import { constants } from "node:fs";
-import {
-  downloadFile,
-  extractTarGz,
-  extractZip,
-  runWithLiveLogs,
-} from "@pipelab/plugin-core";
+import { downloadFile, extractTarGz, extractZip, runWithLiveLogs } from "@pipelab/plugin-core";
 import type { PipelabContext } from "@pipelab/plugin-core";
 
 const steamCmdInstallers = {
@@ -27,14 +22,14 @@ const steamCmdInstallers = {
   },
 } as const;
 
-type SupportedPlatform = keyof typeof steamCmdInstallers;
-
 export const ensureSteamCmd = async (
   context: PipelabContext,
   log: typeof console.log,
   abortSignal?: AbortSignal,
 ) => {
-  const installer = steamCmdInstallers[process.platform as SupportedPlatform];
+  const installer = Object.entries(steamCmdInstallers).find(
+    ([platform]) => platform === process.platform,
+  )?.[1];
   if (!installer) throw new Error(`Steam uploads are not supported on ${process.platform}`);
   if (process.platform === "linux" && process.arch !== "x64")
     throw new Error("Steam uploads currently require an x64 Linux host");
@@ -66,7 +61,10 @@ export const ensureSteamCmd = async (
   const parentDir = context.getThirdPartyPath("steamcmd");
   await mkdir(parentDir, { recursive: true });
   const tempDir = await mkdtemp(join(parentDir, `.setup-${process.platform}-`));
-  const archivePath = join(tempDir, installer.archive === "zip" ? "steamcmd.zip" : "steamcmd.tar.gz");
+  const archivePath = join(
+    tempDir,
+    installer.archive === "zip" ? "steamcmd.zip" : "steamcmd.tar.gz",
+  );
   try {
     log(`Downloading SteamCMD for ${process.platform}...`);
     await downloadFile(installer.url, archivePath, undefined, abortSignal);

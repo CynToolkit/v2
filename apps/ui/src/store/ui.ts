@@ -23,14 +23,18 @@ export interface FilePickerOptions {
   mode: "open" | "save";
 }
 
+export interface FilePickerResult {
+  canceled: boolean;
+  filePath?: string;
+  filePaths?: string[];
+}
+
 export const useUIStore = defineStore("ui", () => {
   const isFilePickerVisible = ref(false);
   const filePickerOptions = ref<FilePickerOptions | null>(null);
-  const filePickerResolve = ref<((value: any) => void) | null>(null);
+  const filePickerResolve = ref<((value: FilePickerResult) => void) | null>(null);
 
-  const showFilePicker = (
-    options: FilePickerOptions,
-  ): Promise<{ canceled: boolean; filePath?: string; filePaths?: string[] }> => {
+  const showFilePicker = (options: FilePickerOptions): Promise<FilePickerResult> => {
     isFilePickerVisible.value = true;
     filePickerOptions.value = options;
 
@@ -39,11 +43,7 @@ export const useUIStore = defineStore("ui", () => {
     });
   };
 
-  const resolveFilePicker = (result: {
-    canceled: boolean;
-    filePath?: string;
-    filePaths?: string[];
-  }) => {
+  const resolveFilePicker = (result: FilePickerResult) => {
     isFilePickerVisible.value = false;
     if (filePickerResolve.value) {
       filePickerResolve.value(result);

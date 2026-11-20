@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
 
-import { defineConfig, loadEnv, type Plugin, type PluginOption } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Icons from "unplugin-icons/vite";
 
@@ -62,11 +62,7 @@ function reportOnlyCsp(supabaseUrl: string | undefined): Plugin {
 export default defineConfig((env) => {
   const environment = loadEnv(env.mode, process.cwd(), "");
   const supabasePublishableKey = environment.SUPABASE_PUBLISHABLE_KEY;
-  const plugins = [
-    vue(),
-    Icons(),
-    reportOnlyCsp(environment.SUPABASE_URL),
-  ] as unknown as PluginOption[];
+  const plugins = [vue(), Icons(), reportOnlyCsp(environment.SUPABASE_URL)];
 
   return {
     plugins,

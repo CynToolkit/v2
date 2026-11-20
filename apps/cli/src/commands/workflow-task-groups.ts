@@ -61,7 +61,7 @@ export const createWorkflowTaskGroups = (
     return {
       producer,
       label: profile?.name?.trim() || definition?.label || producer.provider,
-      tasks: [] as WorkflowStepTask[],
+      tasks: new Array<WorkflowStepTask>(),
     };
   });
 
@@ -88,7 +88,7 @@ export const createWorkflowTaskGroups = (
           config: destination,
           label: destinationLabels[index],
           groupSlots: enabledSlots.length > 1 || hasNamedSlot,
-          tasks: [] as WorkflowStepTask[],
+          tasks: new Array<WorkflowStepTask>(),
         },
       ] as const;
     }),

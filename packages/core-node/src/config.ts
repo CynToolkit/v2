@@ -13,7 +13,7 @@ import {
   fileRepoMigrations,
 } from "@pipelab/shared";
 
-export const setupConfigFile = async <T>(
+export const setupConfigFile = async <T extends { version: string }>(
   filesPath: string,
   options: { context: PipelabContext; migrator: Migrator<T> },
 ) => {
@@ -37,7 +37,7 @@ export const setupConfigFile = async <T>(
     getConfig: async () => {
       const { logger } = useLogger();
       let content = undefined;
-      let originalJson: any = undefined;
+      let originalJson: { version: `${number}.${number}.${number}` } | undefined = undefined;
       let parseFailed = false;
 
       try {
@@ -50,13 +50,13 @@ export const setupConfigFile = async <T>(
         parseFailed = true;
       }
 
-      let json: any = undefined;
+      let json: T | undefined = undefined;
       let migrationFailed = false;
       try {
-        if (!parseFailed) {
+        if (!parseFailed && originalJson) {
           json = await migrator.migrate(originalJson, {
             debug: false,
-            onStep: async (state: any, version: string) => {
+            onStep: async (state, version) => {
               const versionedPath = path.join(
                 parsedPath.dir,
                 `${parsedPath.name}.v${version}.json`,
@@ -114,7 +114,7 @@ export const setupConfigFile = async <T>(
         }
       }
 
-      return json as T;
+      return json ?? migrator.defaultValue;
     },
   };
 };

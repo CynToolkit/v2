@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { itchDestination } from "./index";
+import { partialDouble } from "@pipelab/shared";
 
 const issuesFor = (channel: string) =>
   itchDestination.validate(
-    {
+    partialDouble({
       id: "itch",
       provider: itchDestination.id,
       enabled: true,
       config: { accountConnectionId: "a", project: "game" },
       slots: [{ id: "s", enabled: true, config: { channel } }],
-    } as never,
-    { host: { platform: "linux", architecture: "x64" } } as never,
+    }),
+    partialDouble({ host: { platform: "linux", architecture: "x64" } }),
   );
 
 describe("itch channel validation", () => {

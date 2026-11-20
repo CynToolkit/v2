@@ -1,7 +1,8 @@
 <template>
   <div class="release-field" :data-control-id="inputId">
     <label :for="inputId"
-      >{{ field.label }}<span v-if="field.required" class="required-mark" aria-hidden="true"> *</span
+      >{{ field.label
+      }}<span v-if="field.required" class="required-mark" aria-hidden="true"> *</span
       ><span v-if="field.required" class="p-hidden-accessible"> (required)</span></label
     >
     <small v-if="field.description" class="field-help">
@@ -310,7 +311,7 @@ let lastEmittedValue: string | undefined;
 
 const emitValue = (value: unknown) => {
   lastEmittedValue = typeof value === "string" ? value : undefined;
-  model.value = value as string;
+  model.value = typeof value === "string" ? value : "";
 };
 const emitConnectionBinding = (value: unknown) =>
   emit("update:connection-binding", typeof value === "string" ? value : "");

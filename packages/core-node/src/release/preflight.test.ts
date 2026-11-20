@@ -3,8 +3,9 @@ import type { ProviderDefinition, ReleaseConfig, ReleaseRegistry } from "@pipela
 import type { Workflow, WorkflowValueResolver } from "@pipelab/workflow-runtime";
 import type { ProviderServices } from "../workflow-tasks";
 import { listPreflightDestinations, PreflightFailedError, runPreflights } from "./preflight";
+import { partialDouble } from "@pipelab/shared";
 
-const workflow: Workflow = {
+const workflow: Workflow = partialDouble<Workflow>({
   steps: [
     {
       id: "a",
@@ -25,23 +26,23 @@ const workflow: Workflow = {
     },
     { id: "build", uses: "task:build" },
   ],
-} as unknown as Workflow;
+});
 
-const config = {
+const config = partialDouble<ReleaseConfig>({
   destinations: [
     { id: "d1", provider: "dest.a", name: "Main", enabled: true, config: {}, slots: [] },
     { id: "d2", provider: "dest.c", enabled: true, config: {}, slots: [] },
   ],
-} as unknown as ReleaseConfig;
-const registry = {
+});
+const registry = partialDouble<ReleaseRegistry>({
   destinations: [
     { id: "dest.a", label: "Alpha" },
     { id: "dest.c", label: "Gamma" },
   ],
-} as unknown as ReleaseRegistry;
+});
 
 const providers = (calls: string[]) =>
-  [
+  partialDouble<readonly ProviderDefinition<ProviderServices>[]>([
     {
       preflights: {
         "task:a": async () => {
@@ -53,7 +54,7 @@ const providers = (calls: string[]) =>
         },
       },
     },
-  ] as unknown as readonly ProviderDefinition<ProviderServices>[];
+  ]);
 
 const resolver = {
   connectionValues: {},

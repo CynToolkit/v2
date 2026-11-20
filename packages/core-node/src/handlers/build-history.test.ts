@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { PipelabContext } from "../context";
 import { BuildHistoryStorage } from "./build-history";
 import { filterBuildHistoryEntries } from "./history";
+import { invalidInput } from "@pipelab/shared";
 
 const workspaces: string[] = [];
 const entry = (id: string, workflowId: string, startTime: number) => ({
@@ -261,7 +262,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     const original = await readFile(historyPath, "utf8");
 
     await expect(
-      storage.update("run-valid", { status: "not-a-status" as never }, "project-1"),
+      storage.update("run-valid", { status: invalidInput("not-a-status") }, "project-1"),
     ).rejects.toThrow("unsupported value");
     await expect(
       storage.save({ ...entry("run-invalid", "workflow-a", 10), startTime: Infinity }),
