@@ -1,3 +1,4 @@
+import type { WorkflowSaveState } from "../composables/workflow-document";
 import type { ReleaseBuildProfileConfig } from "@pipelab/shared";
 
 export const persistBuildChangesBeforeNavigation = async (
@@ -13,8 +14,6 @@ export const persistBuildChangesBeforeNavigation = async (
     return false;
   }
 };
-
-export type WorkflowSaveState = "saving" | "saved" | "error";
 
 const structurallyEqual = (left: unknown, right: unknown): boolean => {
   if (Object.is(left, right)) return true;

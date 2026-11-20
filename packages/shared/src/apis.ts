@@ -1,6 +1,5 @@
 import type { PreflightResult, RendererProviderMetadata } from "./plugins/definitions";
 import { User, UserResponse } from "@supabase/supabase-js";
-import type { Tagged } from "type-fest";
 import { AppConfig, ConnectionsConfig } from "./config.schema";
 import { FileRepo } from "./config/projects-definition";
 import type {
@@ -224,6 +223,7 @@ export type IpcMessage = {
   requestId: RequestId;
   data: any;
 };
-export type RequestId = Tagged<string, "request-id">;
+export type { RequestId } from "./ipc.types";
+import type { RequestId } from "./ipc.types";
 
 // type Output = End<'fs:openFolder'>

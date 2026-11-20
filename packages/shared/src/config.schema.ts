@@ -1,7 +1,7 @@
 import {
   union,
   literal,
-  InferInput,
+  InferOutput,
   string,
   boolean,
   object,
@@ -66,8 +66,8 @@ export const ConnectionsValidator = object({
   workflowBindings: optional(array(WorkflowConnectionBindingValidator)),
 });
 
-export type Connection = InferInput<typeof ConnectionValidator>;
-export type WorkflowConnectionBinding = InferInput<typeof WorkflowConnectionBindingValidator>;
-export type ConnectionsConfig = InferInput<typeof ConnectionsValidator>;
+export type Connection = InferOutput<typeof ConnectionValidator>;
+export type WorkflowConnectionBinding = InferOutput<typeof WorkflowConnectionBindingValidator>;
+export type ConnectionsConfig = InferOutput<typeof ConnectionsValidator>;
 
-export type AppConfig = InferInput<typeof AppSettingsValidator>;
+export type AppConfig = InferOutput<typeof AppSettingsValidator>;
