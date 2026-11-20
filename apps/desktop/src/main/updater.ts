@@ -1,6 +1,7 @@
 import type { GitHubRelease } from "@pipelab/core-node/desktop";
 import type { UpdateState } from "@pipelab/shared";
 import semver from "semver";
+import type { SetFeedURLOptions, OnProgress } from "./updater.types";
 
 export interface AvailableUpdate {
   version: string;
@@ -32,13 +33,13 @@ export function resolveAvailableUpdate(
 
 /** The subset of electron-updater's `autoUpdater` this module relies on. */
 export interface NativeUpdater {
-  setFeedURL(options: { provider: "generic"; url: string; channel?: string }): void;
+  setFeedURL(options: SetFeedURLOptions): void;
   checkForUpdates(): Promise<unknown> | void;
   on(
     event: "checking-for-update" | "update-available" | "update-not-available",
     cb: () => void,
   ): void;
-  on(event: "download-progress", cb: (progress: { percent: number }) => void): void;
+  on(event: "download-progress", cb: (progress: OnProgress) => void): void;
   on(event: "update-downloaded", cb: () => void): void;
   on(event: "error", cb: (error: Error) => void): void;
 }

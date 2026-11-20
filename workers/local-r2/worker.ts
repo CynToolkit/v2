@@ -1,8 +1,10 @@
+import type { R2ObjectMetadataHttpMetadata, PutOptions } from "./worker.types";
+
 interface R2ObjectMetadata {
   size: number;
   etag?: string;
   uploaded?: Date;
-  httpMetadata?: { contentType?: string };
+  httpMetadata?: R2ObjectMetadataHttpMetadata;
   customMetadata?: Record<string, string>;
 }
 
@@ -10,12 +12,7 @@ interface R2Bucket {
   put(
     key: string,
     value: ReadableStream<Uint8Array> | ArrayBuffer | ArrayBufferView | string,
-    options?: {
-      httpMetadata?: { contentType?: string };
-      customMetadata?: Record<string, string>;
-      md5?: string;
-      onlyIf?: Headers;
-    },
+    options?: PutOptions,
   ): Promise<unknown>;
   head(key: string): Promise<R2ObjectMetadata | null>;
   delete(key: string): Promise<void>;

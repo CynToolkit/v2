@@ -1,10 +1,11 @@
 import { PipelabContext, BuildHistoryStorage } from "@pipelab/core-node";
 import { getDefaultUserDataPath } from "../paths";
 import { BuildHistoryEntry } from "@pipelab/shared";
+import type { HistoryCommandOptions } from "./history.types";
 
 export async function historyCommand(
   projectId: string | undefined,
-  options: { get?: string; userData?: string; limit?: number },
+  options: HistoryCommandOptions,
 ) {
   const userDataPath = options.userData || getDefaultUserDataPath();
   const context = new PipelabContext({ userDataPath });

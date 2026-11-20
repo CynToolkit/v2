@@ -24,6 +24,13 @@ import { parseWorkflowConnectionOverrides } from "./workflow-connection-override
 import { createWorkflowTaskGroups, type WorkflowStepTask } from "./workflow-task-groups";
 import { workflowStepTitle } from "./workflow-task-title";
 import { createWorkflowTaskOutputBuffer, workflowTaskOutputLines } from "./workflow-task-output";
+import type {
+  ListWorkflowsCommandOptions,
+  DeleteWorkflowCommandOptions,
+  RunWorkflowCommandOptions,
+  RunCompletion,
+  WorkflowLogs,
+} from "./workflows.types";
 
 export const formatWorkflowStepElapsed = (durationMs: number) =>
   durationMs < 1_000 ? `${Math.round(durationMs)} ms` : `${(durationMs / 1_000).toFixed(2)} s`;
@@ -268,7 +275,7 @@ const loadWorkflowFile = async (path: string): Promise<ReleaseConfig> => {
   return config;
 };
 
-export async function listWorkflowsCommand(options: { userData?: string } = {}) {
+export async function listWorkflowsCommand(options: ListWorkflowsCommandOptions = {}) {
   const context = contextFor(options.userData);
   const entries = await workflowEntries(context);
   const persistence = new ReleasePersistence(context);
@@ -284,10 +291,7 @@ export async function listWorkflowsCommand(options: { userData?: string } = {}) 
   }
 }
 
-export async function deleteWorkflowCommand(
-  id: string,
-  options: { force?: boolean; userData?: string },
-) {
+export async function deleteWorkflowCommand(id: string, options: DeleteWorkflowCommandOptions) {
   if (!options.force) throw new Error("Deleting a workflow requires the --force flag.");
   const context = contextFor(options.userData);
   const persistence = new ReleasePersistence(context);
@@ -295,19 +299,7 @@ export async function deleteWorkflowCommand(
   console.log(`Deleted workflow "${id}".`);
 }
 
-export async function runWorkflowCommand(
-  id: string,
-  options: {
-    userData?: string;
-    output?: string;
-    failOnError?: boolean;
-    dryRun?: boolean;
-    skipPreflight?: boolean;
-    skipPersistence?: boolean;
-    verbose?: boolean;
-    connection?: readonly string[];
-  },
-) {
+export async function runWorkflowCommand(id: string, options: RunWorkflowCommandOptions) {
   const connectionOverrides = parseWorkflowConnectionOverrides(options.connection || []);
   const context = contextFor(options.userData);
   const savedEntry = isWorkflowFileArgument(id) ? undefined : await findEntry(context, id);
@@ -359,7 +351,7 @@ export async function runWorkflowCommand(
     return;
   }
   const workflow = prepared.workflow;
-  const completion = new Map<string, { resolve: () => void; reject: (error: Error) => void }>();
+  const completion = new Map<string, RunCompletion>();
   const waiters = new Map<string, Promise<void>>();
   const phaseCompletion = new Map<string, () => void>();
   const phaseWaiters = new Map<string, Promise<void>>();
@@ -389,7 +381,7 @@ export async function runWorkflowCommand(
   const workflowTimer = process.stdout.isTTY
     ? setInterval(() => updateWorkflowTitle(), 100)
     : undefined;
-  const workflowLogs: Array<{ stepTitle: string; message: string }> = [];
+  const workflowLogs: Array<WorkflowLogs> = [];
   const phaseKey = (stepId: string, phaseId: string) => `${stepId}\0${phaseId}`;
   const updateTask = (stepId: string, state: ListrTaskState) => {
     taskStates.set(stepId, state);
