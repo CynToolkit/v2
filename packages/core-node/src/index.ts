@@ -23,7 +23,7 @@ export * from "./release/workflow-value-requirements";
 export { listPreflightDestinations, PreflightFailedError } from "./release/preflight";
 export { builtInProviders } from "./providers-registry";
 export * from "./server";
-export * from "./desktop-bootstrap";
+export * from "./desktop-host";
 export * from "./pipelab-cloud-auth";
 export * from "./utils";
 export * from "./utils/github";

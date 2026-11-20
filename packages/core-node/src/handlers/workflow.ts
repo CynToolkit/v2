@@ -719,10 +719,14 @@ export const executeWorkflow = async (
   };
 };
 
+const activeRuns = new WorkflowRunCancellationRegistry();
+
+/** Abort every in-flight workflow run (used when the hosting process shuts down). */
+export const cancelAllWorkflowRuns = () => activeRuns.cancelAll();
+
 export const registerWorkflowHandlers = (context: PipelabContext) => {
   const { handle } = useAPI();
   const { logger } = useLogger();
-  const activeRuns = new WorkflowRunCancellationRegistry();
   handle(
     "release:catalog:get",
     async (_, { send }) =>

@@ -55,12 +55,10 @@ test("rejects symlinks while copying the CLI", async (t) => {
   await rejects(copyTreeWithoutSymlinks(source, path.join(root, "target")), /symlink or junction/);
 });
 
-test("validates the embedded CLI entry points", async () => {
+test("validates the embedded CLI UI", async () => {
   const root = await temporaryDirectory("cli-layout");
   const cli = path.join(root, "cli");
   await mkdir(path.join(cli, "ui"), { recursive: true });
-  await writeFile(path.join(cli, "package.json"), "{}\n");
-  await writeFile(path.join(cli, "index.mjs"), "export default true;\n");
   await writeFile(path.join(cli, "ui", "index.html"), "<!doctype html>\n");
 
   await verifyBundledCli(cli);

@@ -36,7 +36,7 @@ export function resolveDefaultWebSocketUrl(
   if (isPackaged === false && isLoopback && isValidPort) {
     const port = Number(queryPort);
     if (port >= 1 && port <= 65535) {
-      // The Desktop sidecar binds IPv4 loopback. Do not let `localhost`
+      // The Desktop server binds IPv4 loopback. Do not let `localhost`
       // resolve to a separate, unverified IPv6 listener on the same port.
       return `ws://127.0.0.1:${port}`;
     }
