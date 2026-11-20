@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReleaseConfig, ReleaseFieldDefinition } from "@pipelab/shared";
 import ReleaseFieldControl from "./ReleaseFieldControl.vue";
 import { invalidEnvironmentBindingPaths } from "../pages/release-flow-model";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("primevue/select", () => ({
   default: defineComponent({

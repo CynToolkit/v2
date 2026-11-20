@@ -9,7 +9,7 @@ import pokiPlugin from "./index.js";
 import { normalizePokiAccountName, pokiAccountConfigRoot } from "./auth.js";
 import { fetchPackage, type PipelabContext } from "@pipelab/plugin-core";
 import type { PokiTaskServices } from "./export.js";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("@pipelab/plugin-core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@pipelab/plugin-core")>();

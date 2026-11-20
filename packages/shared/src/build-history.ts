@@ -7,6 +7,19 @@ import type {
 } from "@pipelab/workflow-runtime";
 import type { ArtifactDescriptor } from "./release/types";
 
+export interface BuildHistoryFolderUsage {
+  name: SandboxFolder;
+  label: string;
+  size: number;
+}
+
+export interface BuildHistoryDiskUsage {
+  total: number;
+  free: number;
+  pipelab: number;
+  folders: BuildHistoryFolderUsage[];
+}
+
 /** Disk and history usage shown on the Advanced settings page. */
 export interface BuildHistoryStorageInfo {
   totalEntries: number;
@@ -15,12 +28,7 @@ export interface BuildHistoryStorageInfo {
   newestEntry?: number;
   numberOfProjects: number;
   userDataPath: string;
-  disk: {
-    total: number;
-    free: number;
-    pipelab: number;
-    folders: Array<{ name: SandboxFolder; label: string; size: number }>;
-  };
+  disk: BuildHistoryDiskUsage;
 }
 
 export interface ExecutionStep {

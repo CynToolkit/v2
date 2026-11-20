@@ -20,7 +20,7 @@ vi.mock("@renderer/composables/useConfig", () => ({
 }));
 
 import { useFiles } from "./files";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("useFiles persistence boundaries", () => {
   beforeEach(() => {

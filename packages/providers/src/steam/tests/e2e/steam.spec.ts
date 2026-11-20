@@ -7,7 +7,7 @@ import type { PipelabContext } from "@pipelab/plugin-core";
 import { createLocalHost, runWorkflow } from "@pipelab/workflow-runtime";
 import type { Subprocess } from "execa";
 import { createSteamUploadTask, type SteamTaskServices } from "../../upload-to-steam";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("@pipelab/plugin-core", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@pipelab/plugin-core")>();

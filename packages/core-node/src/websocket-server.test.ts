@@ -28,7 +28,7 @@ vi.mock("ws", async (importOriginal) => {
 
 import { WebSocketServer } from "./websocket-server";
 import { useAPI } from "./ipc-core";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("WebSocket request logging", () => {
   afterEach(() => {

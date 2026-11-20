@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ReleaseConfig, ReleasePlan } from "@pipelab/shared";
 import { layoutPlanGraph, PLAN_NODE_HEIGHT, PLAN_NODE_WIDTH } from "./workflow-plan-graph";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const config = partialDouble<ReleaseConfig>({
   source: { provider: "construct" },

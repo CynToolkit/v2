@@ -150,11 +150,28 @@ interface Artifact {
   hasShareLink: boolean;
 }
 
+interface OverviewUsage {
+  usedBytes: number;
+  quotaBytes: number | null;
+  retentionDays: number | null;
+}
+
+interface OverviewEntitlement {
+  status: string;
+  graceUntil: string | null;
+}
+
+interface OverviewNotification {
+  id: string;
+  message: string;
+  deadline_at: string;
+}
+
 interface Overview {
   artifacts: Artifact[];
-  usage: { usedBytes: number; quotaBytes: number | null; retentionDays: number | null };
-  entitlement: { status: string; graceUntil: string | null };
-  notifications: Array<{ id: string; message: string; deadline_at: string }>;
+  usage: OverviewUsage;
+  entitlement: OverviewEntitlement;
+  notifications: OverviewNotification[];
 }
 
 const auth = useAuth();

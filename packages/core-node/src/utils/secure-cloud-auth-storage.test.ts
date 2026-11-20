@@ -18,7 +18,7 @@ vi.mock("@napi-rs/keyring", () => ({
 }));
 
 import { SecureCloudAuthStorage } from "./secure-cloud-auth-storage";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("SecureCloudAuthStorage", () => {
   beforeEach(() => {

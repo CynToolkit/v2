@@ -58,7 +58,7 @@ import type {
   ReleasePlan,
 } from "@pipelab/shared";
 import type { SlotDestinationDefinition } from "./release-flow-model";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const catalog: ReleaseCatalog = {
   buildTypes: [

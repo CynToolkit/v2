@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import type { Page } from "playwright";
 import { openConstructProjectFile } from "../../assets/script";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 interface FakeFileChooser {
   setFiles: (files: string[]) => Promise<void>;

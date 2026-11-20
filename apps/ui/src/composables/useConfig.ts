@@ -10,7 +10,17 @@ import {
   defaultFileRepo,
 } from "@pipelab/shared";
 
-type ConfigResult<R> = { type: "success"; result: R } | { type: "error"; ipcError: string };
+interface ConfigSuccess<R> {
+  type: "success";
+  result: R;
+}
+
+interface ConfigFailure {
+  type: "error";
+  ipcError: string;
+}
+
+type ConfigResult<R> = ConfigSuccess<R> | ConfigFailure;
 
 /** Typed access to one persisted config document; `name` only labels logs and errors. */
 interface ConfigIO<T> {

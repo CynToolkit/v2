@@ -3,7 +3,7 @@ import type { ProviderDefinition, ReleaseConfig, ReleaseRegistry } from "@pipela
 import type { Workflow, WorkflowValueResolver } from "@pipelab/workflow-runtime";
 import type { ProviderServices } from "../workflow-tasks";
 import { listPreflightDestinations, PreflightFailedError, runPreflights } from "./preflight";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const workflow: Workflow = partialDouble<Workflow>({
   steps: [

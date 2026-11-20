@@ -36,6 +36,18 @@ interface Env {
   PIPELAB_CLOUD_FROM_EMAIL?: string;
 }
 
+interface ExpiredReservation {
+  id: string;
+  storage_key: string;
+  multipart_upload_id?: string | null;
+}
+
+interface DeletionWarning {
+  user_id: string;
+  email: string | null;
+  deadline_at: string;
+}
+
 interface Artifact {
   id: string;
   storage_key: string;
@@ -1134,11 +1146,7 @@ export async function cleanupExpiredArtifacts(env: Env) {
   if (reservationClaimError) throw reservationClaimError;
   let reservationsDeleted = 0;
   let reservationsFailed = 0;
-  const claimedReservations: Array<{
-    id: string;
-    storage_key: string;
-    multipart_upload_id?: string | null;
-  }> = reservations ?? [];
+  const claimedReservations: ExpiredReservation[] = reservations ?? [];
   for (const reservation of claimedReservations) {
     try {
       if (reservation.multipart_upload_id) {
@@ -1169,11 +1177,7 @@ export async function cleanupExpiredArtifacts(env: Env) {
     }
   }
 
-  let pendingWarnings: Array<{
-    user_id: string;
-    email: string | null;
-    deadline_at: string;
-  }> = [];
+  let pendingWarnings: DeletionWarning[] = [];
   if (entitlementChecksSucceeded) {
     const { data, error } = await admin.rpc("claim_pipelab_cloud_deletion_warnings");
     if (error) throw error;

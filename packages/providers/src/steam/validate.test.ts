@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { steamDestination } from "./index";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const issueCodes = (appId: string, depotId: string) =>
   steamDestination

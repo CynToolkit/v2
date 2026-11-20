@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { itchDestination } from "./index";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const issuesFor = (channel: string) =>
   itchDestination.validate(

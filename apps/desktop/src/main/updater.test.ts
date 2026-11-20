@@ -3,7 +3,7 @@ import { describe, it } from "vitest";
 import type { UpdateState } from "@pipelab/shared";
 import type { GitHubRelease } from "@pipelab/core-node/desktop";
 import { createUpdater, resolveAvailableUpdate, type NativeUpdater } from "./updater";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const release: GitHubRelease = {
   prerelease: false,

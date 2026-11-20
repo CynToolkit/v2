@@ -6,7 +6,7 @@ import type {
   ReleaseRegistry,
 } from "@pipelab/shared";
 import { dispatchRunNotifications, type DispatchRunNotificationsInput } from "./notifications";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const event: ReleaseNotificationEvent = {
   workflow: "My game",

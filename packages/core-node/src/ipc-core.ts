@@ -1,4 +1,4 @@
-import { Channels, Data, Events, WebSocketRequestMessage } from "@pipelab/shared";
+import { Channels, Events, RequestMessageFor, WebSocketRequestMessage } from "@pipelab/shared";
 import { WebSocket as WSWebSocket } from "ws";
 import { useLogger } from "@pipelab/shared";
 import { WebSocketEvent, WebSocketHandler, WebSocketSendFunction } from "@pipelab/shared";
@@ -25,10 +25,7 @@ export const useAPI = () => {
     };
   };
 
-  const dispatch = <KEY extends Channels>(
-    ws: WSWebSocket,
-    message: { channel: KEY; requestId: string; data: Data<KEY> },
-  ) => {
+  const dispatch = <KEY extends Channels>(ws: WSWebSocket, message: RequestMessageFor<KEY>) => {
     const { channel, data, requestId } = message;
     const handler = handlers[channel];
 

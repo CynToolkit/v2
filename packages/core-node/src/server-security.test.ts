@@ -8,7 +8,7 @@ import {
   isTokenEnforced,
   requiresAuthentication,
 } from "./server-security";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const request = (headers: Record<string, string>, url = "/") =>
   partialDouble<IncomingMessage>({ headers, url });

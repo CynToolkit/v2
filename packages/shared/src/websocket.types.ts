@@ -47,13 +47,25 @@ export interface WebSocketEvent {
 
 // WebSocket message types
 /** One member per channel, so `channel` and `data` stay paired when the message is narrowed. */
+export interface RequestMessageFor<KEY extends Channels> {
+  channel: KEY;
+  requestId: RequestId;
+  data: Data<KEY>;
+}
+
 export type WebSocketRequestMessage = {
-  [KEY in Channels]: { channel: KEY; requestId: RequestId; data: Data<KEY> };
+  [KEY in Channels]: RequestMessageFor<KEY>;
 }[Channels];
 
 /** A server-pushed event, paired with its channel the same way as a request. */
+export interface EventMessageFor<KEY extends Channels> {
+  type: "event";
+  channel: KEY;
+  data: Events<KEY>;
+}
+
 export type WebSocketEventMessage = {
-  [KEY in Channels]: { type: "event"; channel: KEY; data: Events<KEY> };
+  [KEY in Channels]: EventMessageFor<KEY>;
 }[Channels];
 
 export interface WebSocketResponseMessage {

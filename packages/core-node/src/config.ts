@@ -13,6 +13,11 @@ import {
   fileRepoMigrations,
 } from "@pipelab/shared";
 
+/** A persisted config file; its `version` selects the migrations to run. */
+interface VersionedDocument {
+  version: `${number}.${number}.${number}`;
+}
+
 export const setupConfigFile = async <T extends { version: string }>(
   filesPath: string,
   options: { context: PipelabContext; migrator: Migrator<T> },
@@ -37,7 +42,7 @@ export const setupConfigFile = async <T extends { version: string }>(
     getConfig: async () => {
       const { logger } = useLogger();
       let content = undefined;
-      let originalJson: { version: `${number}.${number}.${number}` } | undefined = undefined;
+      let originalJson: VersionedDocument | undefined = undefined;
       let parseFailed = false;
 
       try {

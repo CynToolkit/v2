@@ -30,6 +30,24 @@ import type {
   WorkflowEvent,
   WorkflowResult,
 } from "@pipelab/workflow-runtime";
+export interface ReleaseSourceInspection {
+  issues?: ValidationIssue[];
+  fieldOptions?: Record<string, ReleaseFieldOption[]>;
+}
+
+export interface AuthErrorResult {
+  error: AuthError | null;
+}
+
+export interface AuthInvokeError {
+  message?: string;
+}
+
+export interface AuthInvokeResult {
+  data: unknown;
+  error: AuthInvokeError | null;
+}
+
 export type BrowserProfileAuthStatus = "authenticated" | "not-authenticated" | "unknown";
 
 export interface BrowserProfileCandidate {
@@ -126,7 +144,7 @@ export type IpcDefinition = {
   "release:catalog:get": [void, EndEvent<ReleaseCatalog>];
   "release:source:inspect": [
     { provider: string; config: Record<string, unknown> },
-    EndEvent<{ issues?: ValidationIssue[]; fieldOptions?: Record<string, ReleaseFieldOption[]> }>,
+    EndEvent<ReleaseSourceInspection>,
   ];
   "release:producer:inspect": [
     { provider: string; config: ReleaseProducerConfig; sourceConfig?: Record<string, unknown> },
@@ -191,11 +209,8 @@ export type IpcDefinition = {
   "auth:signInWithPassword": [{ email: string; password: string }, EndEvent<UserResponse>];
   "auth:signUp": [{ email: string; password: string }, EndEvent<AuthResponse>];
   "auth:signOut": [void, EndEvent<void>];
-  "auth:resetPasswordForEmail": [{ email: string }, EndEvent<{ error: AuthError | null }>];
-  "auth:invoke": [
-    { name: string; options?: FunctionInvokeOptions },
-    EndEvent<{ data: unknown; error: { message?: string } | null }>,
-  ];
+  "auth:resetPasswordForEmail": [{ email: string }, EndEvent<AuthErrorResult>];
+  "auth:invoke": [{ name: string; options?: FunctionInvokeOptions }, EndEvent<AuthInvokeResult>];
   "agent:version:get": [void, EndEvent<{ version: string; channel: ReleaseChannel }>];
   "system:packages:cleanup": [void, EndEvent<boolean>];
   "startup:progress": [void, { type: "progress"; data: { message: string } } | { type: "done" }];

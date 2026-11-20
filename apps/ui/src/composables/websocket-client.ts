@@ -4,6 +4,8 @@ import {
   End,
   Events,
   RequestId,
+  type EventMessageFor,
+  type RequestMessageFor,
   type WebSocketEventMessage,
   type WebSocketListener,
 } from "@pipelab/shared";
@@ -260,7 +262,7 @@ export class WebSocketClient {
     }
   }
 
-  private emitEvent<KEY extends Channels>(message: { channel: KEY; data: Events<KEY> }) {
+  private emitEvent<KEY extends Channels>(message: EventMessageFor<KEY>) {
     this.eventListeners[message.channel]?.forEach((listener) => {
       try {
         listener(message.data);
@@ -313,7 +315,7 @@ export class WebSocketClient {
     }
 
     const requestId: RequestId = nanoidFn();
-    const message: { channel: KEY; requestId: RequestId; data: Data<KEY> | undefined } = {
+    const message: Omit<RequestMessageFor<KEY>, "data"> & { data: Data<KEY> | undefined } = {
       channel,
       requestId,
       data: toRaw(klona(data)),

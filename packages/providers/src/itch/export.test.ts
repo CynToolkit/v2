@@ -6,7 +6,7 @@ import { runWithLiveLogs, type PipelabContext } from "@pipelab/plugin-core";
 import { createLocalHost, runWorkflow } from "@pipelab/workflow-runtime";
 import { ensureButler } from "./ensure.js";
 import { createItchUploadTask, type ItchTaskServices, WORKFLOW_TASK_ID } from "./export.js";
-import { invalidInput, partialDouble } from "@pipelab/shared";
+import { invalidInput, partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("./ensure.js", () => ({ ensureButler: vi.fn(async () => "/mock/butler") }));
 vi.mock("@pipelab/plugin-core", async (importOriginal) => {

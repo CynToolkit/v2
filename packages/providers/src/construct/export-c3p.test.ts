@@ -8,7 +8,7 @@ import {
   formatSavedConstructVersion,
   type ConstructWorkflowTaskServices,
 } from "./export-c3p.js";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("./export-shared.js", () => ({
   exportc3p: vi.fn(async () => ({ zipFile: "/out/project.zip" })),

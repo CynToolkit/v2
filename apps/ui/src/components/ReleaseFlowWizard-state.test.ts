@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { computed, reactive } from "vue";
-import { invalidInput, resolveReleaseDefaults } from "@pipelab/shared";
+import { resolveReleaseDefaults } from "@pipelab/shared";
+import { invalidInput } from "@pipelab/shared/test-doubles";
 import type { CompiledArtifact, ReleaseCatalog, ReleaseRegistry } from "@pipelab/shared";
 import { invalidEnvironmentBindingPaths } from "../utils/environment-bindings";
 import {

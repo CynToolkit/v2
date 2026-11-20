@@ -7,7 +7,7 @@ import { runWorkflowTask } from "@pipelab/test-utils";
 import type { ConstructWorkflowTaskServices } from "../../export-c3p";
 import { constructExportWorkflowTaskFactory } from "../../export-c3p";
 import { exportc3p } from "../../export-shared.js";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 vi.mock("../../export-shared.js", () => ({ exportc3p: vi.fn() }));
 

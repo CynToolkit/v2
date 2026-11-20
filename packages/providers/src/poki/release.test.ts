@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import pokiPlugin, { createPokiUploadTask, WORKFLOW_TASK_ID } from "./index";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 describe("Poki Release registry", () => {
   it("keeps the destination and task without legacy node metadata", () => {

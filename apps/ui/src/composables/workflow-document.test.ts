@@ -7,7 +7,7 @@ import {
   SAVE_DELAY_MS,
   type WorkflowDocumentDeps,
 } from "./workflow-document";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const config = (over: Partial<ReleaseConfig> = {}): ReleaseConfig =>
   partialDouble<ReleaseConfig>({

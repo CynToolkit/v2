@@ -7,7 +7,7 @@ import {
   filterBuildChoices,
   groupBuildChoices,
 } from "./build-choices";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const choice = (engine: string, engineLabel: string, target: string): CompatibleBuildCandidate => ({
   type: "desktop",

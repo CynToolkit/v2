@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { checkItchPreflight, testItchConnection } from "./itch/export";
 import { checkPokiPreflight, testPokiConnection } from "./poki/export";
 import { checkSteamPreflight, testSteamConnection } from "./steam/preflight";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const itchContext = (apiKey = "key") => ({
   inputs: { accountConnectionId: "acct", project: "game" },

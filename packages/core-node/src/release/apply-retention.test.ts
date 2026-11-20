@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { BuildHistoryEntry } from "@pipelab/shared";
 import { applyRetention } from "./apply-retention";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const DAY = 24 * 60 * 60 * 1000;
 const run = (id: string, ageDays: number) =>

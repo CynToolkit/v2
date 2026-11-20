@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { PipelabContext } from "../context";
 import { BuildHistoryStorage } from "./build-history";
 import { filterBuildHistoryEntries } from "./history";
-import { invalidInput } from "@pipelab/shared";
+import { invalidInput } from "@pipelab/shared/test-doubles";
 
 const workspaces: string[] = [];
 const entry = (id: string, workflowId: string, startTime: number) => ({

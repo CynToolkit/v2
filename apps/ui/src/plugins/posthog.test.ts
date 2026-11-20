@@ -7,7 +7,7 @@ vi.mock("posthog-js", () => ({
 }));
 
 import posthogPlugin from "./posthog";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const install = () => {
   const app = partialDouble<App>({ config: { globalProperties: {} } });

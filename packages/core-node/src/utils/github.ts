@@ -1,5 +1,10 @@
 import semver from "semver";
 
+/** A ref entry from the GitHub matching-refs API. */
+interface GitRef {
+  ref: string;
+}
+
 export interface GitHubRelease {
   tag_name: string;
   prerelease: boolean;
@@ -95,7 +100,7 @@ export async function fetchPackageReleases(
 
     // Extract tags matching the packageName@ pattern
     const eligibleTags = refs
-      .map((r: { ref: string }) => r.ref.replace("refs/tags/", ""))
+      .map((r: GitRef) => r.ref.replace("refs/tags/", ""))
       .filter((tag: string) => getEligibleVersion(packageName, tag, options));
 
     if (eligibleTags.length === 0) {

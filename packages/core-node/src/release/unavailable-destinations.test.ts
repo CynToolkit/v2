@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ReleaseConfig } from "@pipelab/shared";
 import { withoutUnavailableDestinations } from "./unavailable-destinations";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const config = partialDouble<ReleaseConfig>({
   destinations: [

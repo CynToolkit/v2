@@ -6,7 +6,7 @@ import { EventEmitter } from "node:events";
 import yauzl from "yauzl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { extractZip, zipFolder } from "./fs-extras";
-import { partialDouble } from "@pipelab/shared";
+import { partialDouble } from "@pipelab/shared/test-doubles";
 
 const tempDirs: string[] = [];
 

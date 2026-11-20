@@ -1,17 +1,25 @@
+export interface PipelabVersions {
+  electron?: string;
+  chrome?: string;
+  node?: string;
+  app?: string;
+}
+
+export interface OpenDialogResult {
+  canceled: boolean;
+  filePaths: string[];
+}
+
+export interface SaveDialogResult {
+  canceled: boolean;
+  filePath: string | undefined;
+}
+
 /** Methods the Desktop preload exposes to the renderer as `window.pipelab`. */
 export interface PipelabBridge {
-  versions: {
-    electron?: string;
-    chrome?: string;
-    node?: string;
-    app?: string;
-  };
-  showOpenDialog: (
-    options: Electron.OpenDialogOptions,
-  ) => Promise<{ canceled: boolean; filePaths: string[] }>;
-  showSaveDialog: (
-    options: Electron.SaveDialogOptions,
-  ) => Promise<{ canceled: boolean; filePath: string | undefined }>;
+  versions: PipelabVersions;
+  showOpenDialog: (options: Electron.OpenDialogOptions) => Promise<OpenDialogResult>;
+  showSaveDialog: (options: Electron.SaveDialogOptions) => Promise<SaveDialogResult>;
   openExternal: (url: string) => Promise<boolean | void>;
   showItemInFolder: (path: string) => Promise<unknown>;
   isPathBlacklisted: (path: string) => Promise<boolean>;

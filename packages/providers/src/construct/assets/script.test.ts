@@ -18,7 +18,7 @@ import {
   waitForConstructExportDownload,
 } from "./script";
 import { isConstructFreeEditionLimit } from "./listeners";
-import { invalidInput, partialDouble } from "@pipelab/shared";
+import { invalidInput, partialDouble } from "@pipelab/shared/test-doubles";
 
 const exportRunPath = join(tmpdir(), "export-run");
 
