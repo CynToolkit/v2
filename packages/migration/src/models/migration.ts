@@ -2,7 +2,7 @@ import * as semver from "semver";
 import { coerce } from "semver";
 import { objectKeys } from "../utils/object-keys";
 import { klona } from "klona";
-import { custom, InferOutput, object } from "valibot";
+import { custom, type GenericSchema, type InferOutput, object, safeParse } from "valibot";
 
 export type Awaitable<T> = Promise<T> | T;
 
@@ -10,13 +10,18 @@ export type MigrationFn<From, To> = (state: From, targetVersion: string) => Awai
 
 export interface MigrateOptions {
   debug?: boolean;
-  target?: SemVer;
   onStep?: (state: MigrationSchema, version: SemVer) => Promise<void> | void;
 }
 
-const MigrationSchemaValidator = object({
-  version: custom<SemVer>((input) => typeof input === "string" && /^\d+\.\d+\.\d+$/.test(input)),
-});
+/** A state between two versions: only `version` is statically known. */
+export type MigrationState = MigrationSchema & Record<string, unknown>;
+
+/** Matches a `major.minor.patch` version string. */
+export const SemVerSchema = custom<SemVer>(
+  (input) => typeof input === "string" && /^\d+\.\d+\.\d+$/.test(input),
+);
+
+const MigrationSchemaValidator = object({ version: SemVerSchema });
 
 export type MigrationSchema = InferOutput<typeof MigrationSchemaValidator>;
 
@@ -41,6 +46,16 @@ export interface MigratorConfig<InitialState, FinalState> {
   coerce?: boolean;
   /** State used when there is nothing persisted yet; also seeds new files. */
   defaultValue: FinalState;
+  /** Describes the state of the latest version; `migrate` returns only states that match it. */
+  schema: GenericSchema<unknown, FinalState>;
+}
+
+/** The migrated state does not match the schema of the latest version. */
+export class MigrationValidationError extends Error {
+  constructor(public readonly issues: readonly string[]) {
+    super(`Migrated state is not valid: ${issues.join("; ")}`);
+    this.name = "MigrationValidationError";
+  }
 }
 
 export class Migrator<InitialState extends MigrationSchema, OutputState extends MigrationSchema> {
@@ -50,6 +65,7 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
 
   coerce: boolean;
   defaultValue: OutputState;
+  schema: GenericSchema<unknown, OutputState>;
 
   constructor(config: MigratorConfig<InitialState, OutputState>) {
     if (config.migrations.length === 0) {
@@ -63,6 +79,7 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
     });
 
     this.defaultValue = config.defaultValue;
+    this.schema = config.schema;
 
     const versions = this.getVersions();
     this.current = versions[versions.length - 1];
@@ -74,26 +91,59 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
     return semver.sort(keys);
   }
 
+  /** Migrates `state` to the latest version and checks the result against the schema. */
   async migrate(
-    _state: MigrationSchema | undefined,
+    state: MigrationSchema | undefined,
     options?: MigrateOptions,
   ): Promise<OutputState> {
+    const migrated = await this.run(state, undefined, options);
+    return this.validate(migrated);
+  }
+
+  /** Migrates `state` up to `target`. The result is an intermediate version, so it is not validated. */
+  migrateTo(
+    state: MigrationSchema | undefined,
+    target: SemVer,
+    options?: MigrateOptions,
+  ): Promise<MigrationState> {
+    return this.run(state, target, options);
+  }
+
+  /** Missing keys take their default, then the result must match the latest version's schema. */
+  private validate(state: MigrationState): OutputState {
+    const result = safeParse(this.schema, { ...this.defaultValue, ...state });
+    if (!result.success) {
+      throw new MigrationValidationError(
+        result.issues.map((issue) => {
+          const path = issue.path?.map((item) => String(item.key)).join(".");
+          return path ? `${path}: ${issue.message}` : issue.message;
+        }),
+      );
+    }
+    return result.output;
+  }
+
+  private async run(
+    _state: MigrationSchema | undefined,
+    explicitTarget: SemVer | undefined,
+    options?: MigrateOptions,
+  ): Promise<MigrationState> {
     const state = _state ?? this.defaultValue;
     const currentVersion = this.tryCoerce(state.version);
-    const targetVersion = this.tryCoerce(options?.target ?? this.current);
+    const targetVersion = this.tryCoerce(explicitTarget ?? this.current);
 
     if (options?.debug) {
       console.log("Migrating from", currentVersion, "to", targetVersion);
     }
 
-    let finalState: MigrationSchema & Record<string, unknown> = klona(state); // Transformed between versions, so only `version` is statically known
+    let finalState: MigrationState = klona(state);
     const versions = this.getVersions();
     const currentIndex = versions.indexOf(currentVersion);
     const targetIndex = versions.indexOf(targetVersion);
 
     if (currentIndex === -1) {
       if (
-        !options?.target &&
+        explicitTarget === undefined &&
         semver.valid(currentVersion) &&
         semver.gt(currentVersion, this.current)
       ) {
@@ -109,14 +159,14 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
 
     // If we're already at the target version, return the state
     if (currentIndex === targetIndex) {
-      return finalState as OutputState;
+      return finalState;
     }
 
     // Get the migration path
     const isUpgrade = currentIndex < targetIndex;
 
     if (!isUpgrade) {
-      return finalState as OutputState;
+      return finalState;
     }
 
     // Perform migrations
@@ -152,7 +202,7 @@ export class Migrator<InitialState extends MigrationSchema, OutputState extends 
       }
     }
 
-    return finalState as OutputState;
+    return finalState;
   }
 
   tryCoerce(version: SemVer): SemVer {

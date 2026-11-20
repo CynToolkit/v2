@@ -1,7 +1,8 @@
 import { describe, test, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import { createMigration, finalVersion } from "./createMigration";
 import { createMigrator, MigratorFactory } from "./createMigrator";
-import { Migrator, MigrationSchema } from "./migration";
+import { object, string } from "valibot";
+import { Migrator, MigrationSchema, MigrationValidationError, SemVerSchema } from "./migration";
 
 interface V1 extends MigrationSchema {
   dummyV1: string;
@@ -39,6 +40,10 @@ const outputV4: V4 = {
   version: "4.0.0",
 };
 
+const schemaV2 = object({ dummyV2: string(), version: SemVerSchema });
+const schemaV3 = object({ dummyV3: string(), version: SemVerSchema });
+const schemaV4 = object({ dummy: string(), version: SemVerSchema });
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe("migrator", () => {
@@ -48,6 +53,7 @@ describe("migrator", () => {
     migratorInstance = createMigrator<V1, V4>();
     migratorMigrations = migratorInstance.createMigrations({
       defaultValue: outputV4,
+      schema: schemaV4,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -124,10 +130,19 @@ describe("migrator", () => {
       version: "4.0.0",
     };
     // Migrate should return the exact state since downgrades are bypassed
-    const result = await migratorMigrations.migrate(input, {
-      target: "3.0.0",
-    });
+    const result = await migratorMigrations.migrateTo(input, "3.0.0");
     expect(result).toEqual(input);
+  });
+
+  test("should reject a final state that does not match the schema", async () => {
+    const input = { dummy: 42, version: "4.0.0" } as const;
+    await expect(migratorMigrations.migrate(input)).rejects.toThrow(MigrationValidationError);
+    await expect(migratorMigrations.migrate(input)).rejects.toThrow("dummy");
+  });
+
+  test("should fill keys missing from the persisted state with their default", async () => {
+    const input = { version: "4.0.0" } as const;
+    await expect(migratorMigrations.migrate(input)).resolves.toStrictEqual(outputV4);
   });
 
   test("should support onStep callback during migration", async () => {
@@ -153,6 +168,7 @@ describe("migrator", () => {
     const seen: string[] = [];
     const migrator = createMigrator<V1, V3>().createMigrations({
       defaultValue: outputV3,
+      schema: schemaV3,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -178,10 +194,18 @@ describe("migrator", () => {
   test("should reject duplicate and empty migration lists", () => {
     const dup = createMigration<V1, V2>({ version: "1.0.0", up: (s) => ({ dummyV2: s.dummyV1 }) });
     expect(() =>
-      createMigrator<V1, V2>().createMigrations({ defaultValue: outputV2, migrations: [dup, dup] }),
+      createMigrator<V1, V2>().createMigrations({
+        defaultValue: outputV2,
+        schema: schemaV2,
+        migrations: [dup, dup],
+      }),
     ).toThrow("Duplicate migration");
     expect(() =>
-      createMigrator<V1, V2>().createMigrations({ defaultValue: outputV2, migrations: [] }),
+      createMigrator<V1, V2>().createMigrations({
+        defaultValue: outputV2,
+        schema: schemaV2,
+        migrations: [],
+      }),
     ).toThrow("at least one migration");
   });
 
@@ -199,6 +223,7 @@ describe("migrator", () => {
 
     const badMigratorInstance = createMigrator<V1, V4>().createMigrations({
       defaultValue: outputV4,
+      schema: schemaV4,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -225,6 +250,7 @@ describe("migrator", () => {
 
     const migrator = createMigrator<V1, V4>().createMigrations({
       defaultValue: outputV4,
+      schema: schemaV4,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -253,6 +279,7 @@ describe("migrator", () => {
 
     const migrator = createMigrator<V1, V2>().createMigrations({
       defaultValue: outputV2,
+      schema: schemaV2,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
@@ -290,6 +317,7 @@ describe("async", () => {
 
     const migrator = createMigrator<V1, V2>().createMigrations({
       defaultValue: outputV2,
+      schema: schemaV2,
       migrations: [
         createMigration<V1, V2>({
           version: "1.0.0",
