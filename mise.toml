@@ -7,22 +7,16 @@ supabase = "3.2.0"
 description = "Install workspace dependencies"
 run = "pnpm install"
 
-# Contributor flow: no Doppler. Cloud features are optional and stay off unless
+# Cloud features are optional and stay off unless
 # their variables are set in the environment or a root .env.
 [tasks.dev]
 description = "Run the standalone UI and CLI backend; cloud features turn on when their variables are set"
 run = "pnpm exec turbo run dev:remote --filter=@pipelab/cli --filter=@pipelab/ui"
 depends = ["install"]
 
-# Maintainer flow: needs Doppler access to the Pipelab project.
-[tasks."dev:cloud"]
-description = "Run the standalone UI and CLI backend with Doppler's cloud configuration"
-run = "doppler run -- pnpm exec turbo run dev:remote --filter=@pipelab/cli --filter=@pipelab/ui"
-depends = ["install"]
-
 [tasks.desktop]
-description = "Run the desktop app with Doppler's cloud configuration"
-run = "doppler run -- pnpm dev"
+description = "Run the desktop app"
+run = "pnpm dev"
 dir = "apps/desktop"
 depends = ["install"]
 
@@ -31,8 +25,8 @@ description = "Start local Supabase and apply migrations"
 run = "supabase start && supabase migration up"
 
 [tasks."deploy:artifacts"]
-description = "Deploy the Pipelab Cloud Worker and inject Doppler secrets"
-run = "doppler run -- pnpm --filter @pipelab/cloud-workers deploy && pnpm --filter @pipelab/cloud-workers deploy:secrets"
+description = "Deploy the Pipelab Cloud Worker and upload its secrets"
+run = "pnpm --filter @pipelab/cloud-workers deploy && pnpm --filter @pipelab/cloud-workers deploy:secrets"
 depends = ["install"]
 
 [tasks."deploy:supabase-functions"]
@@ -41,7 +35,7 @@ run = 'supabase functions deploy --remote="${SUPABASE_PROJECT_REF:?Set SUPABASE_
 
 [tasks."setup:construct"]
 description = "Seed the signed-in Chromium profile used by Construct exports"
-run = 'pnpm --filter @pipelab/providers exec playwright install chromium && doppler run --preserve-env --project "${DOPPLER_PROJECT:-pipelab}" --config "${DOPPLER_CONFIG:-dev_personal}" -- node scripts/setup/construct-profile.mjs'
+run = 'pnpm --filter @pipelab/providers exec playwright install chromium && node scripts/setup/construct-profile.mjs'
 depends = ["install"]
 
 [tasks."setup:poki"]
