@@ -29,3 +29,17 @@ a relationship, so removing it needs a redesign or runtime validation, not a loc
 
 - `tauri.ts` writes `name` / `version` as top-level `Cargo.toml` keys instead of under
   `[package]`, so they have no effect. It predates this change and is unchanged.
+
+## Inline object types (repo-wide pass)
+
+The cast-removal PR named the inline object types it added (bridge results, storage info, auth
+results, WebSocket messages, cloud overview, worker rows, config documents). The rest of the
+repo still has inline object shapes in annotations, generics and return types, for example
+`Promise<{ path: string; size: number }>`, `Array<{ ... }>` and `: { a: string; b: number }`
+parameters. Convert them to named `interface`s (object shapes) or `type`s (unions,
+intersections, mapped types), per `AGENTS.md`, and define each shape once.
+
+- Find them with a search for `: {`, `<{`, `Array<{` and `Promise<{` in non-test source,
+  and check the result by hand: object literals and valibot schemas are values, not types.
+- Start with `packages/providers/src` (provider inputs, `godot/export.ts`), `packages/core-node`
+  handlers and `apps/ui/src` components.
