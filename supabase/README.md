@@ -8,7 +8,7 @@ Cloudflare Workers under the repository's root `workers/` directory own the auth
 2. Deploy all Supabase Edge Functions in this checkout, including browser billing and `pipelab-cloud-reconcile`, to the approved project with `SUPABASE_PROJECT_REF` set. Configure the existing production Polar credentials and endpoint values listed below in the target project's Edge Function environment.
 3. Configure these server-only Doppler secrets: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `PIPELAB_CLOUD_LINK_ENCRYPTION_KEY`, `RESEND_API_KEY`, and `PIPELAB_CLOUD_FROM_EMAIL`. Configure `CLOUDFLARE_API_TOKEN` for Wrangler deployment.
 4. The last migration seeds a Basic allowance for the production Polar Indie product ID `4f3a3e6f-5195-4583-9488-e06108ac7547`: `quota_bytes = 1073741824` (1 GiB) and 30-day history retention. It leaves an existing row for that product unchanged; verify any existing row has the intended values. The owner approved the allowance using the internal four-target Electron sample as synthetic quota evidence. Its ZIPs total 575,081,265 bytes, leaving 498,660,559 bytes of headroom. This confirms packaged-byte accounting but does not represent customer game sizes. Higher-tier numeric values remain unset. Configure production endpoint URLs for hosted functions so production subscriptions match the seeded production product row. Uploads fail closed without a matching enabled row.
-5. Run `mise run deploy:artifacts`. Wrangler deploys the Worker and uploads those Doppler values as Worker secrets.
+5. Run `doppler run -- mise run deploy:artifacts`. Wrangler deploys the Worker and uploads those Doppler values as Worker secrets.
 6. Set `PIPELAB_CLOUD_WORKER_URL` in Doppler to the deployed Worker origin, then build/package Pipelab with Doppler so Desktop, the UI, and the local CLI use that origin.
 7. Cloudflare's `17 * * * *` Cron Trigger handles entitlement reconciliation, expired upload reservations, subscription grace, warning emails, artifact deletion, and cleanup retries.
 
@@ -20,18 +20,7 @@ Subscription grace begins at the actual paid-through date and lasts 30 days. Exi
 
 ## Local development
 
-The root `mise.toml` provides the local commands. `local:setup` installs workspace dependencies, initializes Supabase config if needed, starts the local Supabase stack, and applies pending migrations without resetting local data. The R2 Worker stores objects locally; the API Worker and desktop use the local Supabase credentials reported by the CLI. The API Worker receives the local R2 endpoint as a Wrangler binding so its signed upload URLs target the local R2 Worker. Run `doppler setup` once from the repository root if this checkout is not already linked to your Doppler project; the app task uses that saved selection for non-Supabase app settings.
-
-Run these in separate terminals from the repository root:
-
-```bash
-mise run local:setup
-mise run local:r2
-mise run local:api
-mise run local:app
-```
-
-The desktop's normal `mise run dev` remains Doppler-backed for development against the configured cloud services. `mise run local:app` uses Doppler for other app settings but overrides Supabase and the Worker URL to point at the local stack. To trigger retention cleanup locally, run `mise run local:cleanup` while the API Worker is running.
+`mise run supabase:setup` starts the local Supabase stack and applies pending migrations without resetting local data. Run the Workers and the desktop app against it with `pnpm --filter @pipelab/cloud-workers dev:r2`, `pnpm --filter @pipelab/cloud-workers dev`, and `pnpm --filter @pipelab/app dev`, passing the credentials from `supabase status -o env` as `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, plus `PIPELAB_CLOUD_WORKER_URL=http://127.0.0.1:8788` for the app. The API Worker also needs `R2_ENDPOINT_URL` (via `--var`) and dummy local `R2_*` values.
 
 Local R2 is exposed on `127.0.0.1:8787` through the path-style S3-compatible `PutObject`, `HeadObject`, and `DeleteObject` API. The API Worker listens on `127.0.0.1:8788`; its `R2_ENDPOINT_URL` points at the local R2 Worker and uses dummy local credentials. No production R2 credentials are needed locally, and multipart uploads remain production-only. Set a local `PIPELAB_CLOUD_LINK_ENCRYPTION_KEY` for share-link development. CLI Cloud sign-in requires an interactive terminal and stores its session in the operating system credential store.
 

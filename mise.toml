@@ -4,192 +4,46 @@ pnpm = "10.33.0"
 supabase = "3.2.0"
 
 [tasks.install]
+description = "Install workspace dependencies"
 run = "pnpm install"
-dir = "apps/desktop"
 
+# Cloud features are optional and stay off unless
+# their variables are set in the environment or a root .env.
 [tasks.dev]
-run = "doppler run -- pnpm dev"
-dir = "apps/desktop"
+description = "Run the standalone UI and CLI backend; cloud features turn on when their variables are set"
+run = "pnpm exec turbo run dev:remote --filter=@pipelab/cli --filter=@pipelab/ui"
 depends = ["install"]
 
-[tasks.stop]
-description = "Stop the local Pipelab backend"
-run = "pnpm --filter @pipelab/cli start -- stop"
-env = { NODE_ENV = "development" }
-
-[tasks.local]
-description = "Start local services with the desktop app or standalone UI"
-run = '''
-#!/usr/bin/env bash
-set -euo pipefail
-
-target="${1:-desktop}"
-case "$target" in
-  ui)
-    mise run local:setup
-    mise run local:r2 ::: local:api ::: local:ui
-    ;;
-  ui-no-cloud)
-    mise run local:ui:no-cloud
-    ;;
-  desktop)
-    mise run local:setup
-    mise run local:r2 ::: local:api ::: local:app
-    ;;
-  *)
-    echo "Usage: mise run local [desktop|ui|ui-no-cloud] (ui-no-cloud skips Supabase and local workers)" >&2
-    exit 2
-    ;;
-esac
-'''
-
-[tasks.package]
-run = "doppler run -- pnpm package"
-dir = "apps/desktop"
-depends = ["install"]
-
-[tasks.test-e2e-local]
-run = "doppler run -- pnpm test:e2e"
-dir = "apps/desktop"
-depends = ["package"]
-
-[tasks.docs-install]
-run = "pnpm install"
-dir = "apps/documentation"
-
-[tasks.docs-dev]
+[tasks.desktop]
+description = "Run the desktop app"
 run = "pnpm dev"
-dir = "apps/documentation"
-depends = ["docs-install", "docs-generate-mermaid"]
+dir = "apps/desktop"
+depends = ["install"]
 
-[tasks.docs-generate-mermaid]
-run = [
-  "pnpm exec mmdc -i assets/architecture/architecture.mermaid -o assets/architecture/architecture.svg",
-]
-dir = "apps/documentation"
-depends = ["docs-install"]
-
-[tasks."local:setup"]
-description = "Initialize Supabase locally and apply migrations"
-run = '''
-set -eu
-pnpm install
-if [ ! -f supabase/config.toml ]; then
-  supabase init
-fi
-supabase start
-supabase migration up
-'''
-
-[tasks."local:r2"]
-description = "Run the local S3-compatible R2 Worker"
-run = "pnpm --filter @pipelab/cloud-workers dev:r2"
-
-[tasks."local:api"]
-description = "Run the Pipelab Cloud Worker against local Supabase and R2"
-run = '''
-set -eu
-eval "$(supabase status --output env)"
-export SUPABASE_URL="${API_URL:-}"
-export SUPABASE_PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-}"
-export SUPABASE_SERVICE_ROLE_KEY="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
-: "${SUPABASE_URL:?Could not read local Supabase URL; run mise run local:setup first}"
-: "${SUPABASE_PUBLISHABLE_KEY:?Could not read local Supabase publishable key}"
-: "${SUPABASE_SERVICE_ROLE_KEY:?Could not read local Supabase service key}"
-export R2_ENDPOINT_URL="http://127.0.0.1:8787"
-export R2_ACCOUNT_ID="local"
-export R2_ACCESS_KEY_ID="local"
-export R2_SECRET_ACCESS_KEY="local"
-export R2_BUCKET_NAME="pipelab-cloud-local"
-export PIPELAB_CLOUD_LINK_ENCRYPTION_KEY="${PIPELAB_CLOUD_LINK_ENCRYPTION_KEY:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA}"
-export CLOUDFLARE_INCLUDE_PROCESS_ENV="true"
-pnpm --filter @pipelab/cloud-workers dev --var "R2_ENDPOINT_URL:${R2_ENDPOINT_URL}"
-'''
-
-[tasks."local:cleanup"]
-description = "Run the local Worker's scheduled cleanup handler once"
-run = "curl --fail-with-body 'http://127.0.0.1:8788/cdn-cgi/local/scheduled?format=json'"
+[tasks."supabase:setup"]
+description = "Start local Supabase and apply migrations"
+run = "supabase start && supabase migration up"
 
 [tasks."deploy:artifacts"]
-description = "Deploy the Pipelab Cloud Worker and inject Doppler secrets"
-run = [
-  "doppler run -- pnpm --filter @pipelab/cloud-workers deploy",
-  "pnpm --filter @pipelab/cloud-workers deploy:secrets",
-]
+description = "Deploy the Pipelab Cloud Worker and upload its secrets"
+run = "pnpm --filter @pipelab/cloud-workers deploy && pnpm --filter @pipelab/cloud-workers deploy:secrets"
 depends = ["install"]
 
 [tasks."deploy:supabase-functions"]
-description = "Deploy all Supabase Edge Functions to an explicitly selected project"
-run = '''
-set -eu
-: "${SUPABASE_PROJECT_REF:?Set SUPABASE_PROJECT_REF to the approved Supabase project}"
-supabase functions deploy --remote="$SUPABASE_PROJECT_REF"
-'''
-
-[tasks."local:app"]
-description = "Run the desktop app against local Supabase and Pipelab Cloud"
-run = '''
-set -eu
-eval "$(supabase status --output env)"
-local_supabase_url="${API_URL:-}"
-local_publishable_key="${PUBLISHABLE_KEY:-}"
-local_service_role_key="${SERVICE_ROLE_KEY:-${SECRET_KEY:-}}"
-: "${local_supabase_url:?Could not read local Supabase URL; run mise run local:setup first}"
-: "${local_publishable_key:?Could not read local Supabase publishable key}"
-: "${local_service_role_key:?Could not read local Supabase service key}"
-doppler run -- env SUPABASE_URL="$local_supabase_url" SUPABASE_PUBLISHABLE_KEY="$local_publishable_key" SUPABASE_SERVICE_ROLE_KEY="$local_service_role_key" PIPELAB_CLOUD_WORKER_URL="http://127.0.0.1:8788" pnpm dev
-'''
-dir = "apps/desktop"
-
-[tasks."local:ui"]
-description = "Run the standalone UI and CLI backend through Turbo"
-run = '''
-set -eu
-eval "$(supabase status --output env)"
-export SUPABASE_URL="${API_URL:-}"
-export SUPABASE_PUBLISHABLE_KEY="${PUBLISHABLE_KEY:-}"
-export PIPELAB_CLOUD_WORKER_URL="http://127.0.0.1:8788"
-: "${SUPABASE_URL:?Could not read local Supabase URL; run mise run local:setup first}"
-: "${SUPABASE_PUBLISHABLE_KEY:?Could not read local Supabase publishable key}"
-pnpm exec turbo run dev:remote --filter=@pipelab/cli --filter=@pipelab/ui
-'''
-
-[tasks."local:ui:no-cloud"]
-description = "Run the standalone UI and CLI backend without Supabase or Pipelab Cloud"
-env = {
-  PIPELAB_CLOUD_WORKER_URL = "",
-  POSTHOG_API_KEY = "",
-  SUPABASE_PROJECT_ID = "",
-  SUPABASE_PUBLISHABLE_KEY = "",
-  SUPABASE_SERVICE_ROLE_KEY = "",
-  SUPABASE_URL = "",
-  VITE_PIPELAB_MODE = "",
-}
-run = """
-# Only the PrimeUI license key comes from Doppler; every cloud secret stays blank.
-PRIME_UI_KEY="$(doppler secrets get PRIME_UI_KEY --plain -p pipelab -c dev 2>/dev/null || true)" \\
-  pnpm exec turbo run dev:remote --filter=@pipelab/cli --filter=@pipelab/ui
-"""
+description = "Deploy Supabase Edge Functions to the project in SUPABASE_PROJECT_REF"
+run = 'supabase functions deploy --remote="${SUPABASE_PROJECT_REF:?Set SUPABASE_PROJECT_REF to the approved Supabase project}"'
 
 [tasks."setup:construct"]
-description = "Seed the signed-in Chromium profile used by Construct exports (credentials from Doppler)"
-run = '''
-set -eu
-pnpm --filter @pipelab/providers exec playwright install chromium
-# Uses CONSTRUCT_USERNAME/CONSTRUCT_PASSWORD from the environment when set,
-# otherwise reads them from Doppler (override with DOPPLER_PROJECT/DOPPLER_CONFIG).
-if [ -n "${CONSTRUCT_USERNAME:-}" ] && [ -n "${CONSTRUCT_PASSWORD:-}" ]; then
-  node scripts/setup/construct-profile.mjs
-else
-  doppler run --project "${DOPPLER_PROJECT:-pipelab}" --config "${DOPPLER_CONFIG:-dev_personal}" -- node scripts/setup/construct-profile.mjs
-fi
-'''
+description = "Seed the signed-in Chromium profile used by Construct exports"
+run = 'pnpm --filter @pipelab/providers exec playwright install chromium && node scripts/setup/construct-profile.mjs'
+depends = ["install"]
 
 [tasks."setup:poki"]
 description = "Save a Poki login without a local browser (POKI_LOGIN_URL, or paste the URL when prompted)"
 run = "node scripts/setup/poki-login.mjs"
 raw = true
+depends = ["install"]
 
 [tasks.setup-providers]
-description = "Run every provider setup task (Construct profile, Poki login, more to come)"
+description = "Run every provider setup task (Construct profile, Poki login)"
 run = [{ task = "setup:construct" }, { task = "setup:poki" }]

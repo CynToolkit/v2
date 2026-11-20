@@ -20,15 +20,15 @@ PIPELAB_CLOUD_WORKER_URL=...
 POSTHOG_API_KEY=...
 ```
 
-These values enable Supabase-backed authentication, Pipelab Cloud artifact requests, and PostHog telemetry respectively. `SUPABASE_PUBLISHABLE_KEY` is the browser/client key. They are optional for local development; missing cloud configuration disables the associated cloud functionality, and the CLI warns that authentication is disabled when Supabase is unavailable. Never commit real credentials. Local Supabase and Worker development is available through the `mise run local` tasks; see `mise.toml` and `supabase/README.md` for the local service setup.
+These values enable Supabase-backed authentication, Pipelab Cloud artifact requests, and PostHog telemetry respectively. `SUPABASE_PUBLISHABLE_KEY` is the browser/client key. They are optional for local development; missing cloud configuration disables the associated cloud functionality, and the CLI warns that authentication is disabled when Supabase is unavailable. Never commit real credentials. `mise run supabase:setup` starts a local Supabase stack; see `supabase/README.md`.
 
-To run the standalone UI and CLI backend without starting local Supabase or either Wrangler Worker, use:
+To run the standalone UI and CLI backend, use:
 
 ```sh
-mise run local ui-no-cloud
+mise run dev
 ```
 
-This mode clears Supabase and Pipelab Cloud configuration for the processes it starts, so authentication, billing, telemetry, and cloud artifact requests are unavailable. Use `mise run local ui` when you need local Supabase or Pipelab Cloud features.
+Cloud configuration is optional: unless the variables above are set in your environment or root `.env`, authentication, billing, telemetry, and cloud artifact requests are unavailable. Maintainers can inject the real cloud configuration by wrapping any task, for example `doppler run -- mise run dev` or `doppler run -- mise run desktop`.
 
 Billing is available in every Editor build. To validate billing locally, use
 the mocked function tests in `supabase/README.md` and the browser journeys in
@@ -107,8 +107,7 @@ without running. Regular push and pull request tests remain credential-free.
 
 To seed the dedicated Construct profile locally, run `mise run setup-providers`
 (or `mise run setup:construct` alone). It installs Playwright's Chromium if needed, signs in with `CONSTRUCT_USERNAME` and `CONSTRUCT_PASSWORD`
-(from the environment, otherwise from Doppler project `pipelab`, config
-`dev_personal`; override with `DOPPLER_PROJECT` and `DOPPLER_CONFIG`), and
+(from the environment; maintainers can run `doppler run -- mise run setup:construct`), and
 prints `CONSTRUCT_PROFILE_PATH`, the `.../PipelabConstruct/Default` profile to
 select on the workflow's Construct source. It signs in again on every run. `mise run setup:poki`
 saves a Poki login without a browser on the machine: it prints Poki's sign-in
