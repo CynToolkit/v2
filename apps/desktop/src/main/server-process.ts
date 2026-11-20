@@ -17,9 +17,6 @@ const RESTART_WINDOW_MS = 60_000;
 // It reaches the server through its environment (argv is visible to other users in `ps`).
 const authToken = randomBytes(32).toString("hex");
 
-/** Token the window must present to the local server. */
-export const getServerAuthToken = () => authToken;
-
 /** URL of the UI served by the local server (or the Vite dev server in development). */
 export const getUiUrl = (port: number) => {
   const base = is.dev
@@ -41,7 +38,7 @@ export const onServerRestarted = (listener: (port: number) => void) => {
   restartListener = listener;
 };
 
-export const getUiDevelopmentPort = () => {
+const getUiDevelopmentPort = () => {
   const testPort = process.env.PIPELAB_TEST_DESKTOP_UI_PORT;
   if (process.env.PIPELAB_TEST_DESKTOP === "1" && testPort && /^\d+$/.test(testPort)) {
     return Number(testPort);
