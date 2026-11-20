@@ -1,5 +1,7 @@
+import type { DeploymentFolderNameSlot } from "./deployment-folder.types";
+
 /** Folder name a Folder deployment writes into, derived from the deployment's display name. */
-export const deploymentFolderName = (slot: { name?: string }, index: number): string => {
+export const deploymentFolderName = (slot: DeploymentFolderNameSlot, index: number): string => {
   const cleaned = trimEnd(
     (slot.name ?? "")
       // eslint-disable-next-line no-control-regex

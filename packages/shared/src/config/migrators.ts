@@ -3,15 +3,15 @@ import {
   createMigrator,
   finalVersion,
   type MigrateOptions,
-  SemVer,
 } from "@pipelab/migration";
 import { AppConfig, ConnectionsConfig } from "../config.schema";
 import { FileRepo } from "./projects-definition";
+import type { VersionedData } from "./migrators.types";
 
 // --- Types ---
 
 export interface Migrator<T> {
-  migrate: (data: { version: SemVer }, options?: MigrateOptions) => Promise<T>;
+  migrate: (data: VersionedData, options?: MigrateOptions) => Promise<T>;
   defaultValue: T;
 }
 

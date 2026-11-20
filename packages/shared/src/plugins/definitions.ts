@@ -1,6 +1,17 @@
 import type { OpenDialogOptions } from "electron";
 import type { ProviderReleaseDefinition } from "../release/types";
 import type { WorkflowTask } from "@pipelab/workflow-runtime";
+import type {
+  ControlTypeInputOptions,
+  ControlTypeSelectOptions,
+  ControlTypeArrayOptions,
+  IconTypeImage,
+  IconTypeIcon,
+  PreflightResultVerified,
+  PreflightResultUnverifiable,
+  PreflightResultFailed,
+  MainPluginDefinitionValidators,
+} from "./definitions.types";
 
 export interface PathOptions {
   filter?: RegExp;
@@ -13,12 +24,7 @@ export interface ControlTypeBase {
 
 export interface ControlTypeInput extends ControlTypeBase {
   type: "input";
-  options: {
-    kind: "number" | "text";
-    validator?: string;
-    placeholder?: string;
-    password?: boolean;
-  };
+  options: ControlTypeInputOptions;
 }
 
 export interface PipelabSelectOption {
@@ -28,18 +34,12 @@ export interface PipelabSelectOption {
 
 export interface ControlTypeSelect extends ControlTypeBase {
   type: "select";
-  options: {
-    options: Array<PipelabSelectOption>;
-    placeholder: string;
-  };
+  options: ControlTypeSelectOptions;
 }
 
 export interface ControlTypeMultiSelect extends ControlTypeBase {
   type: "multi-select";
-  options: {
-    options: Array<PipelabSelectOption>;
-    placeholder: string;
-  };
+  options: ControlTypeSelectOptions;
 }
 
 export interface ControlTypeBoolean extends ControlTypeBase {
@@ -63,9 +63,7 @@ export interface ControlTypeJSON extends ControlTypeBase {
 
 export interface ControlTypeArray extends ControlTypeBase {
   type: "array";
-  options: {
-    kind: "number" | "text";
-  };
+  options: ControlTypeArrayOptions;
 }
 
 export interface ControlTypeColor extends ControlTypeBase {
@@ -100,18 +98,7 @@ export type InputDefinition<T extends ControlType = ControlType> = {
 };
 
 export type InputsDefinition = Record<string, InputDefinition>;
-export type IconType =
-  | {
-      type: "image";
-      /**
-       * base64 image
-       */
-      image: string;
-    }
-  | {
-      type: "icon";
-      icon: string;
-    };
+export type IconType = IconTypeImage | IconTypeIcon;
 export interface IntegrationField {
   key: string;
   label: string;
@@ -151,9 +138,9 @@ export type WorkflowTaskFactoryRegistry<TServices> = Record<string, WorkflowTask
  * Only `failed` blocks a run; `unverifiable` (offline, no cheap check) passes.
  */
 export type PreflightResult =
-  | { status: "verified" }
-  | { status: "unverifiable"; reason: string }
-  | { status: "failed"; message: string };
+  | PreflightResultVerified
+  | PreflightResultUnverifiable
+  | PreflightResultFailed;
 
 export interface PreflightContext<TServices> {
   /** The destination step's resolved `with` inputs. */
@@ -224,11 +211,7 @@ export const createProviderDefinition = <
 ): TDefinition => definition;
 
 export interface MainPluginDefinition<TServices = unknown> extends ProviderDefinition<TServices> {
-  validators?: Array<{
-    id: string;
-    description: string;
-    validator: (options: Record<string, unknown>) => unknown;
-  }>;
+  validators?: Array<MainPluginDefinitionValidators>;
 }
 
 export type ParamsToInput<PARAMS extends InputsDefinition> = {

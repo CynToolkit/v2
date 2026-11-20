@@ -25,23 +25,19 @@ export interface EndEvent<DATA> {
         type: "success";
         result: DATA;
       }
-    | {
-        type: "error";
-        ipcError: string;
-        code?: string;
-      };
+    | EndEventDataError;
 }
 
 export type IpcDefinition = {
   "dialog:alert": [
     // input
-    { message: string; buttons?: { title: string; value: string }[] },
-    EndEvent<{ answer: string }>,
+    DialogAlertInput,
+    EndEvent<DialogAlertEvent>,
   ];
   "dialog:prompt": [
     // input
-    { message: string; buttons?: { title: string; value: string }[] },
-    EndEvent<{ answer: string }>,
+    DialogAlertInput,
+    EndEvent<DialogAlertEvent>,
   ];
   "log:message": [
     // input
@@ -60,7 +56,7 @@ export type RendererData<KEY extends RendererChannels> = IpcDefinition[KEY][0];
 export type RendererEvents<KEY extends RendererChannels> = IpcDefinition[KEY][1];
 export type RendererEnd<KEY extends RendererChannels> = Extract<
   IpcDefinition[KEY][1],
-  { type: "end" }
+  RendererEndEvent
 >["data"];
 
 export interface RendererMessage {
@@ -79,3 +75,27 @@ export type HandleListenerRenderer<KEY extends RendererChannels> = (
   event: unknown,
   data: { value: RendererData<KEY>; send: HandleListenerRendererSendFn<KEY> },
 ) => Promise<void>;
+
+export interface EndEventDataError {
+  type: "error";
+  ipcError: string;
+  code?: string;
+}
+
+export interface DialogAlertInputButton {
+  title: string;
+  value: string;
+}
+
+export interface DialogAlertInput {
+  message: string;
+  buttons?: DialogAlertInputButton[];
+}
+
+export interface DialogAlertEvent {
+  answer: string;
+}
+
+export interface RendererEndEvent {
+  type: "end";
+}
