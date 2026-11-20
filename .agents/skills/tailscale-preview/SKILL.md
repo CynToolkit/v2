@@ -5,8 +5,8 @@ description: Serve the Pipelab UI and CLI dev servers for remote browser access 
 
 # Tailscale Preview
 
-Serve the local Supabase/workers, standalone UI, and CLI over Tailscale. This
-procedure uses the repository's `mise run local ui` task, which starts the
+Serve the standalone UI and CLI over Tailscale. This
+procedure uses the repository's `mise run dev` task, which starts the
 remote-bound UI and CLI through Turbo.
 
 Run the Pipelab UI + CLI dev servers so a remote browser (e.g. the developer's
@@ -18,10 +18,10 @@ laptop) can open the UI over Tailscale. Use when asked to "start the app",
 From the repository root, run this command and keep the terminal open:
 
 ```bash
-mise run local ui 2>&1 | tee /tmp/pipelab-local-ui.log
+mise run dev 2>&1 | tee /tmp/pipelab-local-ui.log
 ```
 
-The task starts local Supabase and workers, then starts the UI on port `5173`
+The task starts the UI on port `5173`
 and the CLI on port `33753` with remote-safe bindings.
 
 1. Confirm Tailscale is up: `tailscale ip -4`. Note the machine IP

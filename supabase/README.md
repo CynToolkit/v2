@@ -20,18 +20,7 @@ Subscription grace begins at the actual paid-through date and lasts 30 days. Exi
 
 ## Local development
 
-The root `mise.toml` provides the local commands. `local:setup` installs workspace dependencies, initializes Supabase config if needed, starts the local Supabase stack, and applies pending migrations without resetting local data. The R2 Worker stores objects locally; the API Worker and desktop use the local Supabase credentials reported by the CLI. The API Worker receives the local R2 endpoint as a Wrangler binding so its signed upload URLs target the local R2 Worker. Run `doppler setup` once from the repository root if this checkout is not already linked to your Doppler project; the app task uses that saved selection for non-Supabase app settings.
-
-Run these in separate terminals from the repository root:
-
-```bash
-mise run local:setup
-mise run local:r2
-mise run local:api
-mise run local:app
-```
-
-The desktop's normal `mise run dev` remains Doppler-backed for development against the configured cloud services. `mise run local:app` uses Doppler for other app settings but overrides Supabase and the Worker URL to point at the local stack. To trigger retention cleanup locally, run `mise run local:cleanup` while the API Worker is running.
+`mise run supabase:setup` starts the local Supabase stack and applies pending migrations without resetting local data. Run the Workers and the desktop app against it with `pnpm --filter @pipelab/cloud-workers dev:r2`, `pnpm --filter @pipelab/cloud-workers dev`, and `pnpm --filter @pipelab/app dev`, passing the credentials from `supabase status -o env` as `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, plus `PIPELAB_CLOUD_WORKER_URL=http://127.0.0.1:8788` for the app. The API Worker also needs `R2_ENDPOINT_URL` (via `--var`) and dummy local `R2_*` values.
 
 Local R2 is exposed on `127.0.0.1:8787` through the path-style S3-compatible `PutObject`, `HeadObject`, and `DeleteObject` API. The API Worker listens on `127.0.0.1:8788`; its `R2_ENDPOINT_URL` points at the local R2 Worker and uses dummy local credentials. No production R2 credentials are needed locally, and multipart uploads remain production-only. Set a local `PIPELAB_CLOUD_LINK_ENCRYPTION_KEY` for share-link development. CLI Cloud sign-in requires an interactive terminal and stores its session in the operating system credential store.
 
