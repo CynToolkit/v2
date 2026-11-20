@@ -4,5 +4,4 @@ export * from "./fs-utils";
 export * from "./archive-utils";
 export * from "./custom-errors";
 
-export { z as schema } from "zod";
 export type NoData = { [index in string]?: unknown };

@@ -1,7 +1,7 @@
 <template>
   <div class="path-picker">
     <InputText
-      :model-value="modelValue || ''"
+      :model-value="model || ''"
       :placeholder="placeholder"
       readonly
       :aria-label="label"
@@ -24,7 +24,6 @@ import { useAPI } from "@renderer/composables/api";
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: string;
     kind?: "directory" | "file";
     /** `save` lets the user name a file that does not exist yet (output paths). */
     mode?: "open" | "save";
@@ -40,34 +39,34 @@ const props = withDefaults(
     fileExtensions: undefined,
   },
 );
-const emit = defineEmits<{ "update:modelValue": [value: string] }>();
+const model = defineModel<string>();
 const api = useAPI();
 
 const pickPath = async () => {
   if (props.kind === "file" && props.mode === "save") {
     const result = await api.execute("dialog:showSaveDialog", {
       title: `Choose ${props.label.toLowerCase()}`,
-      defaultPath: props.modelValue || undefined,
+      defaultPath: model.value || undefined,
       properties: ["createDirectory", "showOverwriteConfirmation"],
       filters: props.fileExtensions?.length
         ? [{ name: "Supported files", extensions: props.fileExtensions }]
         : undefined,
     });
     if (result.type === "success" && !result.result.canceled && result.result.filePath)
-      emit("update:modelValue", result.result.filePath);
+      model.value = result.result.filePath;
     return;
   }
   if (props.kind === "file") {
     const result = await api.execute("dialog:showOpenDialog", {
       title: `Choose ${props.label.toLowerCase()}`,
-      defaultPath: props.modelValue || undefined,
+      defaultPath: model.value || undefined,
       properties: ["openFile"],
       filters: props.fileExtensions?.length
         ? [{ name: "Supported files", extensions: props.fileExtensions }]
         : undefined,
     });
     if (result.type === "success" && !result.result.canceled && result.result.filePaths[0])
-      emit("update:modelValue", result.result.filePaths[0]);
+      model.value = result.result.filePaths[0];
     return;
   }
   const result = await api.execute("dialog:showOpenDialog", {
@@ -75,7 +74,7 @@ const pickPath = async () => {
     properties: ["openDirectory", "createDirectory", "promptToCreate"],
   });
   if (result.type === "success" && !result.result.canceled && result.result.filePaths[0])
-    emit("update:modelValue", result.result.filePaths[0]);
+    model.value = result.result.filePaths[0];
 };
 </script>
 

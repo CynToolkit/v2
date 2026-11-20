@@ -126,7 +126,7 @@
       <Select
         v-else-if="field.type === 'select'"
         :id="inputId"
-        :model-value="value"
+        :model-value="model"
         :options="options"
         optionLabel="label"
         optionValue="value"
@@ -137,14 +137,14 @@
       <InputText
         v-else-if="allowPathEdit && (field.type === 'file' || field.type === 'directory')"
         :id="inputId"
-        :model-value="value"
+        :model-value="model"
         :placeholder="field.required ? 'Required; validation needs an agent' : 'Optional path'"
         class="field-control"
         @update:model-value="emitValue"
       />
       <PathPicker
         v-else-if="field.type === 'file' || field.type === 'directory'"
-        :model-value="value"
+        :model-value="model"
         :kind="field.type"
         :mode="field.pathMode"
         :label="field.label"
@@ -154,7 +154,7 @@
       <InputText
         v-else
         :id="inputId"
-        :model-value="value"
+        :model-value="model"
         :type="field.type === 'password' ? 'password' : 'text'"
         :placeholder="field.placeholder ?? (field.required ? 'Required' : undefined)"
         class="field-control"
@@ -186,8 +186,8 @@
         :key="option.value"
         type="button"
         class="suggestion-chip"
-        :class="{ active: value === option.value }"
-        :aria-pressed="value === option.value"
+        :class="{ active: model === option.value }"
+        :aria-pressed="model === option.value"
         @click="toggleSuggestion(option.value)"
       >
         {{ option.label }}
@@ -222,7 +222,6 @@ import PathPicker from "./PathPicker.vue";
 
 const props = defineProps<{
   field: ReleaseFieldDefinition;
-  value: string;
   options: ReleaseFieldOption[];
   inputId: string;
   connectionBinding?: string;
@@ -231,8 +230,8 @@ const props = defineProps<{
   allowPathEdit?: boolean;
   hideAdvanced?: boolean;
 }>();
+const model = defineModel<string>("value", { required: true });
 const emit = defineEmits<{
-  "update:value": [value: unknown];
   "update:connection-binding": [connectionId: string];
   "add-connection": [integration: string];
 }>();
@@ -262,7 +261,7 @@ const encodeInvalidEnvironmentBinding = (name: string) => {
   return `\${{ env.${invalidEnvironmentBindingPrefix}${encodedName} }}`;
 };
 const initialEnvironmentVariableName =
-  props.field.type === "connection" ? undefined : parseEnvironmentVariableName(props.value);
+  props.field.type === "connection" ? undefined : parseEnvironmentVariableName(model.value);
 const suggestedEnvironmentVariableName = `PIPELAB_${
   props.field.key
     .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
@@ -290,14 +289,14 @@ const textSuggestions = computed(() =>
   props.field.type === "text" && !environmentBindingEnabled.value ? props.options : [],
 );
 const toggleSuggestion = (suggestion: string) =>
-  emitValue(props.value === suggestion ? "" : suggestion);
-const connectionAliasDraft = ref(props.value);
+  emitValue(model.value === suggestion ? "" : suggestion);
+const connectionAliasDraft = ref(model.value);
 const editingAlias = ref(false);
 const supportsEnvironmentBinding = computed(
   () => props.field.type !== "connection" && !props.hideAdvanced,
 );
 const environmentVariableName = ref(initialEnvironmentVariableName ?? "");
-const literalValue = ref(initialEnvironmentVariableName === undefined ? props.value : "");
+const literalValue = ref(initialEnvironmentVariableName === undefined ? model.value : "");
 const environmentVariableError = ref(
   initialEnvironmentVariableName !== undefined &&
     !environmentVariableNamePattern.test(initialEnvironmentVariableName)
@@ -308,13 +307,13 @@ let lastEmittedValue: string | undefined;
 
 const emitValue = (value: unknown) => {
   lastEmittedValue = typeof value === "string" ? value : undefined;
-  emit("update:value", value);
+  model.value = value as string;
 };
 const emitConnectionBinding = (value: unknown) =>
   emit("update:connection-binding", typeof value === "string" ? value : "");
 
 watch(
-  () => props.value,
+  () => model.value,
   (value) => {
     connectionAliasDraft.value = value;
     if (value === lastEmittedValue) {
@@ -361,10 +360,10 @@ const startAliasEdit = async () => {
 };
 const finishAliasEdit = () => {
   const alias = connectionAliasDraft.value;
-  if (alias !== props.value) {
+  if (alias !== model.value) {
     // An invalid alias is never saved; revert instead of leaving the field in a blocked state.
     if (!alias || workflowConnectionAliasPattern.test(alias)) emitValue(alias);
-    else connectionAliasDraft.value = props.value;
+    else connectionAliasDraft.value = model.value;
   }
   editingAlias.value = false;
 };
@@ -374,7 +373,7 @@ const toggleEnvironmentBinding = () => {
   environmentBindingEnabled.value = enabled;
   environmentVariableError.value = "";
   if (enabled) {
-    literalValue.value = props.value;
+    literalValue.value = model.value;
     environmentVariableName.value = suggestedEnvironmentVariableName;
     environmentVariableError.value = "";
     emitValue(`\${{ env.${suggestedEnvironmentVariableName} }}`);
