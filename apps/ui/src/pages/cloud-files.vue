@@ -135,7 +135,7 @@ import { useRouteReadiness } from "@renderer/composables/useRouteReadiness";
 import { computed, onMounted, ref, watch } from "vue";
 import { useAuth } from "@renderer/store/auth";
 
-type Artifact = {
+interface Artifact {
   id: string;
   original_name: string;
   artifact_output_id: string;
@@ -148,14 +148,14 @@ type Artifact = {
   expires_at: string;
   pinned: boolean;
   hasShareLink: boolean;
-};
+}
 
-type Overview = {
+interface Overview {
   artifacts: Artifact[];
   usage: { usedBytes: number; quotaBytes: number | null; retentionDays: number | null };
   entitlement: { status: string; graceUntil: string | null };
   notifications: Array<{ id: string; message: string; deadline_at: string }>;
-};
+}
 
 const auth = useAuth();
 const workerUrl = process.env.PIPELAB_CLOUD_WORKER_URL;

@@ -37,10 +37,10 @@ export class ReleasePersistenceError extends Error {
   }
 }
 
-type ReleasePersistenceFileOps = {
+interface ReleasePersistenceFileOps {
   rename: typeof rename;
   rm: typeof rm;
-};
+}
 
 export interface LoadedReleaseWorkflow {
   config: ReleaseConfig;

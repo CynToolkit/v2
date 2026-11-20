@@ -126,6 +126,11 @@ Avoid `any` and unjustified casts. Prefer narrowing, schema validation, and
 typed boundaries. Keep generic packages independent of integration-specific
 details. Do not add speculative abstractions or unrelated cleanup.
 
+Define each type once and import it; do not redeclare a shape in another
+package. Use `interface` for object shapes and `type` for unions, intersections,
+mapped types, and types derived from values or schemas (`InferOutput` for
+valibot schemas). Custom components expose `v-model` through `defineModel`.
+
 ## CLI and UI parity
 
 The CLI and UI are hosts for the same product capabilities. Put workflow policy,

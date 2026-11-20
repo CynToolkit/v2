@@ -2,10 +2,10 @@ import type { OpenDialogOptions } from "electron";
 import type { ProviderReleaseDefinition } from "../release/types";
 import type { WorkflowTask } from "@pipelab/workflow-runtime";
 
-export type PathOptions = {
+export interface PathOptions {
   filter?: RegExp;
   type?: "file" | "folder";
-};
+}
 
 export interface ControlTypeBase {
   type: string;

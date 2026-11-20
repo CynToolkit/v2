@@ -1,4 +1,8 @@
-import type { WorkflowTask, WorkflowTaskRegistry } from "@pipelab/workflow-runtime";
+import type { WorkflowTaskRegistry } from "@pipelab/workflow-runtime";
+import type {
+  WorkflowTaskFactory as BaseWorkflowTaskFactory,
+  WorkflowTaskFactoryRegistry as BaseWorkflowTaskFactoryRegistry,
+} from "@pipelab/shared";
 import type { PipelabContext } from "./context";
 import { createPipelabCloudUploadTask } from "./pipelab-cloud";
 import { createCoreFilesystemWorkflowTasks } from "./workflow-tasks/filesystem";
@@ -22,13 +26,9 @@ export interface ProviderServices {
   workflowCachePath: string;
 }
 
-export type WorkflowTaskFactory<TServices = ProviderServices> = (
-  services: TServices,
-) => WorkflowTask<TServices>;
-export type WorkflowTaskFactoryRegistry<TServices = ProviderServices> = Record<
-  string,
-  WorkflowTaskFactory<TServices>
->;
+export type WorkflowTaskFactory<TServices = ProviderServices> = BaseWorkflowTaskFactory<TServices>;
+export type WorkflowTaskFactoryRegistry<TServices = ProviderServices> =
+  BaseWorkflowTaskFactoryRegistry<TServices>;
 
 export const createWorkflowTaskRegistry = <TServices>(
   factories: WorkflowTaskFactoryRegistry<TServices>,

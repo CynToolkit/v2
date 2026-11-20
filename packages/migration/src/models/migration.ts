@@ -8,11 +8,11 @@ export type Awaitable<T> = Promise<T> | T;
 
 export type MigrationFn<From, To> = (state: From, targetVersion: string) => Awaitable<To>;
 
-export type MigrateOptions = {
+export interface MigrateOptions {
   debug?: boolean;
   target?: SemVer;
   onStep?: (state: any, version: SemVer) => Promise<void> | void;
-};
+}
 
 const MigrationSchemaValidator = object({
   version: custom<SemVer>((input) => typeof input === "string" && /^\d+\.\d+\.\d+$/.test(input)),

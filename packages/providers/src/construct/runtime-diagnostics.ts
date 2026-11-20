@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 
-export type LinuxMemorySnapshot = {
+export interface LinuxMemorySnapshot {
   availableMemoryKiB: number;
   freeSwapKiB: number;
-};
+}
 
 export const shouldRecordPlaywrightVideo = (nodeEnv: string | undefined, isCI: boolean) =>
   nodeEnv === "development" || isCI;

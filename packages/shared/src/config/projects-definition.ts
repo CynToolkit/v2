@@ -1,4 +1,4 @@
-import { object, string, optional, InferInput, literal, array } from "valibot";
+import { object, string, optional, InferOutput, literal, array } from "valibot";
 import { isSafePersistedId } from "../persisted-id";
 
 export const FileRepoProjectValidator = object({
@@ -21,8 +21,8 @@ export const FileRepoValidator = object({
   workflows: optional(array(SaveLocationWorkflowValidator), []),
 });
 
-export type SaveLocationWorkflow = InferInput<typeof SaveLocationWorkflowValidator>;
-export type FileRepo = InferInput<typeof FileRepoValidator>;
+export type SaveLocationWorkflow = InferOutput<typeof SaveLocationWorkflowValidator>;
+export type FileRepo = InferOutput<typeof FileRepoValidator>;
 
 export class FileRepoParseError extends Error {
   constructor(public readonly issues: string[]) {

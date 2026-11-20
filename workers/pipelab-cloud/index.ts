@@ -20,7 +20,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-type Env = {
+interface Env {
   SUPABASE_URL?: string;
   SUPABASE_PUBLISHABLE_KEY?: string;
   SUPABASE_PUBLISHABLE_KEYS?: string;
@@ -34,24 +34,24 @@ type Env = {
   PIPELAB_CLOUD_LINK_ENCRYPTION_KEY?: string;
   RESEND_API_KEY?: string;
   PIPELAB_CLOUD_FROM_EMAIL?: string;
-};
+}
 
-type Artifact = {
+interface Artifact {
   id: string;
   storage_key: string;
-};
+}
 
-type CloudPlan = {
+interface CloudPlan {
   productId: string;
   tierName: string;
   quotaBytes: number;
   retentionDays: number;
   paidThroughAt: string;
-};
+}
 
-type ExecutionContext = {
+interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
-};
+}
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {

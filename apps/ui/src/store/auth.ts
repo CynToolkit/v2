@@ -18,10 +18,10 @@ import type { BillingSubscription } from "@renderer/types/billing";
 type Subscription = BillingSubscription;
 
 export type SubscriptionStatus = "idle" | "loading" | "ready" | "error";
-type AuthActionResponse = {
+interface AuthActionResponse {
   data: { user: User | null; session: Session | null };
   error: Error | null;
-};
+}
 
 // Define a more comprehensive AuthStateType
 export type AuthStateType =

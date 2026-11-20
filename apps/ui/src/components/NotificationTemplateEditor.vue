@@ -8,10 +8,10 @@
     </div>
     <div ref="host" class="editor-host" />
     <button
-      v-if="defaultValue && modelValue !== defaultValue"
+      v-if="defaultValue && model !== defaultValue"
       type="button"
       class="reset-link"
-      @click="emit('update:modelValue', defaultValue)"
+      @click="model = defaultValue"
     >
       Reset to the default message
     </button>
@@ -70,13 +70,12 @@ import {
 } from "../utils/notification-template";
 
 const props = defineProps<{
-  modelValue: string;
   variables: NotificationVariableInfo[];
   defaultValue?: string;
   /** Longest message the channel accepts; longer text is cut when sent. */
   maxLength?: number;
 }>();
-const emit = defineEmits<{ "update:modelValue": [value: string] }>();
+const model = defineModel<string>({ required: true });
 
 const host = ref<HTMLDivElement>();
 let view: EditorView | undefined;
@@ -84,7 +83,7 @@ let view: EditorView | undefined;
 const known = computed(() => new Set<string>(props.variables.map((info) => info.name)));
 const infoFor = (name: string) => props.variables.find((info) => info.name === name);
 
-const fullPreview = computed(() => renderTemplatePreview(props.modelValue, props.variables));
+const fullPreview = computed(() => renderTemplatePreview(model.value, props.variables));
 const overLimit = computed(() =>
   props.maxLength && fullPreview.value.length > props.maxLength
     ? fullPreview.value.length - props.maxLength
@@ -97,7 +96,7 @@ const hasRealValues = computed(() => props.variables.some((info) => info.value !
 const unknownMessage = computed(() => {
   const names = [
     ...new Set(
-      splitTemplate(props.modelValue).flatMap((part) =>
+      splitTemplate(model.value).flatMap((part) =>
         part.kind === "variable" && !part.known ? [part.name] : [],
       ),
     ),
@@ -253,7 +252,7 @@ onMounted(() => {
   view = new EditorView({
     parent: host.value,
     state: EditorState.create({
-      doc: props.modelValue,
+      doc: model.value,
       extensions: [
         history(),
         keymap.of([...defaultKeymap, ...historyKeymap]),
@@ -265,7 +264,7 @@ onMounted(() => {
         theme,
         EditorView.contentAttributes.of({ "aria-label": "Message template" }),
         EditorView.updateListener.of((update) => {
-          if (update.docChanged) emit("update:modelValue", update.state.doc.toString());
+          if (update.docChanged) model.value = update.state.doc.toString();
         }),
       ],
     }),
@@ -273,7 +272,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.modelValue,
+  () => model.value,
   (value) => {
     if (!view || view.state.doc.toString() === value) return;
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value } });

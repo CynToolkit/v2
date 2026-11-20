@@ -1,12 +1,5 @@
-type WorkflowConnectionOverrideValue =
-  | { kind: "environment"; name: string }
-  | { kind: "literal"; value: string };
-
-export interface WorkflowConnectionOverride {
-  alias: string;
-  field: string;
-  value: WorkflowConnectionOverrideValue;
-}
+import type { WorkflowConnectionOverride } from "@pipelab/workflow-runtime";
+export type { WorkflowConnectionOverride };
 
 const environmentVariableNamePattern = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const connectionAliasPattern = /^[A-Za-z_][A-Za-z0-9_-]*$/;

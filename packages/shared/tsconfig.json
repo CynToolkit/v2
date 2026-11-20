@@ -2,6 +2,7 @@
   "extends": "../tsconfig/commonjs.json",
   "compilerOptions": {
     "emitDeclarationOnly": true,
+    "strictNullChecks": true,
     "outDir": "dist",
     "baseUrl": "."
   },

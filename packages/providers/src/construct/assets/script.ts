@@ -242,13 +242,13 @@ export const clickConstructDownload = async (
 };
 
 type ConstructSettingsSeedOptions = { origin: string; timeoutMs: number };
-type ConstructSettingsSeedResult = {
+interface ConstructSettingsSeedResult {
   welcomeTourDismissed: true;
   uiAnimationsDisabled: true;
   uiEffectsDisabled: true;
   addonUpdateChecksDisabled: true;
   startPageHidden: true;
-};
+}
 
 const seedConstructEditorSettings = (options: ConstructSettingsSeedOptions) => {
   if (window.top !== window || location.origin !== options.origin) return;
