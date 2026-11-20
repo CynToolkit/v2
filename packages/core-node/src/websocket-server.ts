@@ -1,19 +1,20 @@
 import { WebSocketServer as WSWebSocketServer, WebSocket as WSWebSocket } from "ws";
-import http, { IncomingMessage } from "node:http";
+import type { IncomingMessage } from "node:http";
+import http from "node:http";
 import { nanoid } from "nanoid";
 import { useAPI } from "./ipc-core";
 import { useLogger } from "@pipelab/shared";
-import {
-  WebSocketServerConfig,
-  WebSocketServerEvents,
+import type {
   WebSocketConnectionState,
-  WebSocketError,
   WebSocketMessage,
-  type WebSocketErrorMessage,
-  isWebSocketRequestMessage,
   Agent,
   Channels,
   Events,
+} from "@pipelab/shared";
+import {
+  WebSocketError,
+  type WebSocketErrorMessage,
+  isWebSocketRequestMessage,
 } from "@pipelab/shared";
 import { websocketPort } from "@pipelab/constants";
 import {

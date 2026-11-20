@@ -11,4 +11,4 @@ declare global {
     pipelab?: PipelabBridge;
   }
 }
-export {}; // Make this a module
+ // Make this a module

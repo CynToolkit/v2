@@ -129,7 +129,7 @@ describe("workflow Connection requirements", () => {
 
     it("lists what the run resolves: embedded references, required bindings and implicitly wired builds", () => {
       const names = getReleaseWorkflowEnvironmentVariableNames(config, registry, host);
-      expect([...names].sort()).toEqual(
+      expect([...names].toSorted()).toEqual(
         [
           "PROJECT_PATH",
           "CONSTRUCT_VERSION", // embedded in a longer value
@@ -137,7 +137,7 @@ describe("workflow Connection requirements", () => {
           "DESKTOP_OUT",
           "ITCH_PROJECT",
           "ITCH_CHANNEL",
-        ].sort(),
+        ].toSorted(),
       );
       expect(names).not.toContain("UNUSED_TARGET");
       expect(names).not.toContain("UNUSED_BUILD");

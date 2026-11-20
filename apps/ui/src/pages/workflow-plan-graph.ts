@@ -1,6 +1,6 @@
 import { plannedUsedTargetKeys, usedTargetKeys } from "@pipelab/shared";
 import type { IconType, ReleaseCatalog, ReleaseConfig, ReleasePlan } from "@pipelab/shared";
-import type { ElkNode, ElkExtendedEdge } from "elkjs/lib/elk-api";
+import type { ElkNode } from "elkjs/lib/elk-api";
 import { destinationIcon, providerMetadataIcon, sourceIcon } from "../utils/provider-icons";
 import type { PlanPoint, NodeCopyResult } from "./workflow-plan-graph.types";
 

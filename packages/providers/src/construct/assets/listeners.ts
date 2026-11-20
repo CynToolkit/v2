@@ -81,26 +81,6 @@ export const registerDeprecatedFeatures = (page: Page, log: typeof console.log) 
     });
 };
 
-const registerMissingAddonErrorListener = (page: Page, log: typeof console.log) => {
-  const okDialog = page.locator("#missingAddonsDialog");
-  const webglErrorButton = okDialog.locator(".okButton");
-  webglErrorButton
-    .waitFor({
-      timeout: 0,
-    })
-    .then(async () => {
-      throw new Error("Missing addon. You should bundle addons with your project");
-    })
-    .catch(async (e) => {
-      if (
-        e.message.includes("Target page, context or browser has been closed") ||
-        isPageCrashError(e)
-      )
-        return;
-      log("missingAddon.okButton.waitFor() failed", e.message);
-    });
-};
-
 export const registerConfirmDialogListener = (page: Page, log: typeof console.log) => {
   const confirmDialog = page.locator("#confirmDialog");
   const cancelButton = confirmDialog.locator(".cancelConfirmButton");

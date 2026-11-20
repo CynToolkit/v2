@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { setupConfigFile, setupProjectsConfigFile } from "./config";
-import { FileRepo } from "@pipelab/shared";
+import type { FileRepo } from "@pipelab/shared";
 import { PipelabContext } from "./context";
 import fs from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -35,7 +35,6 @@ describe("setupConfigFile & Backup Creation", () => {
   });
 
   test("should create default config file if missing on setup", async () => {
-    const configDir = context.getConfigPath();
     const projectsFilePath = context.getProjectsPath();
 
     expect(existsSync(projectsFilePath)).toBe(false);

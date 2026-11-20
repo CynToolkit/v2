@@ -1,6 +1,6 @@
 import { PipelabContext, BuildHistoryStorage } from "@pipelab/core-node";
 import { getDefaultUserDataPath } from "../paths";
-import { BuildHistoryEntry } from "@pipelab/shared";
+import type { BuildHistoryEntry } from "@pipelab/shared";
 import type { HistoryCommandOptions } from "./history.types";
 
 export async function historyCommand(

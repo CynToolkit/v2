@@ -308,6 +308,7 @@ describe("Construct Desktop Ship to running Electron binary", () => {
               .catch(
                 () => "<no body>",
               )}\nRenderer errors: ${rendererErrors.join("; ")}\n${desktop.output}\n${String(error)}`,
+            { cause: error },
           );
         }
         await waitForOutput(desktop, "WebSocket client connected");

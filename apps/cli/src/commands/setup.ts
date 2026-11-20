@@ -2,7 +2,6 @@ import * as p from "@clack/prompts";
 import { setTimeout } from "node:timers/promises";
 import { PipelabContext } from "@pipelab/core-node";
 import { setupSettingsConfigFile } from "@pipelab/core-node";
-import { AppConfig } from "@pipelab/shared";
 import { getDefaultUserDataPath } from "../paths";
 import type { UserDataOptions } from "./options.types";
 

@@ -4,7 +4,6 @@ import { router } from "./router/router";
 
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-import { createI18n } from "vue-i18n";
 
 import PrimeVue from "primevue/config";
 import Lara from "@primevue/themes/lara";
@@ -20,17 +19,12 @@ import VueDOMPurifyHTML from "vue-dompurify-html";
 import ToastService from "primevue/toastservice";
 import ConfirmationService from "primevue/confirmationservice";
 import posthogPlugin from "./plugins/posthog"; //import the plugin.
-import posthog from "posthog-js";
 import { i18n } from "./i18n";
 
 import { websocketManager } from "./composables/websocket-manager";
 import { shouldAutoConnectAgent } from "./composables/ui-runtime";
 import { useLogger } from "@pipelab/shared";
 import Tooltip from "primevue/tooltip";
-
-const isPackaged = window.isPackaged || false;
-const isTest = window.isTest || false;
-const isCI = window.isCI || false;
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);

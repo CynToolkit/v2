@@ -1,6 +1,6 @@
 import { useAPI } from "../ipc-core";
 import { useLogger } from "@pipelab/shared";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 import { homedir } from "node:os";
 import { execFile } from "node:child_process";
 import { isAbsolute, relative, resolve, sep } from "node:path";

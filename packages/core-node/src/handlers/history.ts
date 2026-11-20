@@ -1,7 +1,7 @@
 import { useAPI } from "../ipc-core";
 import { useLogger, type BuildHistoryEntry, type BuildHistoryQuery } from "@pipelab/shared";
 import { BuildHistoryStorage } from "./build-history";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 
 export const filterBuildHistoryEntries = (
   entries: BuildHistoryEntry[],

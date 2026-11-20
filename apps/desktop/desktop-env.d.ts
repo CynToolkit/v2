@@ -1,4 +1,4 @@
-export {}; // Make this a module
+ // Make this a module
 
 declare global {
   type ElectronAPI = import("@electron-toolkit/preload").ElectronAPI;

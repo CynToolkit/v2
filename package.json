@@ -9,7 +9,7 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "typecheck": "turbo typecheck",
-    "format": "turbo format",
+    "format": "oxfmt .",
     "package": "pnpm --filter @pipelab/app package",
     "make": "pnpm --filter @pipelab/app make",
     "changeset": "changeset",

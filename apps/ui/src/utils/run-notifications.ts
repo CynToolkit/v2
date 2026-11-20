@@ -33,6 +33,7 @@ export const notifyRunFinished = (
 ) => {
   if (!supported() || Notification.permission !== "granted" || !shouldNotify(settings, outcome))
     return;
+  // oxlint-disable-next-line no-new -- the notification shows itself on construction
   new Notification(workflowName, {
     body: outcome === "success" ? "Release finished." : "Release finished with errors.",
   });

@@ -25,12 +25,6 @@ import type { PackagedApp } from "@pipelab/plugin-core";
 
 // TODO: https://js.electronforge.io/modules/_electron_forge_core.html
 
-const IDMake = "electron:make";
-const IDPackage = "electron:package";
-const IDPackageV2 = "electron:package:v2";
-const IDPackageV3 = "electron:package:v3";
-const IDPreview = "electron:preview";
-
 export interface ForgeExecutionContext {
   cwd: string;
   log: (...args: unknown[]) => void;

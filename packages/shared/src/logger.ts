@@ -5,7 +5,7 @@ const createDefaultLogger = () =>
     minLevel: 3, // INFO
   });
 
-let _logger = createDefaultLogger();
+const _logger = createDefaultLogger();
 
 export const useLogger = () => {
   const attachTransport = (transport: (logObj: unknown) => void) => {

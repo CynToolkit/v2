@@ -1,7 +1,6 @@
-import { mkdir, createReadStream, createWriteStream } from "node:fs";
+import { createWriteStream } from "node:fs";
 import { mkdir as mkdirP } from "node:fs/promises";
 import { join, dirname } from "node:path";
-import zlib from "zlib";
 import * as tar from "tar";
 import yauzl from "yauzl";
 import { ZipArchive } from "archiver";

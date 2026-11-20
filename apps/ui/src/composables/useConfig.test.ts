@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { computed, ref } from "vue";
+import type { ref } from "vue";
 
 const execute = vi.fn();
 let connected = true;

@@ -14,7 +14,6 @@ import {
   type ReleasePlan,
   type ReleaseDestinationSlot,
   type ReleaseCatalogTarget,
-  type Availability,
   type ProducerInspection,
   type ValidationIssue,
   type ReleaseFieldDefinition,
@@ -320,8 +319,6 @@ export const runAfterSuccessfulSave = async <T>(
   await save();
   return run();
 };
-
-const buildTypesFor = (catalog: ReleaseCatalog) => catalog.buildTypes;
 
 export const buildEnginesFor = (catalog: ReleaseCatalog, type: string) =>
   catalog.producers.filter(

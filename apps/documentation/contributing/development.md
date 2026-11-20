@@ -11,7 +11,7 @@ pnpm dev
 
 The root `dev` script starts the workspace development setup. The desktop app starts its own CLI server on a per-launch loopback port and verifies it before loading the UI; for the desktop path, do not start a second CLI server. Vite HMR remains active for UI work. Restart Desktop after changing CLI server source. To work on the standalone UI and remote CLI backend, use `pnpm dev-remote`.
 
-The desktop development scripts use Doppler (`doppler run -- pnpm dev`). If using the plain root script, create a root `.env` as needed:
+The development scripts read cloud configuration from the environment or a root `.env`. Create one as needed:
 
 ```dotenv
 SUPABASE_URL=...

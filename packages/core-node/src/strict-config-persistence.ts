@@ -6,7 +6,7 @@ import {
   type ConnectionsConfig,
   type FileRepo,
 } from "@pipelab/shared";
-import { PipelabContext } from "./context";
+import type { PipelabContext } from "./context";
 import {
   JsonFileMissingError,
   readJsonFile,

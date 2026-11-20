@@ -67,7 +67,6 @@ export const createWorkflowListr = (
                     rendererOptions: {
                       collapseErrors: false,
                       collapseSubtasks: false,
-                      outputBar: 1,
                       showErrorMessage: true,
                     },
                   }),
@@ -94,7 +93,6 @@ export const createWorkflowListr = (
               rendererOptions: {
                 collapseErrors: false,
                 collapseSubtasks: false,
-                outputBar: 1,
                 showErrorMessage: true,
               },
             },
@@ -108,7 +106,6 @@ export const createWorkflowListr = (
       rendererOptions: {
         collapseErrors: false,
         collapseSubtasks: false,
-        outputBar: 1,
         showErrorMessage: true,
       },
     },
@@ -228,10 +225,12 @@ const validateWorkflowSourcePath = async (config: ReleaseConfig) => {
     info = await stat(path);
   } catch (cause) {
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "ENOENT") {
-      throw new Error(`Workflow source path does not exist: ${path}`);
+      throw new Error(`Workflow source path does not exist: ${path}`, { cause: cause });
     }
     const detail = cause instanceof Error ? cause.message : String(cause);
-    throw new Error(`Unable to inspect workflow source path '${path}': ${detail}`);
+    throw new Error(`Unable to inspect workflow source path '${path}': ${detail}`, {
+      cause: cause,
+    });
   }
   if (field.type === "file" && !info.isFile())
     throw new Error(`Workflow source file path is not a file: ${path}`);
@@ -245,10 +244,10 @@ const loadWorkflowFile = async (path: string): Promise<ReleaseConfig> => {
     contents = await readFile(resolve(path), "utf8");
   } catch (cause) {
     if (cause && typeof cause === "object" && "code" in cause && cause.code === "ENOENT") {
-      throw new Error(`Workflow file '${path}' was not found.`);
+      throw new Error(`Workflow file '${path}' was not found.`, { cause: cause });
     }
     const detail = cause instanceof Error ? cause.message : String(cause);
-    throw new Error(`Unable to read workflow file '${path}': ${detail}`);
+    throw new Error(`Unable to read workflow file '${path}': ${detail}`, { cause: cause });
   }
 
   let value: unknown;
@@ -256,7 +255,7 @@ const loadWorkflowFile = async (path: string): Promise<ReleaseConfig> => {
     value = JSON.parse(contents);
   } catch (cause) {
     const detail = cause instanceof Error ? cause.message : String(cause);
-    throw new Error(`Workflow file '${path}' is not valid JSON: ${detail}`);
+    throw new Error(`Workflow file '${path}' is not valid JSON: ${detail}`, { cause: cause });
   }
 
   let config: ReleaseConfig;
@@ -264,7 +263,9 @@ const loadWorkflowFile = async (path: string): Promise<ReleaseConfig> => {
     config = parseReleaseConfig(value);
   } catch (cause) {
     const detail = cause instanceof Error ? cause.message : String(cause);
-    throw new Error(`Workflow file '${path}' is not a supported Release Workflow: ${detail}`);
+    throw new Error(`Workflow file '${path}' is not a supported Release Workflow: ${detail}`, {
+      cause: cause,
+    });
   }
 
   resolveWorkflowFilePaths(config, dirname(resolve(path)));

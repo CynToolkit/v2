@@ -1,34 +1,28 @@
+import type { Channels, Data, End, Events, RequestId } from "@pipelab/shared";
 import {
-  Channels,
-  Data,
-  End,
-  Events,
-  RequestId,
   type EventSubscription,
   type OutgoingRequestMessage,
-  type RequestMessageFor,
   type WebSocketEventMessage,
   type WebSocketListener,
 } from "@pipelab/shared";
 import { useLogger } from "@pipelab/shared";
 import { klona } from "klona";
 import { toRaw } from "vue";
-import {
-  WebSocketSendFunction,
+import type {
   WebSocketClientConfig,
   WebSocketConnectionState,
-  WebSocketError,
-  WebSocketConnectionError,
   WebSocketErrorMessage,
   WebSocketMessage,
+} from "@pipelab/shared";
+import {
+  WebSocketError,
+  WebSocketConnectionError,
   isWebSocketResponseMessage,
   isWebSocketErrorMessage,
 } from "@pipelab/shared";
 import { websocketPort } from "@pipelab/constants";
 import { nanoid } from "nanoid";
 import type { DisconnectOptions } from "./websocket-client.types";
-
-type WebSocketSendFn<KEY extends Channels> = WebSocketSendFunction<KEY>;
 
 export function resolveDefaultWebSocketUrl(
   location: Pick<Location, "protocol" | "host" | "hostname" | "search"> | undefined,
@@ -281,7 +275,7 @@ export class WebSocketClient {
     data?: Data<KEY>,
     listener?: WebSocketListener<KEY>,
   ): Promise<End<KEY>> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const { logger } = useLogger();
 
       // If connection is not ready, queue the message

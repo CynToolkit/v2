@@ -133,7 +133,7 @@ const config = (
 
 const context = { host: { platform: "linux", architecture: "x64" } };
 const slotInput = (resolved: ReleaseConfig) => resolved.destinations[0].slots[0].input;
-const slotInputPath = "destinations.0.slots.0.input";
+
 const errorsOf = (resolved: ReleaseConfig, registryValue: ReleaseRegistry) =>
   planRelease(resolved, registryValue, context).issues.filter(
     (issue) => issue.severity === "error",
@@ -521,7 +521,7 @@ describe("resolveReleaseDefaults", () => {
           `link-${index}`,
           `link-${index}-out`,
         ),
-      ).reverse();
+      ).toReversed();
       return { producers, table };
     };
     const chainSource = source("chain-source", project("t0"));

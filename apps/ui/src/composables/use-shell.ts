@@ -1,11 +1,9 @@
 import { useUIStore, type FilePickerOptions } from "../store/ui";
-import { useAPI } from "./api";
 
 /**
  * Composable for interacting with the shell (Electron or Web fallback)
  */
 export const useShell = () => {
-  const { execute } = useAPI();
   const uiStore = useUIStore();
 
   /**

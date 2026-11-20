@@ -78,6 +78,7 @@ const validArtifactName = (value: unknown): value is string =>
   typeof value === "string" &&
   value.length > 0 &&
   value.length <= 255 &&
+  // oxlint-disable-next-line no-control-regex -- rejecting control characters is the point
   !/[\\/\u0000-\u001f\u007f]/.test(value) &&
   value !== "." &&
   value !== "..";
@@ -1167,7 +1168,7 @@ export async function cleanupExpiredArtifacts(env: Env) {
       });
       if (error) throw error;
       reservationsDeleted++;
-    } catch (error) {
+    } catch {
       console.error("Could not clean up a Pipelab Cloud upload reservation", reservation.id);
       await admin.rpc("finish_pipelab_cloud_upload_reservation_cleanup", {
         p_reservation_id: reservation.id,
@@ -1224,6 +1225,7 @@ export async function cleanupExpiredArtifacts(env: Env) {
         const { error: releaseError } = await admin.rpc("release_pipelab_cloud_deletion_warning", {
           p_user_id: warning.user_id,
         });
+        // oxlint-disable-next-line no-unsafe-finally -- a failed release must surface even after a send error
         if (releaseError) throw releaseError;
       }
     }

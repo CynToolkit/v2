@@ -428,7 +428,9 @@ async function installDependencies(packageDir: string, packageName: string, opti
       console.error(`[Fetcher] ${packageName}: Error details:\n${err.all}`);
     // Clean up node_modules on error to allow retries
     await rm(nodeModulesPath, { recursive: true, force: true }).catch(() => {});
-    throw new Error(`Failed to install dependencies for ${packageName}. See logs for details.`);
+    throw new Error(`Failed to install dependencies for ${packageName}. See logs for details.`, {
+      cause: err,
+    });
   }
 }
 
@@ -452,7 +454,7 @@ async function tryLocalFallback(
     const range = versionOrRange || "latest";
 
     if (range === "latest") {
-      const sorted = localVersions.sort((a, b) => semver.rcompare(a, b));
+      const sorted = localVersions.toSorted((a, b) => semver.rcompare(a, b));
       const latestLocal = sorted[0] || null;
       if (latestLocal) {
         console.info(`[Fetcher] ${logPrefix}: Using locally cached latest version: ${latestLocal}`);

@@ -86,9 +86,8 @@ const inspect = async (path: string) => {
   } catch {
     /* Presets are reported as missing through issues. */
   }
-  let executable: string | undefined;
   let godotVersion: string | undefined;
-  executable = findGodotExecutable();
+  const executable: string | undefined = findGodotExecutable();
   if (executable)
     try {
       godotVersion = execFileSync(executable, ["--version"], {

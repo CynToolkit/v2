@@ -516,7 +516,7 @@ import { useConfirm } from "primevue/useconfirm";
 import { nanoid } from "nanoid";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { UpdateStatus } from "@pipelab/shared";
+import type { UpdateStatus } from "@pipelab/shared";
 import posthog from "posthog-js";
 import { handle } from "@renderer/composables/handlers";
 import { websocketManager } from "@renderer/composables/websocket-manager";

@@ -38,7 +38,7 @@ export const resolveWorkflowRunsState = (
   if (!historyError && !workflowError && history.type === "success") {
     entries = history.result.entries
       .filter((entry) => entry.workflowId === flowId && entry.projectId === projectId)
-      .sort((a, b) => b.startTime - a.startTime);
+      .toSorted((a, b) => b.startTime - a.startTime);
   }
 
   return { entries, historyError, workflowError, workflowName };

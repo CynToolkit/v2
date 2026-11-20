@@ -40,6 +40,7 @@ export class SecureCloudAuthStorage implements SupportedStorage {
       if (error instanceof Error && error.message.includes("credential store")) throw error;
       throw new Error(
         "Could not read Pipelab Cloud sign-in from the operating system credential store.",
+        { cause: error },
       );
     }
   }

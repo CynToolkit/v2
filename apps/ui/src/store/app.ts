@@ -208,5 +208,3 @@ export const useAppStore = defineStore("app", () => {
     getProviderDefinition,
   };
 });
-
-type AppStore = ReturnType<typeof useAppStore>;

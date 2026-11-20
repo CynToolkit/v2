@@ -214,7 +214,7 @@ import { storeToRefs } from "pinia";
 import { useRouter, RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useToast } from "primevue/usetoast";
-import Menu from "primevue/menu";
+import type Menu from "primevue/menu";
 import type { BuildHistoryEntry } from "@pipelab/shared";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";
 import { useAPI } from "@renderer/composables/api";
@@ -292,7 +292,7 @@ const loadRecentExecutions = async () => {
     if (result.type === "error") throw new Error(result.ipcError);
     recentExecutions.value = result.result.entries
       .filter((entry) => entry.projectId === projectId)
-      .sort((a, b) => b.startTime - a.startTime)
+      .toSorted((a, b) => b.startTime - a.startTime)
       .slice(0, 6);
   } catch (error) {
     if (request === historyRequest) historyError.value = String(error);

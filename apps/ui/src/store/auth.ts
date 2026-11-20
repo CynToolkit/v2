@@ -8,7 +8,7 @@ import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { useAPI } from "@renderer/composables/api";
 import { uiEnvironment } from "@renderer/composables/ui-runtime";
 import { defineStore } from "pinia";
-import { computed, readonly, Ref, ref, shallowRef, watch } from "vue";
+import { computed, readonly, ref, shallowRef, watch } from "vue";
 import posthog from "posthog-js";
 import { createEventHook } from "@vueuse/core";
 import { useAgentAvailability } from "@renderer/composables/useAgentAvailability";

@@ -914,12 +914,6 @@ describe("release flow model", () => {
   });
 
   it("requires reference-aware confirmation only when a build change affects consumers", () => {
-    const consumer = {
-      kind: "destination-slot" as const,
-      ownerId: "slot-a",
-      label: "Store · Production",
-      path: "destinations.0.slots.0.input",
-    };
     expect(
       outputReferenceChangeImpact({ kind: "build-remove", buildName: "Unused profile" }, []),
     ).toEqual({

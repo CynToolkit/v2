@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, dialog, screen, protocol, net } from "electron";
 import { autoUpdater } from "electron-updater";
-import { join, resolve, dirname } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { getUiUrl, onServerRestarted, startServer, stopServer } from "./main/server-process";

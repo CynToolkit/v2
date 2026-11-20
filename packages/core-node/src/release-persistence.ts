@@ -11,7 +11,7 @@ import {
   useLogger,
   hasErrorCode,
 } from "@pipelab/shared";
-import { PipelabContext } from "./context";
+import type { PipelabContext } from "./context";
 import { JsonFileMissingError, readJsonFile, writeJsonFileAtomically } from "./utils/atomic-json";
 import { loadStrictConnections, loadStrictProjects } from "./strict-config-persistence";
 import { serializeFileMutation } from "./release-persistence-lock";

@@ -1,5 +1,6 @@
 import { isRecord } from "../guards";
-import { object, string, optional, InferOutput, literal, array } from "valibot";
+import type { InferOutput } from "valibot";
+import { object, string, optional, literal, array } from "valibot";
 import { isSafePersistedId } from "../persisted-id";
 
 export const FileRepoProjectValidator = object({

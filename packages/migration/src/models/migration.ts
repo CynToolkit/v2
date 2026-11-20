@@ -50,7 +50,7 @@ export interface MigrationObjInput<Current, Up> {
   up: MigrationFn<OmitVersion<Current>, OmitVersion<Up>>;
 }
 
-export interface MigratorConfig<InitialState, FinalState> {
+export interface MigratorConfig<_InitialState, FinalState> {
   migrations: MigrationClass<MigrationSchema, MigrationSchema>[];
   coerce?: boolean;
   /** State used when there is nothing persisted yet; also seeds new files. */

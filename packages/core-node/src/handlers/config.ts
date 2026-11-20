@@ -4,13 +4,12 @@ import {
   appSettingsMigrator,
   defaultConnections,
   defaultFileRepo,
-  type AppConfig,
   type ConnectionsConfig,
   type FileRepo,
   type BrowserProfileCandidate,
 } from "@pipelab/shared";
 import { setupSettingsConfigFile } from "../config";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 import { discoverBrowserProfiles, inspectChromiumProfile } from "@pipelab/providers";
 import { ConstructProfileDiscoveryCache } from "./construct-profile-cache";
 import { ReleasePersistence } from "../release-persistence";

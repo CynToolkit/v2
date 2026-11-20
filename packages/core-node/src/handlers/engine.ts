@@ -1,5 +1,5 @@
 import { useAPI } from "../ipc-core";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 import { getProviderMetadata } from "../utils";
 
 export const registerEngineHandlers = (_context: PipelabContext) => {

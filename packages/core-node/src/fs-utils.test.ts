@@ -1,7 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { homedir } from "node:os";
-import { resolve, join } from "node:path";
-import slash from "slash";
+import { join } from "node:path";
 import { isPathBlacklisted } from "./fs-utils";
 import { getDefaultUserDataPath, projectRoot } from "./context";
 

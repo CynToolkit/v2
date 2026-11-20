@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { Draft, create } from "mutative";
+import type { Draft } from "mutative";
+import { create } from "mutative";
 import { klona } from "klona";
-import { FileRepo, ReleaseConfig } from "@pipelab/shared";
+import type { FileRepo, ReleaseConfig } from "@pipelab/shared";
 import { useAPI } from "@renderer/composables/api";
 import { useProjectsConfig } from "@renderer/composables/useConfig";
 

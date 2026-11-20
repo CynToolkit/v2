@@ -319,7 +319,7 @@ const loadLatestRun = async () => {
     if (result.type !== "success") return;
     latestRun.value = result.result.entries
       .filter((entry) => entry.workflowId === props.flow.id && entry.status !== "running")
-      .sort((a, b) => b.startTime - a.startTime)[0];
+      .toSorted((a, b) => b.startTime - a.startTime)[0];
   } catch {
     latestRun.value = undefined;
   }

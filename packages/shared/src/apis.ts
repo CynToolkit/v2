@@ -1,7 +1,7 @@
 import type { PreflightResult } from "./plugins/definitions";
-import { AuthError, AuthResponse, UserResponse } from "@supabase/supabase-js";
-import { AppConfig, ConnectionsConfig } from "./config.schema";
-import { FileRepo } from "./config/projects-definition";
+import type { AuthError, AuthResponse, UserResponse } from "@supabase/supabase-js";
+import type { AppConfig, ConnectionsConfig } from "./config.schema";
+import type { FileRepo } from "./config/projects-definition";
 import type {
   ReleaseCatalog,
   ReleaseConfig,
@@ -10,7 +10,7 @@ import type {
   ReleaseFieldOption,
   ValidationIssue,
 } from "./release/types";
-import { BuildHistoryResponse, BuildHistoryStorageInfo } from "./build-history";
+import type { BuildHistoryResponse, BuildHistoryStorageInfo } from "./build-history";
 export interface ReleaseSourceInspection {
   issues?: ValidationIssue[];
   fieldOptions?: Record<string, ReleaseFieldOption[]>;

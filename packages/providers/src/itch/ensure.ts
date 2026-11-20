@@ -24,7 +24,7 @@ export const ensureButler = async (
   try {
     await access(finalButlerPath, constants.X_OK);
     return finalButlerPath;
-  } catch (e) {
+  } catch {
     log(`Butler not found at ${finalButlerPath}, installing...`);
   }
 

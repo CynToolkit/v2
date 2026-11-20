@@ -12,20 +12,20 @@ function isWindowsDriveRoot(path: string): boolean {
 
 import { getDefaultUserDataPath, projectRoot } from "./context";
 
-const windowsSystemFolders = [
+const windowsSystemFolders = new Set([
   "windows",
   "program files",
   "program files (x86)",
   "users",
   "programdata",
   "perflogs",
-];
+]);
 
 function isWindowsSystemDirectory(path: string): boolean {
   const driveRoot = path.substring(0, 2);
   if (!isWindowsDriveRoot(driveRoot) || path.charAt(2) !== "/") return false;
   const folder = path.substring(3);
-  return windowsSystemFolders.includes(folder);
+  return windowsSystemFolders.has(folder);
 }
 
 // Static Unix/Linux/macOS system directories (normalized)

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { IncomingMessage } from "node:http";
+import type { IncomingMessage } from "node:http";
 import {
   hasValidAuthToken,
   isAllowedOrigin,

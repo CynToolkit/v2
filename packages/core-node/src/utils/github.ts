@@ -50,7 +50,7 @@ export async function fetchPackageReleases(
   packageName: string,
   options: FetchReleaseOptions = {},
 ): Promise<GitHubRelease[]> {
-  const { repo = "CynToolkit/v2", allowPrerelease = false } = options;
+  const { repo = "CynToolkit/v2" } = options;
 
   try {
     const override = process.env.PIPELAB_OVERRIDE_RELEASE;

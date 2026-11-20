@@ -452,7 +452,7 @@ export const createPipelabCloudUploadTask =
           completionError instanceof Error
             ? completionError.message
             : "Could not save Pipelab Cloud metadata";
-        throw new Error(message);
+        throw new Error(message, { cause: completionError });
       }
       const uploaded = parseOrUndefined(completionSchema, completionData)?.artifact;
       if (

@@ -132,7 +132,7 @@ describe("CLI and IPC workflow execution parity", () => {
       Object.entries(result?.steps ?? {}).map(([id, step]) => [
         id,
         step.status,
-        Object.keys(step.outputs).sort(),
+        Object.keys(step.outputs).toSorted(),
       ]);
 
     expect(cliResult?.status).toBe("completed");
@@ -151,7 +151,7 @@ describe("CLI and IPC workflow execution parity", () => {
         "utf8",
       ),
     ).resolves.toBe("same workflow");
-    expect(Object.keys(executionInputPolicy).sort()).toEqual([
+    expect(Object.keys(executionInputPolicy).toSorted()).toEqual([
       "connectionOverrides",
       "connectionValues",
       "destinations",

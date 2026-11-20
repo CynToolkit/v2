@@ -1,4 +1,5 @@
-import { MessageSchema, Locales, en_US, fr_FR, pt_BR, zh_CN, es_ES, de_DE } from "@pipelab/shared";
+import type { MessageSchema, Locales } from "@pipelab/shared";
+import { en_US, fr_FR, pt_BR, zh_CN, es_ES, de_DE } from "@pipelab/shared";
 import { createI18n } from "vue-i18n";
 
 export const i18n = createI18n<[MessageSchema], Locales>({

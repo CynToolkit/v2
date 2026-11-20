@@ -1,14 +1,8 @@
 import { computed, ref, readonly, watch } from "vue";
 import { useAPI } from "./api";
 import { useAgentAvailability } from "./useAgentAvailability";
-import {
-  AppConfig,
-  ConnectionsConfig,
-  FileRepo,
-  defaultAppSettings,
-  defaultConnections,
-  defaultFileRepo,
-} from "@pipelab/shared";
+import type { AppConfig, ConnectionsConfig, FileRepo } from "@pipelab/shared";
+import { defaultAppSettings, defaultConnections, defaultFileRepo } from "@pipelab/shared";
 
 interface ConfigSuccess<R> {
   type: "success";

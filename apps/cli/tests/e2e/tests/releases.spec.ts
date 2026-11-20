@@ -1204,10 +1204,10 @@ describe("Release beforeBuild hooks", () => {
       expect(result.status).toBe("completed");
       expect(constructExportCount).toBe(1);
       expect(electronInputs).toHaveLength(2);
-      expect(electronInputs.map((item) => item.value).sort()).toEqual([0, 1]);
+      expect(electronInputs.map((item) => item.value).toSorted()).toEqual([0, 1]);
       expect(logMessages.some((message) => message.includes("MANAGED_PNPM"))).toBe(true);
       expect(new Set(electronInputs.map((item) => item.path)).size).toBe(2);
-      expect(electronInputs.map((item) => item.id).sort()).toEqual([
+      expect(electronInputs.map((item) => item.id).toSorted()).toEqual([
         "sdk-off-windows-x64",
         "sdk-on-windows-x64",
       ]);
@@ -1245,7 +1245,7 @@ describe("Release beforeBuild hooks", () => {
           return packagedSdk[16][0];
         }),
       );
-      expect(packagedValues.sort()).toEqual([0, 1]);
+      expect(packagedValues.toSorted()).toEqual([0, 1]);
       expect(workflow.steps.filter((step) => step.uses === "@pipelab/core/fs/copy")).toHaveLength(
         2,
       );

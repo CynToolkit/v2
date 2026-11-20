@@ -1,4 +1,4 @@
-import { CreateQuickJSFn } from "./quickjs";
+import type { CreateQuickJSFn } from "./quickjs";
 
 export interface VariableBase {
   value: string;

@@ -1,4 +1,4 @@
-import { join, dirname, resolve } from "node:path";
+import { join, dirname } from "node:path";
 import { homedir, platform } from "node:os";
 import { fileURLToPath } from "node:url";
 import { existsSync, readFileSync } from "node:fs";
@@ -157,7 +157,7 @@ export class PipelabContext {
       this._cachedSettings = JSON.parse(content);
       this._cachedSettingsTime = now;
       return this._cachedSettings;
-    } catch (e) {
+    } catch {
       return this._cachedSettings;
     }
   }
@@ -236,9 +236,8 @@ export class PipelabContext {
       [SandboxFolder.Artifacts]: { label: "Artifacts", path: this.getArtifactsPath() },
     };
 
-    return Object.values(SandboxFolder).map((key) => ({
-      name: key,
-      ...foldersRecord[key],
-    }));
+    return Object.values(SandboxFolder).map((key) =>
+      Object.assign({ name: key }, foldersRecord[key]),
+    );
   }
 }

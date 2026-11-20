@@ -1,4 +1,4 @@
-import { InputDefinition } from "./plugins/definitions";
+import type { InputDefinition } from "./plugins/definitions";
 
 export const isRequired = (param: InputDefinition) => {
   return param.required === true;

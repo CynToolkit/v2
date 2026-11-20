@@ -62,7 +62,7 @@ describe("notification providers", () => {
   it("contributes Discord and generic webhook targets with a sender each", () => {
     const ids = [DISCORD_NOTIFICATION_ID, SLACK_NOTIFICATION_ID, WEBHOOK_NOTIFICATION_ID];
     expect(provider.release?.notifications?.map((definition) => definition.id)).toEqual(ids);
-    expect(Object.keys(provider.notificationSenders ?? {}).sort()).toEqual([...ids].sort());
+    expect(Object.keys(provider.notificationSenders ?? {}).toSorted()).toEqual([...ids].toSorted());
   });
 
   it("posts a Discord message as JSON and truncates it to Discord's limit", async () => {

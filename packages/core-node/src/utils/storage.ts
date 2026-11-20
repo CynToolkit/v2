@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { useLogger } from "@pipelab/shared";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 
 /**
  * A generic file-based storage implementation for persisting JSON data.

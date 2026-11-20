@@ -822,7 +822,7 @@ import { websocketManager } from "@renderer/composables/websocket-manager";
 import { useShell } from "@renderer/composables/use-shell";
 
 import { useI18n } from "vue-i18n";
-import { Locales } from "@pipelab/shared";
+import type { Locales } from "@pipelab/shared";
 import { watchDebounced } from "@vueuse/core";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";

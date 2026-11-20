@@ -217,6 +217,7 @@ describe("Pipelab Cloud Worker", () => {
       query.in.mockReturnValue(query);
       query.update.mockReturnValue(query);
       Object.assign(query, {
+        // oxlint-disable-next-line unicorn/no-thenable -- query builders are awaitable
         then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) =>
           Promise.resolve({ data: [data], error: null }).then(resolve, reject),
       });
@@ -724,6 +725,7 @@ describe("Pipelab Cloud Worker", () => {
       limit: vi.fn(),
       in: vi.fn(),
       update: vi.fn(),
+      // oxlint-disable-next-line unicorn/no-thenable -- query builders are awaitable
       then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) =>
         Promise.resolve({ data: accounts, error: null }).then(resolve, reject),
     };
@@ -768,7 +770,7 @@ describe("Pipelab Cloud Worker", () => {
       { user_id: "warning-1", email: "one@example.com", deadline_at: "2026-11-01T00:00:00Z" },
       { user_id: "warning-2", email: "two@example.com", deadline_at: "2026-11-01T00:00:00Z" },
     ];
-    const emailFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const emailFetch = vi.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
       if (String(input) !== "https://api.resend.com/emails") {
         return new Response(
           JSON.stringify({

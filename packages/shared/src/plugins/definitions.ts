@@ -89,7 +89,7 @@ export type ControlType =
 export type InputDefinition<T extends ControlType = ControlType> = {
   label: string;
   description?: string;
-  validator?: () => any;
+  validator?: () => unknown;
   required: boolean;
   control: T;
   value: unknown;

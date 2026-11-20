@@ -45,7 +45,9 @@ export const ensureSteamCmd = async (
       );
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") throw error;
-      throw new Error("Steam uploads on Apple Silicon require Rosetta 2 to be installed");
+      throw new Error("Steam uploads on Apple Silicon require Rosetta 2 to be installed", {
+        cause: error,
+      });
     }
   }
 
@@ -99,6 +101,6 @@ export const ensureSteamCmd = async (
     await rm(tempDir, { recursive: true, force: true });
     if (error instanceof Error && error.name === "AbortError") throw error;
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Unable to install SteamCMD: ${message}`);
+    throw new Error(`Unable to install SteamCMD: ${message}`, { cause: error });
   }
 };

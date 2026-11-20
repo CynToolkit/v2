@@ -95,7 +95,7 @@ describe("built-in provider Release task factories", () => {
 describe("provider compatibility and composition", () => {
   it("retains all built-in provider and Workflow task IDs", async () => {
     const { createBuiltInWorkflowTaskFactories } = await import("./workflow-tasks/registry");
-    expect(builtInProviders.map((provider) => provider.id).sort()).toEqual([
+    expect(builtInProviders.map((provider) => provider.id).toSorted()).toEqual([
       "@pipelab/pipelab-cloud",
       "@pipelab/plugin-construct",
       "@pipelab/plugin-electron",
@@ -106,7 +106,7 @@ describe("provider compatibility and composition", () => {
       "@pipelab/plugin-steam",
       "@pipelab/plugin-tauri",
     ]);
-    expect(Object.keys(createBuiltInWorkflowTaskFactories()).sort()).toEqual([
+    expect(Object.keys(createBuiltInWorkflowTaskFactories()).toSorted()).toEqual([
       "@pipelab/plugin-construct/export-construct-project",
       "@pipelab/plugin-electron/electron:package:v2",
       "@pipelab/plugin-godot/godot:export",
@@ -134,7 +134,7 @@ describe("provider compatibility and composition", () => {
         registry[kind]
           .filter((definition) => !definition.id.startsWith("@pipelab/core/"))
           .map((definition) => definition.id)
-          .sort(),
+          .toSorted(),
       ).toEqual(contributedIds(kind));
     }
     expect(contributedIds("sources")).toEqual([

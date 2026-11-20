@@ -1,5 +1,3 @@
-import type { ReleaseFieldDefinition } from "@pipelab/shared";
-
 export interface ReleaseFlowProps {
   dashboardMode?: boolean;
   dashboardFlowId?: string;

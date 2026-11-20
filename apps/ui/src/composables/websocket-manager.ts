@@ -1,14 +1,14 @@
-import { Channels, Data, End } from "@pipelab/shared";
+import type { Channels, Data, End } from "@pipelab/shared";
 import { useLogger } from "@pipelab/shared";
-import { getWebSocketClient, WebSocketClient } from "./websocket-client";
+import type { WebSocketClient } from "./websocket-client";
+import { getWebSocketClient } from "./websocket-client";
 import { ref } from "vue";
-import {
+import type {
   WebSocketManager,
   WebSocketConnectionState,
   WebSocketClientConfig,
-  WebSocketError,
-  WebSocketConnectionError,
 } from "@pipelab/shared";
+import { WebSocketConnectionError } from "@pipelab/shared";
 
 class WebSocketManagerImpl implements WebSocketManager {
   private client: WebSocketClient | null = null;
@@ -16,7 +16,7 @@ class WebSocketManagerImpl implements WebSocketManager {
   private isInitialized = false;
   public connectionState = ref<WebSocketConnectionState>("disconnected");
 
-  async initialize(config?: WebSocketClientConfig): Promise<void> {
+  async initialize(_config?: WebSocketClientConfig): Promise<void> {
     if (this.isInitialized) {
       return;
     }

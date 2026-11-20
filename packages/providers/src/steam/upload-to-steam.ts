@@ -169,6 +169,7 @@ export const createSteamUploadTask =
       const reason = error instanceof Error ? error.message : String(error);
       throw new Error(
         `SteamCMD could not reuse the saved login for ${username}. Run this command in a terminal to authenticate the same SteamCMD installation, then retry:\n\n${manualLoginCommand}\n\n${reason}`,
+        { cause: error },
       );
     }
 
@@ -182,14 +183,16 @@ export const createSteamUploadTask =
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(
           `SteamCMD lost the saved login for ${username}. Run this command in a terminal to authenticate the same SteamCMD installation, then retry:\n\n${manualLoginCommand}\n\n${reason}`,
+          { cause: error },
         );
       }
       if (error instanceof ExternalCommandError && error.code === 6)
         throw new Error(
           `Steam upload failed: depot ${depotId} could not connect to the content server`,
+          { cause: error },
         );
       const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`SteamCMD upload failed: ${message}`);
+      throw new Error(`SteamCMD upload failed: ${message}`, { cause: error });
     }
 
     log("Done uploading");

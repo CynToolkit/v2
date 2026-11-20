@@ -1,4 +1,4 @@
-import {
+import type {
   UpdateStatus,
   RendererChannels,
   RendererData,
@@ -8,7 +8,6 @@ import {
   RequestId,
   HandleListenerRendererArgs,
   HandleListenerRendererSendFn,
-  HandleListenerRenderer as BaseHandleListenerRenderer,
 } from "@pipelab/shared";
 
 export type {

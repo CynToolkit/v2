@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  WebSocketConnectionError,
-  WebSocketError,
-  type RequestId,
-  type WebSocketMessage,
-} from "@pipelab/shared";
+import { WebSocketConnectionError, WebSocketError, type WebSocketMessage } from "@pipelab/shared";
 import { resolveAuthToken, resolveDefaultWebSocketUrl, WebSocketClient } from "./websocket-client";
 
 class FakeWebSocket {

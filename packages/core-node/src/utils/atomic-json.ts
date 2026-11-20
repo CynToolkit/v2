@@ -24,6 +24,7 @@ export const readJsonFile = async (filePath: string): Promise<unknown> => {
   } catch (error) {
     throw new Error(
       `Malformed JSON in ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     );
   }
 };
