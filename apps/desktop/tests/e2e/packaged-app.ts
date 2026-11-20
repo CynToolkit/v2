@@ -48,10 +48,10 @@ const stopProcessTree = (child: ChildProcess) => {
   }
 };
 
-export type PackagedApp = {
+export interface PackagedApp {
   page: Page;
   close: () => Promise<void>;
-};
+}
 
 // Launches the packaged executable with a throwaway profile and attaches over CDP.
 // The shipped app disables the Node-inspect fuse that Playwright's `_electron.launch` needs,

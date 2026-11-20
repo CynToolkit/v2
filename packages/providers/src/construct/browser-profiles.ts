@@ -170,7 +170,10 @@ const executable = (browser: string, chromium: BrowserType) => {
   return existsSync(playwrightBrowser) ? playwrightBrowser : undefined;
 };
 
-type ChromiumProfile = { path: string; name: string };
+interface ChromiumProfile {
+  path: string;
+  name: string;
+}
 
 export const chromiumProfiles = async (root: string): Promise<ChromiumProfile[]> => {
   try {

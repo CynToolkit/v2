@@ -105,7 +105,11 @@ import {
   type TriggerEventKind,
 } from "../utils/notification-triggers";
 
-type EventOption = { on: TriggerEventKind; label: string; icon: string };
+interface EventOption {
+  on: TriggerEventKind;
+  label: string;
+  icon: string;
+}
 
 const props = defineProps<{
   target: ReleaseNotificationConfig;

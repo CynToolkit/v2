@@ -15,7 +15,10 @@ import { connectionIntegrationFieldValue } from "./connection-field-values";
 const connectionAliasPattern = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 
 type ConnectionValues = Record<string, Record<string, string>>;
-type ConnectionReference = { alias: string; integration?: string };
+interface ConnectionReference {
+  alias: string;
+  integration?: string;
+}
 
 const collectConnectionReferences = (
   fields: ReleaseFieldDefinition[] | undefined,

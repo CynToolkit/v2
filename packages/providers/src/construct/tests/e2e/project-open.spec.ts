@@ -2,7 +2,9 @@ import { expect, test } from "vitest";
 import type { Page } from "playwright";
 import { openConstructProjectFile } from "../../assets/script";
 
-type FakeFileChooser = { setFiles: (files: string[]) => Promise<void> };
+interface FakeFileChooser {
+  setFiles: (files: string[]) => Promise<void>;
+}
 
 class FakePage {
   listeners = new Map<string, (value: unknown) => void>();
