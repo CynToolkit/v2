@@ -6,7 +6,9 @@ process, on an OS-assigned loopback port. The shell loads the UI only once the
 server reports ready, and startup fails with an error if it cannot start. If the
 server crashes, the shell kills whatever it left running, restarts it (on the same port when possible) and
 reloads the window, so a server crash does not close the app. In production, the
-server also serves the bundled UI.
+server also serves the bundled UI. Each Desktop launch generates a random token
+that the window presents to the server, so other local processes and users on the
+same machine cannot connect to the loopback port and run workflows.
 
 ![Pipelab desktop, UI, CLI server, and execution paths](../assets/architecture/architecture.svg)
 

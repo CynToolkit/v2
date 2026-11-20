@@ -8,24 +8,15 @@ import {
   type ReleaseChannel,
   type RendererProviderMetadata,
   useLogger,
-  transformUrl,
 } from "@pipelab/shared";
 import type { IntegrationDefinition } from "@pipelab/shared";
 import browserProviderSpecs from "@renderer/generated/release-provider-specs";
 
-const transformProviderUrls = (provider: RendererProviderMetadata): RendererProviderMetadata => {
-  const transformedIcon =
-    provider.icon?.type === "image"
-      ? {
-          ...provider.icon,
-          image: transformUrl(provider.icon.image),
-        }
-      : provider.icon;
-
+const pickProviderMetadata = (provider: RendererProviderMetadata): RendererProviderMetadata => {
   return {
     id: provider.id,
     name: provider.name,
-    icon: transformedIcon,
+    icon: provider.icon,
     description: provider.description,
     isOfficial: provider.isOfficial,
     packageName: provider.packageName,
@@ -42,7 +33,7 @@ const mergeProviderMetadata = (
   return [
     ...runtime.map((provider) => {
       const base = bundledById.get(provider.id);
-      if (!base) return transformProviderUrls(provider);
+      if (!base) return pickProviderMetadata(provider);
       return {
         ...base,
         integrations: mergeIntegrations(base.integrations ?? [], provider.integrations ?? []),

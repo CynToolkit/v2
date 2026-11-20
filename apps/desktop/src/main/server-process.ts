@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { app, dialog } from "electron";
 import { is } from "@electron-toolkit/utils";
 import http from "node:http";
@@ -11,6 +12,22 @@ const READY_TIMEOUT_MS = 60_000;
 const STOP_TIMEOUT_MS = 10_000;
 const MAX_RESTARTS = 5;
 const RESTART_WINDOW_MS = 60_000;
+
+// One secret per Desktop launch, kept across server restarts so an open window can reconnect.
+// It reaches the server through its environment (argv is visible to other users in `ps`).
+const authToken = randomBytes(32).toString("hex");
+
+/** Token the window must present to the local server. */
+export const getServerAuthToken = () => authToken;
+
+/** URL of the UI served by the local server (or the Vite dev server in development). */
+export const getUiUrl = (port: number) => {
+  const base = is.dev
+    ? `http://127.0.0.1:${getUiDevelopmentPort()}/?cliPort=${port}`
+    : `http://127.0.0.1:${port}`;
+  // In the hash so it is never sent to a server or leaked through a Referer header.
+  return `${base}#token=${authToken}`;
+};
 
 let serverProcess: ChildProcess | null = null;
 let serverPort: number | null = null;
@@ -93,6 +110,7 @@ const spawnServer = (preferredPort: number): Promise<{ child: ChildProcess; port
     env: {
       ...process.env,
       ELECTRON_RUN_AS_NODE: "1",
+      PIPELAB_AUTH_TOKEN: authToken,
       NODE_ENV: is.dev ? "development" : "production",
     },
   });

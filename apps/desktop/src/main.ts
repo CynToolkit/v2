@@ -4,12 +4,7 @@ import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
-import {
-  getUiDevelopmentPort,
-  onServerRestarted,
-  startServer,
-  stopServer,
-} from "./main/server-process";
+import { getUiUrl, onServerRestarted, startServer, stopServer } from "./main/server-process";
 import { getProtocolName, getAppBundleId } from "@pipelab/constants";
 import { getCliPassthroughArgs, runCliPassthrough } from "./main/cli-passthrough";
 import { registerIpcHandlers } from "./main/ipc-handlers";
@@ -454,10 +449,7 @@ function createWindow(): void {
 async function restoreWindowAfterFailedShutdown(): Promise<void> {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
   const cliPort = await startServer();
-  const uiUrl = is.dev
-    ? `http://127.0.0.1:${getUiDevelopmentPort()}/?cliPort=${cliPort}`
-    : `http://127.0.0.1:${cliPort}`;
-  await mainWindow?.loadURL(uiUrl);
+  await mainWindow?.loadURL(getUiUrl(cliPort));
 }
 
 const protocolName = getProtocolName(app.getVersion());
@@ -565,10 +557,7 @@ app.whenReady().then(async () => {
 
   // When the server crashes and is restarted, point the window at it again.
   onServerRestarted((port) => {
-    const url = is.dev
-      ? `http://127.0.0.1:${getUiDevelopmentPort()}/?cliPort=${port}`
-      : `http://127.0.0.1:${port}`;
-    void mainWindow?.loadURL(url);
+    void mainWindow?.loadURL(getUiUrl(port));
   });
 
   // Start the background server (this might include downloading the CLI on first run)
@@ -578,9 +567,7 @@ app.whenReady().then(async () => {
     console.info("[Main] Standalone server is ready");
 
     // Do not load any renderer until the in-process server is listening.
-    const uiUrl = is.dev
-      ? `http://127.0.0.1:${getUiDevelopmentPort()}/?cliPort=${cliPort}`
-      : `http://127.0.0.1:${cliPort}`;
+    const uiUrl = getUiUrl(cliPort);
     console.info(`[Main] Loading ${is.dev ? "development" : "production"} UI`);
     if (isDesktopIntegrationTest) {
       await new Promise((resolveDelay) => setTimeout(resolveDelay, 5000));

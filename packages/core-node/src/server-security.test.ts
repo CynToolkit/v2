@@ -5,6 +5,7 @@ import {
   isAllowedOrigin,
   isAuthorizedRequest,
   isLoopbackHost,
+  isTokenEnforced,
   requiresAuthentication,
 } from "./server-security";
 
@@ -93,5 +94,52 @@ describe("server security policy", () => {
         options,
       ),
     ).toBe(false);
+  });
+
+  describe("loopback server with a configured token", () => {
+    const options = {
+      host: "127.0.0.1",
+      authToken: "secret",
+      allowedOrigins: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    };
+
+    test("enforces the token even though the host is loopback", () => {
+      expect(isTokenEnforced(options)).toBe(true);
+      expect(isTokenEnforced({ host: "127.0.0.1" })).toBe(false);
+    });
+
+    test("rejects a local process that has no token, with or without an Origin", () => {
+      expect(isAuthorizedRequest(request({ host: "127.0.0.1:49152" }), options)).toBe(false);
+      expect(
+        isAuthorizedRequest(
+          request({ host: "127.0.0.1:49152", origin: "http://127.0.0.1:49152" }),
+          options,
+        ),
+      ).toBe(false);
+    });
+
+    test("rejects a wrong token and accepts the right one", () => {
+      expect(
+        isAuthorizedRequest(request({ host: "127.0.0.1:49152" }, "/?token=wrong"), options),
+      ).toBe(false);
+      expect(
+        isAuthorizedRequest(request({ host: "127.0.0.1:49152" }, "/?token=secret"), options),
+      ).toBe(true);
+    });
+
+    test("still enforces the token in development mode", () => {
+      expect(
+        isAuthorizedRequest(request({ host: "127.0.0.1:49152" }), {
+          ...options,
+          allowUnauthenticated: true,
+        }),
+      ).toBe(false);
+      expect(
+        isAuthorizedRequest(
+          request({ host: "127.0.0.1:49152", origin: "http://127.0.0.1:5173" }, "/?token=secret"),
+          { ...options, allowUnauthenticated: true },
+        ),
+      ).toBe(true);
+    });
   });
 });

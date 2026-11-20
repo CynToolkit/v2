@@ -5,7 +5,7 @@ import {
   type RequestId,
   type WebSocketMessage,
 } from "@pipelab/shared";
-import { resolveDefaultWebSocketUrl, WebSocketClient } from "./websocket-client";
+import { resolveAuthToken, resolveDefaultWebSocketUrl, WebSocketClient } from "./websocket-client";
 
 class FakeWebSocket {
   static readonly CONNECTING = 0;
@@ -230,5 +230,31 @@ describe("Desktop CLI endpoint discovery", () => {
       "ws://127.0.0.1:49152",
       "ws://127.0.0.1:49152",
     ]);
+  });
+});
+
+describe("resolveAuthToken", () => {
+  const storage = new Map<string, string>();
+
+  beforeEach(() => {
+    storage.clear();
+    vi.stubGlobal("sessionStorage", {
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => void storage.set(key, value),
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("reads the token from the URL hash and keeps it for later reloads", () => {
+    expect(resolveAuthToken({ search: "", hash: "#token=abc" })).toBe("abc");
+    // In-app navigation drops the hash; a reload must still authenticate.
+    expect(resolveAuthToken({ search: "", hash: "" })).toBe("abc");
+  });
+
+  it("returns null when there is no token anywhere", () => {
+    expect(resolveAuthToken({ search: "", hash: "" })).toBeNull();
   });
 });

@@ -23,6 +23,14 @@ if (!port || !userData || !cliDirname) {
   process.exit(2);
 }
 
+// Read the token Desktop generated, then drop it so workflow processes do not inherit it.
+const authToken = process.env.PIPELAB_AUTH_TOKEN;
+delete process.env.PIPELAB_AUTH_TOKEN;
+if (!authToken) {
+  console.error("[Server] Missing PIPELAB_AUTH_TOKEN.");
+  process.exit(2);
+}
+
 let stopping = false;
 const shutdown = async (exitCode: number) => {
   if (stopping) return;
@@ -53,7 +61,7 @@ process.on("message", (message) => {
 process.on("disconnect", () => void shutdown(0));
 
 // The Desktop server is only ever reachable from this machine.
-startServer({ port, host: "127.0.0.1", userData, cliDirname, desktopHosted: true })
+startServer({ port, host: "127.0.0.1", userData, cliDirname, authToken, desktopHosted: true })
   .then(({ port }) => process.send?.({ type: "ready", port }))
   .catch((error: unknown) => {
     console.error("[Server] Failed to start:", error);

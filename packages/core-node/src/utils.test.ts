@@ -8,7 +8,7 @@ describe("toRendererProviderMetadata", () => {
     const plugin: RendererProviderMetadata & { nodes: unknown[] } = {
       id: "@pipelab/plugin-example",
       name: "Example",
-      icon: { type: "image", image: "file:///tmp/plugin.png" },
+      icon: { type: "image", image: "data:image/png;base64,AAAA" },
       description: "Example plugin",
       isOfficial: true,
       packageName: "@pipelab/plugin-example",
@@ -22,10 +22,7 @@ describe("toRendererProviderMetadata", () => {
     expect(metadata).toEqual({
       id: plugin.id,
       name: plugin.name,
-      icon: {
-        type: "image",
-        image: "http://localhost:33753/media-file/%2Ftmp%2Fplugin.png",
-      },
+      icon: plugin.icon,
       description: plugin.description,
       isOfficial: plugin.isOfficial,
       packageName: plugin.packageName,

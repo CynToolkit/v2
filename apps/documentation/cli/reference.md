@@ -29,7 +29,7 @@ Starts the standalone HTTP/WebSocket server used by the UI and provider handlers
 | --------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `-p, --port <port>`         | `33753`                      | Port to listen on.                                                                                                  |
 | `--host <host>`             | `127.0.0.1`                  | Interface to bind.                                                                                                  |
-| `--auth-token <token>`      | `PIPELAB_AUTH_TOKEN`, if set | Bearer token for non-loopback access.                                                                               |
+| `--auth-token <token>`      | `PIPELAB_AUTH_TOKEN`, if set | Bearer or `?token=` secret. Required beyond loopback; when set, also enforced on loopback.                          |
 | `--allowed-origin <origin>` | —                            | Adds one browser origin to the built-in localhost development origins. This option is not registered as repeatable. |
 | `--user-data <path>`        | Platform default             | Use a custom user-data directory.                                                                                   |
 

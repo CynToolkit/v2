@@ -46,6 +46,27 @@ export function resolveDefaultWebSocketUrl(
   return `ws://${location.hostname}:${cliPort}`;
 }
 
+const TOKEN_STORAGE_KEY = "pipelab:auth-token";
+
+/**
+ * The token arrives in the page URL (query or hash). In-app navigation drops the URL hash,
+ * so keep it for the lifetime of the window and a reload still authenticates.
+ */
+export function resolveAuthToken(location: Pick<Location, "search" | "hash">): string | null {
+  const fromUrl =
+    new URLSearchParams(location.search).get("token") ||
+    new URLSearchParams(location.hash.replace(/^#/, "")).get("token");
+  try {
+    if (fromUrl) {
+      sessionStorage.setItem(TOKEN_STORAGE_KEY, fromUrl);
+      return fromUrl;
+    }
+    return sessionStorage.getItem(TOKEN_STORAGE_KEY);
+  } catch {
+    return fromUrl;
+  }
+}
+
 // Message queue item interface
 interface QueuedMessage {
   channel: Channels;
@@ -81,9 +102,7 @@ export class WebSocketClient {
     );
 
     if (typeof window !== "undefined") {
-      const token =
-        new URLSearchParams(window.location.search).get("token") ||
-        new URLSearchParams(window.location.hash.replace(/^#/, "")).get("token");
+      const token = resolveAuthToken(window.location);
       if (token) defaultUrl += `?token=${encodeURIComponent(token)}`;
     }
 

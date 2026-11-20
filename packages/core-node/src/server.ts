@@ -3,12 +3,10 @@ import { resolveBundledUiFolder } from "./bundled-cli";
 import { getUiDevServerMissingWarning, uiDevPort } from "@pipelab/constants";
 import { existsSync } from "node:fs";
 import http from "http";
-import { readFile } from "node:fs/promises";
 import handler from "serve-handler";
 import {
   DEFAULT_ALLOWED_ORIGINS,
   DEFAULT_SERVER_HOST,
-  isAuthorizedRequest,
   type ServerSecurityOptions,
 } from "./server-security";
 import { markDesktopHosted } from "./desktop-host";
@@ -68,52 +66,6 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
   }
 
   const server = http.createServer(async (request, response) => {
-    const urlObj = request.url ? new URL(request.url, "http://localhost") : null;
-    // Serve local media files securely via HTTP
-    if (urlObj && urlObj.pathname.startsWith("/media-file/")) {
-      if (!isAuthorizedRequest(request, security)) {
-        response.writeHead(401, { "Content-Type": "text/plain" });
-        response.end("Unauthorized");
-        return;
-      }
-
-      const prefix = "/media-file/";
-      const encodedPath = urlObj.pathname.substring(prefix.length);
-      const filePath = decodeURIComponent(encodedPath);
-      // Strip leading slash on Windows if followed by a drive letter (e.g. /C:/...)
-      const normalizedPath =
-        filePath.startsWith("/") && filePath.match(/^\/[a-zA-Z]:/)
-          ? filePath.substring(1)
-          : filePath;
-
-      if (existsSync(normalizedPath)) {
-        try {
-          const content = await readFile(normalizedPath);
-          let contentType = "application/octet-stream";
-          if (normalizedPath.endsWith(".png")) contentType = "image/png";
-          else if (normalizedPath.endsWith(".jpg") || normalizedPath.endsWith(".jpeg"))
-            contentType = "image/jpeg";
-          else if (normalizedPath.endsWith(".svg")) contentType = "image/svg+xml";
-          else if (normalizedPath.endsWith(".gif")) contentType = "image/gif";
-          else if (normalizedPath.endsWith(".webp")) contentType = "image/webp";
-
-          response.writeHead(200, {
-            "Content-Type": contentType,
-          });
-          response.end(content);
-          return;
-        } catch (e) {
-          response.writeHead(500, { "Content-Type": "text/plain" });
-          response.end(`Error reading file: ${e}`);
-          return;
-        }
-      } else {
-        response.writeHead(404, { "Content-Type": "text/plain" });
-        response.end(`File not found: ${normalizedPath}`);
-        return;
-      }
-    }
-
     if (isDev) {
       const requestHost = request.headers.host?.split(":")[0] || "localhost";
       response.writeHead(302, {
