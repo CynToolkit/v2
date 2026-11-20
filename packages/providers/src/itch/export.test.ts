@@ -114,6 +114,7 @@ describe("Itch native upload task", () => {
         }),
         connectionValues: { [alias]: { apiKey } },
         tasks: { [WORKFLOW_TASK_ID]: createItchUploadTask(services) },
+        services,
         onEvent: (event) => events.push(event),
       },
     );
@@ -163,6 +164,7 @@ describe("Itch native upload task", () => {
           host: createLocalHost(sandbox.path),
           connectionValues: { [alias]: { apiKey: "" } },
           tasks: { [WORKFLOW_TASK_ID]: createItchUploadTask(services) },
+          services,
         },
       ),
     ).rejects.toThrow("Itch account connection has no API key");
