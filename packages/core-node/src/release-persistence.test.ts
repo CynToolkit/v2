@@ -1246,7 +1246,7 @@ describe("ReleasePersistence", () => {
     await Promise.all([first.save(config("workflow-a")), second.save(config("workflow-b"))]);
 
     const repo = JSON.parse(await readFile(context.getProjectsPath(), "utf8"));
-    const workflowIds = repo.workflows.map((workflow: { id: string }) => workflow.id).sort();
+    const workflowIds = repo.workflows.map((workflow: { id: string }) => workflow.id).toSorted();
     expect(workflowIds).toEqual(["workflow-1", "workflow-a", "workflow-b"]);
   });
 
@@ -1282,7 +1282,7 @@ describe("ReleasePersistence", () => {
 
     await Promise.all([run("workflow-a"), run("workflow-b")]);
     const index = JSON.parse(await readFile(context.getProjectsPath(), "utf8"));
-    expect(index.workflows.map((workflow: { id: string }) => workflow.id).sort()).toEqual([
+    expect(index.workflows.map((workflow: { id: string }) => workflow.id).toSorted()).toEqual([
       "workflow-1",
       "workflow-a",
       "workflow-b",

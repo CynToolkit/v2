@@ -1,7 +1,7 @@
+import type { InferOutput } from "valibot";
 import {
   union,
   literal,
-  InferOutput,
   string,
   boolean,
   object,

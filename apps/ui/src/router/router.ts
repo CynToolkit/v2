@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory, RouterOptions } from "vue-router";
+import type { RouterOptions } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import { i18n } from "../i18n";
 import { preserveDesktopCliPort } from "./preserve-desktop-cli-port";
 

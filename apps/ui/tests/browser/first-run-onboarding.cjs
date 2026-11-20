@@ -1041,7 +1041,7 @@ async function journey(
     } catch (error) {
       if (process.env.SCREENSHOT_DIR)
         await page.screenshot({ path: join(process.env.SCREENSHOT_DIR, "quick-ship-failure.png") });
-      throw new Error(`${error.message}; browser errors: ${errors.join("; ")}`);
+      throw new Error(`${error.message}; browser errors: ${errors.join("; ")}`, { cause: error });
     }
     await page.waitForFunction(
       (dark) => document.documentElement.classList.contains("dark") === dark,
@@ -1056,7 +1056,7 @@ async function journey(
           await page.screenshot({
             path: join(process.env.SCREENSHOT_DIR, "quick-ship-failure.png"),
           });
-        throw new Error(`${error.message}; browser errors: ${errors.join("; ")}`);
+        throw new Error(`${error.message}; browser errors: ${errors.join("; ")}`, { cause: error });
       }
       const bounds = await shipButton.boundingBox();
       assert.ok(bounds.width >= 44 && bounds.height >= 44, "dashboard Ship has a 44px target");
@@ -1100,6 +1100,7 @@ async function journey(
         } catch (error) {
           throw new Error(
             `${error.message}; workflow text: ${await page.locator("body").innerText()}`,
+            { cause: error },
           );
         }
         if (process.env.SCREENSHOT_DIR)
@@ -1777,7 +1778,9 @@ async function journey(
       await picker.getByRole("row", { name: pickerEntry }).waitFor();
     } catch (error) {
       const rows = await picker.getByRole("row").allTextContents();
-      throw new Error(`${error.message}; file picker rows: ${JSON.stringify(rows)}`);
+      throw new Error(`${error.message}; file picker rows: ${JSON.stringify(rows)}`, {
+        cause: error,
+      });
     }
     await picker.getByRole("row", { name: pickerEntry }).click();
     if (sourceField.type === "file") {

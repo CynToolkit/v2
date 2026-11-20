@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useLogger } from "@pipelab/shared";
-import { WebSocket } from "ws";
+import type { WebSocket } from "ws";
 import { useAPI } from "./ipc-core";
 
 describe("workflow execution IPC logging", () => {

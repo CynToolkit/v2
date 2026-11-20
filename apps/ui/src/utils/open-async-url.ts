@@ -1,5 +1,3 @@
-type OpenAsyncUrlResult = "opened" | "blocked" | "failed";
-
 const safeHttpUrl = (url: string): string | undefined => {
   try {
     const parsed = new URL(url);

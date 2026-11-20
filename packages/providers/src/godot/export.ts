@@ -117,7 +117,7 @@ export const exportGodotProject = async (
     );
   } catch (error) {
     if (hasErrorCode(error, "ENOENT"))
-      throw new Error(`Godot executable not found: ${options.executable}.`);
+      throw new Error(`Godot executable not found: ${options.executable}.`, { cause: error });
     throw error;
   }
   if (result.exitCode !== 0)

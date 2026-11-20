@@ -1,5 +1,5 @@
-import { Channels, Data, Events, End, RequestId } from "./apis";
-import { WebSocket as WSWebSocket } from "ws";
+import type { Channels, Data, Events, End, RequestId } from "./apis";
+import type { WebSocket as WSWebSocket } from "ws";
 
 // WebSocket connection states
 export type WebSocketConnectionState =
@@ -196,7 +196,7 @@ export class WebSocketTimeoutError extends WebSocketError {
   constructor(
     message: string,
     public timeout: number,
-    requestId?: RequestId,
+    _requestId?: RequestId,
   ) {
     super(message);
     this.name = "WebSocketTimeoutError";
@@ -236,4 +236,4 @@ export type WebSocketResponseType<T extends Channels> = {
 };
 
 // Import for Node.js HTTP server
-import { IncomingMessage } from "http";
+import type { IncomingMessage } from "http";

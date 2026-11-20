@@ -503,7 +503,7 @@ const allLogs = computed(() => {
   const logs = entry.value?.logs?.length
     ? entry.value.logs
     : entry.value?.steps.flatMap((step) => step.logs) || [];
-  return [...logs].sort((a, b) => a.timestamp - b.timestamp);
+  return [...logs].toSorted((a, b) => a.timestamp - b.timestamp);
 });
 const visibleLogs = computed(() =>
   selectedStep.value === null ? allLogs.value : selectedStepEntry.value?.logs || [],

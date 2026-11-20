@@ -28,7 +28,8 @@
 import { defineAsyncComponent, onMounted, onUnmounted, ref, provide, watch } from "vue";
 import { useRouter } from "vue-router";
 import { handle } from "./composables/handlers";
-import { useLogger, MessageSchema, Locales } from "@pipelab/shared";
+import type { Locales } from "@pipelab/shared";
+import { useLogger, MessageSchema } from "@pipelab/shared";
 import { useI18n } from "vue-i18n";
 import Layout from "./components/Layout.vue";
 import ConnectingPage from "./components/ConnectingPage.vue";
@@ -205,7 +206,8 @@ handle("log:message", async (event, { value, send }) => {
         .log(
           value._meta.logLevelId,
           value._meta.path?.fullFilePath || "unknown",
-          ...[logLevelName, ...filteredValues],
+          logLevelName,
+          ...filteredValues,
         );
     } catch (error) {
       console.error("log:message: Error processing log message:", error);

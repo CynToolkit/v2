@@ -232,6 +232,7 @@ export const waitForConstructExportDownload = async (
     const timeoutSeconds = Math.ceil(timeoutMs / 1_000);
     throw new Error(
       `Construct did not make its ${exportLabel ? `${exportLabel} ` : ""}project download available within ${timeoutSeconds} seconds.${status ? ` Current status: ${status}.` : ""}${screenshotDetails}${error instanceof Error ? ` (${error.message})` : ""}`,
+      { cause: error },
     );
   }
   if (!(await downloadButton.isEnabled()))
@@ -907,9 +908,9 @@ export const script = async (
   exportType: ConstructExportType = "web",
 ) => {
   throwIfAborted(abortSignal);
-  let url = "https://editor.construct.net/";
+  let _url = "https://editor.construct.net/";
   if (version) {
-    url += version;
+    _url += version;
   }
 
   const accountOrigin = constructAccountOrigin(version);
@@ -1037,6 +1038,7 @@ export const script = async (
     }
     throw new Error(
       `Could not select Construct's ${exportTypeLabel} export option after opening the Export menu.${exportItems.length ? ` Options: ${JSON.stringify(exportItems)}.` : ""}${context ? ` Page says: ${context}.` : ""}${screenshotDetails}${error instanceof Error ? ` (${error.message})` : ""}`,
+      { cause: error },
     );
   }
   logElapsed(log, `Construct ${exportTypeName} platform click after`, actionStartedAt);
@@ -1056,6 +1058,7 @@ export const script = async (
     const context = pageText.replace(/\s+/g, " ").trim().slice(0, 500);
     throw new Error(
       `Construct did not open the export platform dialog after selecting ${exportTypeName}${context ? `; page says: ${context}` : ""}${error instanceof Error ? ` (${error.message})` : ""}`,
+      { cause: error },
     );
   }
 
@@ -1071,6 +1074,7 @@ export const script = async (
   } catch (error) {
     throw new Error(
       `Construct's export platform dialog did not become ready${error instanceof Error ? `: ${error.message}` : ""}`,
+      { cause: error },
     );
   }
   logElapsed(log, "Construct export platform selection after", exportPlatformStartedAt);
@@ -1108,6 +1112,7 @@ export const script = async (
       const context = pageText.replace(/\s+/g, " ").trim().slice(0, 500);
       throw new Error(
         `Construct did not open the standard export options after selecting the platform${context ? `; page says: ${context}` : ""}${error instanceof Error ? ` (${error.message})` : ""}`,
+        { cause: error },
       );
     }
 
@@ -1126,6 +1131,7 @@ export const script = async (
       const context = dialogText.replace(/\s+/g, " ").trim().slice(0, 500);
       throw new Error(
         `Construct's standard export options did not expose an available Offline support option${context ? `; dialog says: ${context}` : ""}${error instanceof Error ? ` (${error.message})` : ""}`,
+        { cause: error },
       );
     }
     log("Disabled offline support");

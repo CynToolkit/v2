@@ -938,7 +938,7 @@ app.on("will-quit", () => {
   for (const client of clients) {
     try {
       client.terminate();
-    } catch (e) {}
+    } catch {}
   }
   clients.clear();
 });

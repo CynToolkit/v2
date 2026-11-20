@@ -197,7 +197,7 @@ const feedsFor = (
   };
   const reused = outputs
     .filter((output) => output.buildId !== undefined && accepts(output.descriptor))
-    .sort(
+    .toSorted(
       (left, right) =>
         reuseRank(scope, left) - reuseRank(scope, right) || hostRank(left) - hostRank(right),
     )

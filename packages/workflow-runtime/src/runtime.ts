@@ -319,7 +319,7 @@ const collectEnvironmentValues = (workflow: Workflow, env: WorkflowEnvironment):
     const value = env[name];
     if (value) values.add(value);
   }
-  return [...values].sort((left, right) => right.length - left.length);
+  return [...values].toSorted((left, right) => right.length - left.length);
 };
 
 export interface WorkflowValueResolver {
@@ -378,7 +378,7 @@ const createInternalRunScopedWorkflowValueResolver = (
         ),
       ].filter((value) => value.length > 0),
     ),
-  ].sort((left, right) => right.length - left.length);
+  ].toSorted((left, right) => right.length - left.length);
   const redactString = (value: string) =>
     secrets.reduce((result, secret) => result.split(secret).join("[REDACTED]"), value);
 

@@ -271,14 +271,19 @@ export const validateReleaseConfigShape = (config: unknown): ValidationIssue[] =
     }
     addId("notification", notification.id, `${path}.id`);
     if (notification.triggers !== undefined) {
-      const triggerKinds = ["success", "failure", "destination-completed", "destination-failed"];
+      const triggerKinds = new Set([
+        "success",
+        "failure",
+        "destination-completed",
+        "destination-failed",
+      ]);
       const valid =
         Array.isArray(notification.triggers) &&
         notification.triggers.every(
           (trigger) =>
             isRecord(trigger) &&
             typeof trigger.on === "string" &&
-            triggerKinds.includes(trigger.on) &&
+            triggerKinds.has(trigger.on) &&
             (trigger.on === "success" ||
               trigger.on === "failure" ||
               requiredString(trigger.destinationId)),

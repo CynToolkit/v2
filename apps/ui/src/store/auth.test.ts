@@ -583,7 +583,7 @@ describe("hosted browser authentication", () => {
 
   it("completes a recovery callback after the PKCE exchange produces a signed-in session", async () => {
     const user = makeUser("callback-user");
-    let listeners: Array<(event: AuthChangeEvent, session: Session | null) => void> = [];
+    const listeners: Array<(event: AuthChangeEvent, session: Session | null) => void> = [];
     browserClient.auth.onAuthStateChange.mockImplementation((listener) => {
       listeners.push(listener);
       return { data: { subscription: { unsubscribe: vi.fn() } } };

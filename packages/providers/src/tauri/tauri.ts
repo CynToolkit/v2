@@ -86,10 +86,6 @@ async function resolveCargoPath(): Promise<string> {
 
 // TODO: https://js.electronforge.io/modules/_electron_forge_core.html
 
-const IDMake = "tauri:make";
-const IDPackageV2 = "tauri:package:v2";
-const IDPreview = "tauri:preview";
-
 export interface TauriExecutionContext {
   cwd: string;
   log: (...args: unknown[]) => void;

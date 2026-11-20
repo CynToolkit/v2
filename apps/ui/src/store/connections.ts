@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ConnectionsConfig } from "@pipelab/shared";
+import type { ConnectionsConfig } from "@pipelab/shared";
 import { watch } from "vue";
 import { useAuth } from "./auth";
 import { useConnectionsConfig } from "@renderer/composables/useConfig";

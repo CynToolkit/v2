@@ -21,7 +21,7 @@ export default async (json, ws) => {
       },
     };
     ws.send(JSON.stringify(existResult));
-  } catch (e) {
+  } catch {
     /**
      * @type {import('@pipelab/core').MakeInputOutput<import('@pipelab/core').MessageExistFile, 'output'>}
      */

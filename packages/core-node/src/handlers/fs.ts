@@ -7,7 +7,7 @@ import { homedir, platform } from "node:os";
 import { join } from "node:path";
 import { isPathBlacklisted } from "../fs-utils";
 
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 import type { FsRoot } from "@pipelab/shared";
 
 export const registerFsHandlers = (_context: PipelabContext) => {
@@ -65,7 +65,7 @@ export const registerFsHandlers = (_context: PipelabContext) => {
           let stats: Stats | undefined;
           try {
             stats = await stat(fullPath);
-          } catch (e) {
+          } catch {
             // Might happen for broken symlinks etc
           }
 

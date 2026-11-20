@@ -49,7 +49,7 @@ const postWebhook = async (
       : error instanceof Error && error.name === "AbortError"
         ? "was cancelled"
         : "could not be reached";
-    throw new Error(`The webhook ${reason}.`);
+    throw new Error(`The webhook ${reason}.`, { cause: error });
   }
   if (!response.ok) throw new Error(`The webhook answered HTTP ${response.status}.`);
 };
@@ -161,6 +161,7 @@ export const sendEmail = async (input: SendEmailInput, signal?: AbortSignal): Pr
         : error instanceof Error && error.name === "AbortError"
           ? "The email was cancelled."
           : "Resend could not be reached.",
+      { cause: error },
     );
   }
   if (response.ok) return;

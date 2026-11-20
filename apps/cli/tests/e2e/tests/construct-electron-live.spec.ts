@@ -31,7 +31,7 @@ async function isPlatformMetadataFile(path: string, entry: string): Promise<bool
 }
 
 async function directoryChildDigests(path: string): Promise<Record<string, string>> {
-  const entries = (await readdir(path)).sort();
+  const entries = (await readdir(path)).toSorted();
   const includedEntries = await Promise.all(
     entries.map(async (entry) => ({
       entry,
@@ -77,7 +77,7 @@ async function artifactDigest(path: string, ancestors = new Set<string>()): Prom
       throw new Error(`Artifact symlink cycle detected at ${path}`);
     }
     const childAncestors = new Set(ancestors).add(resolvedPath);
-    const entries = (await readdir(path)).sort();
+    const entries = (await readdir(path)).toSorted();
     const includedEntries = await Promise.all(
       entries.map(async (entry) => ({
         entry,
@@ -314,8 +314,8 @@ describe("authenticated local Construct to Electron CI acceptance", () => {
         expect(currentRun.id).not.toBe(baseline.id);
         const earlierRun = runs.find((run) => run.id === baseline.id);
         expect(earlierRun).toBeDefined();
-        expect(earlierRun?.artifacts.map((artifact) => artifact.path).sort()).toEqual(
-          baseline.artifactManifest.map((artifact) => artifact.path).sort(),
+        expect(earlierRun?.artifacts.map((artifact) => artifact.path).toSorted()).toEqual(
+          baseline.artifactManifest.map((artifact) => artifact.path).toSorted(),
         );
         for (const artifact of baseline.artifactManifest) {
           const digest = await artifactDigest(artifact.path);

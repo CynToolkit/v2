@@ -6,7 +6,6 @@ import { vol } from "memfs";
 import { PipelabContext } from "../context";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { existsSync } from "node:fs";
 
 vi.mock("node:dns/promises", () => ({
   default: {

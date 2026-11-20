@@ -29,8 +29,8 @@ const structurallyEqual = (left: unknown, right: unknown): boolean => {
     );
   }
 
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
+  const leftKeys = Object.keys(left).toSorted();
+  const rightKeys = Object.keys(right).toSorted();
   return (
     leftKeys.length === rightKeys.length &&
     leftKeys.every(

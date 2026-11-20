@@ -457,7 +457,11 @@ describe("core Bundle execution", () => {
 
     const extracted = join(root, "extracted");
     await extractZip(join(workspace, "bundle.zip"), extracted);
-    expect((await readdir(extracted)).sort()).toEqual(["linux-linux", "mac-macos", "win-windows"]);
+    expect((await readdir(extracted)).toSorted()).toEqual([
+      "linux-linux",
+      "mac-macos",
+      "win-windows",
+    ]);
     expect(await readdir(join(extracted, "win-windows"))).toContain("game.exe");
   });
 
@@ -514,8 +518,8 @@ describe("core Bundle execution", () => {
 
     const extracted = join(root, "extracted");
     await extractZip(join(workspace, "outer.zip"), extracted);
-    expect((await readdir(extracted)).sort()).toEqual(["inner-zip", "third"]);
-    expect((await readdir(join(extracted, "inner-zip"))).sort()).toEqual(["first", "second"]);
+    expect((await readdir(extracted)).toSorted()).toEqual(["inner-zip", "third"]);
+    expect((await readdir(join(extracted, "inner-zip"))).toSorted()).toEqual(["first", "second"]);
     expect(await readdir(join(extracted, "inner-zip", "first"))).toContain("a.txt");
   });
 });

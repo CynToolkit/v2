@@ -386,10 +386,7 @@ const validationSchema = computed<TypedSchema<AuthFormValues>>(() => {
           regex(/[a-z]/, "Password must contain at least one lowercase letter"),
           regex(/[A-Z]/, "Password must contain at least one uppercase letter"),
           regex(/[0-9]/, "Password must contain at least one number"),
-          regex(
-            /[!@#$%^&*()_+-=[\]{};':"|\<>?,./`~.]/,
-            "Password must contain at least one symbol",
-          ),
+          regex(/[!@#$%^&*()_+-=[\]{};':"|<>?,./`~.]/, "Password must contain at least one symbol"),
         ),
         confirmPassword: pipe(
           string("Confirm password is required"),
@@ -434,7 +431,7 @@ const passwordRequirements = computed(() => {
     { label: "Lowercase letter", isValid: /[a-z]/.test(pwd) },
     { label: "Uppercase letter", isValid: /[A-Z]/.test(pwd) },
     { label: "Numeric digit", isValid: /[0-9]/.test(pwd) },
-    { label: "Special symbol", isValid: /[!@#$%^&*()_+-=[\]{};':"|\<>?,./`~.]/.test(pwd) },
+    { label: "Special symbol", isValid: /[!@#$%^&*()_+-=[\]{};':"|<>?,./`~.]/.test(pwd) },
   ];
 });
 

@@ -1,10 +1,10 @@
 import { stringInput } from "@pipelab/shared";
+import type { InputsDefinition } from "@pipelab/plugin-core";
 import {
   createNumberParam,
   createPasswordParam,
   createPathParam,
   createStringParam,
-  InputsDefinition,
   runWithLiveLogs,
   type fetchPackage,
 } from "@pipelab/plugin-core";
@@ -15,7 +15,6 @@ import {
   parseConstructExportType,
   script,
 } from "./assets/script.js";
-import * as v from "valibot";
 import type { BrowserContext, Video } from "playwright";
 import type { Dirent } from "node:fs";
 import { createHash } from "node:crypto";
@@ -203,6 +202,7 @@ const validateProfilePreferences = async (source: string): Promise<void> => {
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Selected Chromium profile needs a readable regular Preferences file at "${path}": ${detail}`,
+      { cause: error },
     );
   }
 };
@@ -357,6 +357,7 @@ export const preparePlaywrightProfile = async (
   } catch (error) {
     throw new Error(
       `Could not access Construct browser profile "${source}": ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     );
   }
   if (!sourceStats.isDirectory()) {
@@ -368,6 +369,7 @@ export const preparePlaywrightProfile = async (
   } catch (error) {
     throw new Error(
       `Could not read Construct browser profile "${source}": ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     );
   }
 
@@ -663,15 +665,13 @@ export const exportc3p = async (
     const recordingLink = recordingPath ? `\nPLAYWRIGHT_VIDEO: ${recordingPath}` : "";
     if (recordingPath) log(`PLAYWRIGHT_VIDEO: ${recordingPath}`);
     if (pageCrashed || /(?:page|target) crashed/i.test(e.message)) {
-      throw new Error(`${formatRendererCrash(await readLinuxMemorySnapshot())}${recordingLink}`);
+      throw new Error(`${formatRendererCrash(await readLinuxMemorySnapshot())}${recordingLink}`, {
+        cause: caught,
+      });
     }
-    throw new Error("ConstructExport failed: " + e.message + recordingLink);
+    throw new Error("ConstructExport failed: " + e.message + recordingLink, { cause: caught });
   } finally {
     abortSignal.removeEventListener("abort", onAbort);
     await cleanup();
   }
-};
-
-const constructVersionValidator = () => {
-  return v.pipe(v.string(), v.regex(/^\d+(-\d+)?$/, "Invalid version"));
 };

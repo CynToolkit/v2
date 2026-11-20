@@ -51,10 +51,10 @@ export const descriptorsEqual = (left: unknown, right: unknown): boolean => {
   if (!isRecord(left) || !isRecord(right)) return false;
   const leftKeys = Object.keys(left)
     .filter((key) => left[key] !== undefined)
-    .sort();
+    .toSorted();
   const rightKeys = Object.keys(right)
     .filter((key) => right[key] !== undefined)
-    .sort();
+    .toSorted();
   return (
     leftKeys.length === rightKeys.length &&
     leftKeys.every(

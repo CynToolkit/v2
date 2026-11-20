@@ -1,19 +1,18 @@
-import { CacheFolder, PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
+import { CacheFolder } from "../context";
 import { join } from "node:path";
 import { writeFile, readFile, unlink, mkdir, stat, readdir, rename, rm } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import type { BuildHistoryEntry, IBuildHistoryStorage } from "@pipelab/shared";
 import {
   useLogger,
   parseBuildHistoryDocument,
   isSafePersistedId,
-  BuildHistoryEntry,
-  IBuildHistoryStorage,
   hasErrorCode,
   type BuildHistoryStorageInfo,
 } from "@pipelab/shared";
 import { checkDiskSpace } from "check-disk-space";
 import { getFolderSize } from "../utils/fs-extras";
-import { SandboxFolder } from "@pipelab/constants";
 import { serializeFileMutation } from "../release-persistence-lock";
 
 // One history file per project, stored under the `history` config directory.
@@ -96,7 +95,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       }
     } catch (error) {
       this.logger.logger().error("Failed to save project history:", error);
-      throw new Error(`Failed to save project history: ${error}`);
+      throw new Error(`Failed to save project history: ${error}`, { cause: error });
     }
   }
 
@@ -119,7 +118,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
           .debug(`Saved build history entry: ${entry.id} for project: ${entry.projectId}`);
       } catch (error) {
         this.logger.logger().error("Failed to save build history entry:", error);
-        throw new Error(`Failed to save build history entry: ${error}`);
+        throw new Error(`Failed to save build history entry: ${error}`, { cause: error });
       }
     });
   }
@@ -151,10 +150,10 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
         const entries = await this.loadProjectHistory(projectId);
         allEntries.push(...entries);
       }
-      return allEntries.sort((a, b) => b.createdAt - a.createdAt);
+      return allEntries.toSorted((a, b) => b.createdAt - a.createdAt);
     } catch (error) {
       this.logger.logger().error("Failed to get all build history entries:", error);
-      throw new Error(`Failed to get all build history entries: ${error}`);
+      throw new Error(`Failed to get all build history entries: ${error}`, { cause: error });
     }
   }
 
@@ -219,10 +218,10 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
   async getByProject(projectId: string): Promise<BuildHistoryEntry[]> {
     try {
       const entries = await this.loadProjectHistory(projectId);
-      return entries.sort((a, b) => b.createdAt - a.createdAt);
+      return entries.toSorted((a, b) => b.createdAt - a.createdAt);
     } catch (error) {
       this.logger.logger().error(`Failed to get build history for project ${projectId}:`, error);
-      throw new Error(`Failed to get build history for project: ${error}`);
+      throw new Error(`Failed to get build history for project: ${error}`, { cause: error });
     }
   }
 
@@ -241,7 +240,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       throw new Error(`Build history entry ${id} not found`);
     } catch (error) {
       this.logger.logger().error(`Failed to update build history entry ${id}:`, error);
-      throw new Error(`Failed to update build history entry: ${error}`);
+      throw new Error(`Failed to update build history entry: ${error}`, { cause: error });
     }
   }
 
@@ -281,7 +280,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       this.logger.logger().info(`Build history entry ${id} not found for deletion`);
     } catch (error) {
       this.logger.logger().error(`Failed to delete build history entry ${id}:`, error);
-      throw new Error(`Failed to delete build history entry: ${error}`);
+      throw new Error(`Failed to delete build history entry: ${error}`, { cause: error });
     }
   }
 
@@ -365,7 +364,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       this.logger.logger().info("Cleared all build history");
     } catch (error) {
       this.logger.logger().error("Failed to clear build history:", error);
-      throw new Error(`Failed to clear build history: ${error}`);
+      throw new Error(`Failed to clear build history: ${error}`, { cause: error });
     }
   }
 
@@ -391,7 +390,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
         return;
       }
       this.logger.logger().error(`Failed to clear history for project "${projectId}":`, error);
-      throw new Error(`Failed to clear history for project: ${error}`);
+      throw new Error(`Failed to clear history for project: ${error}`, { cause: error });
     }
   }
 
@@ -439,7 +438,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
         totalSize = allEntries.length * 1024; // Rough estimate
       }
 
-      const sortedEntries = allEntries.sort((a, b) => a.createdAt - b.createdAt);
+      const sortedEntries = allEntries.toSorted((a, b) => a.createdAt - b.createdAt);
 
       return {
         totalEntries: allEntries.length,
@@ -457,7 +456,7 @@ export class BuildHistoryStorage implements IBuildHistoryStorage {
       };
     } catch (error) {
       this.logger.logger().error("Failed to get storage info:", error);
-      throw new Error(`Failed to get storage info: ${error}`);
+      throw new Error(`Failed to get storage info: ${error}`, { cause: error });
     }
   }
 

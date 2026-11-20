@@ -26,15 +26,12 @@ const fakeResponse = ({
 
 describe("GitHub Release Updates API", () => {
   let fetchSpy: MockInstance<typeof fetch>;
-  let consoleLogSpy: MockInstance<typeof console.log>;
-  let consoleWarnSpy: MockInstance<typeof console.warn>;
-  let consoleErrorSpy: MockInstance<typeof console.error>;
 
   beforeEach(() => {
     fetchSpy = vi.spyOn(global, "fetch");
-    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     // Clean up environment variables
     delete process.env.PIPELAB_OVERRIDE_RELEASE;
   });

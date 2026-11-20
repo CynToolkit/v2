@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { AppConfig } from "@pipelab/shared";
+import type { AppConfig } from "@pipelab/shared";
 import { watch } from "vue";
 import { useAuth } from "./auth";
 import { useSettingsConfig } from "@renderer/composables/useConfig";

@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClientOptions } from "@supabase/supabase-js";
-import { Database } from "./database.types";
+import type { Database } from "./database.types";
 
 const getSupabaseConfig = () => {
   const url = process.env.SUPABASE_URL || "";

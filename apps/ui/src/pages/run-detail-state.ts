@@ -1,4 +1,4 @@
-import type { BuildHistoryEntry, ExecutionStep, Events } from "@pipelab/shared";
+import type { BuildHistoryEntry, ExecutionStep } from "@pipelab/shared";
 import { nanoid } from "nanoid";
 import type { WorkflowEvent } from "./run-events";
 import type {
@@ -78,7 +78,7 @@ const mergeLogs = (current: BuildHistoryEntry["logs"], persisted: BuildHistoryEn
   }
   return [...groups.values()]
     .flatMap(({ current: live, persisted: stored }) => [...live, ...stored.slice(live.length)])
-    .sort((left, right) => left.timestamp - right.timestamp);
+    .toSorted((left, right) => left.timestamp - right.timestamp);
 };
 
 const terminalStepStatuses = new Set(["completed", "failed", "skipped", "cancelled"]);
@@ -378,20 +378,21 @@ export const applyWorkflowEventToRunEntry = (entry: BuildHistoryEntry, event: Wo
     const previousSteps = new Map(entry.steps.map((step) => [step.id, step]));
     entry.steps = Object.values(event.result.steps).map((resultStep) => {
       const previous = previousSteps.get(resultStep.id);
-      return {
-        id: resultStep.id,
-        name: previous?.name || resultStep.id,
-        uses: resultStep.uses,
-        status: resultStep.status,
-        startTime: resultStep.startedAt,
-        endTime: resultStep.completedAt,
-        duration: resultStep.duration,
-        phases: resultStep.phases,
-        diagnostics: resultStep.diagnostics,
-        ...(resultStep.blockedBy?.length ? { blockedBy: resultStep.blockedBy } : {}),
-        logs: previous?.logs || [],
-        output: resultStep.outputs,
-        ...(resultStep.error
+      return Object.assign(
+        {
+          id: resultStep.id,
+          name: previous?.name || resultStep.id,
+          uses: resultStep.uses,
+          status: resultStep.status,
+          startTime: resultStep.startedAt,
+          endTime: resultStep.completedAt,
+          duration: resultStep.duration,
+          phases: resultStep.phases,
+          diagnostics: resultStep.diagnostics,
+        },
+        resultStep.blockedBy?.length ? { blockedBy: resultStep.blockedBy } : {},
+        { logs: previous?.logs || [], output: resultStep.outputs },
+        resultStep.error
           ? {
               error: {
                 message: resultStep.error.message,
@@ -399,14 +400,11 @@ export const applyWorkflowEventToRunEntry = (entry: BuildHistoryEntry, event: Wo
                 timestamp: resultStep.completedAt,
               },
             }
-          : {}),
-        ...(resultStep.delivery
-          ? {
-              destinationId: resultStep.delivery.destinationId,
-              slotId: resultStep.delivery.slotId,
-            }
-          : {}),
-      };
+          : {},
+        resultStep.delivery
+          ? { destinationId: resultStep.delivery.destinationId, slotId: resultStep.delivery.slotId }
+          : {},
+      );
     });
     entry.status = event.result.status;
     entry.endTime = event.timestamp;

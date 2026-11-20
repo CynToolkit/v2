@@ -10,7 +10,6 @@ class EvaluationError extends Error {
     public description: string,
   ) {
     super(description);
-    this.name = name;
   }
 }
 

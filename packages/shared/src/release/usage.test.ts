@@ -56,7 +56,7 @@ describe("usedTargetKeys", () => {
       inputs: [{ buildId: "a", targetId: "linux" }, { source: true }],
       targets: [],
     });
-    expect([...usedTargetKeys(config)].sort()).toEqual(["a:linux", "a:win"]);
+    expect([...usedTargetKeys(config)].toSorted()).toEqual(["a:linux", "a:win"]);
   });
 });
 

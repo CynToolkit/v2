@@ -25,7 +25,7 @@ export const connectionTestFingerprint = (
   JSON.stringify([
     pluginName,
     Object.keys(values)
-      .sort()
+      .toSorted()
       .map((key) => [key, values[key] ?? ""]),
   ]);
 

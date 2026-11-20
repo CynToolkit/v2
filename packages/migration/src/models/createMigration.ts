@@ -1,11 +1,5 @@
-import {
-  MigrationFn,
-  MigrationObjInput,
-  MigrationClass,
-  MigrationSchema,
-  OmitVersion,
-  isSemVer,
-} from "./migration";
+import type { MigrationObjInput, MigrationClass, MigrationSchema } from "./migration";
+import { isSemVer } from "./migration";
 
 export function createMigration<Current extends MigrationSchema, Up extends MigrationSchema>(
   migration: MigrationObjInput<Current, Up>,

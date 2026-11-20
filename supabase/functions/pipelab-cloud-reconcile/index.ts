@@ -238,7 +238,7 @@ export function createReconcileHandler(env: (name: string) => string | undefined
     }
 
     try {
-      for (const userId of [...new Set(body.userIds as string[])]) {
+      for (const userId of new Set(body.userIds as string[])) {
         await reconcileUser(
           userId,
           baseUrl,

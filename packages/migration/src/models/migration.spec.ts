@@ -1,8 +1,10 @@
 import { describe, test, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import { createMigration, finalVersion } from "./createMigration";
-import { createMigrator, MigratorFactory } from "./createMigrator";
+import type { MigratorFactory } from "./createMigrator";
+import { createMigrator } from "./createMigrator";
 import { object, string } from "valibot";
-import { Migrator, MigrationSchema, MigrationValidationError, SemVerSchema } from "./migration";
+import type { Migrator, MigrationSchema } from "./migration";
+import { MigrationValidationError, SemVerSchema } from "./migration";
 
 interface V1 extends MigrationSchema {
   dummyV1: string;

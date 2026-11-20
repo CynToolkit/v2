@@ -27,7 +27,7 @@ export const planRetention = (
   if (!policy) return plan;
   const runs = entries
     .filter((entry) => entry.workflowId === workflowId && entry.status !== "running")
-    .sort((a, b) => b.createdAt - a.createdAt);
+    .toSorted((a, b) => b.createdAt - a.createdAt);
   const latestSuccessful =
     policy.keepLatestSuccessful === false
       ? undefined

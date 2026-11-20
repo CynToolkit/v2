@@ -41,24 +41,28 @@ const parseRuntimeHistory = (id: string, result: WorkflowResult): BuildHistoryEn
           (step) => step.status === "failed" || step.status === "skipped",
         ).length,
         cancelledSteps: 0,
-        steps: Object.values(result.steps).map((step) => ({
-          id: step.id,
-          name: step.id,
-          uses: step.uses,
-          status: step.status,
-          startTime: step.startedAt,
-          endTime: step.completedAt,
-          duration: step.duration,
-          phases: step.phases,
-          diagnostics: step.diagnostics,
-          logs: [],
-          ...(step.error
-            ? { error: { message: step.error.message, timestamp: step.completedAt } }
-            : {}),
-          ...(step.delivery
-            ? { destinationId: step.delivery.destinationId, slotId: step.delivery.slotId }
-            : {}),
-        })),
+        steps: Object.values(result.steps).map((step) =>
+          Object.assign(
+            {
+              id: step.id,
+              name: step.id,
+              uses: step.uses,
+              status: step.status,
+              startTime: step.startedAt,
+              endTime: step.completedAt,
+              duration: step.duration,
+              phases: step.phases,
+              diagnostics: step.diagnostics,
+              logs: [],
+            },
+            step.error
+              ? { error: { message: step.error.message, timestamp: step.completedAt } }
+              : {},
+            step.delivery
+              ? { destinationId: step.delivery.destinationId, slotId: step.delivery.slotId }
+              : {},
+          ),
+        ),
         logs: [],
         artifacts: result.artifacts,
         deliveries: result.deliveries,

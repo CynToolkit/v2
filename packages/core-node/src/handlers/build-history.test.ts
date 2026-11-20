@@ -281,7 +281,7 @@ describe("BuildHistoryStorage workflow runs", () => {
       second.save(entry("run-b", "workflow-b", 20)),
     ]);
 
-    expect((await first.getByProject("project-1")).map((run) => run.id).sort()).toEqual([
+    expect((await first.getByProject("project-1")).map((run) => run.id).toSorted()).toEqual([
       "run-a",
       "run-b",
     ]);
@@ -324,7 +324,7 @@ describe("BuildHistoryStorage workflow runs", () => {
     await Promise.all([run("run-process-a", 10), run("run-process-b", 20)]);
 
     const storage = new BuildHistoryStorage(new PipelabContext({ userDataPath: root }));
-    expect((await storage.getByProject("project-1")).map((run) => run.id).sort()).toEqual([
+    expect((await storage.getByProject("project-1")).map((run) => run.id).toSorted()).toEqual([
       "run-process-a",
       "run-process-b",
     ]);

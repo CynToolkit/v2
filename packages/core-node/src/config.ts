@@ -1,13 +1,10 @@
-import { PipelabContext } from "./context";
+import type { PipelabContext } from "./context";
 import path from "node:path";
 import { ensure } from "./utils/fs-extras";
 import fs from "node:fs/promises";
+import type { AppConfig, ConnectionsConfig, FileRepo } from "@pipelab/shared";
 import {
   useLogger,
-  Migrator,
-  AppConfig,
-  ConnectionsConfig,
-  FileRepo,
   appSettingsMigrator,
   connectionsMigrator,
   fileRepoMigrations,
@@ -23,7 +20,6 @@ export const setupConfigFile = async <T extends SetupConfigFile>(
   filesPath: string,
   options: SetupConfigFileOptions<T>,
 ) => {
-  const ctx = options.context;
   const parsedPath = path.parse(filesPath);
   const migrator = options.migrator;
 

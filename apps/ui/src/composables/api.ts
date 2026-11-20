@@ -152,5 +152,3 @@ export const useAPI = () => {
     isConnected,
   };
 };
-
-type UseAPI = ReturnType<typeof useAPI>;

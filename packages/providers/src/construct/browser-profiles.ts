@@ -336,7 +336,7 @@ export const listChromiumBrowserProfiles = async (
       profiles.push({ browser, profileName: profile.name, path });
     }
   }
-  return profiles.sort(
+  return profiles.toSorted(
     (a, b) => a.browser.localeCompare(b.browser) || a.profileName.localeCompare(b.profileName),
   );
 };
@@ -436,7 +436,7 @@ export const discoverBrowserProfiles = async (
       addonScore + Math.max(0, 1 - ageDays / 180) * 35 + (candidate.isDefault ? 5 : 0),
     );
   }
-  return candidates.sort(
+  return candidates.toSorted(
     (a, b) =>
       (b.score ?? -1) - (a.score ?? -1) ||
       (b.addonCount ?? -1) - (a.addonCount ?? -1) ||

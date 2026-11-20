@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { mkdir, readdir, chmod, rm, cp, rename } from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 import { fetchPackage } from "@pipelab/plugin-core";
 import { sendStartupProgress } from "../server";
 import { downloadFile, extractZip, extractTarGz } from "./fs-extras";

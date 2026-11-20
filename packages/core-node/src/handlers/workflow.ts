@@ -587,11 +587,9 @@ export const executeWorkflow = async (
         : preflightOutcomes
           ? {
               preflight: valueResolver.redactObject(
-                preflightOutcomes.map(({ destinationId, destination, result }) => ({
-                  destinationId,
-                  destination,
-                  ...result,
-                })),
+                preflightOutcomes.map(({ destinationId, destination, result }) =>
+                  Object.assign({ destinationId, destination }, result),
+                ),
               ),
             }
           : {};
@@ -665,23 +663,27 @@ export const executeWorkflow = async (
     deliveries: result.deliveries,
     output: result.outputs,
     logs: [...liveLogs],
-    steps: Object.values(result.steps).map((step) => ({
-      id: step.id,
-      name: step.id,
-      uses: step.uses,
-      status: step.status,
-      startTime: step.startedAt,
-      endTime: step.completedAt,
-      duration: step.duration,
-      phases: step.phases,
-      diagnostics: step.diagnostics,
-      logs: [...(liveSteps.find((candidate) => candidate.id === step.id)?.logs || [])],
-      output: step.outputs,
-      error: step.error
-        ? { message: step.error.message, code: step.error.name, timestamp: step.completedAt }
-        : undefined,
-      ...(step.blockedBy?.length ? { blockedBy: step.blockedBy } : {}),
-    })),
+    steps: Object.values(result.steps).map((step) =>
+      Object.assign(
+        {
+          id: step.id,
+          name: step.id,
+          uses: step.uses,
+          status: step.status,
+          startTime: step.startedAt,
+          endTime: step.completedAt,
+          duration: step.duration,
+          phases: step.phases,
+          diagnostics: step.diagnostics,
+          logs: [...(liveSteps.find((candidate) => candidate.id === step.id)?.logs || [])],
+          output: step.outputs,
+          error: step.error
+            ? { message: step.error.message, code: step.error.name, timestamp: step.completedAt }
+            : undefined,
+        },
+        step.blockedBy?.length ? { blockedBy: step.blockedBy } : {},
+      ),
+    ),
     completedSteps: Object.values(result.steps).filter((step) => step.status === "completed")
       .length,
     failedSteps: Object.values(result.steps).filter(

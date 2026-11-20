@@ -1,11 +1,10 @@
 // Build History Storage Types and Interfaces
-import { SandboxFolder } from "@pipelab/constants";
+import type { SandboxFolder } from "@pipelab/constants";
 import type {
   ArtifactInstance as WorkflowArtifactInstance,
   WorkflowPhaseResult,
   WorkflowDeliveryResult,
 } from "@pipelab/workflow-runtime";
-import type { ArtifactDescriptor } from "./release/types";
 
 export interface BuildHistoryFolderUsage {
   name: SandboxFolder;
@@ -268,11 +267,18 @@ const assertEntry: (value: unknown, path: string) => asserts value is BuildHisto
       throw new BuildHistoryParseError(`${path}.${key}`, "must be an object");
   if (!Array.isArray(value.steps) || !Array.isArray(value.logs))
     throw new BuildHistoryParseError(path, "steps and logs must be arrays");
-  const stepStatuses = ["pending", "running", "completed", "failed", "cancelled", "skipped"];
+  const stepStatuses = new Set([
+    "pending",
+    "running",
+    "completed",
+    "failed",
+    "cancelled",
+    "skipped",
+  ]);
   value.steps.forEach((step, index) => {
     if (!isRecord(step) || !isNonEmptyString(step.id) || !isNonEmptyString(step.name))
       throw new BuildHistoryParseError(`${path}.steps.${index}`, "step requires id and name");
-    if (typeof step.status !== "string" || !stepStatuses.includes(step.status))
+    if (typeof step.status !== "string" || !stepStatuses.has(step.status))
       throw new BuildHistoryParseError(`${path}.steps.${index}.status`, "has an unsupported value");
     if (!isFiniteNumber(step.startTime) || !Array.isArray(step.logs))
       throw new BuildHistoryParseError(

@@ -1,6 +1,6 @@
 import { homedir } from "node:os";
 import { resolve, join, dirname } from "node:path";
-import { stat, writeFile, mkdir, mkdir as mkdirP } from "node:fs/promises";
+import { stat, writeFile, mkdir as mkdirP } from "node:fs/promises";
 import { assertSafeDirectoryCleanup, writePipelabFolderMarker } from "@pipelab/workflow-runtime";
 
 const normalizePath = (value: string) =>

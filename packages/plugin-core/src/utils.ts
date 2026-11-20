@@ -91,6 +91,7 @@ export const runWithLiveLogs = async (
     hooks?.onExit?.(code);
     throw new Error(
       `Command failed with exit code ${code}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
     );
   }
 };

@@ -1,7 +1,7 @@
 import { supabase, useLogger, isSupabaseAvailable } from "@pipelab/shared";
 import { useAPI } from "../ipc-core";
 import { JsonFileStorage } from "../utils/storage";
-import { PipelabContext } from "../context";
+import type { PipelabContext } from "../context";
 import { webSocketServer } from "../websocket-server";
 
 const normalizeFunctionError = (error: unknown) => {
@@ -68,7 +68,7 @@ export const registerAuthHandlers = (context: PipelabContext) => {
         return send({ type: "end", data: { type: "success", result: { user: null } } });
       }
       return send({ type: "end", data: { type: "success", result: { user: data.user } } });
-    } catch (e) {
+    } catch {
       return send({ type: "end", data: { type: "success", result: { user: null } } });
     }
   });

@@ -1,7 +1,7 @@
-import { Channels, Events, WebSocketRequestMessage } from "@pipelab/shared";
+import type { Channels, Events, WebSocketRequestMessage } from "@pipelab/shared";
 import { WebSocket as WSWebSocket } from "ws";
 import { useLogger } from "@pipelab/shared";
-import {
+import type {
   WebSocketEvent,
   WebSocketHandler,
   WebSocketHandlerEntry,

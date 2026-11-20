@@ -1,7 +1,8 @@
 import * as p from "@clack/prompts";
 import { createPipelabCloudAuthClient, PipelabContext } from "@pipelab/core-node";
 import { loginToPoki, loginToSteam } from "@pipelab/providers";
-import { Command, Option } from "commander";
+import type { Command } from "commander";
+import { Option } from "commander";
 import { getDefaultUserDataPath } from "../paths";
 import type { UserDataOptions } from "./options.types";
 

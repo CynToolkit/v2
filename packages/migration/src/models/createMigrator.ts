@@ -1,4 +1,5 @@
-import { MigratorConfig, Migrator, MigrationSchema } from "./migration";
+import type { MigratorConfig, MigrationSchema } from "./migration";
+import { Migrator } from "./migration";
 
 export const createMigrator = <
   InitialState extends MigrationSchema,

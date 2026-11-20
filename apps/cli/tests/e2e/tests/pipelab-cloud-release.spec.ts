@@ -295,7 +295,7 @@ describe("Pipelab Cloud Release destination in the CLI workflow host", () => {
         tasks,
       });
 
-      expect(uploadRequests.map((request) => request.buildTargetId).sort()).toEqual([
+      expect(uploadRequests.map((request) => request.buildTargetId).toSorted()).toEqual([
         "file",
         "folder",
         "quota",
