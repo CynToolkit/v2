@@ -14,7 +14,8 @@ import {
   type ReleaseFieldDefinition,
   type SaveLocationWorkflow,
 } from "@pipelab/shared";
-import { cleanseAnsi, Listr, ListrTaskState, type ListrTask, type ListrTaskWrapper } from "listr2";
+import { cleanseAnsi, Listr, ListrTaskState, type ListrTask } from "listr2";
+import type { WorkflowListrTask } from "./workflows.types";
 import type { WorkflowEvent } from "@pipelab/workflow-runtime";
 import { Option } from "commander";
 import { readFile, stat } from "node:fs/promises";
@@ -45,7 +46,7 @@ export const createWorkflowListr = (
   title: string,
   stepTasks: ListrTask[],
   execution: Promise<unknown>,
-  onWorkflowTask: (task: ListrTaskWrapper<any, any, any>) => void = () => undefined,
+  onWorkflowTask: (task: WorkflowListrTask) => void = () => undefined,
   onExecutionFailure: (error: unknown) => void = () => undefined,
 ) => {
   void execution.catch(onExecutionFailure);
@@ -53,13 +54,13 @@ export const createWorkflowListr = (
     [
       {
         title,
-        task: (_ctx: unknown, task: ListrTaskWrapper<any, any, any>) => {
+        task: (_ctx: unknown, task: WorkflowListrTask) => {
           onWorkflowTask(task);
           return task.newListr(
             [
               {
                 title: "Workflow steps",
-                task: (_ctx: unknown, steps: ListrTaskWrapper<any, any, any>) =>
+                task: (_ctx: unknown, steps: WorkflowListrTask) =>
                   steps.newListr(stepTasks, {
                     concurrent: true,
                     exitOnError: false,
@@ -73,7 +74,7 @@ export const createWorkflowListr = (
               },
               {
                 title: "Finalizing",
-                task: async (_ctx: unknown, resultTask: ListrTaskWrapper<any, any, any>) => {
+                task: async (_ctx: unknown, resultTask: WorkflowListrTask) => {
                   const startedAt = performance.now();
                   const timer = setInterval(() => {
                     resultTask.title = `Finalizing · ${formatWorkflowStepElapsed(performance.now() - startedAt)}`;
@@ -351,7 +352,7 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
   const waiters = new Map<string, Promise<void>>();
   const phaseCompletion = new Map<string, () => void>();
   const phaseWaiters = new Map<string, Promise<void>>();
-  const phaseControls = new Map<string, ListrTaskWrapper<any, any, any>>();
+  const phaseControls = new Map<string, WorkflowListrTask>();
   const phaseTaskLogs = new Map<string, string[]>();
   const taskOutputBuffers = new Map<string, ReturnType<typeof createWorkflowTaskOutputBuffer>>();
   const activePhaseByStep = new Map<string, string>();
@@ -360,14 +361,14 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
   const phaseWarnings = new Map<string, string[]>();
   const phaseSettled = new Set<string>();
   const settledSteps = new Set<string>();
-  const taskControls = new Map<string, ListrTaskWrapper<any, any, any>>();
+  const taskControls = new Map<string, WorkflowListrTask>();
   const taskStates = new Map<string, ListrTaskState>();
   const taskLogs = new Map<string, string[]>();
   const taskStartedAt = new Map<string, number>();
   const taskElapsed = new Map<string, number>();
   const taskTimers = new Map<string, ReturnType<typeof setInterval>>();
   const workflowTitle = flow.name || "Workflow";
-  let workflowTaskControl: ListrTaskWrapper<any, any, any> | undefined;
+  let workflowTaskControl: WorkflowListrTask | undefined;
   const workflowStartedAt = performance.now();
   const updateWorkflowTitle = (durationMs = performance.now() - workflowStartedAt) => {
     if (workflowTaskControl) {
@@ -539,7 +540,7 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
     return {
       title: step.title,
       rendererOptions: { outputBar: workflowTaskOutputLineLimit },
-      task: (_ctx: unknown, task: ListrTaskWrapper<any, any, any>) => {
+      task: (_ctx: unknown, task: WorkflowListrTask) => {
         taskControls.set(step.id, task);
         task.task.state$ = taskStates.get(step.id) || ListrTaskState.WAITING;
         const startedAt = taskStartedAt.get(step.id);
@@ -559,7 +560,7 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
                   ? phaseTitles.get(key) || "Skipped"
                   : false;
               },
-              task: (_phaseContext: unknown, phaseTask: ListrTaskWrapper<any, any, any>) => {
+              task: (_phaseContext: unknown, phaseTask: WorkflowListrTask) => {
                 const key = phaseKey(step.id, phase.id);
                 phaseControls.set(key, phaseTask);
                 phaseTask.title = phaseTitles.get(key) || phase.title;
