@@ -71,5 +71,5 @@ export const saveStrictConnections = async (
   context: PipelabContext,
   value: ConnectionsConfig,
 ): Promise<void> => {
-  await writeJsonFileAtomically(context.getConnectionsPath(), parseConnectionsConfig(value));
+  await writeJsonFileAtomically(context.getConnectionsPath(), parseConnectionsConfig(value), 0o600);
 };

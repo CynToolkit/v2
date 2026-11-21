@@ -14,7 +14,7 @@ import type { BuildHistoryQuery } from "./build-history";
 import type { Agent } from "./websocket.types";
 import type { User } from "@supabase/supabase-js";
 import type { FunctionInvokeOptions } from "@supabase/supabase-js";
-import type { ReleaseChannel } from "./apis";
+import type { AuthErrorResult, ReleaseChannel } from "./apis";
 
 export interface FsReadInput {
   path: string;
@@ -211,6 +211,11 @@ export interface AuthGetUserEvent {
   user: User | null;
 }
 
+export interface AuthPasswordResult extends AuthErrorResult {
+  data: AuthGetUserEvent;
+  requiresPlaintextConsent?: boolean;
+}
+
 export interface AuthGetCloudAccessTokenEvent {
   accessToken: string | null;
 }
@@ -218,6 +223,7 @@ export interface AuthGetCloudAccessTokenEvent {
 export interface AuthSignInWithPasswordInput {
   email: string;
   password: string;
+  allowPlaintextSession?: boolean;
 }
 
 export interface AuthResetPasswordForEmailInput {

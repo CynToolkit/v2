@@ -39,6 +39,9 @@
     "test:local-release-e2e": "node scripts/electron-local-release-test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false"
   },
+  "dependencies": {
+    "@napi-rs/keyring": "2.0.0"
+  },
   "devDependencies": {
     "@electron-toolkit/preload": "3.0.2",
     "@electron-toolkit/utils": "4.0.0",

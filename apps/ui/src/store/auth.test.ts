@@ -516,7 +516,7 @@ describe("hosted browser authentication", () => {
     expect(auth.authState).toBe("SIGNED_IN");
 
     await auth.logout();
-    expect(browserClient.auth.signOut).toHaveBeenCalledOnce();
+    expect(browserClient.auth.signOut).toHaveBeenCalledExactlyOnceWith({ scope: "local" });
     expect(auth.user).toBeUndefined();
     expect(auth.authState).toBe("SIGNED_OUT");
     expect(posthog.reset).toHaveBeenCalled();
@@ -799,7 +799,7 @@ describe("Desktop auth transport compatibility", () => {
     const user = makeUser("desktop-user");
     execute.mockImplementation(async (channel: string) => {
       if (channel === "auth:signInWithPassword") {
-        return { type: "success", result: { data: { user, session: null }, error: null } };
+        return { type: "success", result: { data: { user }, error: null } };
       }
       if (channel === "auth:signOut") return { type: "success", result: null };
       return { type: "error", ipcError: "Unexpected channel" };
@@ -838,6 +838,25 @@ describe("Desktop auth transport compatibility", () => {
     await vi.waitFor(() => expect(auth.authState).toBe("SIGNED_IN"));
 
     expect(posthog.identify).not.toHaveBeenCalled();
+    expect(posthog.reset).not.toHaveBeenCalled();
+  });
+
+  it("keeps the signed-in account when Desktop sign-out fails", async () => {
+    const user = makeUser("desktop-user");
+    execute.mockImplementation(async (channel: string) =>
+      channel === "auth:getUser"
+        ? { type: "success", result: { user } }
+        : { type: "error", ipcError: "Sign-out service unavailable" },
+    );
+    const auth = useAuth();
+    activeAuthStore = auth;
+    setReady(true);
+    await vi.waitFor(() => expect(auth.authState).toBe("SIGNED_IN"));
+
+    await auth.logout();
+
+    expect(auth.authState).toBe("ERROR");
+    expect(auth.user?.id).toBe(user.id);
     expect(posthog.reset).not.toHaveBeenCalled();
   });
 });

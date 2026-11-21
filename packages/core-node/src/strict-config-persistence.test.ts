@@ -1,12 +1,14 @@
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { defaultConnections } from "@pipelab/shared";
 import { PipelabContext } from "./context";
 import {
   loadStrictConnections,
   loadStrictProjects,
+  saveStrictConnections,
   saveStrictProjects,
 } from "./strict-config-persistence";
 
@@ -37,6 +39,21 @@ describe("strict config persistence", () => {
     await expect(loadStrictConnections(context)).rejects.toThrow("Malformed JSON");
     await expect(readFile(context.getConnectionsPath(), "utf8")).resolves.toBe("{broken");
   });
+
+  it.skipIf(process.platform === "win32")(
+    "restricts permissions when replacing a connections file",
+    async ({ onTestFinished }) => {
+      const context = await setup();
+      onTestFinished(() => rm(context.userDataPath, { recursive: true, force: true }));
+      await writeFile(context.getConnectionsPath(), JSON.stringify(defaultConnections), {
+        mode: 0o644,
+      });
+
+      await saveStrictConnections(context, defaultConnections);
+
+      expect((await stat(context.getConnectionsPath())).mode & 0o777).toBe(0o600);
+    },
+  );
 
   it("re-reads a connections file created by another process during initialization", async () => {
     const context = await setup();

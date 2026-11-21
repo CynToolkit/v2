@@ -41,13 +41,7 @@ export const useAPI = () => {
     };
 
     const send: HandleListenerSendFn<Channels> = (events: Events<Channels>) => {
-      const serialized = JSON.stringify(events);
-      logger().debug(
-        "sending response to",
-        requestId,
-        ":",
-        serialized.length > 500 ? serialized.substring(0, 500) + "..." : serialized,
-      );
+      logger().debug("Sending WebSocket response:", { channel, requestId, eventType: events.type });
       const response = {
         type: "response",
         requestId,
