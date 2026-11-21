@@ -328,6 +328,7 @@ import { useAuth } from "@renderer/store/auth";
 import { storeToRefs } from "pinia";
 import { useForm, type TypedSchema } from "vee-validate";
 import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
 import { toTypedSchema } from "@vee-validate/valibot";
 import { email, minLength, nonEmpty, object, pipe, regex, string } from "valibot";
 import InputText from "primevue/inputtext";
@@ -346,6 +347,7 @@ const { isAuthModalVisible, authModalTitle, authModalSubTitle, isAuthenticating,
   storeToRefs(auth);
 
 const toast = useToast();
+const confirm = useConfirm();
 
 // Tab state: 'login' | 'register' | 'forgot-password'
 const activeTab = ref<"login" | "register" | "forgot-password">("login");
@@ -450,7 +452,51 @@ const submitButtonLabel = computed(() => {
   }
 });
 
-// Form submission handler
+const submitPasswordAuth = async (
+  values: AuthFormValues,
+  mode: "login" | "register",
+  allowPlaintextSession = false,
+) => {
+  const isRegistering = mode === "register";
+  const { error, requiresPlaintextConsent } = await auth[mode](
+    values.email ?? "",
+    values.password ?? "",
+    allowPlaintextSession,
+  );
+  if (requiresPlaintextConsent) {
+    confirm.require({
+      header: "Save session tokens without encryption?",
+      message:
+        "The operating system credential store is unavailable. Anyone who can read your Pipelab files or backups could use the saved session tokens to access your account.",
+      icon: "pi pi-exclamation-triangle",
+      rejectLabel: "Cancel",
+      acceptLabel: "Save unencrypted",
+      acceptClass: "p-button-danger",
+      defaultFocus: "reject",
+      accept: () =>
+        void handleSubmit((currentValues) => submitPasswordAuth(currentValues, mode, true))(),
+    });
+    return;
+  }
+  if (error) {
+    toast.add({
+      severity: "error",
+      summary: isRegistering ? "Failed to register" : "Failed to sign in",
+      detail: error.message,
+      life: 4000,
+    });
+    return;
+  }
+
+  isAuthModalVisible.value = false;
+  toast.add({
+    severity: "success",
+    summary: isRegistering ? "Successfully registered" : "Successfully signed in",
+    detail: isRegistering ? "A confirmation e-mail has been sent" : "Welcome back!",
+    life: 4000,
+  });
+};
+
 const onSuccess = async (values: AuthFormValues) => {
   if (!auth.isAuthTransportReady) return;
   try {
@@ -460,23 +506,7 @@ const onSuccess = async (values: AuthFormValues) => {
         return;
       }
 
-      const { error } = await auth.register(values.email ?? "", values.password ?? "");
-      if (error) {
-        toast.add({
-          severity: "error",
-          summary: "Failed to register",
-          detail: error.message,
-          life: 4000,
-        });
-      } else {
-        isAuthModalVisible.value = false;
-        toast.add({
-          severity: "success",
-          summary: "Successfully registered",
-          detail: "A confirmation e-mail has been sent",
-          life: 4000,
-        });
-      }
+      await submitPasswordAuth(values, "register");
     } else if (activeTab.value === "forgot-password") {
       const { error } = await auth.resetPassword(values.email ?? "");
       if (error) {
@@ -496,24 +526,7 @@ const onSuccess = async (values: AuthFormValues) => {
         });
       }
     } else {
-      // login
-      const { error } = await auth.login(values.email ?? "", values.password ?? "");
-      if (error) {
-        toast.add({
-          severity: "error",
-          summary: "Failed to login",
-          detail: error.message,
-          life: 4000,
-        });
-      } else {
-        isAuthModalVisible.value = false;
-        toast.add({
-          severity: "success",
-          summary: "Successfully logged in",
-          detail: "Welcome back!",
-          life: 4000,
-        });
-      }
+      await submitPasswordAuth(values, "login");
     }
   } catch {
     toast.add({

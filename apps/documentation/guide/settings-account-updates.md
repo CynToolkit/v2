@@ -17,7 +17,8 @@ language, cache, temporary folders and other preferences are preserved.
 
 An **integration** configures credentials or an account used by a provider.
 Manage these profiles on the **Connections** screen. Saved connections keep
-their IDs and credentials during the settings upgrade.
+their IDs and credentials during the settings upgrade. Saving connections on
+macOS or Linux restricts the configuration file to the current OS user.
 
 Construct, Itch, Poki and Steam connections have a **Test connection** button. It runs a
 read-only check (no upload, no login prompt) and shows the result next to the
@@ -35,6 +36,13 @@ password reset. Registration may wait for account validation before sign-in is
 available. Everything that runs locally, including workflows, run history and
 projects, is available on the Free plan. Plans only gate cloud features such as
 Cloud Save; the app's upgrade dialog shows the current state.
+
+Desktop encrypts its saved account session using a key held in the operating
+system credential store. If that store is unavailable, Desktop asks whether to
+save the session without encryption. Anyone who can read your Pipelab files or
+backups could use those tokens to access your account. You can cancel and keep
+using local workflows, or make the credential store available and try again.
+Sign-out ends the current session, so other browsers and devices stay signed in.
 
 In the browser app, account sign-in works without the local agent when the
 deployment has Supabase configured. The signed-in browser session keeps

@@ -45,8 +45,23 @@ describe("SecureCloudAuthStorage", () => {
     await storage.setItem("supabase.auth.token", "session-payload");
 
     await storage.removeItem("supabase.auth.token");
+    await storage.removeItem("supabase.auth.token-code-verifier");
 
     expect(keyring.password).toBeNull();
     expect(await storage.getItem("supabase.auth.token")).toBeNull();
+  });
+
+  it("keeps malformed credentials out of the error and its cause", async () => {
+    const context = partialDouble<PipelabContext>({
+      getConfigPath: () => "/pipelab/user-data/cloud-auth-session",
+    });
+    const storage = new SecureCloudAuthStorage(context);
+    keyring.password = "invalid-secret-payload";
+
+    const read = storage.getItem("supabase.auth.token");
+    await expect(read).rejects.toThrow(
+      "Could not read Pipelab Cloud sign-in from the operating system credential store.",
+    );
+    await expect(read).rejects.not.toHaveProperty("cause");
   });
 });

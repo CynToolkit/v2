@@ -28,46 +28,34 @@ export class SecureCloudAuthStorage implements SupportedStorage {
     return this.entryPromise;
   }
 
-  async getItem(key: string): Promise<string | null> {
-    try {
-      const password = await (await this.getEntry()).getPassword();
-      if (!password) return null;
-      const data: unknown = JSON.parse(password);
-      if (!isRecord(data)) return null;
-      const value = data[key];
-      return typeof value === "string" ? value : null;
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("credential store")) throw error;
-      throw new Error(
-        "Could not read Pipelab Cloud sign-in from the operating system credential store.",
-        { cause: error },
-      );
-    }
-  }
-
-  async setItem(key: string, value: string): Promise<void> {
-    const entry = await this.getEntry();
-    let data: Record<string, string> = {};
+  private async read(entry: KeyringEntry): Promise<Record<string, string>> {
     try {
       const password = await entry.getPassword();
-      if (password) {
-        const parsed: unknown = JSON.parse(password);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          data = Object.fromEntries(
-            Object.entries(parsed).filter(
-              (item): item is [string, string] => typeof item[1] === "string",
-            ),
-          );
-        }
-      }
+      if (!password) return {};
+      const data: unknown = JSON.parse(password);
+      if (!isRecord(data)) return {};
+      return Object.fromEntries(
+        Object.entries(data).filter(
+          (item): item is [string, string] => typeof item[1] === "string",
+        ),
+      );
     } catch {
       throw new Error(
         "Could not read Pipelab Cloud sign-in from the operating system credential store.",
       );
     }
-    data[key] = value;
+  }
+
+  async getItem(key: string): Promise<string | null> {
+    const data = await this.read(await this.getEntry());
+    return Object.hasOwn(data, key) ? data[key] : null;
+  }
+
+  async setItem(key: string, value: string): Promise<void> {
+    const entry = await this.getEntry();
+    const data = await this.read(entry);
     try {
-      await entry.setPassword(JSON.stringify(data));
+      await entry.setPassword(JSON.stringify({ ...data, [key]: value }));
     } catch {
       throw new Error(
         "Could not save Pipelab Cloud sign-in to the operating system credential store.",
@@ -77,20 +65,10 @@ export class SecureCloudAuthStorage implements SupportedStorage {
 
   async removeItem(key: string): Promise<void> {
     const entry = await this.getEntry();
-    let data: Record<string, string> = {};
+    const data = await this.read(entry);
+    if (!Object.hasOwn(data, key)) return;
+    delete data[key];
     try {
-      const password = await entry.getPassword();
-      if (password) {
-        const parsed: unknown = JSON.parse(password);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          data = Object.fromEntries(
-            Object.entries(parsed).filter(
-              (item): item is [string, string] => typeof item[1] === "string",
-            ),
-          );
-        }
-      }
-      delete data[key];
       if (Object.keys(data).length) await entry.setPassword(JSON.stringify(data));
       else await entry.deletePassword();
     } catch {

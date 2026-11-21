@@ -1,5 +1,5 @@
 import type { PreflightResult } from "./plugins/definitions";
-import type { AuthError, AuthResponse, UserResponse } from "@supabase/supabase-js";
+import type { AuthError } from "@supabase/supabase-js";
 import type { AppConfig, ConnectionsConfig } from "./config.schema";
 import type { FileRepo } from "./config/projects-definition";
 import type {
@@ -148,8 +148,8 @@ export type IpcDefinition = {
   "agents:get": [void, EndEvent<AgentsGetEvent>];
   "auth:getUser": [void, EndEvent<AuthGetUserEvent>];
   "auth:getCloudAccessToken": [void, EndEvent<AuthGetCloudAccessTokenEvent>];
-  "auth:signInWithPassword": [AuthSignInWithPasswordInput, EndEvent<UserResponse>];
-  "auth:signUp": [AuthSignInWithPasswordInput, EndEvent<AuthResponse>];
+  "auth:signInWithPassword": [AuthSignInWithPasswordInput, EndEvent<AuthPasswordResult>];
+  "auth:signUp": [AuthSignInWithPasswordInput, EndEvent<AuthPasswordResult>];
   "auth:signOut": [void, EndEvent<void>];
   "auth:resetPasswordForEmail": [AuthResetPasswordForEmailInput, EndEvent<AuthErrorResult>];
   "auth:invoke": [AuthInvokeInput, EndEvent<AuthInvokeResult>];
@@ -211,6 +211,7 @@ import type {
   AuthGetUserEvent,
   AuthGetCloudAccessTokenEvent,
   AuthSignInWithPasswordInput,
+  AuthPasswordResult,
   AuthResetPasswordForEmailInput,
   AuthInvokeInput,
   AgentVersionGetEvent,
