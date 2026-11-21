@@ -137,6 +137,7 @@ Desktop automatic update selection uses the v2 repository and filters releases
 to the installed app major and channel. Stable builds select final releases.
 Beta builds select `-beta` prereleases. The Settings channel picker can offer a
 newer release of the other channel across major versions for manual installation.
+Stable and Beta keep downloaded installers in separate updater caches.
 If no eligible release is
 found, automatic update setup is skipped instead of falling back to the
 unfiltered `releases/latest/download` endpoint. Two environment variables
