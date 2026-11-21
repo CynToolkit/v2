@@ -1,4 +1,5 @@
 import semver from "semver";
+import type { UpdateChannel } from "@pipelab/shared";
 import type { GitHubReleaseAssets } from "./github.types";
 
 /** A ref entry from the GitHub matching-refs API. */
@@ -17,20 +18,24 @@ export interface GitHubRelease {
 export interface FetchReleaseOptions {
   repo?: string;
   allowPrerelease?: boolean;
+  channel?: UpdateChannel;
   currentVersion?: string;
+  throwOnError?: boolean;
 }
 
 function getEligibleVersion(
   packageName: string,
   tagName: string,
-  { allowPrerelease = false, currentVersion }: FetchReleaseOptions,
+  { allowPrerelease = false, channel, currentVersion }: FetchReleaseOptions,
 ): string | null {
   const prefix = `${packageName}@`;
   if (!tagName.startsWith(prefix)) return null;
 
   const version = tagName.slice(prefix.length);
   if (!semver.valid(version)) return null;
-  if (!allowPrerelease && semver.prerelease(version)) return null;
+  const prerelease = semver.prerelease(version);
+  if (channel === "beta" && prerelease?.[0] !== "beta") return null;
+  if (prerelease && (channel === "stable" || (!channel && !allowPrerelease))) return null;
 
   if (currentVersion !== undefined) {
     const validCurrentVersion = semver.valid(currentVersion);
@@ -148,6 +153,7 @@ export async function fetchPackageReleases(
     console.warn(`[GitHub] No published Release found for any matching tag of "${packageName}".`);
     return [];
   } catch (error) {
+    if (options.throwOnError) throw error;
     console.error(`[GitHub] Failed to fetch releases for ${packageName}:`, error);
     return [];
   }

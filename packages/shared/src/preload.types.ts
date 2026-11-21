@@ -1,3 +1,12 @@
+import type { ReleaseChannel } from "./apis";
+
+export type UpdateChannel = Exclude<ReleaseChannel, "dev">;
+
+export interface AvailableUpdate {
+  version: string;
+  downloadUrl: string;
+}
+
 export interface PipelabVersions {
   electron?: string;
   chrome?: string;
@@ -25,5 +34,7 @@ export interface PipelabBridge {
   isPathBlacklisted: (path: string) => Promise<boolean>;
   relaunch: () => Promise<void>;
   installUpdate: () => Promise<void>;
+  getUpdateChannel: () => Promise<UpdateChannel>;
+  findUpdateForChannel: (channel: UpdateChannel) => Promise<AvailableUpdate | null>;
   readWorkflowEnvironment: (workflowId: string) => Promise<Record<string, string>>;
 }

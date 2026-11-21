@@ -64,6 +64,13 @@ profile access or affect the local settings file.
 
 ## Desktop updates
 
+In **Settings → General → Update channel**, choose **Stable** to look for
+final releases or **Beta** to look for beta prereleases. Automatic updates
+follow the installed channel. To switch, select the other channel and open
+the offered release to download and install it. Pipelab offers a switch only
+when that channel has a strictly newer version. Stable and Beta are separate
+installations with separate local data, including workflows and settings.
+
 The packaged desktop app checks for a newer release shortly after launch and
 every few hours while it stays open, without delaying startup. Windows, macOS and
 Linux AppImage installs download the update in the background, show the

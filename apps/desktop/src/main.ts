@@ -9,7 +9,8 @@ import { getProtocolName, getAppBundleId } from "@pipelab/constants";
 import { getCliPassthroughArgs, runCliPassthrough } from "./main/cli-passthrough";
 import { registerIpcHandlers } from "./main/ipc-handlers";
 import { installUpdateAfterServerStops } from "./main/update-shutdown";
-import { createUpdater } from "./main/updater";
+import { createUpdater, resolveAvailableUpdate } from "./main/updater";
+import type { UpdateChannel } from "@pipelab/shared";
 import {
   buildCoreReleaseRegistry,
   fetchLatestDesktopRelease,
@@ -464,6 +465,20 @@ if (is.dev && process.platform === "win32") {
   app.setAsDefaultProtocolClient(protocolName);
 }
 
+function getUpdateChannel(): UpdateChannel {
+  return app.getVersion().includes("beta") ? "beta" : "stable";
+}
+
+async function findUpdateForChannel(channel: unknown) {
+  if (channel !== "stable" && channel !== "beta") throw new Error("Unknown update channel");
+  if (!app.isPackaged || channel === getUpdateChannel()) return null;
+
+  // The other channel is a separate application, with its own installer and data directory.
+  const release = await fetchLatestDesktopRelease({ channel, throwOnError: true });
+  const update = resolveAvailableUpdate(release, app.getVersion(), process.platform);
+  return release && update ? { version: update.version, downloadUrl: release.html_url } : null;
+}
+
 function startUpdater(): void {
   if (!app.isPackaged) return;
 
@@ -471,6 +486,7 @@ function startUpdater(): void {
   // Linux can only update itself when running as an AppImage.
   const canSelfUpdate = process.platform !== "linux" || Boolean(process.env.APPIMAGE);
   autoUpdater.autoInstallOnAppQuit = false;
+  autoUpdater.allowDowngrade = false;
 
   const updater = createUpdater({
     currentVersion,
@@ -480,8 +496,9 @@ function startUpdater(): void {
     channel: process.platform === "darwin" ? `latest-${process.arch}` : undefined,
     fetchRelease: () =>
       fetchLatestDesktopRelease({
-        allowPrerelease: currentVersion.includes("-"),
+        channel: getUpdateChannel(),
         currentVersion,
+        throwOnError: true,
       }),
     feedUrl: (release) => getDesktopReleaseFeedUrl(release, process.env.APP_UPDATE_URL),
     send: (state) =>
@@ -546,16 +563,21 @@ app.whenReady().then(async () => {
   const workflowContext = new PipelabContext({ userDataPath: customUserDataPath, releaseTag });
   const workflowPersistence = new ReleasePersistence(workflowContext);
   const workflowRegistry = buildCoreReleaseRegistry();
-  registerIpcHandlers(relaunchAfterServerStops, installDownloadedUpdate, (workflowId) =>
-    readWorkflowEnvironmentForWorkflow(
-      workflowId,
-      (id) => workflowPersistence.load(id),
-      (config) =>
-        getReleaseWorkflowEnvironmentVariableNames(config, workflowRegistry, {
-          platform: process.platform,
-          architecture: process.arch,
-        }),
-    ),
+  registerIpcHandlers(
+    relaunchAfterServerStops,
+    installDownloadedUpdate,
+    getUpdateChannel,
+    findUpdateForChannel,
+    (workflowId) =>
+      readWorkflowEnvironmentForWorkflow(
+        workflowId,
+        (id) => workflowPersistence.load(id),
+        (config) =>
+          getReleaseWorkflowEnvironmentVariableNames(config, workflowRegistry, {
+            platform: process.platform,
+            architecture: process.arch,
+          }),
+      ),
   );
   createWindow();
 

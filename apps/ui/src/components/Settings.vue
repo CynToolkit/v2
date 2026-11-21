@@ -151,6 +151,49 @@
             </div>
           </div>
 
+          <div v-if="desktopUpdates" class="setting-item">
+            <div class="setting-content">
+              <label id="update-channel-label" for="update-channel" class="setting-title">
+                Update channel
+              </label>
+              <div id="update-channel-status" class="setting-description" role="status">
+                <template v-if="checkingChannel">Checking for releases…</template>
+                <template v-else-if="channelCheckFailed">
+                  Unable to check for releases.
+                  <Button label="Retry" text size="small" @click="checkUpdateChannel" />
+                </template>
+                <template v-else-if="channelUpdate">
+                  Version {{ channelUpdate.version }} is available. The other channel uses a
+                  separate installation and local data folder.
+                </template>
+                <template v-else-if="selectedChannel && selectedChannel !== installedChannel">
+                  This channel has no release newer than your installed version.
+                </template>
+                <template v-else>Automatic updates follow your installed channel.</template>
+              </div>
+            </div>
+            <div class="setting-action flex flex-wrap gap-2">
+              <Select
+                input-id="update-channel"
+                aria-labelledby="update-channel-label"
+                :pt="{ label: { 'aria-describedby': 'update-channel-status' } }"
+                :model-value="selectedChannel"
+                :options="updateChannels"
+                option-label="label"
+                option-value="value"
+                :disabled="checkingChannel || !installedChannel"
+                @update:model-value="selectUpdateChannel"
+              />
+              <Button
+                v-if="channelUpdate"
+                label="Open release"
+                outlined
+                size="small"
+                @click="shell.openExternal(channelUpdate.downloadUrl)"
+              />
+            </div>
+          </div>
+
           <div class="setting-item">
             <div class="setting-content">
               <div class="setting-title">Dashboard Guide</div>
@@ -808,7 +851,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRaw, watch, inject } from "vue";
+import { computed, onMounted, ref, toRaw, watch, inject } from "vue";
 import { useAppSettings } from "@renderer/store/settings";
 import { storeToRefs } from "pinia";
 import Card from "primevue/card";
@@ -822,7 +865,7 @@ import { websocketManager } from "@renderer/composables/websocket-manager";
 import { useShell } from "@renderer/composables/use-shell";
 
 import { useI18n } from "vue-i18n";
-import type { Locales } from "@pipelab/shared";
+import type { AvailableUpdate, Locales, UpdateChannel } from "@pipelab/shared";
 import { watchDebounced } from "@vueuse/core";
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
@@ -853,6 +896,43 @@ const { isReady } = useAgentAvailability();
 const isBrowser = uiEnvironment === "browser";
 const currentSection = ref("general");
 const browserPreferenceError = ref("");
+
+const desktopUpdates = !isBrowser && window.isPackaged ? window.pipelab : undefined;
+const updateChannels = [
+  { label: "Stable", value: "stable" },
+  { label: "Beta", value: "beta" },
+];
+const installedChannel = ref<UpdateChannel>();
+const selectedChannel = ref<UpdateChannel>();
+const channelUpdate = ref<AvailableUpdate | null>(null);
+const checkingChannel = ref(false);
+const channelCheckFailed = ref(false);
+
+async function checkUpdateChannel() {
+  if (!desktopUpdates || checkingChannel.value) return;
+  checkingChannel.value = true;
+  channelCheckFailed.value = false;
+  channelUpdate.value = null;
+  try {
+    if (!installedChannel.value) {
+      installedChannel.value = await desktopUpdates.getUpdateChannel();
+      selectedChannel.value = installedChannel.value;
+    } else if (selectedChannel.value && selectedChannel.value !== installedChannel.value) {
+      channelUpdate.value = await desktopUpdates.findUpdateForChannel(selectedChannel.value);
+    }
+  } catch {
+    channelCheckFailed.value = true;
+  } finally {
+    checkingChannel.value = false;
+  }
+}
+
+function selectUpdateChannel(channel: UpdateChannel) {
+  selectedChannel.value = channel;
+  void checkUpdateChannel();
+}
+
+onMounted(checkUpdateChannel);
 
 const openCacheFolder = () => {
   const path =

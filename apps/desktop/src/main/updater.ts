@@ -1,13 +1,7 @@
 import type { GitHubRelease } from "@pipelab/core-node/desktop";
-import type { UpdateState } from "@pipelab/shared";
+import type { AvailableUpdate, UpdateState } from "@pipelab/shared";
 import semver from "semver";
 import type { SetFeedURLOptions, OnProgress } from "./updater.types";
-
-export interface AvailableUpdate {
-  version: string;
-  /** Direct installer asset when one matches the platform, else the release page. */
-  downloadUrl: string;
-}
 
 const MANUAL_ASSET_SUFFIXES: Partial<Record<NodeJS.Platform, string[]>> = {
   linux: [".AppImage", ".deb", ".zip"],
@@ -100,6 +94,7 @@ export function createUpdater(options: UpdaterOptions) {
   async function check(): Promise<void> {
     if (busy || downloaded) return;
     busy = true;
+    current = null;
     try {
       const release = await options.fetchRelease();
       current = resolveAvailableUpdate(release, options.currentVersion, options.platform);
@@ -115,7 +110,7 @@ export function createUpdater(options: UpdaterOptions) {
     } catch (error) {
       log("update check failed", error);
       // The `error` event already reports native failures.
-      if (!native) send({ status: "error" });
+      if (!native || !current) send({ status: "error" });
     } finally {
       busy = false;
     }

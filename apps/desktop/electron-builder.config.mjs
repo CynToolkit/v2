@@ -36,7 +36,11 @@ export default {
   files: [".vite/**", "dist/cli/**", "assets/build/**", "package.json"],
   asar: false,
   npmRebuild: false,
-  extraMetadata: { main: ".vite/build/main.js" },
+  extraMetadata: {
+    main: ".vite/build/main.js",
+    // electron-builder derives the updater cache folder from this packaged name.
+    name: isBeta ? `${pkg.name}-beta` : pkg.name,
+  },
   electronFuses: {
     runAsNode: true,
     enableCookieEncryption: true,

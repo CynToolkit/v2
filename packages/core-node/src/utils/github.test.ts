@@ -200,7 +200,7 @@ describe("GitHub Release Updates API", () => {
     expect(releases.map(({ tag_name }) => tag_name)).toEqual(["@pipelab/app@2.1.0-beta.1"]);
   });
 
-  test("fetchPackageReleases - beta updates may use stable releases from the installed major", async () => {
+  test("fetchPackageReleases - without a channel, prerelease opt-in also allows stable releases", async () => {
     fetchSpy.mockResolvedValueOnce(
       fakeResponse({
         ok: true,
@@ -230,6 +230,34 @@ describe("GitHub Release Updates API", () => {
 
     expect(releases.map(({ tag_name }) => tag_name)).toEqual(["@pipelab/app@2.1.0"]);
   });
+
+  test.each([
+    { channel: "stable" as const, expected: "2.3.0" },
+    { channel: "beta" as const, expected: "2.4.0-beta.10" },
+  ])(
+    "desktop channel $channel selects $expected from mixed tags",
+    async ({ channel, expected }) => {
+      const versions = ["2.4.0-beta.2", "2.3.0", "2.5.0-rc.1", "2.4.0-beta.10", "2.2.0"];
+      fetchSpy.mockResolvedValueOnce(
+        fakeResponse({
+          json: async () =>
+            versions.map((version) => ({
+              ref: `refs/tags/@pipelab/app@${version}`,
+            })),
+        }),
+      );
+      fetchSpy.mockResolvedValueOnce(
+        fakeResponse({ json: async () => ({ tag_name: `@pipelab/app@${expected}` }) }),
+      );
+
+      await fetchLatestDesktopRelease({ channel });
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(fetchSpy).toHaveBeenLastCalledWith(
+        expect.stringContaining(`/releases/tags/%40pipelab%2Fapp%40${expected}`),
+        expect.any(Object),
+      );
+    },
+  );
 
   test("fetchPackageReleases - handles tag that has no release (skips and falls back to older tag)", async () => {
     // 1. mock matching refs
