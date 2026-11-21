@@ -1,10 +1,13 @@
 import { ipcMain, dialog, BrowserWindow, shell, app } from "electron";
+import type { AvailableUpdate, UpdateChannel } from "@pipelab/shared";
 import { isPathBlacklisted } from "@pipelab/plugin-core";
 import { showExistingItemInFolder } from "./show-existing-item";
 
 export const registerIpcHandlers = (
   relaunch: () => Promise<void>,
   installUpdate: () => Promise<void>,
+  getUpdateChannel: () => UpdateChannel,
+  findUpdateForChannel: (channel: unknown) => Promise<AvailableUpdate | null>,
   readWorkflowEnvironment: (workflowId: unknown) => Promise<Record<string, string>>,
 ) => {
   const OPEN_DIALOG_CHANNEL = "dialog:showOpenDialog";
@@ -84,4 +87,8 @@ export const registerIpcHandlers = (
 
   ipcMain.handle("app:relaunch", () => relaunch());
   ipcMain.handle("app:install-update", () => installUpdate());
+  ipcMain.handle("app:update-channel:get", () => getUpdateChannel());
+  ipcMain.handle("app:update-channel:find-update", (_event, channel: unknown) =>
+    findUpdateForChannel(channel),
+  );
 };

@@ -133,9 +133,11 @@ bundle build. Desktop packaging starts after successful CLI publication.
 
 Production builds on `main` read `SUPABASE_PUBLISHABLE_KEY` from Doppler and GitHub Actions secrets; `develop` and PR preview builds omit production Supabase values. Do not put service-role or secret keys in browser build variables.
 
-Desktop update selection uses the v2 repository and filters releases to the
-installed app major. Stable builds exclude prereleases; beta builds may use
-stable or prerelease releases from that same major. If no eligible release is
+Desktop automatic update selection uses the v2 repository and filters releases
+to the installed app major and channel. Stable builds select final releases.
+Beta builds select `-beta` prereleases. The Settings channel picker can offer a
+newer release of the other channel across major versions for manual installation.
+If no eligible release is
 found, automatic update setup is skipped instead of falling back to the
 unfiltered `releases/latest/download` endpoint. Two environment variables
 steer a packaged app for testing: `PIPELAB_OVERRIDE_RELEASE` selects a specific

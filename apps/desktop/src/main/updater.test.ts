@@ -59,6 +59,13 @@ describe("resolveAvailableUpdate", () => {
     assert.equal(resolveAvailableUpdate(release, "3.0.0", "darwin"), null);
     assert.equal(resolveAvailableUpdate(null, "2.0.0", "darwin"), null);
   });
+
+  it("compares versions across channels using SemVer precedence", () => {
+    assert.equal(resolveAvailableUpdate(release, "2.1.0-beta.10", "darwin")?.version, "2.1.0");
+    const beta = { ...release, tag_name: "@pipelab/app@2.1.0-beta.10" };
+    assert.equal(resolveAvailableUpdate(beta, "2.1.0", "darwin"), null);
+    assert.equal(resolveAvailableUpdate(beta, "2.0.0", "darwin")?.version, "2.1.0-beta.10");
+  });
 });
 
 const statuses = (sent: UpdateState[]) => sent.map((state) => state.status);

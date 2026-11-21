@@ -38,9 +38,9 @@ distribution has been tested.
 
 ## Updating
 
-The desktop app checks for releases when running as a packaged application.
-Windows and macOS can install an update through the app and ask you to restart.
-Linux users are directed to download a release manually. Update behavior is
-not part of the browser UI.
+The packaged desktop app checks for newer releases on its installed channel.
+Windows, macOS, and Linux AppImage installs can update through the app. Other
+Linux installs offer a manual download. To move between Stable and Beta, use
+the [update channel picker](/guide/settings-account-updates#desktop-updates).
 
 For local development instructions, see [Develop Pipelab](/contributing/development).

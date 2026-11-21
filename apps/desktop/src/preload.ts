@@ -43,6 +43,8 @@ const pipelab: PipelabBridge = {
   isPathBlacklisted: (path) => ipcRenderer.invoke("path:isBlacklisted", path),
   relaunch: () => ipcRenderer.invoke("app:relaunch"),
   installUpdate: () => ipcRenderer.invoke("app:install-update"),
+  getUpdateChannel: () => ipcRenderer.invoke("app:update-channel:get"),
+  findUpdateForChannel: (channel) => ipcRenderer.invoke("app:update-channel:find-update", channel),
   readWorkflowEnvironment: (workflowId) =>
     ipcRenderer.invoke("workflow:environment:read", workflowId),
 };
