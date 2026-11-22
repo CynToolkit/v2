@@ -1,6 +1,7 @@
-import { ipcMain, dialog, BrowserWindow, shell, app } from "electron";
+import { ipcMain as electronIpcMain, dialog, BrowserWindow, shell, app } from "electron";
 import type { AvailableUpdate, UpdateChannel } from "@pipelab/shared";
 import { isPathBlacklisted } from "@pipelab/plugin-core";
+import { guardedIpcMain } from "./guarded-ipc";
 import { showExistingItemInFolder } from "./show-existing-item";
 
 export const registerIpcHandlers = (
@@ -9,7 +10,9 @@ export const registerIpcHandlers = (
   getUpdateChannel: () => UpdateChannel,
   findUpdateForChannel: (channel: unknown) => Promise<AvailableUpdate | null>,
   readWorkflowEnvironment: (workflowId: unknown) => Promise<Record<string, string>>,
+  getTrustedOrigins: () => readonly string[],
 ) => {
+  const ipcMain = guardedIpcMain(electronIpcMain, getTrustedOrigins);
   const OPEN_DIALOG_CHANNEL = "dialog:showOpenDialog";
   const SAVE_DIALOG_CHANNEL = "dialog:showSaveDialog";
 

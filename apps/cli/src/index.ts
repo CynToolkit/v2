@@ -18,6 +18,7 @@ import { fileURLToPath } from "node:url";
 import { isSupabaseAvailable } from "@pipelab/shared";
 import { config } from "dotenv";
 import { PostHog } from "posthog-node";
+import { buildCommandTelemetry } from "./telemetry";
 
 // Desktop bundles this program as CommonJS, where import.meta is unavailable but __dirname is.
 const cliDirname =
@@ -176,15 +177,12 @@ workflows
     }
   });
 
-program.hook("postAction", (thisCommand) => {
+program.hook("postAction", (_thisCommand, actionCommand) => {
   if (posthog) {
     posthog.capture({
       distinctId: "cli-user",
       event: "command_executed",
-      properties: {
-        command: thisCommand.name(),
-        args: thisCommand.args,
-      },
+      properties: buildCommandTelemetry(actionCommand),
     });
   }
 });

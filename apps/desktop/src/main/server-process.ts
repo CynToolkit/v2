@@ -28,6 +28,14 @@ export const getUiUrl = (port: number) => {
   return `${base}#token=${authToken}`;
 };
 
+/** Origins the Desktop renderer may be served from: the local server and, in development, Vite. */
+export const getTrustedUiOrigins = (): string[] => {
+  const origins: string[] = [];
+  if (serverPort !== null) origins.push(`http://127.0.0.1:${serverPort}`);
+  if (is.dev) origins.push(`http://127.0.0.1:${getUiDevelopmentPort()}`);
+  return origins;
+};
+
 let serverProcess: ChildProcess | null = null;
 let serverPort: number | null = null;
 let startingServer: Promise<number> | null = null;

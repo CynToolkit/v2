@@ -1,13 +1,19 @@
-import { app, shell, BrowserWindow, dialog, screen, protocol, net } from "electron";
+import { app, shell, BrowserWindow, dialog, screen } from "electron";
 import { autoUpdater } from "electron-updater";
 import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
 import { platform } from "node:os";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
-import { getUiUrl, onServerRestarted, startServer, stopServer } from "./main/server-process";
+import {
+  getTrustedUiOrigins,
+  getUiUrl,
+  onServerRestarted,
+  startServer,
+  stopServer,
+} from "./main/server-process";
 import { getProtocolName, getAppBundleId } from "@pipelab/constants";
 import { getCliPassthroughArgs, runCliPassthrough } from "./main/cli-passthrough";
 import { registerIpcHandlers } from "./main/ipc-handlers";
+import { isExternalHttpUrl, isTrustedRendererUrl } from "./main/trusted-origin";
 import { installUpdateAfterServerStops } from "./main/update-shutdown";
 import { createUpdater, resolveAvailableUpdate } from "./main/updater";
 import type { UpdateChannel } from "@pipelab/shared";
@@ -72,19 +78,6 @@ const getEnv = () => {
 
 const customUserDataPath = desktopTestUserDataPath || getDefaultUserDataPath(getEnv());
 app.setPath("userData", join(customUserDataPath, "desktop"));
-
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: "media",
-    privileges: {
-      secure: true,
-      standard: true,
-      supportFetchAPI: true,
-      corsEnabled: true,
-      stream: true,
-    },
-  },
-]);
 
 function getIconPath() {
   let ext = ".png";
@@ -438,16 +431,24 @@ function createWindow(): void {
       .catch(handleShutdownFailure);
   });
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    try {
-      const url = new URL(details.url);
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        shell.openExternal(details.url);
-      }
-    } catch {
-      console.warn("Blocked invalid external URL", details.url);
+  const openExternally = (rawUrl: string) => {
+    if (isExternalHttpUrl(rawUrl)) {
+      void shell.openExternal(rawUrl);
+    } else {
+      console.warn("Blocked external URL", rawUrl);
     }
+  };
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    openExternally(details.url);
     return { action: "deny" };
+  });
+
+  // The renderer never leaves the app's own origin; anything else opens in the system browser.
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    if (isTrustedRendererUrl(url, getTrustedUiOrigins())) return;
+    event.preventDefault();
+    openExternally(url);
   });
 }
 
@@ -531,11 +532,6 @@ function startUpdater(): void {
 app.whenReady().then(async () => {
   if (cliPassthroughArgs) return;
 
-  protocol.handle("media", (request) => {
-    const path = decodeURIComponent(request.url.replace(/^media:\/\/+/, "/"));
-    return net.fetch(pathToFileURL(path).toString());
-  });
-
   // Check if launched via protocol URL on startup
   const startupArgs = is.dev ? process.argv.slice(2) : process.argv.slice(1);
   try {
@@ -578,6 +574,7 @@ app.whenReady().then(async () => {
             architecture: process.arch,
           }),
       ),
+    getTrustedUiOrigins,
   );
   createWindow();
 
