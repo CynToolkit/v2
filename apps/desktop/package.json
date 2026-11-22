@@ -40,7 +40,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false"
   },
   "dependencies": {
-    "@napi-rs/keyring": "2.0.0"
+    "@napi-rs/keyring": "2.1.2"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "3.0.2",
@@ -53,13 +53,13 @@
     "@pipelab/tsconfig": "workspace:*",
     "@playwright/test": "^1.63.0",
     "@types/node": "24.12.2",
-    "@types/semver": "7.7.1",
+    "@types/semver": "7.8.0",
     "cross-env": "10.1.0",
     "electron": "45.4.1",
     "electron-builder": "26.18.0",
     "electron-updater": "6.8.11",
-    "posthog-node": "6.0.2",
-    "semver": "7.8.0",
+    "posthog-node": "6.0.5",
+    "semver": "7.8.6",
     "tsx": "4.19.1",
     "typescript": "5.8.3",
     "vite": "8.3.8",

@@ -47,7 +47,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false && tsc --noEmit -p tsconfig.parity.json --composite false"
   },
   "dependencies": {
-    "@clack/prompts": "1.2.0",
+    "@clack/prompts": "1.9.0",
     "@pipelab/constants": "workspace:*",
     "@pipelab/core-node": "workspace:*",
     "@pipelab/providers": "workspace:*",
@@ -55,8 +55,8 @@
     "@pipelab/workflow-runtime": "workspace:*",
     "commander": "^15.1.0",
     "dotenv": "18.0.10",
-    "listr2": "11.1.0",
-    "posthog-node": "6.0.2"
+    "listr2": "11.4.1",
+    "posthog-node": "6.0.5"
   },
   "devDependencies": {
     "@pipelab/test-utils": "workspace:*",
