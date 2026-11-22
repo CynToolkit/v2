@@ -266,6 +266,29 @@ jobs:
           path: apps/documentation/.vitepress/dist
           if-no-files-found: error
 
+  dependency-audit:
+    name: Dependency advisories
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Advisories are published independently of any change, so an unrelated PR must not fail
+    # on them. The job reports findings without gating "CI passed". Remove continue-on-error
+    # and add this job to the `ci-passed` needs once the existing high/critical findings are
+    # resolved.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
   ci-passed:
     name: CI passed
     if: always()

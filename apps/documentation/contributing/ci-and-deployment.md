@@ -66,6 +66,22 @@ create pull requests in repository settings, and approve workflows on the
 generated PR when GitHub requires it. No tag push or separate dispatch is
 needed. See [Release Pipelab](/contributing/releases).
 
+### Dependency updates and advisories
+
+Dependabot (`.github/dependabot.yml`) opens weekly update pull requests for the
+root pnpm workspace (`npm` ecosystem) and for GitHub Actions. Minor and patch
+updates are grouped (production and development dependencies separately; all
+Actions together); major updates arrive one package per pull request.
+
+The **Dependency advisories** job in `release.yml` runs
+`pnpm audit --prod --audit-level high` against the current advisory database on
+every run. Because advisories are published independently of any code change,
+the job is advisory: it uses `continue-on-error`, shows the findings in the run,
+and is not part of **CI passed**, so unrelated pull requests are not blocked.
+Review its output before merging dependency changes or releasing. Once the
+existing high and critical findings are resolved, make it blocking by removing
+`continue-on-error` and adding it to the `ci-passed` job's `needs`.
+
 Deployment files use `workflow_call` and are called only after CI succeeds.
 The entry workflow checks that the PR head repository is
 the same repository before running jobs that can access secrets. They do not
