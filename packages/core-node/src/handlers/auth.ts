@@ -1,6 +1,6 @@
-import { supabase, useLogger, isSupabaseAvailable } from "@pipelab/shared";
+import { useLogger, isSupabaseAvailable } from "@pipelab/shared";
 import { useAPI } from "../ipc-core";
-import { JsonFileStorage } from "../utils/storage";
+import { getServerCloudAuth } from "../pipelab-cloud-auth";
 import type { PipelabContext } from "../context";
 import { webSocketServer } from "../websocket-server";
 
@@ -50,16 +50,9 @@ export const registerAuthHandlers = (context: PipelabContext) => {
     return;
   }
 
-  // Initialize the singleton Supabase client for the backend with the custom FileStorage
-  const client = supabase({
-    auth: {
-      storage: new JsonFileStorage("auth-session.json", context),
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: false,
-    },
-  });
-  if (!client) return;
+  const auth = getServerCloudAuth(context);
+  if (!auth) return;
+  const { client, storage } = auth;
 
   handle("auth:getUser", async (_, { send }) => {
     try {
@@ -87,23 +80,32 @@ export const registerAuthHandlers = (context: PipelabContext) => {
     }
   });
 
-  handle("auth:signInWithPassword", async (_, { value, send }) => {
-    const { email, password } = value;
-    logger().info("[Auth] signInWithPassword");
-    const result = await client.auth.signInWithPassword({ email, password });
-    return send({ type: "end", data: { type: "success", result } });
-  });
+  const registerPasswordAuth = (method: "signInWithPassword" | "signUp") => {
+    handle(`auth:${method}`, async (_, { value, send }) => {
+      const { email, password, allowPlaintextSession } = value;
+      logger().info("[Auth]", method);
+      const response = await storage.runPasswordAuth(allowPlaintextSession === true, () =>
+        client.auth[method]({ email, password }),
+      );
+      return send({
+        type: "end",
+        data: {
+          type: "success",
+          result: response
+            ? { data: { user: response.data.user }, error: response.error }
+            : { data: { user: null }, error: null, requiresPlaintextConsent: true },
+        },
+      });
+    });
+  };
 
-  handle("auth:signUp", async (_, { value, send }) => {
-    const { email, password } = value;
-    logger().info("[Auth] signUp");
-    const result = await client.auth.signUp({ email, password });
-    return send({ type: "end", data: { type: "success", result } });
-  });
+  registerPasswordAuth("signInWithPassword");
+  registerPasswordAuth("signUp");
 
   handle("auth:signOut", async (_, { send }) => {
     logger().info("[Auth] signOut");
-    await client.auth.signOut();
+    const { error } = await client.auth.signOut({ scope: "local" });
+    if (error) return send({ type: "end", data: { type: "error", ipcError: error.message } });
     return send({ type: "end", data: { type: "success", result: undefined } });
   });
 
@@ -138,7 +140,7 @@ export const registerAuthHandlers = (context: PipelabContext) => {
   });
 
   // Maintain logs for the backend state change and broadcast to all clients
-  client.auth.onAuthStateChange(async (event, session) => {
+  client.auth.onAuthStateChange((event, session) => {
     logger().info("[Auth] State changed, broadcasting:", event);
     webSocketServer.broadcast("auth:getUser", {
       type: "end",

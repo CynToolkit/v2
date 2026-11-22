@@ -21,7 +21,8 @@ An active paid Pipelab Cloud plan is required. The Cloud Files page shows the
 stored artifacts, pooled storage use, latest pins, history, and share links.
 Download URLs are short-lived. The object storage key is kept on the server.
 
-For local CLI use, sign in once with an interactive terminal:
+Desktop uses the account session from the editor. For local CLI use, sign in
+once with an interactive terminal:
 
 ```sh
 pipelab settings cloud login

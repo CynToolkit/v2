@@ -112,6 +112,10 @@ importers:
     publishDirectory: dist
 
   apps/desktop:
+    dependencies:
+      '@napi-rs/keyring':
+        specifier: 2.0.0
+        version: 2.0.0
     devDependencies:
       '@electron-toolkit/preload':
         specifier: 3.0.2

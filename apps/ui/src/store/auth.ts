@@ -29,6 +29,7 @@ export type SubscriptionStatus = "idle" | "loading" | "ready" | "error";
 interface AuthActionResponse {
   data: AuthActionResponseData;
   error: Error | null;
+  requiresPlaintextConsent?: boolean;
 }
 
 // Define a more comprehensive AuthStateType
@@ -426,7 +427,11 @@ export const useAuth = defineStore("auth", () => {
     { immediate: true },
   );
 
-  const login = async (email: string, pwd: string): Promise<AuthActionResponse> => {
+  const login = async (
+    email: string,
+    pwd: string,
+    allowPlaintextSession = false,
+  ): Promise<AuthActionResponse> => {
     const requestId = ++authRequestId;
     initPromise = undefined;
     isAuthenticating.value = true;
@@ -442,7 +447,11 @@ export const useAuth = defineStore("auth", () => {
         );
       } else {
         const response = await withRequestTimeout(
-          api.execute("auth:signInWithPassword", { email, password: pwd }),
+          api.execute("auth:signInWithPassword", {
+            email,
+            password: pwd,
+            ...(allowPlaintextSession && { allowPlaintextSession }),
+          }),
           "Sign-in timed out. Check your connection and try again.",
         );
         result =
@@ -450,6 +459,7 @@ export const useAuth = defineStore("auth", () => {
             ? {
                 data: { user: response.result.data.user, session: null },
                 error: response.result.error,
+                requiresPlaintextConsent: response.result.requiresPlaintextConsent,
               }
             : {
                 data: { user: null, session: null },
@@ -460,7 +470,9 @@ export const useAuth = defineStore("auth", () => {
         return result;
       }
 
-      if (result.error) {
+      if (result.requiresPlaintextConsent) {
+        setAuthState(user.value ? "SIGNED_IN" : "SIGNED_OUT");
+      } else if (result.error) {
         setAuthState("ERROR");
         errorMessage.value =
           result.error.message || "Sign-in failed. Check your details and try again.";
@@ -491,7 +503,11 @@ export const useAuth = defineStore("auth", () => {
     }
   };
 
-  const register = async (email: string, pwd: string): Promise<AuthActionResponse> => {
+  const register = async (
+    email: string,
+    pwd: string,
+    allowPlaintextSession = false,
+  ): Promise<AuthActionResponse> => {
     const requestId = ++authRequestId;
     initPromise = undefined;
     isAuthenticating.value = true;
@@ -511,7 +527,11 @@ export const useAuth = defineStore("auth", () => {
         );
       } else {
         const response = await withRequestTimeout(
-          api.execute("auth:signUp", { email, password: pwd }),
+          api.execute("auth:signUp", {
+            email,
+            password: pwd,
+            ...(allowPlaintextSession && { allowPlaintextSession }),
+          }),
           "Registration timed out. Check your connection and try again.",
         );
         result =
@@ -519,6 +539,7 @@ export const useAuth = defineStore("auth", () => {
             ? {
                 data: { user: response.result.data.user, session: null },
                 error: response.result.error,
+                requiresPlaintextConsent: response.result.requiresPlaintextConsent,
               }
             : {
                 data: { user: null, session: null },
@@ -527,7 +548,9 @@ export const useAuth = defineStore("auth", () => {
       }
 
       if (requestId !== authRequestId) return result;
-      if (result.error) {
+      if (result.requiresPlaintextConsent) {
+        setAuthState(user.value ? "SIGNED_IN" : "SIGNED_OUT");
+      } else if (result.error) {
         setAuthState("ERROR");
         errorMessage.value = result.error.message || "Failed to register. Please try again.";
       } else {
@@ -559,7 +582,7 @@ export const useAuth = defineStore("auth", () => {
       if (isBrowserRuntime) {
         if (!browserClient) throw new Error("Browser authentication is not configured.");
         const { error } = await withRequestTimeout(
-          browserClient.auth.signOut(),
+          browserClient.auth.signOut({ scope: "local" }),
           "Sign-out timed out. Check your connection and try again.",
         );
         if (error) throw error;

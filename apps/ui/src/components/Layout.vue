@@ -740,6 +740,14 @@ const openLink = (url: string) => {
 
 const logout = async () => {
   await auth.logout();
+  if (auth.authState === "ERROR") {
+    toast.add({
+      severity: "error",
+      summary: "Could not sign out",
+      detail: "Check your connection and try again.",
+      life: 4000,
+    });
+  }
 };
 
 const auth = useAuth();
