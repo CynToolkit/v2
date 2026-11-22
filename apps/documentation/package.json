@@ -11,7 +11,7 @@
     "generate-mermaid": "pnpm exec mmdc -i assets/architecture/architecture.mermaid -o assets/architecture/architecture.svg -t default -b transparent"
   },
   "dependencies": {
-    "medium-zoom": "^1.1.0"
+    "medium-zoom": "^1.1.2"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^12.2.0",
