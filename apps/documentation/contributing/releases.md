@@ -153,8 +153,10 @@ release; preserve the legacy release assets until
 the old-client bridge is built and verified; see the
 [CI and deployment setup](/contributing/ci-and-deployment).
 
-Changesets selects npm dist-tags from its prerelease state (`beta` while the
-repository is in beta mode, and `latest` for stable releases). Desktop GitHub
+During the beta-only period, Changesets publishes CLI releases to npm's
+`latest` tag. The [default CLI install](/cli/installation) gets the current
+beta. After the first stable CLI release, `latest` points to stable releases
+and Changesets publishes subsequent betas to the `beta` tag. Desktop GitHub
 releases are marked as prereleases when the shared version contains `-`.
 
 ## Verify and recover
