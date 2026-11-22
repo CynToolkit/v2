@@ -409,6 +409,30 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         run: node -p "'version=' + require('./apps/cli/package.json').version" >> "$GITHUB_OUTPUT"
 
+  sync-cli-beta-tag:
+    name: Sync CLI beta tag
+    needs: changesets
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+
+      - name: Advance the npm beta tag during beta-only releases
+        shell: bash
+        run: |
+          tags=$(npm view @pipelab/cli dist-tags --prefer-online --json)
+          latest=$(node -p 'JSON.parse(process.argv[1]).latest ?? ""' "$tags")
+          beta=$(node -p 'JSON.parse(process.argv[1]).beta ?? ""' "$tags")
+
+          if [[ "$latest" =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ && "$latest" != "$beta" ]] &&
+            [[ $(printf '%s\n' "$beta" "$latest" | sort -V | tail -n 1) == "$latest" ]]; then
+            npx --yes --package=npm@11.21.1 -- npm dist-tag add "@pipelab/cli@$latest" beta
+          fi
+
   build:
     needs: changesets
     if: needs.changesets.outputs.published == 'true'

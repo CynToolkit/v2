@@ -112,13 +112,13 @@ with public access using [npm Trusted Publishing](https://docs.npmjs.com/trusted
 In the npm package's **Settings → Trusted publishing**, add a **GitHub Actions**
 publisher with these values:
 
-| Field                | Value                                      |
-| -------------------- | ------------------------------------------ |
-| Organization or user | `CynToolkit`                               |
-| Repository           | `v2`                                       |
-| Workflow filename    | `release.yml`                              |
-| Environment name     | Leave blank                                |
-| Allowed actions      | Allow direct publishing with `npm publish` |
+| Field                | Value                                  |
+| -------------------- | -------------------------------------- |
+| Organization or user | `CynToolkit`                           |
+| Repository           | `v2`                                   |
+| Workflow filename    | `release.yml`                          |
+| Environment name     | Leave blank                            |
+| Allowed actions      | Allow `npm publish` and `npm dist-tag` |
 
 The release job grants `id-token: write` on a GitHub-hosted runner. Node
 24.15.0 includes an npm version supporting OIDC (npm 11.5.1 or newer is
@@ -126,6 +126,7 @@ required). pnpm delegates publishing to npm, which authenticates automatically;
 do not add `NPM_TOKEN` or `NODE_AUTH_TOKEN`. The staged manifest preserves the
 repository metadata required by npm. A new trust configuration must complete
 its first successful publish within two days; recreate it if it expires.
+The **Sync CLI beta tag** job uses npm 11.21.1 for OIDC dist-tag support.
 
 The workflow passes
 `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PROJECT_ID`, and `POSTHOG_API_KEY` into the
@@ -153,8 +154,10 @@ release; preserve the legacy release assets until
 the old-client bridge is built and verified; see the
 [CI and deployment setup](/contributing/ci-and-deployment).
 
-Changesets selects npm dist-tags from its prerelease state (`beta` while the
-repository is in beta mode, and `latest` for stable releases). Desktop GitHub
+Changesets publishes to npm's `latest` tag while all published CLI versions
+are betas. On main, **Sync CLI beta tag** advances `beta` when `latest` points
+to a newer beta. After the first stable CLI release, `latest` follows stable
+releases and Changesets publishes subsequent betas to `beta`. Desktop GitHub
 releases are marked as prereleases when the shared version contains `-`.
 
 ## Verify and recover
@@ -171,6 +174,10 @@ will skip desktop publication if Changesets finds the CLI version already on
 npm. Do not delete or move tags as a generic recovery step, or attempt to
 republish an existing npm version. npm and GitHub publication are separate
 operations, so a failed desktop build can leave the CLI available first.
+
+If **Sync CLI beta tag** fails, check that the npm trusted publisher for
+`release.yml` has **Allow npm dist-tag** enabled and rerun the failed job.
+Use `npm dist-tag ls @pipelab/cli` to verify the aliases.
 
 See [Develop Pipelab](/contributing/development) for local build commands and
 [CLI installation](/cli/installation) for the user-facing CLI package.

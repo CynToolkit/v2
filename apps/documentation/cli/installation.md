@@ -7,6 +7,8 @@ npm install --global @pipelab/cli
 pipelab --help
 ```
 
+The default install uses npm's `latest` tag, which points to a beta until the first stable CLI release.
+
 The release workflow uses Node.js 24.15.0 to build the package. The published manifest does not declare a minimum Node.js version, so this repository does not establish a separate end-user version requirement. The CLI is a Node package, rather than a platform-specific executable.
 
 ## User data

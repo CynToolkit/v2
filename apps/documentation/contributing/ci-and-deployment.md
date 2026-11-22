@@ -61,7 +61,7 @@ fixed-group version. After successful npm publication, the same workflow
 builds desktop installers and publishes one GitHub release for that version.
 Configure npm Trusted Publishing for `@pipelab/cli`: GitHub owner `CynToolkit`,
 repository `v2`, workflow filename `release.yml`, no environment, and allow
-direct publishing. No npm publishing secret is required. Allow GitHub Actions to
+`npm publish` and `npm dist-tag`. No npm publishing secret is required. Allow GitHub Actions to
 create pull requests in repository settings, and approve workflows on the
 generated PR when GitHub requires it. No tag push or separate dispatch is
 needed. See [Release Pipelab](/contributing/releases).
