@@ -41,7 +41,14 @@
   },
   "resolutions": {
     "@codemirror/state": "6.4.1",
-    "vue-demi": "0.14.10"
+    "fast-xml-parser@<4.5.5": "^4.5.5",
+    "immutable@>=5.0.0-beta.1 <5.1.8": "^5.1.8",
+    "js-yaml@>=4.0.0 <4.3.2": "^4.3.2",
+    "launch-editor@<2.14.2": "^2.14.2",
+    "shell-quote@<1.9.0": "^1.9.0",
+    "source-map-js@<1.2.2": "^1.2.2",
+    "vue-demi": "0.14.10",
+    "ws@>=8.0.0 <8.21.0": "^8.21.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [

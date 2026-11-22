@@ -270,11 +270,6 @@ jobs:
     name: Dependency advisories
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Advisories are published independently of any change, so an unrelated PR must not fail
-    # on them. The job reports findings without gating "CI passed". Remove continue-on-error
-    # and add this job to the `ci-passed` needs once the existing high/critical findings are
-    # resolved.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -292,16 +287,18 @@ jobs:
   ci-passed:
     name: CI passed
     if: always()
-    needs: [verify, local-release-platforms]
+    needs: [verify, local-release-platforms, dependency-audit]
     runs-on: ubuntu-latest
     steps:
       - name: Require all verification jobs to succeed
         env:
           VERIFY_RESULT: ${{ needs.verify.result }}
+          AUDIT_RESULT: ${{ needs.dependency-audit.result }}
           PLATFORM_RESULT: ${{ needs.local-release-platforms.result }}
         run: |
           test "$VERIFY_RESULT" = success
           test "$PLATFORM_RESULT" = success
+          test "$AUDIT_RESULT" = success
 
   changes:
     name: Select web deployments
