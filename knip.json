@@ -21,7 +21,8 @@
       "entry": ["pipelab-cloud/index.ts", "local-r2/worker.ts", "scripts/*.mjs"]
     },
     "apps/desktop": {
-      "entry": ["electron-builder.config.mjs"]
+      "entry": ["electron-builder.config.mjs"],
+      "ignoreDependencies": ["@napi-rs/keyring"]
     },
     "packages/core-node": {
       "entry": ["scripts/*.ts"]
