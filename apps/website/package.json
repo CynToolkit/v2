@@ -13,15 +13,15 @@
     "supa:types": "supabase gen types typescript --remote=uehmyyeqheqnxmzhctcd --schema public > src/database.types.ts"
   },
   "dependencies": {
-    "@primevue/themes": "^4.5.0",
-    "@supabase/supabase-js": "^2.86.0",
-    "date-fns": "^4.1.0",
+    "@primevue/themes": "^4.5.4",
+    "@supabase/supabase-js": "^2.119.2",
+    "date-fns": "^4.4.0",
     "pinia": "^4.1.0",
     "primeflex": "^4.0.0",
     "primeicons": "^8.0.2",
     "primevue": "^5.0.5",
     "supabase": "^3.2.0",
-    "vue": "^3.5.45",
+    "vue": "^3.5.46",
     "vue-confetti-explosion": "^1.0.2",
     "vue-router": "^5.5.1"
   },

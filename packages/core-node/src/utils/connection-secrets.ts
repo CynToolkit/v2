@@ -53,10 +53,10 @@ export const getConnectionSecretKey = async (
   account: string,
   create: boolean,
 ): Promise<Buffer | null> => {
-  let entry: { getSecret(): Promise<Uint8Array | null | undefined> } & {
+  let entry: { getSecret(): Promise<ArrayLike<number> | null | undefined> } & {
     setSecret(key: Uint8Array): Promise<unknown>;
   };
-  let stored: Uint8Array | null | undefined;
+  let stored: ArrayLike<number> | null | undefined;
   try {
     const { AsyncEntry } = await import("@napi-rs/keyring");
     entry = new AsyncEntry(SERVICE, account);
