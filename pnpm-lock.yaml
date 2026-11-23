@@ -257,6 +257,9 @@ importers:
       '@pipelab/constants':
         specifier: workspace:*
         version: link:../../packages/constants
+      '@pipelab/providers':
+        specifier: workspace:*
+        version: link:../../packages/providers
       '@pipelab/shared':
         specifier: workspace:*
         version: link:../../packages/shared

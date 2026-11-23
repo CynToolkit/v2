@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "vite",
     "dev:remote": "vite --host 0.0.0.0",
-    "build": "pnpm --filter @pipelab/app exec tsx ../../packages/core-node/scripts/generate-browser-provider-specs.ts && vite build",
+    "build": "vite build",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json --composite false",
     "preview": "vite preview",
     "format": "oxfmt .",
@@ -29,6 +29,7 @@
     "@electron-toolkit/preload": "3.0.2",
     "@mdi/font": "7.4.47",
     "@pipelab/constants": "workspace:*",
+    "@pipelab/providers": "workspace:*",
     "@pipelab/shared": "workspace:*",
     "@primevue/themes": "4.1.1",
     "@supabase/supabase-js": "2.99.3",

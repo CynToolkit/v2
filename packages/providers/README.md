@@ -10,6 +10,12 @@ task factory aliases. Provider modules remain internal and independently testabl
 The core-node `builtInProviders` list composes the definitions into renderer
 metadata, Release definitions, and Workflow tasks.
 
+A second, browser-safe entry, `@pipelab/providers/metadata`, exposes each
+provider's identity and Release descriptors without any task or Node code. The
+UI builds its catalog from it; each provider's `metadata.ts` holds that data and
+its `index.ts` adds `validate`, `compile`, `inspect` and tasks. A test checks the
+entry's import graph stays Node-free.
+
 Provider, Release, and task IDs retain their `@pipelab/plugin-*` values for
 saved workflow and connection compatibility. Consolidation does not require
 a Release configuration migration.

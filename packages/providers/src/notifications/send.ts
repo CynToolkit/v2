@@ -1,7 +1,9 @@
 import { escapeJsonString } from "@pipelab/shared";
 import type { SendEmailInput } from "./send.types";
 
-export const DISCORD_MESSAGE_LIMIT = 2000;
+import { DISCORD_MESSAGE_LIMIT } from "./metadata";
+
+export { DISCORD_MESSAGE_LIMIT };
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
 /** Webhook URLs are secrets: they must be HTTPS, except to this machine, which is for local testing. */

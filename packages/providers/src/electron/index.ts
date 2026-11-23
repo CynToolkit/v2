@@ -1,50 +1,14 @@
 /// <reference path="./declarations.d.ts" />
-import { createProviderDefinition, pickLiteral } from "@pipelab/shared";
+import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { electronWorkflowTaskFactories } from "./package-v2";
 import { electronPhases } from "./phases";
-import { requiresMacHostForMacTargets } from "../host-matrix";
-import { electronProviderLogo } from "../provider-icons";
-import type { DesktopTargetInputs } from "@pipelab/plugin-core";
+import { electronMetadata, electronProducerDescriptor, electronTargetInputs } from "./metadata";
 
-export const electronTargetInputs = (targetId: string): DesktopTargetInputs => {
-  const [target, arch] = targetId.split("-");
-  const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
-  const supportedArch = pickLiteral(["x64", "arm64"], arch);
-  if (!supportedArch) throw new Error(`Unsupported Electron target: ${targetId}`);
-  return { platform, arch: supportedArch };
-};
-
-const electronTargetDescriptor = (id: string) => {
-  const inputs = electronTargetInputs(id);
-  return {
-    kind: "application" as const,
-    technology: "electron",
-    platform:
-      inputs.platform === "win32" ? "windows" : inputs.platform === "darwin" ? "macos" : "linux",
-    architecture: inputs.arch,
-    container: "directory" as const,
-  };
-};
+export { electronTargetInputs };
 
 const electronProducer: ReleaseProducerDefinition = {
-  id: "@pipelab/plugin-electron/producer",
-  label: "Electron",
-  planning: { mode: "build" },
-  supportsBeforeBuildHooks: true,
-  accepts: { kind: "application", platform: "web", container: "directory" },
-  targets: ["windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-arm64"].map(
-    (id) => ({
-      id,
-      label: id,
-      buildType: "desktop",
-      output: electronTargetDescriptor(id),
-      createDefaultConfig: () => ({}),
-      isAvailable: (host) =>
-        requiresMacHostForMacTargets(electronTargetDescriptor(id).platform, host),
-    }),
-  ),
-  createDefaultConfig: () => ({}),
+  ...electronProducerDescriptor,
   validate: () => [],
   compile: (input, config) => ({
     steps: config.targets
@@ -79,12 +43,7 @@ const electronProducer: ReleaseProducerDefinition = {
 };
 
 export const provider = createProviderDefinition({
-  id: "@pipelab/plugin-electron",
-  packageName: "@pipelab/plugin-electron",
-  name: "Electron",
-  description: "Pipelab provider for packaging apps with Electron",
-  icon: { type: "image", image: electronProviderLogo },
-  isOfficial: true,
+  ...electronMetadata,
   release: { producers: [electronProducer] },
   workflowTasks: electronWorkflowTaskFactories,
 });

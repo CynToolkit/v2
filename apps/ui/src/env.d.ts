@@ -5,9 +5,3 @@ declare module "*.vue" {
   const component: DefineComponent<object, object, unknown>;
   export default component;
 }
-
-declare module "virtual:pipelab/provider-specs" {
-  import type { BrowserProviderSpecs } from "@pipelab/shared";
-  const specs: BrowserProviderSpecs;
-  export default specs;
-}
