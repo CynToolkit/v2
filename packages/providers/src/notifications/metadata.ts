@@ -20,12 +20,12 @@ export const EMAIL_NOTIFICATION_ID = `${PROVIDER_ID}/email`;
 export const EMAIL_ENABLED = false;
 
 /** Connection integrations, matched by name so a Discord target never offers an email account. */
-export const WEBHOOK_INTEGRATION = "Notification webhook";
-export const EMAIL_INTEGRATION = "Email (Resend)";
+const WEBHOOK_INTEGRATION = "Notification webhook";
+const EMAIL_INTEGRATION = "Email (Resend)";
 
-export const DEFAULT_TEMPLATE =
+const DEFAULT_TEMPLATE =
   "{{workflow}} {{version}}: {{status}} in {{duration}}\n{{destinations}}\n{{error}}";
-export const DEFAULT_JSON_TEMPLATE =
+const DEFAULT_JSON_TEMPLATE =
   '{"workflow":"{{workflow}}","version":"{{version}}","status":"{{status}}","duration":"{{duration}}","destinations":"{{destinations}}","error":"{{error}}"}';
 
 const TEMPLATE_HELP =
@@ -158,7 +158,7 @@ export const emailNotificationDescriptor: ReleaseNotificationDescriptor = {
   }),
 };
 
-export const emailIntegration: IntegrationDefinition = {
+const emailIntegration: IntegrationDefinition = {
   name: EMAIL_INTEGRATION,
   testable: true,
   fields: [
