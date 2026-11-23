@@ -50,10 +50,10 @@
     "change-case": "5.4.4",
     "confbox": "0.3.2",
     "execa": "10.2.1",
-    "node-stream-zip": "1.15.0",
+    "node-stream-zip": "1.16.0",
     "proper-lockfile": "4.1.2",
-    "semver": "7.8.1",
-    "valibot": "1.4.2"
+    "semver": "7.8.6",
+    "valibot": "1.5.0"
   },
   "devDependencies": {
     "@pipelab/test-utils": "workspace:*",

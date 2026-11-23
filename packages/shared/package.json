@@ -43,12 +43,12 @@
     "@pipelab/constants": "workspace:*",
     "@pipelab/migration": "workspace:*",
     "@pipelab/workflow-runtime": "workspace:*",
-    "@supabase/supabase-js": "2.99.3",
+    "@supabase/supabase-js": "2.119.2",
     "@types/node": "^24.12.2",
     "nanoid": "6.0.2",
     "tslog": "5.5.0",
-    "valibot": "1.4.2",
-    "ws": "8.21.0"
+    "valibot": "1.5.0",
+    "ws": "8.23.0"
   },
   "devDependencies": {
     "@pipelab/tsconfig": "workspace:*",
