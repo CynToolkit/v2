@@ -1,5 +1,11 @@
 # @pipelab/app
 
+## 2.0.0-beta.44
+
+### Patch Changes
+
+- [#97](https://github.com/CynToolkit/v2/pull/97) [`9115add`](https://github.com/CynToolkit/v2/commit/9115add8686b5604626541880905156b6b154653) Thanks [@Armaldio](https://github.com/Armaldio)! - Fix macOS desktop builds failing at code signing because the entitlements file path was not resolved.
+
 ## 2.0.0-beta.43
 
 ### Minor Changes
