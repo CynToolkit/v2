@@ -10,7 +10,7 @@ export class JsonFileMissingError extends Error {
   }
 }
 
-export class JsonFileMalformedError extends Error {
+class JsonFileMalformedError extends Error {
   constructor(
     public readonly filePath: string,
     cause: unknown,
@@ -58,7 +58,7 @@ export const writeJsonFileAtomically = async (
   }
 };
 
-export const writeJsonFileAtomicallyIfMissing = async (
+const writeJsonFileAtomicallyIfMissing = async (
   filePath: string,
   value: unknown,
 ): Promise<boolean> => {
