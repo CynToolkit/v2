@@ -11,12 +11,12 @@
     "generate-mermaid": "pnpm exec mmdc -i assets/architecture/architecture.mermaid -o assets/architecture/architecture.svg -t default -b transparent"
   },
   "dependencies": {
-    "medium-zoom": "^1.1.0"
+    "medium-zoom": "^1.1.2"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^12.2.0",
     "vitepress": "2.0.0-alpha.5",
     "vitepress-plugin-lightbox": "^1.0.2",
-    "vue": "3.5.45"
+    "vue": "3.5.46"
   }
 }
