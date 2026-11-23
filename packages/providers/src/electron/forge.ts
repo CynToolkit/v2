@@ -198,6 +198,8 @@ export const forge = async (
     }
     await writeFile(pkgJSONPath, JSON.stringify(pkgJSON, null, 2));
 
+    // pnpm reuses the bundled pnpm-lock.yaml whenever the manifest still matches it
+    // and re-resolves only what the overrides above changed.
     const installArgs = customPackages.length
       ? ["add", ...customPackages, "--prefer-offline"]
       : ["install", "--prefer-offline"];

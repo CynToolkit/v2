@@ -10,7 +10,7 @@ import {
   useLogger,
 } from "@pipelab/shared";
 import type { IntegrationDefinition } from "@pipelab/shared";
-import browserProviderSpecs from "@renderer/generated/release-provider-specs";
+import browserProviderSpecs from "virtual:pipelab/provider-specs";
 
 const pickProviderMetadata = (provider: RendererProviderMetadata): RendererProviderMetadata => {
   return {
