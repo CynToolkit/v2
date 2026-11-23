@@ -34,6 +34,12 @@ export default {
   directories: { output: "../out/make", buildResources: path.join(root, "assets/build") },
   // Ship only the built runtime. The main process bundles its dependencies.
   files: [".vite/**", "dist/cli/**", "assets/build/**", "package.json"],
+  // ASAR packaging and embedded integrity validation are intentionally off. The server
+  // and the CLI run as separate ELECTRON_RUN_AS_NODE processes that read dist/cli (UI,
+  // provider asset templates) and hand those files to external tools, and Electron only
+  // validates embedded ASAR integrity on macOS and Windows. Enabling it needs a packaged
+  // build verified on all three platforms (asarUnpack for dist/cli, onlyLoadAppFromAsar,
+  // runAsNode behaviour), which cannot be validated in CI as configured today.
   asar: false,
   npmRebuild: false,
   extraMetadata: {

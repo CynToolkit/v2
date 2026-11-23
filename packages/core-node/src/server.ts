@@ -1,5 +1,6 @@
 import { PipelabContext, isDev, registerAllHandlers, webSocketServer } from "./index";
 import { resolveBundledUiFolder } from "./bundled-cli";
+import { rendererSecurityHeaders } from "./renderer-csp";
 import { getUiDevServerMissingWarning, uiDevPort } from "@pipelab/constants";
 import { existsSync } from "node:fs";
 import http from "http";
@@ -62,8 +63,10 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
     ],
   };
   let rawAssetFolder: string | undefined;
+  let securityHeaders: ReturnType<typeof rendererSecurityHeaders> | undefined;
   if (!isDev) {
     rawAssetFolder = resolveBundledUiFolder(cliDirname);
+    if (existsSync(rawAssetFolder)) securityHeaders = rendererSecurityHeaders(rawAssetFolder);
   }
 
   const server = http.createServer(async (request, response) => {
@@ -88,6 +91,7 @@ export async function serveCommand(options: ServeOptions, version: string, cliDi
     return handler(request, response, {
       public: rawAssetFolder,
       rewrites: [{ source: "/**", destination: "/index.html" }],
+      headers: securityHeaders,
     });
   });
 

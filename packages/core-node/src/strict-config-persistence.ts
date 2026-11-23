@@ -1,4 +1,5 @@
 import {
+  useLogger,
   defaultConnections,
   defaultFileRepo,
   parseConnectionsConfig,
@@ -13,6 +14,13 @@ import {
   writeJsonFileAtomically,
   writeJsonFileAtomicallyIfMissing,
 } from "./utils/atomic-json";
+import {
+  getConnectionSecretKey,
+  hasPlaintextSecrets,
+  hasSealedSecrets,
+  sealConnections,
+  unsealConnections,
+} from "./utils/connection-secrets";
 import { serializeFileMutation } from "./release-persistence-lock";
 
 export const loadStrictProjects = async (context: PipelabContext): Promise<FileRepo> => {
@@ -49,9 +57,7 @@ export const saveStrictProjects = async (
   });
 };
 
-export const loadStrictConnections = async (
-  context: PipelabContext,
-): Promise<ConnectionsConfig> => {
+const readConnectionsFile = async (context: PipelabContext) => {
   try {
     return parseConnectionsConfig(await readJsonFile(context.getConnectionsPath()));
   } catch (error) {
@@ -67,9 +73,48 @@ export const loadStrictConnections = async (
   }
 };
 
+/** Writes connections sealed with the keyring key, or 0600 plaintext when no keyring exists. */
+const writeConnectionsFile = async (context: PipelabContext, value: ConnectionsConfig) => {
+  const path = context.getConnectionsPath();
+  const key = hasPlaintextSecrets(value) ? await getConnectionSecretKey(path, true) : null;
+  if (!key && hasPlaintextSecrets(value))
+    useLogger()
+      .logger()
+      .warn(
+        "[Connections] The operating system credential store is unavailable; saved connection values are kept in a user-only file instead.",
+      );
+  await writeJsonFileAtomically(
+    path,
+    parseConnectionsConfig(key ? sealConnections(value, key) : value),
+    0o600,
+  );
+};
+
+/**
+ * Loads connections with their values decrypted. Existing plaintext values are
+ * migrated to protected storage on first load when a credential store exists.
+ */
+export const loadStrictConnections = async (
+  context: PipelabContext,
+): Promise<ConnectionsConfig> => {
+  const path = context.getConnectionsPath();
+  const raw = await readConnectionsFile(context);
+  const key = hasSealedSecrets(raw) ? await getConnectionSecretKey(path, false) : null;
+  const config = unsealConnections(raw, key);
+  if (hasPlaintextSecrets(raw) && (await getConnectionSecretKey(path, true))) {
+    await serializeFileMutation(path, async () => {
+      const current = await readConnectionsFile(context);
+      if (hasPlaintextSecrets(current)) await writeConnectionsFile(context, current);
+    });
+  }
+  return config;
+};
+
 export const saveStrictConnections = async (
   context: PipelabContext,
   value: ConnectionsConfig,
 ): Promise<void> => {
-  await writeJsonFileAtomically(context.getConnectionsPath(), parseConnectionsConfig(value), 0o600);
+  await serializeFileMutation(context.getConnectionsPath(), () =>
+    writeConnectionsFile(context, parseConnectionsConfig(value)),
+  );
 };
