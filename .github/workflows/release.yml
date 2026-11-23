@@ -53,6 +53,9 @@ jobs:
       - name: Run Desktop IPC and artifact tests
         run: pnpm --filter @pipelab/app test
 
+      - name: Install Playwright Chromium for the WebGL launch test
+        run: pnpm --filter @pipelab/providers exec playwright install chromium
+
       - name: Run Construct profile validation tests
         run: pnpm --filter @pipelab/providers test:construct
 
