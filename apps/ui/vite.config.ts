@@ -59,8 +59,8 @@ function reportOnlyCsp(
     "object-src 'none'",
     "frame-ancestors 'self'",
     "form-action 'self'",
-    // QuickJS runs WebAssembly. Keep JavaScript eval and inline scripts disallowed.
-    "script-src 'self' 'wasm-unsafe-eval'",
+    // Keep JavaScript eval and inline scripts disallowed.
+    "script-src 'self'",
     "script-src-attr 'none'",
     "style-src 'self' https://fonts.googleapis.com",
     "style-src-attr 'none'",
@@ -179,10 +179,6 @@ export default defineConfig(({ mode }) => {
       dedupe: ["primevue"],
       alias: {
         "@renderer": resolve(__dirname, "src"),
-        // Shared evaluation code has a Node default variant for the CLI. The
-        // UI already loads the separate-WASM browser variant; avoid bundling
-        // the 692 KiB single-file Node runtime into the browser build.
-        "@jitl/quickjs-singlefile-mjs-release-sync": "@jitl/quickjs-wasmfile-release-sync",
       },
     },
   };

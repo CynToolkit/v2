@@ -6,7 +6,7 @@ The standalone engine of Pipelab. It provides workflow execution and serves as t
 
 1.  **WebSocket Server**: When started with `serve`, it acts as a backend for the `@pipelab/ui`, handling workflow execution, real-time logging, and state synchronization.
 2.  **Workflow runner**: The `workflow` commands list, inspect, and execute saved Release workflows without the desktop UI.
-3.  **Plugin Host**: Manages the execution context for all Pipelab plugins, including the QuickJS-based virtual environment.
+3.  **Plugin Host**: Manages the execution context for all Pipelab plugins.
 
 ## 🛠️ Development
 

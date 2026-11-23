@@ -24,7 +24,7 @@ describe("renderer CSP", () => {
   }) => {
     const policy = buildRendererCsp(await setup(onTestFinished));
     const hash = createHash("sha256").update(script).digest("base64");
-    expect(policy).toContain(`script-src 'self' 'wasm-unsafe-eval' 'sha256-${hash}'`);
+    expect(policy).toContain(`script-src 'self' 'sha256-${hash}'`);
     expect(policy).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
     expect(policy).toContain("script-src-attr 'none'");
     expect(policy).toContain("object-src 'none'");

@@ -59,7 +59,7 @@ export const buildRendererCsp = (uiFolder: string) => {
     "object-src 'none'",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    ["script-src 'self' 'wasm-unsafe-eval'", ...inlineScriptHashes(indexHtml)].join(" "),
+    ["script-src 'self'", ...inlineScriptHashes(indexHtml)].join(" "),
     "script-src-attr 'none'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
