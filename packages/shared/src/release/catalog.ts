@@ -1,18 +1,28 @@
 import type { ProviderDefinition, RendererProviderMetadata } from "../plugins/definitions";
-import type { ReleaseRegistry } from "./types";
+import type { ReleaseDescriptorRegistry, ReleaseRegistry } from "./types";
 import type { MergeCatalogItems, MergeDefinition } from "./catalog.types";
 
-export const buildReleaseRegistry = (
+export function buildReleaseRegistry(providers: ProviderDefinition[]): ReleaseRegistry;
+export function buildReleaseRegistry(
+  providers: RendererProviderMetadata[],
+): ReleaseDescriptorRegistry;
+export function buildReleaseRegistry(
   providers: Array<ProviderDefinition | RendererProviderMetadata>,
-): ReleaseRegistry => ({
-  sources: providers.flatMap((provider) => provider.release?.sources ?? []),
-  producers: providers.flatMap((provider) => provider.release?.producers ?? []),
-  destinations: providers.flatMap((provider) => provider.release?.destinations ?? []),
-  notifications: providers.flatMap((provider) => provider.release?.notifications ?? []),
-});
+): ReleaseDescriptorRegistry {
+  return {
+    sources: providers.flatMap((provider) => provider.release?.sources ?? []),
+    producers: providers.flatMap((provider) => provider.release?.producers ?? []),
+    destinations: providers.flatMap((provider) => provider.release?.destinations ?? []),
+    notifications: providers.flatMap((provider) => provider.release?.notifications ?? []),
+  };
+}
+
+/** Whether the host must inspect the project: stated by the descriptor, else implied by `inspect`. */
+const isInspectable = (definition: { inspectable?: boolean; inspect?: unknown }): boolean =>
+  definition.inspectable ?? Boolean(definition.inspect);
 
 export const buildReleaseCatalog = (
-  registry: ReleaseRegistry,
+  registry: ReleaseDescriptorRegistry,
   host?: Parameters<
     NonNullable<ReleaseRegistry["producers"][number]["targets"][number]["isAvailable"]>
   >[0],
@@ -32,7 +42,7 @@ export const buildReleaseCatalog = (
     fields: source.fields,
     output: source.output,
     defaultConfig: source.createDefaultConfig(),
-    requiresAgentInspection: Boolean(source.inspect),
+    requiresAgentInspection: isInspectable(source),
   })),
   producers: registry.producers.map((producer) => ({
     id: producer.id,
@@ -45,7 +55,7 @@ export const buildReleaseCatalog = (
     supportsBeforeBuildHooks: producer.supportsBeforeBuildHooks,
     inputs: producer.inputs,
     defaultConfig: producer.createDefaultConfig(),
-    requiresAgentInspection: Boolean(producer.inspect),
+    requiresAgentInspection: isInspectable(producer),
     targets: producer.targets.map((target) => ({
       id: target.id,
       label: target.label,

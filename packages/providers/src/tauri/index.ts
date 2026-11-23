@@ -1,45 +1,13 @@
 /// <reference path="./declarations.d.ts" />
-import { createProviderDefinition, pickLiteral } from "@pipelab/shared";
-import { requiresHostOfSamePlatform } from "../host-matrix";
+import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseProducerDefinition } from "@pipelab/shared";
 import { tauriWorkflowTaskFactories } from "./package";
-import { tauriProviderLogo } from "../provider-icons";
-import type { DesktopTargetInputs } from "@pipelab/plugin-core";
+import { tauriMetadata, tauriProducerDescriptor, tauriTargetInputs } from "./metadata";
 
-export const tauriTargetInputs = (targetId: string): DesktopTargetInputs => {
-  const [target, arch] = targetId.split("-");
-  const platform = target === "windows" ? "win32" : target === "macos" ? "darwin" : "linux";
-  const supportedArch = pickLiteral(["x64", "arm64"], arch);
-  if (!supportedArch) throw new Error(`Unsupported Tauri target: ${targetId}`);
-  return { platform, arch: supportedArch };
-};
-
-const tauriTargetDescriptor = (id: string) => {
-  const inputs = tauriTargetInputs(id);
-  return {
-    kind: "application" as const,
-    technology: "tauri",
-    platform:
-      inputs.platform === "win32" ? "windows" : inputs.platform === "darwin" ? "macos" : "linux",
-    architecture: inputs.arch,
-    container: "directory" as const,
-  };
-};
+export { tauriTargetInputs };
 
 const tauriProducer: ReleaseProducerDefinition = {
-  id: "@pipelab/plugin-tauri/producer",
-  label: "Tauri",
-  planning: { mode: "build" },
-  accepts: { kind: "application", platform: "web", container: "directory" },
-  targets: ["windows-x64", "linux-x64", "macos-arm64"].map((id) => ({
-    id,
-    label: id,
-    buildType: "desktop",
-    output: tauriTargetDescriptor(id),
-    createDefaultConfig: () => ({}),
-    isAvailable: (host) => requiresHostOfSamePlatform(tauriTargetDescriptor(id).platform, host),
-  })),
-  createDefaultConfig: () => ({}),
+  ...tauriProducerDescriptor,
   validate: () => [],
   compile: (input, config) => ({
     steps: config.targets
@@ -73,12 +41,7 @@ const tauriProducer: ReleaseProducerDefinition = {
 };
 
 export const provider = createProviderDefinition({
-  id: "@pipelab/plugin-tauri",
-  packageName: "@pipelab/plugin-tauri",
-  name: "Tauri",
-  description: "Pipelab provider for packaging apps with Tauri",
-  icon: { type: "image", image: tauriProviderLogo },
-  isOfficial: true,
+  ...tauriMetadata,
   release: { producers: [tauriProducer] },
   workflowTasks: tauriWorkflowTaskFactories,
 });

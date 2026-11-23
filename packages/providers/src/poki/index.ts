@@ -8,24 +8,12 @@ import {
 
 import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseDestinationDefinition } from "@pipelab/shared";
-import { pokiProviderLogo } from "../provider-icons";
+import { pokiDestinationDescriptor, pokiMetadata } from "./metadata";
 
 export { createPokiUploadTask, WORKFLOW_TASK_ID };
 
 const pokiDestination: ReleaseDestinationDefinition = {
-  id: "@pipelab/plugin-poki/destination",
-  label: "Poki",
-  accepts: { kind: "application", platform: "web", container: "directory" },
-  fields: [
-    {
-      key: "accountConnectionId",
-      type: "connection",
-      integration: "@pipelab/plugin-poki",
-      label: "Poki account",
-    },
-    { key: "project", type: "text", label: "Poki project", required: true },
-  ],
-  createDefaultConfig: () => ({ accountConnectionId: "", project: "" }),
+  ...pokiDestinationDescriptor,
   validate: (config) =>
     ["project"]
       .filter((key) => !String(config.config[key] || "").trim())
@@ -56,26 +44,7 @@ const pokiDestination: ReleaseDestinationDefinition = {
 };
 
 export const provider = createProviderDefinition({
-  id: "@pipelab/plugin-poki",
-  packageName: "@pipelab/plugin-poki",
-  name: "Poki",
-  description: "Pipelab provider for publishing HTML5 games to Poki",
-  icon: { type: "image", image: pokiProviderLogo },
-  isOfficial: true,
-  integrations: [
-    {
-      name: "Poki Account",
-      testable: true,
-      fields: [
-        {
-          key: "account",
-          label: "Account name",
-          type: "text",
-          placeholder: "e.g., studio",
-        },
-      ],
-    },
-  ],
+  ...pokiMetadata,
   release: { destinations: [pokiDestination] },
   connectionTests: { "@pipelab/plugin-poki": testPokiConnection },
   preflights: { [WORKFLOW_TASK_ID]: checkPokiPreflight },

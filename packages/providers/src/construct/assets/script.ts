@@ -13,6 +13,7 @@ import type {
   ConstructLoginFailure,
   WaitForLocatorWithAbortOptions,
 } from "./script.types";
+import { CONSTRUCT_EXPORT_TYPES, type ConstructExportType } from "../export-types";
 
 const CONSTRUCT_READY_TIMEOUT_MS = 15_000;
 const CONSTRUCT_SETTINGS_SEED_TIMEOUT_MS = 15_000;
@@ -25,8 +26,7 @@ const OPEN_RETRY_COUNT = 1;
 const CONSTRUCT_EDITOR_ORIGIN = "https://editor.construct.net";
 const DESKTOP_OPTIONS_DIALOG_TIMEOUT_MS = 10_000;
 
-export const CONSTRUCT_EXPORT_TYPES = ["web", "webview2", "wkwebview", "cef"] as const;
-export type ConstructExportType = (typeof CONSTRUCT_EXPORT_TYPES)[number];
+export { CONSTRUCT_EXPORT_TYPES, type ConstructExportType };
 
 const CONSTRUCT_EXPORT_TYPE_LABELS: Record<ConstructExportType, string> = {
   web: "Web (HTML5)",

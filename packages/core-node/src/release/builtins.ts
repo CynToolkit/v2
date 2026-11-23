@@ -1,5 +1,17 @@
 import {
+  bundleProducerDescriptor,
+  bundleZipOutput,
   deploymentFolderName,
+  folderDestinationDescriptor,
+  folderOutput,
+  folderSourceDescriptor,
+  genericZipSourceDescriptor,
+  passthroughProducerDescriptor,
+  unzipProducerDescriptor,
+  webFolderOutput,
+  webFolderSourceDescriptor,
+  webZipSourceDescriptor,
+  zipDestinationDescriptor,
   deploymentFolderPath,
   transformArtifactDescriptor,
   type CompiledArtifact,
@@ -7,17 +19,11 @@ import {
   type ReleaseDestinationDefinition,
   type ReleaseProducerDefinition,
   type ReleaseSourceDefinition,
+  type ReleaseSourceDescriptor,
 } from "@pipelab/shared";
 import { CORE_WORKFLOW_TASKS, type WorkflowStep } from "@pipelab/workflow-runtime";
 import type { SlotTaskConfigSlot } from "./builtins.types";
 export { CORE_WORKFLOW_TASKS } from "@pipelab/workflow-runtime";
-
-const folderOutput = { kind: "files", container: "directory" } as const;
-const webFolderOutput = {
-  kind: "application",
-  platform: "web",
-  container: "directory",
-} as const;
 
 /** Renames the slot's destination field to the task input it feeds; other slot config passes through. */
 const slotTaskConfig = (
@@ -30,11 +36,7 @@ const slotTaskConfig = (
 };
 
 const folderSource: ReleaseSourceDefinition = {
-  id: "@pipelab/core/source/folder",
-  label: "Folder",
-  fields: [{ key: "path", type: "directory", label: "Folder path", required: true }],
-  output: folderOutput,
-  createDefaultConfig: () => ({ path: "" }),
+  ...folderSourceDescriptor,
   validate: (config) =>
     typeof config.path === "string" && config.path
       ? []
@@ -70,9 +72,7 @@ const folderSource: ReleaseSourceDefinition = {
 
 const webFolderSource: ReleaseSourceDefinition = {
   ...folderSource,
-  id: "@pipelab/core/source/web-folder",
-  label: "Web app folder",
-  output: webFolderOutput,
+  ...webFolderSourceDescriptor,
   compile: (config) => ({
     steps: [
       {
@@ -95,67 +95,44 @@ const webFolderSource: ReleaseSourceDefinition = {
   }),
 };
 
-const zipSource = (
-  id: string,
-  label: string,
-  output: ReleaseSourceDefinition["output"],
-): ReleaseSourceDefinition => ({
-  id,
-  label,
-  fields: [
-    { key: "path", type: "file", label: "ZIP path", required: true, fileExtensions: ["zip"] },
-  ],
-  output,
-  createDefaultConfig: () => ({ path: "" }),
-  validate: (config) =>
-    typeof config.path === "string" && config.path
-      ? []
-      : [
-          {
-            code: "source.path.required",
-            message: "A ZIP path is required.",
-            severity: "error",
-            path: "path",
+const zipSource = (descriptor: ReleaseSourceDescriptor): ReleaseSourceDefinition => {
+  const { id, output } = descriptor;
+  return {
+    ...descriptor,
+    validate: (config) =>
+      typeof config.path === "string" && config.path
+        ? []
+        : [
+            {
+              code: "source.path.required",
+              message: "A ZIP path is required.",
+              severity: "error",
+              path: "path",
+            },
+          ],
+    compile: (config) => ({
+      steps: [
+        {
+          id: `${id}-source`,
+          uses: CORE_WORKFLOW_TASKS.copy,
+          with: {
+            from: config.path,
+            to: "${{ variables.workspace }}/source.zip",
+            overwrite: true,
           },
-        ],
-  compile: (config) => ({
-    steps: [
-      {
-        id: `${id}-source`,
-        uses: CORE_WORKFLOW_TASKS.copy,
-        with: {
-          from: config.path,
-          to: "${{ variables.workspace }}/source.zip",
-          overwrite: true,
+          artifacts: { output: { descriptor: output } },
         },
-        artifacts: { output: { descriptor: output } },
-      },
-    ],
-    artifact: { reference: { stepId: `${id}-source`, artifact: "output" }, descriptor: output },
-  }),
-});
+      ],
+      artifact: { reference: { stepId: `${id}-source`, artifact: "output" }, descriptor: output },
+    }),
+  };
+};
 
-const genericZipSource = zipSource("@pipelab/core/source/zip", "ZIP", {
-  kind: "files",
-  container: "archive",
-  format: "zip",
-});
-const webZipSource = zipSource("@pipelab/core/source/web-zip", "Web app ZIP", {
-  kind: "application",
-  platform: "web",
-  container: "archive",
-  format: "zip",
-});
+const genericZipSource = zipSource(genericZipSourceDescriptor);
+const webZipSource = zipSource(webZipSourceDescriptor);
 
 const folderDestination: ReleaseDestinationDefinition = {
-  id: "@pipelab/core/destination/folder",
-  label: "Folder",
-  icon: { type: "icon", icon: "mdi-folder-outline" },
-  accepts: {},
-  requiresBuild: true,
-  fields: [],
-  slotFields: [{ key: "outputDir", type: "directory", label: "Output folder", required: true }],
-  createDefaultConfig: () => ({}),
+  ...folderDestinationDescriptor,
   validate: (destination) =>
     destination.slots
       .map((slot, index) => ({ slot, index }))
@@ -188,26 +165,11 @@ const folderDestination: ReleaseDestinationDefinition = {
 };
 
 const zipDestination: ReleaseDestinationDefinition = {
-  id: "@pipelab/core/destination/zip",
-  label: "ZIP",
-  icon: { type: "icon", icon: "mdi-folder-zip-outline" },
-  accepts: { container: ["directory", "archive"] },
+  ...zipDestinationDescriptor,
   acceptsWhen: (artifact) =>
     artifact.container === "directory" || artifact.format === "zip"
       ? { accepted: true }
       : { accepted: false, reason: "A ZIP destination accepts folders and ZIP archives." },
-  fields: [],
-  slotFields: [
-    {
-      key: "outputPath",
-      type: "file",
-      label: "ZIP output path",
-      required: true,
-      fileExtensions: ["zip"],
-      pathMode: "save",
-    },
-  ],
-  createDefaultConfig: () => ({}),
   validate: (destination) =>
     destination.slots
       .map((slot, index) => ({ slot, index }))
@@ -251,32 +213,16 @@ const zipDestination: ReleaseDestinationDefinition = {
         ],
 };
 
-const bundleZipOutput = { kind: "files", container: "archive", format: "zip" } as const;
-
 /**
  * Puts every input into one ZIP with one top-level folder per input, named by its label. Folder
  * inputs are copied into a staging folder; ZIP inputs (for nested bundles) are extracted into it.
  */
 const bundleProducer: ReleaseProducerDefinition = {
-  id: "@pipelab/core/bundle",
-  label: "Bundle",
-  planning: { mode: "build" },
-  inputs: "many",
-  accepts: { kind: ["application", "files"], container: ["directory", "archive"] },
+  ...bundleProducerDescriptor,
   acceptsWhen: (artifact) =>
     artifact.container === "directory" || artifact.format === "zip"
       ? { accepted: true }
       : { accepted: false, reason: "A bundle accepts folders and ZIP archives." },
-  targets: [
-    {
-      id: "zip",
-      label: "ZIP archive",
-      buildType: "bundle",
-      output: bundleZipOutput,
-      createDefaultConfig: () => ({}),
-    },
-  ],
-  createDefaultConfig: () => ({}),
   validate: () => [],
   compile: () => {
     throw new Error("A bundle consumes several inputs; it is compiled with compileMany.");
@@ -323,19 +269,7 @@ const bundleProducer: ReleaseProducerDefinition = {
 };
 
 const unzipProducer: ReleaseProducerDefinition = {
-  id: "@pipelab/core/unzip",
-  label: "Extract ZIP",
-  planning: { mode: "automatic" },
-  accepts: { container: "archive", format: "zip" },
-  targets: [
-    {
-      id: "output",
-      label: "Extracted files",
-      transform: { changes: { container: "directory" }, remove: ["format"] },
-      createDefaultConfig: () => ({}),
-    },
-  ],
-  createDefaultConfig: () => ({}),
+  ...unzipProducerDescriptor,
   validate: () => [],
   compile: (input: CompiledArtifact, config) => {
     const descriptor = transformArtifactDescriptor(input.descriptor, {
@@ -359,14 +293,7 @@ const unzipProducer: ReleaseProducerDefinition = {
 };
 
 const passthroughProducer: ReleaseProducerDefinition = {
-  id: CORE_WORKFLOW_TASKS.passthrough,
-  label: "Passthrough",
-  planning: { mode: "automatic" },
-  accepts: {},
-  targets: [
-    { id: "output", label: "Output", transform: { changes: {} }, createDefaultConfig: () => ({}) },
-  ],
-  createDefaultConfig: () => ({}),
+  ...passthroughProducerDescriptor,
   validate: () => [],
   compile: (input, config) => {
     const stepId = `${config.id}-output`;

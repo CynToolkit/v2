@@ -1,6 +1,5 @@
 import { CORE_WORKFLOW_TASKS } from "@pipelab/workflow-runtime";
 import type {
-  Availability,
   CompiledArtifact,
   ReleaseCompileContext,
   ReleaseProducerConfig,
@@ -8,82 +7,10 @@ import type {
 } from "@pipelab/shared";
 import type { WorkflowStep } from "@pipelab/workflow-runtime";
 import { constructExportInputs } from "./export-inputs";
-
-import type { ConstructTargets } from "./producer.types";
-
-const desktopUnavailable: Availability = {
-  available: false,
-  reason: "Construct desktop exports are not available yet",
-};
-
-const constructTargets: Array<ConstructTargets> = [
-  {
-    id: "web",
-    buildType: "web",
-    exportType: "web",
-    output: {
-      kind: "application",
-      technology: "construct",
-      platform: "web",
-      container: "directory",
-    },
-    isAvailable: () => ({ available: true }),
-  },
-  {
-    id: "webview2-windows-x64",
-    buildType: "desktop",
-    exportType: "webview2",
-    output: {
-      kind: "application",
-      technology: "webview2",
-      platform: "windows",
-      architecture: "x64",
-      container: "directory",
-    },
-    isAvailable: () => desktopUnavailable,
-  },
-  {
-    id: "wkwebview-macos-arm64",
-    buildType: "desktop",
-    exportType: "wkwebview",
-    output: {
-      kind: "application",
-      technology: "wkwebview",
-      platform: "macos",
-      architecture: "arm64",
-      container: "directory",
-    },
-    isAvailable: () => desktopUnavailable,
-  },
-  {
-    id: "cef-linux-x64",
-    buildType: "desktop",
-    exportType: "cef",
-    output: {
-      kind: "application",
-      technology: "cef",
-      platform: "linux",
-      architecture: "x64",
-      container: "directory",
-    },
-    isAvailable: () => desktopUnavailable,
-  },
-];
+import { constructProducerDescriptor, constructTargets } from "./metadata";
 
 export const constructProducer: ReleaseProducerDefinition = {
-  id: "@pipelab/plugin-construct/producer",
-  label: "Construct",
-  planning: { mode: "build" },
-  accepts: { kind: "project", technology: "construct" },
-  targets: constructTargets.map((target) => ({
-    id: target.id,
-    label: target.id,
-    buildType: target.buildType,
-    output: target.output,
-    createDefaultConfig: () => ({}),
-    isAvailable: target.isAvailable,
-  })),
-  createDefaultConfig: () => ({}),
+  ...constructProducerDescriptor,
   validate: () => [],
   compile: (
     _input: CompiledArtifact,

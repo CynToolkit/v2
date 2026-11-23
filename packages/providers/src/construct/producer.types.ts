@@ -1,4 +1,4 @@
-import type { ConstructExportType } from "./assets/script";
+import type { ConstructExportType } from "./export-types";
 import type { ArtifactDescriptor } from "@pipelab/shared";
 import type { Availability } from "@pipelab/shared";
 

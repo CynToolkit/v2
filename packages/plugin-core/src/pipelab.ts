@@ -26,11 +26,7 @@ export interface PackagedApp {
   binary: string | undefined;
 }
 
-/** The platform and architecture a desktop target is built for. */
-export interface DesktopTargetInputs {
-  platform: "win32" | "linux" | "darwin";
-  arch: "x64" | "arm64";
-}
+export type { DesktopTargetInputs } from "@pipelab/shared";
 
 /**
  * Provider-facing compatibility alias for ProviderHostContext.
