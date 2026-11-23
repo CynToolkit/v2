@@ -2,7 +2,7 @@ import { mkdir } from "node:fs/promises";
 
 export type ManagedFolderKind = "cache" | "temp";
 
-export const isManagedFolderKind = (value: unknown): value is ManagedFolderKind =>
+const isManagedFolderKind = (value: unknown): value is ManagedFolderKind =>
   value === "cache" || value === "temp";
 
 /**
