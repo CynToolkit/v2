@@ -51,6 +51,16 @@ if (platform === "win32") {
   baseProfile = join(homedir(), "Library", "Application Support", "Google", "Chrome");
 }
 
+/**
+ * Construct needs WebGL. GPU-less hosts (macOS CI, VMs, headless Chromium) fail to create a
+ * context unless Chromium falls back to ANGLE's SwiftShader software renderer.
+ */
+export const CONSTRUCT_WEBGL_ARGS = [
+  "--ignore-gpu-blocklist",
+  "--use-angle=swiftshader",
+  "--enable-unsafe-swiftshader",
+];
+
 export const sharedParams = {
   username: createStringParam("", {
     label: "Username",
@@ -603,6 +613,7 @@ export const exportc3p = async (
       channel: browserChannel,
       locale: "en-US",
       recordVideo,
+      args: CONSTRUCT_WEBGL_ARGS,
     });
 
     if (!browserContext) {
