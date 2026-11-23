@@ -17,6 +17,8 @@ const arch = process.env.TARGET_ARCH || process.arch;
 const productName = isBeta ? "PipelabBeta" : "Pipelab";
 const appId = isBeta ? "app.pipelab.desktop.beta" : "app.pipelab.desktop";
 
+const macEntitlements = path.join(root, "assets/build/entitlements.mac.plist");
+
 const macIdentity = isPullRequest
   ? null // unsigned
   : hasAppleCredentials
@@ -67,8 +69,9 @@ export default {
     icon: "icon.icns",
     category: "public.app-category.developer-tools",
     hardenedRuntime: true,
-    entitlements: "entitlements.mac.plist",
-    entitlementsInherit: "entitlements.mac.plist",
+    // Absolute: codesign receives this path verbatim and runs from another working directory.
+    entitlements: macEntitlements,
+    entitlementsInherit: macEntitlements,
     identity: macIdentity,
     notarize: !isPullRequest && hasAppleCredentials,
     extendInfo: {
