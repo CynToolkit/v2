@@ -169,7 +169,6 @@ export type End<KEY extends Channels> = Extract<IpcDefinition[KEY][1], EndEventS
 
 export type { RequestId } from "./ipc.types";
 export type { ConnectionTestInput, FsDirectoryEntry, FsRoot } from "./apis.types";
-import type { RequestId } from "./ipc.types";
 import type {
   FsReadInput,
   FsReadEvent,

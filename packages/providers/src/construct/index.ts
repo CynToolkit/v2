@@ -1,11 +1,7 @@
 /// <reference path="./declarations.d.ts" />
 import { createProviderDefinition } from "@pipelab/shared";
 import { basename, normalize } from "node:path";
-import {
-  discoverBrowserProfiles,
-  isChromiumProfileDirectory,
-  listChromiumBrowserProfiles,
-} from "./browser-profiles";
+import { isChromiumProfileDirectory, listChromiumBrowserProfiles } from "./browser-profiles";
 import type { ReleaseFieldOption, ReleaseSourceDefinition } from "@pipelab/shared";
 import { getSavedConstructVersion } from "./saved-version";
 export { discoverBrowserProfiles, inspectChromiumProfile } from "./browser-profiles";
