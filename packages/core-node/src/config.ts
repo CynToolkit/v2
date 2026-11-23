@@ -2,13 +2,8 @@ import type { PipelabContext } from "./context";
 import path from "node:path";
 import { ensure } from "./utils/fs-extras";
 import fs from "node:fs/promises";
-import type { AppConfig, ConnectionsConfig, FileRepo } from "@pipelab/shared";
-import {
-  useLogger,
-  appSettingsMigrator,
-  connectionsMigrator,
-  fileRepoMigrations,
-} from "@pipelab/shared";
+import type { AppConfig, FileRepo } from "@pipelab/shared";
+import { useLogger, appSettingsMigrator, fileRepoMigrations } from "@pipelab/shared";
 import type { SetupConfigFile, SetupConfigFileOptions } from "./config.types";
 
 /** A persisted config file; its `version` selects the migrations to run. */
@@ -125,13 +120,6 @@ export const setupSettingsConfigFile = (context: PipelabContext) => {
   return setupConfigFile<AppConfig>(context.getSettingsPath(), {
     context,
     migrator: appSettingsMigrator,
-  });
-};
-
-export const setupConnectionsConfigFile = (context: PipelabContext) => {
-  return setupConfigFile<ConnectionsConfig>(context.getConnectionsPath(), {
-    context,
-    migrator: connectionsMigrator,
   });
 };
 

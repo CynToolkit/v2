@@ -17,8 +17,14 @@ language, cache, temporary folders and other preferences are preserved.
 
 An **integration** configures credentials or an account used by a provider.
 Manage these profiles on the **Connections** screen. Saved connections keep
-their IDs and credentials during the settings upgrade. Saving connections on
-macOS or Linux restricts the configuration file to the current OS user.
+their IDs and credentials during the settings upgrade. Credential values (API
+keys, tokens and similar) are encrypted at rest with a key kept in the operating
+system credential store, in Desktop and in the CLI alike. Existing plaintext
+connections are encrypted the next time connections are loaded. If no credential
+store is available, values stay readable in the configuration file, which is
+restricted to the current OS user on macOS and Linux, and a warning is logged.
+Connections that were encrypted cannot be read without their key: restore the
+credential store entry or re-enter the credentials.
 
 Construct, Itch, Poki and Steam connections have a **Test connection** button. It runs a
 read-only check (no upload, no login prompt) and shows the result next to the

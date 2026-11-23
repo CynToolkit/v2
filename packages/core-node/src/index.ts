@@ -5,7 +5,6 @@ export * from "./ipc-core";
 export * from "./handlers/index";
 export {
   setupSettingsConfigFile,
-  setupConnectionsConfigFile,
   setupProjectsConfigFile,
   deleteWorkflowConfigFileByName,
 } from "./config";

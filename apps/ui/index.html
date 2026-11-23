@@ -8,10 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      id="geist-font"
       href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&display=swap"
       rel="stylesheet"
       media="print"
-      onload="this.media = 'all'"
     />
     <noscript>
       <link
@@ -216,6 +216,12 @@
         const theme = localStorage.getItem("pipelab.theme");
         document.documentElement.classList.toggle("dark", theme === "dark");
       } catch {}
+      // Non-blocking font load without an inline event handler (blocked by CSP).
+      const font = document.getElementById("geist-font");
+      if (font) {
+        if (font.sheet) font.media = "all";
+        else font.addEventListener("load", () => (font.media = "all"), { once: true });
+      }
     </script>
   </head>
   <body>
