@@ -30,13 +30,13 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           cache: pnpm
@@ -70,13 +70,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           cache: pnpm
@@ -173,19 +173,19 @@ jobs:
       matrix:
         task: [lint, typecheck, test, build]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           cache: pnpm
 
       - name: Cache Turbo
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: ${{ runner.os }}-${{ runner.arch }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ matrix.task }}-${{ github.sha }}
@@ -253,7 +253,7 @@ jobs:
 
       - name: Save website build
         if: matrix.task == 'build'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-website
           include-hidden-files: true
@@ -262,7 +262,7 @@ jobs:
 
       - name: Save documentation build
         if: matrix.task == 'build'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-documentation
           include-hidden-files: true
@@ -274,13 +274,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
 
@@ -311,7 +311,7 @@ jobs:
       website: ${{ steps.paths.outputs.website }}
       documentation: ${{ steps.paths.outputs.documentation }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Match deployment paths
@@ -396,15 +396,15 @@ jobs:
       published: ${{ steps.changesets.outputs.published }}
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           cache: pnpm
@@ -414,7 +414,7 @@ jobs:
 
       - name: Create version pull request or publish CLI
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: pnpm version-packages
           publish: pnpm release
@@ -451,7 +451,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
 
@@ -463,11 +463,11 @@ jobs:
           actual_version=$(node -p "require('./apps/desktop/package.json').version")
           [[ "$RELEASE_VERSION" == "$actual_version" ]]
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           cache: pnpm
@@ -498,7 +498,7 @@ jobs:
 
       - name: Import Apple Code Signing Certificate
         if: startsWith(matrix.os, 'macos-') && steps.apple_signing.outputs.mode == 'developer-id'
-        uses: apple-actions/import-codesign-certs@v3
+        uses: apple-actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.CERTIFICATE_OSX_APPLICATION }}
           p12-password: ${{ secrets.CERTIFICATE_OSX_APPLICATION_PASSWORD }}
@@ -550,7 +550,7 @@ jobs:
           signature=$(codesign -dv --verbose=4 "$app" 2>&1)
           grep -q 'Authority=Developer ID Application:' <<< "$signature"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-${{ matrix.os }}-${{ matrix.arch }}
           path: apps/desktop/out/make/**/*
@@ -565,9 +565,9 @@ jobs:
       contents: write
       actions: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: release-*
           path: artifacts
@@ -579,7 +579,7 @@ jobs:
         run: node scripts/release-notes.mjs "$RELEASE_VERSION" > release-notes.md
 
       - name: Publish or update same-tag release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: "v${{ needs.changesets.outputs.version }}"
           tag_name: "@pipelab/app@${{ needs.changesets.outputs.version }}"
