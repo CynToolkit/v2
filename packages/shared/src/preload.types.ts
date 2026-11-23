@@ -31,6 +31,7 @@ export interface PipelabBridge {
   showSaveDialog: (options: Electron.SaveDialogOptions) => Promise<SaveDialogResult>;
   openExternal: (url: string) => Promise<boolean | void>;
   showItemInFolder: (path: string) => Promise<unknown>;
+  openManagedFolder: (kind: "cache" | "temp") => Promise<void>;
   isPathBlacklisted: (path: string) => Promise<boolean>;
   relaunch: () => Promise<void>;
   installUpdate: () => Promise<void>;

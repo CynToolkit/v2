@@ -1,12 +1,21 @@
 import * as p from "@clack/prompts";
-import { setTimeout } from "node:timers/promises";
 import { PipelabContext } from "@pipelab/core-node";
 import { setupSettingsConfigFile } from "@pipelab/core-node";
 import { getDefaultUserDataPath } from "../paths";
 import type { UserDataOptions } from "./options.types";
 
+const INTEGRATION_LABELS: Record<string, string> = {
+  path: "Add 'pipelab' to your PATH",
+  completion: "Shell autocompletion",
+  telemetry: "Anonymous telemetry",
+};
+
 export async function setupCommand(options: UserDataOptions) {
   p.intro(`Welcome to Pipelab CLI Setup Wizard`);
+
+  // Stages the wizard offers but cannot perform yet; reported at the end and
+  // reflected in the exit status so automation does not read them as success.
+  const notImplemented: string[] = [];
 
   const userDataPath = options.userData || getDefaultUserDataPath();
   const context = new PipelabContext({ userDataPath });
@@ -15,8 +24,8 @@ export async function setupCommand(options: UserDataOptions) {
   const authType = await p.select({
     message: "How would you like to authenticate?",
     options: [
-      { value: "token", label: "Access Token (Recommended)" },
-      { value: "credentials", label: "Email & Password" },
+      { value: "token", label: "Access Token (not implemented yet)" },
+      { value: "credentials", label: "Email & Password (not implemented yet)" },
       { value: "skip", label: "Skip for now" },
     ],
   });
@@ -26,20 +35,8 @@ export async function setupCommand(options: UserDataOptions) {
     process.exit(0);
   }
 
-  if (authType === "token") {
-    const token = await p.password({
-      message: "Enter your Pipelab Access Token",
-      validate: (value) => {
-        if (!value) return "Token is required";
-        if (value.length < 10) return "Token is too short";
-      },
-    });
-    if (p.isCancel(token)) return;
-
-    const s = p.spinner();
-    s.start("Authenticating with Pipelab...");
-    await setTimeout(1500); // Fake delay
-    s.stop("Authenticated successfully!");
+  if (authType === "token" || authType === "credentials") {
+    notImplemented.push("Authentication (no credentials were stored)");
   }
 
   // 2. Configuration
@@ -77,7 +74,6 @@ export async function setupCommand(options: UserDataOptions) {
   const localeValue = configChanges.locale;
   const locale = isLocale(localeValue) ? localeValue : "en-US";
 
-  // Save config (Fake save for now to avoid side effects in this demo if needed, but let's do it real)
   await settings.setConfig({
     ...config,
     theme,
@@ -88,27 +84,35 @@ export async function setupCommand(options: UserDataOptions) {
   const integrations = await p.multiselect({
     message: "Which integrations would you like to enable?",
     options: [
-      { value: "path", label: "Add 'pipelab' to your PATH", hint: "recommended" },
-      { value: "completion", label: "Enable shell autocompletion" },
-      { value: "telemetry", label: "Anonymous telemetry", hint: "helps us improve" },
+      { value: "path", label: INTEGRATION_LABELS.path, hint: "not implemented yet" },
+      { value: "completion", label: INTEGRATION_LABELS.completion, hint: "not implemented yet" },
+      { value: "telemetry", label: INTEGRATION_LABELS.telemetry, hint: "not implemented yet" },
     ],
   });
 
   if (p.isCancel(integrations)) return;
 
-  if (integrations.length > 0) {
-    const s = p.spinner();
-    s.start("Setting up integrations...");
-    await setTimeout(2000); // Fake delay
-    s.stop("Integrations configured!");
+  for (const integration of integrations) {
+    notImplemented.push(`${INTEGRATION_LABELS[String(integration)] ?? String(integration)}`);
+  }
+
+  if (notImplemented.length > 0) {
+    p.log.error(
+      `These selections are not implemented and were NOT applied:\n${notImplemented
+        .map((item) => `  - ${item}`)
+        .join("\n")}`,
+    );
+    p.outro("Setup finished with unapplied selections (theme and language were saved).");
+    process.exitCode = 1;
+    return;
   }
 
   p.note(
-    `You're all set! You can now use Pipelab CLI to manage your automation.\n\nType 'pipelab --help' to get started.`,
+    `Theme and language were saved.\n\nType 'pipelab --help' to get started.`,
     "Setup Complete",
   );
 
-  p.outro("Happy automating! 🚀");
+  p.outro("Setup complete.");
 }
 
 function isLocale(

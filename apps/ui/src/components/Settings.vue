@@ -934,23 +934,9 @@ function selectUpdateChannel(channel: UpdateChannel) {
 
 onMounted(checkUpdateChannel);
 
-const openCacheFolder = () => {
-  const path =
-    settingsRef.value?.cacheFolder ||
-    (storageInfo.value?.userDataPath ? `${storageInfo.value.userDataPath}/cache` : null);
-  if (path) {
-    shell.openExternal(`file://${path}`);
-  }
-};
+const openCacheFolder = () => shell.openManagedFolder("cache");
 
-const openTempFolder = () => {
-  const path =
-    settingsRef.value?.tempFolder ||
-    (storageInfo.value?.userDataPath ? `${storageInfo.value.userDataPath}/temp` : null);
-  if (path) {
-    shell.openExternal(`file://${path}`);
-  }
-};
+const openTempFolder = () => shell.openManagedFolder("temp");
 
 const browseCacheFolder = async () => {
   const result = await api.execute("dialog:showOpenDialog", {

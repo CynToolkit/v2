@@ -575,6 +575,7 @@ app.whenReady().then(async () => {
           }),
       ),
     getTrustedUiOrigins,
+    (kind) => (kind === "cache" ? workflowContext.getCachePath() : workflowContext.getTempPath()),
   );
   createWindow();
 
