@@ -156,6 +156,11 @@ export class DesktopAuthStorage implements SupportedStorage {
     });
   }
 
+  /** Delete the saved session, e.g. when it can no longer be read. */
+  async discard(): Promise<void> {
+    await serializeFileMutation(this.filePath, () => rm(this.filePath, { force: true }));
+  }
+
   async removeItem(key: string): Promise<void> {
     // Password auth replaces the saved session after Supabase clears its old verifier.
     if (this.passwordSession.getStore()) return;

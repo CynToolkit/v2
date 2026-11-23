@@ -12,6 +12,8 @@ import type { SpawnServerResult } from "./server-process.types";
 
 const READY_TIMEOUT_MS = 60_000;
 const STOP_TIMEOUT_MS = 10_000;
+const RECOVERY_TIMEOUT_MS = 30_000;
+const LOAD_ATTEMPTS = 5;
 const MAX_RESTARTS = 5;
 const RESTART_WINDOW_MS = 60_000;
 
@@ -188,7 +190,9 @@ const recoverServer = async (previousPort: number) => {
   if (restartTimes.length > MAX_RESTARTS) {
     dialog.showErrorBox(
       "Server Error",
-      "The Pipelab background server keeps crashing. Restart the application.",
+      "The Pipelab background server keeps crashing, so Pipelab will close.\n\n" +
+        "Restart the application. If this happens again, start Pipelab from a terminal and " +
+        "report the '[Server]' error lines it prints.",
     );
     app.quit();
     return;
@@ -212,6 +216,45 @@ const recoverServer = async (previousPort: number) => {
     }
   }
   void recoverServer(0);
+};
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** Port of the running server; waits while a crashed server is being restarted. */
+const waitForServerPort = async (timeoutMs = RECOVERY_TIMEOUT_MS): Promise<number> => {
+  const deadline = Date.now() + timeoutMs;
+  while (serverPort === null) {
+    if (stopping || Date.now() > deadline) {
+      throw new Error("The background server stopped and could not be restarted.");
+    }
+    await wait(100);
+  }
+  return serverPort;
+};
+
+const isConnectionFailure = (error: unknown) =>
+  isRecord(error) && error.code === "ERR_CONNECTION_REFUSED";
+
+/**
+ * Load the UI from the running server. The server can exit just after reporting ready (the
+ * supervisor then restarts it), so a refused connection waits for the restart and retries
+ * instead of failing startup.
+ */
+export const loadServerUi = async (load: (url: string) => Promise<void>): Promise<void> => {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= LOAD_ATTEMPTS; attempt++) {
+    const port = await waitForServerPort();
+    try {
+      await load(getUiUrl(port));
+      return;
+    } catch (error) {
+      if (!isConnectionFailure(error)) throw error;
+      lastError = error;
+      console.warn(`[Server] UI load refused on port ${port} (attempt ${attempt}); retrying.`);
+      await wait(500);
+    }
+  }
+  throw lastError;
 };
 
 export const startServer = async (): Promise<number> => {

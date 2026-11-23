@@ -113,4 +113,12 @@ describe("Desktop session storage", () => {
     await storage.setItem("session", "new-token");
     await expect(storage.getItem("session")).resolves.toBe("new-token");
   });
+
+  it("discards a saved session", async ({ onTestFinished }) => {
+    const { path, storage } = await setup(onTestFinished);
+    await storage.setItem("session", "old-token");
+    await storage.discard();
+    await expect(stat(path)).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(storage.getItem("session")).resolves.toBeNull();
+  });
 });
