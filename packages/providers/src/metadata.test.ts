@@ -6,7 +6,10 @@ import { buildBrowserProviderSpecs } from "./metadata";
 
 const sourceRoot = dirname(fileURLToPath(import.meta.url));
 
-/** Every relative module reachable from `entry`, plus the bare specifiers they import. */
+/**
+ * Every relative module reachable from `entry`, plus the bare specifiers they import. Type-only
+ * imports count: the UI typechecks whatever they reach, so a type leak breaks it as well.
+ */
 const importGraph = (entry: string) => {
   const files = new Set<string>();
   const specifiers = new Set<string>();
@@ -14,9 +17,7 @@ const importGraph = (entry: string) => {
     if (files.has(file)) return;
     files.add(file);
     const text = readFileSync(file, "utf8");
-    for (const match of text.matchAll(
-      /(?:import|export)\s+(?!type\b)[^;]*?from\s+["']([^"']+)["']/g,
-    )) {
+    for (const match of text.matchAll(/(?:import|export)\s+[^;]*?from\s+["']([^"']+)["']/g)) {
       const specifier = match[1];
       if (specifier.startsWith(".")) {
         const base = resolve(dirname(file), specifier);

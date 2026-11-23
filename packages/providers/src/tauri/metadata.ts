@@ -1,6 +1,9 @@
 import { pickLiteral } from "@pipelab/shared";
-import type { ReleaseProducerDescriptor, RendererProviderMetadata } from "@pipelab/shared";
-import type { DesktopTargetInputs } from "@pipelab/plugin-core";
+import type {
+  DesktopTargetInputs,
+  ReleaseProducerDescriptor,
+  RendererProviderMetadata,
+} from "@pipelab/shared";
 import { requiresHostOfSamePlatform } from "../host-matrix";
 import { tauriProviderLogo } from "../provider-icons";
 

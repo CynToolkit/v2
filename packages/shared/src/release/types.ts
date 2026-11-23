@@ -630,3 +630,9 @@ export interface ReleasePlanGraphEdges {
   from: string;
   to: string;
 }
+
+/** The platform and architecture a desktop target is built for. */
+export interface DesktopTargetInputs {
+  platform: "win32" | "linux" | "darwin";
+  arch: "x64" | "arm64";
+}
