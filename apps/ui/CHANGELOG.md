@@ -1,5 +1,9 @@
 # @pipelab/ui
 
+## 2.0.0-beta.44
+
+No changes in this release.
+
 ## 2.0.0-beta.43
 
 ### Minor Changes
