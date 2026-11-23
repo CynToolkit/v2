@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const { execFileSync } = require("node:child_process");
 const { createRequire } = require("node:module");
 const { resolve } = require("node:path");
 const workspaceRequire = createRequire(resolve(__dirname, "../../../../apps/website/package.json"));
@@ -7,9 +8,24 @@ workspaceRequire("tsx/cjs");
 
 const baseUrl = process.env.UI_BASE_URL || "http://127.0.0.1:5175";
 const chromiumPath = process.env.CHROMIUM_PATH || "/usr/bin/chromium";
-const {
-  default: { catalog, providers },
-} = require("../../src/generated/release-provider-specs.ts");
+// The editor serves this snapshot as an in-memory module; compute the same data here.
+const repoRoot = resolve(__dirname, "../../../..");
+const { catalog, providers } = JSON.parse(
+  execFileSync(
+    "pnpm",
+    [
+      "--filter",
+      "@pipelab/app",
+      "exec",
+      "tsx",
+      "../../packages/core-node/scripts/print-browser-provider-specs.ts",
+    ],
+    { cwd: repoRoot, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+  )
+    .trim()
+    .split("\n")
+    .at(-1),
+);
 
 (async () => {
   const browser = await chromium.launch({
