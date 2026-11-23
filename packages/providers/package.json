@@ -55,7 +55,7 @@
     "@pipelab/tsconfig": "workspace:*",
     "@types/node": "^24.12.2",
     "@types/proper-lockfile": "4.1.4",
-    "playwright": "1.63.0",
+    "playwright": "1.65.1",
     "typescript": "5.9.3",
     "vitest": "5.1.1"
   }
