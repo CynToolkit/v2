@@ -1,5 +1,12 @@
 # @pipelab/cli
 
+## 2.0.0-beta.45
+
+### Patch Changes
+
+- Updated dependencies [[`db964d1`](https://github.com/CynToolkit/v2/commit/db964d1d00f7a33b1b893093654111c7ae894a45)]:
+  - @pipelab/core-node@1.0.0-beta.43
+
 ## 2.0.0-beta.44
 
 No changes in this release.

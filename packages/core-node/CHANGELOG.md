@@ -1,5 +1,11 @@
 # @pipelab/core-node
 
+## 1.0.0-beta.43
+
+### Patch Changes
+
+- [#99](https://github.com/CynToolkit/v2/pull/99) [`db964d1`](https://github.com/CynToolkit/v2/commit/db964d1d00f7a33b1b893093654111c7ae894a45) Thanks [@Armaldio](https://github.com/Armaldio)! - Desktop no longer fails to start when the background server hits an error right after launch. An unreadable saved sign-in now signs you out instead of crashing the server, stray background errors no longer stop the server, and Desktop waits for a restarted server before loading the UI. Startup errors now explain what failed and what to do.
+
 ## 1.0.0-beta.42
 
 ### Minor Changes
