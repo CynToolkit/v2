@@ -1,5 +1,11 @@
 # @pipelab/asset-electron
 
+## 1.0.0-beta.33
+
+### Patch Changes
+
+- [#93](https://github.com/CynToolkit/v2/pull/93) [`3b1c287`](https://github.com/CynToolkit/v2/commit/3b1c287146bb532714de92a5759bbf5c5ad2a9a9) Thanks [@Armaldio](https://github.com/Armaldio)! - Electron game builds with the default configuration now install from a bundled lockfile, so they are reproducible and work from the local pnpm cache. Builds that override the Electron version or add custom packages still resolve dependencies fresh.
+
 ## 1.0.0-beta.32
 
 ### Patch Changes

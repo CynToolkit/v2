@@ -1,6 +1,6 @@
 {
   "name": "@pipelab/asset-electron",
-  "version": "1.0.0-beta.32",
+  "version": "1.0.0-beta.33",
   "private": true,
   "description": "Electron assets for pipelab",
   "license": "FSL-1.1-MIT",
