@@ -37,7 +37,7 @@
     "oxlint": "1.55.0",
     "playwright": "1.63.0",
     "turbo": "^2.8.15",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   },
   "resolutions": {
     "@codemirror/state": "6.4.1",
