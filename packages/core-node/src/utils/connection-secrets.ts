@@ -18,7 +18,7 @@ const CLEAR_FIELDS: ReadonlySet<string> = new Set([
 
 const SERVICE = "Pipelab connection secrets";
 
-export class ConnectionSecretsError extends Error {}
+class ConnectionSecretsError extends Error {}
 
 interface SealedValues {
   version: 1;
