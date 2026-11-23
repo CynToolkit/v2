@@ -51,7 +51,7 @@
     "@pipelab/plugin-core": "workspace:*",
     "@pipelab/shared": "workspace:*",
     "@pipelab/tsconfig": "workspace:*",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.65.1",
     "@types/node": "24.12.2",
     "@types/semver": "7.7.1",
     "cross-env": "10.1.0",
@@ -60,7 +60,7 @@
     "electron-updater": "6.8.11",
     "posthog-node": "6.0.2",
     "semver": "7.8.0",
-    "tsx": "4.19.1",
+    "tsx": "4.23.15",
     "typescript": "5.8.3",
     "vite": "8.3.8",
     "vitest": "5.1.1"
