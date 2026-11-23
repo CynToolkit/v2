@@ -24,9 +24,6 @@
       "entry": ["electron-builder.config.mjs"],
       "ignoreDependencies": ["@napi-rs/keyring"]
     },
-    "packages/core-node": {
-      "entry": ["scripts/*.ts"]
-    },
     "packages/providers": {
       "entry": [".construct-benchmark.ts"]
     },

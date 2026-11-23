@@ -29,6 +29,7 @@
     "@electron-toolkit/preload": "3.0.2",
     "@mdi/font": "7.4.47",
     "@pipelab/constants": "workspace:*",
+    "@pipelab/providers": "workspace:*",
     "@pipelab/shared": "workspace:*",
     "@primevue/themes": "4.1.1",
     "@supabase/supabase-js": "2.99.3",

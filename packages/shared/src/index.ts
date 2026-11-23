@@ -37,6 +37,7 @@ export * from "./release/types";
 export * from "./release/matcher";
 export * from "./release/config";
 export * from "./release/catalog";
+export * from "./release/builtin-descriptors";
 export * from "./release/compiler";
 export * from "./release/validate";
 export * from "./release/usage";

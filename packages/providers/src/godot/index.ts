@@ -11,38 +11,13 @@ import {
   godotPresetMatchesTarget,
   hasGodotTemplates,
 } from "./export";
-import { godotProviderLogo } from "../provider-icons";
+import {
+  godotExporterDescriptor,
+  godotMetadata,
+  godotSourceDescriptor,
+  targetDescriptors,
+} from "./metadata";
 import type { PresetInfoForProjectResult } from "./index.types";
-
-const targetDescriptors = {
-  "windows-x64": {
-    kind: "application" as const,
-    technology: "godot",
-    platform: "windows",
-    architecture: "x64",
-    container: "directory" as const,
-  },
-  "linux-x64": {
-    kind: "application" as const,
-    technology: "godot",
-    platform: "linux",
-    architecture: "x64",
-    container: "directory" as const,
-  },
-  "macos-arm64": {
-    kind: "application" as const,
-    technology: "godot",
-    platform: "macos",
-    architecture: "arm64",
-    container: "directory" as const,
-  },
-  web: {
-    kind: "application" as const,
-    technology: "godot",
-    platform: "web",
-    container: "directory" as const,
-  },
-};
 
 const descriptorFor = (targetId: string) => {
   const descriptor = Object.entries(targetDescriptors).find(([id]) => id === targetId)?.[1];
@@ -133,13 +108,7 @@ const inspect = async (path: string) => {
 };
 
 export const godotSource: ReleaseSourceDefinition = {
-  id: "@pipelab/plugin-godot/source",
-  label: "Godot project",
-  fields: [
-    { key: "path", type: "directory", label: "Project path", required: true, showInWizard: true },
-  ],
-  output: { kind: "project", technology: "godot", container: "directory" },
-  createDefaultConfig: () => ({ path: "" }),
+  ...godotSourceDescriptor,
   validate: (config) =>
     typeof config.path === "string" && config.path
       ? []
@@ -204,27 +173,7 @@ export const godotExportTask: WorkflowTask = async (data) => {
 };
 
 export const godotExporter: ReleaseProducerDefinition = {
-  id: "@pipelab/plugin-godot/producer",
-  label: "Godot exporter",
-  planning: { mode: "build" },
-  accepts: { kind: "project", technology: "godot", container: "directory" },
-  targets: Object.entries(targetDescriptors).map(([id, output]) => ({
-    id,
-    label: id,
-    buildType: id === "web" ? "web" : "desktop",
-    output,
-    fields: [
-      {
-        key: "preset",
-        type: "select" as const,
-        label: "Godot export preset",
-        required: true,
-      },
-    ],
-    createDefaultConfig: () => ({ preset: "" }),
-    isAvailable: () => ({ available: true }),
-  })),
-  createDefaultConfig: () => ({ executable: "" }),
+  ...godotExporterDescriptor,
   validate: (config, context) =>
     config.targets
       .filter((target) => target.enabled)
@@ -343,12 +292,7 @@ export const godotExporter: ReleaseProducerDefinition = {
 };
 
 export const provider = createProviderDefinition({
-  id: "@pipelab/plugin-godot",
-  packageName: "@pipelab/plugin-godot",
-  name: "Godot",
-  description: "Godot Release provider",
-  icon: { type: "image", image: godotProviderLogo },
-  isOfficial: true,
+  ...godotMetadata,
   release: { sources: [godotSource], producers: [godotExporter] },
   workflowTasks: {
     "@pipelab/plugin-godot/godot:export": () => godotExportTask,

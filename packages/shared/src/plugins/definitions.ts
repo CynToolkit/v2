@@ -1,5 +1,5 @@
 import type { OpenDialogOptions } from "electron";
-import type { ProviderReleaseDefinition } from "../release/types";
+import type { ProviderReleaseDefinition, ProviderReleaseDescriptor } from "../release/types";
 import type { WorkflowTask } from "@pipelab/workflow-runtime";
 import type {
   ControlTypeInputOptions,
@@ -126,7 +126,7 @@ export interface ProviderIdentity {
 /** Renderer-safe provider metadata; native task factories stay in the main process. */
 export interface RendererProviderMetadata extends ProviderIdentity {
   integrations?: Array<IntegrationDefinition>;
-  release?: ProviderReleaseDefinition;
+  release?: ProviderReleaseDescriptor;
 }
 
 export type WorkflowTaskFactory<TServices> = (services: TServices) => WorkflowTask<TServices>;
@@ -193,6 +193,7 @@ export type NotificationSenderRegistry = Record<string, NotificationSender>;
 
 /** Complete built-in provider contribution consumed by Pipelab hosts. */
 export interface ProviderDefinition<TServices = unknown> extends RendererProviderMetadata {
+  release?: ProviderReleaseDefinition;
   workflowTasks?: WorkflowTaskFactoryRegistry<TServices>;
   /** Preflight checks keyed by the workflow task ID of the destination step they guard. */
   preflights?: PreflightCheckRegistry<TServices>;

@@ -92,10 +92,22 @@ Low-level Forge and executable patch tests remain in the Electron provider folde
 
 ## Provider architecture boundary
 
-`core-node` has one `builtInProviders` list. Renderer metadata, Release
-contributions and native Workflow task registration derive from it; there is no
-mutable plugin store or background provider loading. Built-in implementations
-are versioned together in `@pipelab/providers`, with isolated provider folders.
+`core-node` has one `builtInProviders` list. Release contributions and native
+Workflow task registration derive from it; there is no mutable plugin store or
+background provider loading. Built-in implementations are versioned together in
+`@pipelab/providers`, with isolated provider folders.
+
+Each provider keeps its browser-safe data (identity, icon, integrations and the
+catalog fields of its Release sources, producers, destinations and
+notifications) in a `metadata.ts` descriptor module. `index.ts` adds the
+host-only behavior (`validate`, `compile`, `inspect`, tasks) on top of those
+descriptors. The UI builds its pre-connection catalog from the
+`@pipelab/providers/metadata` entry, which may import only `@pipelab/shared`;
+the UI never imports the providers' root entry. The metadata list defines the
+provider order; core-node resolves each host definition against it and fails at
+startup if a provider is missing on either side, or if a descriptor's
+`inspectable` flag disagrees with its `inspect` implementation. A core-node test
+keeps the metadata catalog identical to the one built from the full definitions.
 The `@pipelab/plugin-*` IDs and the persisted connection key `pluginName` are
 stable provider identifiers used by saved workflows and connections.
 

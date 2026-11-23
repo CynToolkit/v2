@@ -11,52 +11,12 @@ import { getSavedConstructVersion } from "./saved-version";
 export { discoverBrowserProfiles, inspectChromiumProfile } from "./browser-profiles";
 
 import { constructWorkflowTaskFactories } from "./export-c3p";
-import { constructProviderLogo } from "../provider-icons";
+import { constructMetadata, constructSourceDescriptor, constructVersionKeywords } from "./metadata";
 import { constructProducer } from "./producer";
 import { checkConstructPreflight, testConstructConnection } from "./preflight";
 
-// Whatever is entered as the version is appended to the editor URL as-is; these only save typing.
-const constructVersionKeywords: ReleaseFieldOption[] = [
-  { label: "latest", value: "latest" },
-  { label: "beta", value: "beta" },
-];
-
 export const constructSource: ReleaseSourceDefinition = {
-  id: "@pipelab/plugin-construct/source",
-  label: "Construct project",
-  fields: [
-    {
-      key: "path",
-      type: "file",
-      label: "Project file",
-      required: true,
-      fileExtensions: ["c3p"],
-      showInWizard: true,
-    },
-    {
-      key: "profilePath",
-      type: "select",
-      label: "Browser profile",
-      required: true,
-    },
-    {
-      key: "accountConnectionId",
-      type: "connection",
-      integration: "Construct Account",
-      label: "Construct account",
-      required: false,
-    },
-    {
-      key: "version",
-      type: "text",
-      label: "Construct version",
-      placeholder: "Empty: the project's saved release",
-      options: constructVersionKeywords,
-      required: false,
-    },
-  ],
-  output: { kind: "project", technology: "construct", container: "file" },
-  createDefaultConfig: () => ({ path: "", profilePath: "", accountConnectionId: "", version: "" }),
+  ...constructSourceDescriptor,
   validate: (config) => [
     ...(typeof config.path === "string" && config.path
       ? []
@@ -160,44 +120,7 @@ export const constructSource: ReleaseSourceDefinition = {
 };
 
 export const provider = createProviderDefinition({
-  id: "@pipelab/plugin-construct",
-  packageName: "@pipelab/plugin-construct",
-  name: "Construct",
-  description: "Pipelab provider for exporting and packaging Construct 3 projects",
-  icon: { type: "image", image: constructProviderLogo },
-  isOfficial: true,
-  integrations: [
-    {
-      name: "Browser Executable",
-      fields: [
-        {
-          key: "path",
-          label: "Browser Executable Path",
-          type: "file",
-          placeholder: "e.g., /usr/bin/google-chrome",
-        },
-      ],
-    },
-    {
-      name: "Browser Profile",
-      fields: [
-        {
-          key: "path",
-          label: "Chrome profile directory",
-          type: "directory",
-          placeholder: "e.g., ~/.config/google-chrome",
-        },
-      ],
-    },
-    {
-      name: "Construct Account",
-      fields: [
-        { key: "username", label: "Username", type: "text" },
-        { key: "password", label: "Password", type: "password" },
-      ],
-      testable: true,
-    },
-  ],
+  ...constructMetadata,
   release: { sources: [constructSource], producers: [constructProducer] },
   workflowTasks: constructWorkflowTaskFactories,
   connectionTests: { "@pipelab/plugin-construct": testConstructConnection },

@@ -1,16 +1,11 @@
 import { createProviderDefinition } from "@pipelab/shared";
 import type { ReleaseDestinationDefinition } from "@pipelab/shared";
-import { pipelabProviderLogo } from "../provider-icons";
+import { pipelabCloudDestinationDescriptor, pipelabCloudMetadata } from "./metadata";
 
 export const PIPELAB_CLOUD_UPLOAD_TASK_ID = "pipelab-cloud:upload";
 
 export const pipelabCloudDestination: ReleaseDestinationDefinition = {
-  id: "@pipelab/pipelab-cloud/destination",
-  label: "Pipelab Cloud",
-  description: "Store selected build artifacts in your private Pipelab Cloud storage.",
-  icon: { type: "image", image: pipelabProviderLogo },
-  accepts: { kind: "application", container: ["file", "directory", "archive"] },
-  createDefaultConfig: () => ({}),
+  ...pipelabCloudDestinationDescriptor,
   validate: () => [],
   compile: (artifact, destination, slot) => {
     const input = slot.input;
@@ -35,12 +30,7 @@ export const pipelabCloudDestination: ReleaseDestinationDefinition = {
 };
 
 export const provider = createProviderDefinition({
-  id: "@pipelab/pipelab-cloud",
-  packageName: "@pipelab/providers",
-  name: "Pipelab Cloud",
-  description: "Store and share selected Pipelab build artifacts.",
-  icon: { type: "image", image: pipelabProviderLogo },
-  isOfficial: true,
+  ...pipelabCloudMetadata,
   release: { destinations: [pipelabCloudDestination] },
 });
 

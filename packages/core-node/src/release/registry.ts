@@ -15,6 +15,21 @@ export const assertUniqueReleaseIds = (
   }
 };
 
+/** A descriptor's `inspectable` flag must match whether its implementation can inspect. */
+export const assertInspectableConsistent = (
+  definitions: readonly { id: string; inspectable?: boolean; inspect?: unknown }[],
+): void => {
+  for (const definition of definitions) {
+    if (
+      definition.inspectable !== undefined &&
+      definition.inspectable !== Boolean(definition.inspect)
+    )
+      throw new Error(
+        `Release definition ${definition.id} declares inspectable=${definition.inspectable} but ${definition.inspect ? "has" : "lacks"} an inspect implementation`,
+      );
+  }
+};
+
 export const buildCoreReleaseRegistry = (): ReleaseRegistry => {
   const definitions: ProviderReleaseDefinition[] = [
     builtInReleaseDefinitions,
@@ -26,6 +41,8 @@ export const buildCoreReleaseRegistry = (): ReleaseRegistry => {
     destinations: definitions.flatMap((release) => release.destinations ?? []),
     notifications: definitions.flatMap((release) => release.notifications ?? []),
   };
+
+  assertInspectableConsistent([...registry.sources, ...registry.producers]);
 
   assertUniqueReleaseIds(
     "source",

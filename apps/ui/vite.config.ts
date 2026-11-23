@@ -1,5 +1,4 @@
 import { defineConfig, loadEnv, searchForWorkspaceRoot, type Plugin } from "vite";
-import { execFileSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
@@ -85,46 +84,6 @@ function reportOnlyCsp(
   };
 }
 
-const providerSpecsModuleId = "virtual:pipelab/provider-specs";
-
-/**
- * Serves the built-in provider catalog as an in-memory module. The UI cannot import
- * the Node-only core packages, so the snapshot is computed by a script in a separate
- * process once per Vite run. Nothing is written to the worktree.
- */
-function providerSpecs(): Plugin {
-  let snapshot: string | undefined;
-  return {
-    name: "pipelab-provider-specs",
-    resolveId(id) {
-      if (id === providerSpecsModuleId) return `\0${providerSpecsModuleId}`;
-    },
-    load(id) {
-      if (id !== `\0${providerSpecsModuleId}`) return;
-      snapshot ??= execFileSync(
-        "pnpm",
-        [
-          "--filter",
-          "@pipelab/app",
-          "exec",
-          "tsx",
-          "../../packages/core-node/scripts/print-browser-provider-specs.ts",
-        ],
-        {
-          cwd: resolve(__dirname, "../.."),
-          encoding: "utf8",
-          maxBuffer: 64 * 1024 * 1024,
-          shell: process.platform === "win32",
-        },
-      )
-        .trim()
-        .split("\n")
-        .at(-1);
-      return `export default ${snapshot};`;
-    },
-  };
-}
-
 function modernIconFonts() {
   return {
     name: "modern-icon-fonts",
@@ -180,9 +139,14 @@ export default defineConfig(({ mode }) => {
               `[Forbidden] Do not import ${id} in the UI project. These are Node.js only packages. Use @pipelab/shared for shared browser-safe code/types.`,
             );
           }
+          // The providers' root entry carries Node-only task code; only its metadata entry is browser-safe.
+          if (id === "@pipelab/providers") {
+            throw new Error(
+              "[Forbidden] Do not import @pipelab/providers in the UI project. Use @pipelab/providers/metadata for browser-safe provider data.",
+            );
+          }
         },
       },
-      providerSpecs(),
       modernIconFonts(),
       mode === "development" && VueDevTools(),
       vue(),

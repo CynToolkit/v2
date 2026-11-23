@@ -21,6 +21,11 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./metadata": {
+      "types": "./src/metadata.ts",
+      "import": "./src/metadata.ts",
+      "default": "./src/metadata.ts"
     }
   },
   "scripts": {

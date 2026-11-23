@@ -266,14 +266,20 @@ export interface ProducerInspection {
   issues: ValidationIssue[];
 }
 
-export interface ReleaseSourceDefinition {
+/** Browser-safe catalog data of a source; the host-only behavior is {@link ReleaseSourceImplementation}. */
+export interface ReleaseSourceDescriptor {
   id: string;
   label: string;
   description?: string;
   icon?: IconType;
   fields?: ReleaseFieldDefinition[];
   output: ArtifactDescriptor;
+  /** Whether the host can inspect the project; derived from `inspect` when omitted. */
+  inspectable?: boolean;
   createDefaultConfig(): Record<string, unknown>;
+}
+
+export interface ReleaseSourceImplementation {
   validate(config: Record<string, unknown>): ValidationIssue[];
   inspect?(
     config: Record<string, unknown>,
@@ -281,6 +287,8 @@ export interface ReleaseSourceDefinition {
   ): Promise<SourceInspection>;
   compile(config: Record<string, unknown>, context: ReleaseCompileContext): CompiledSource;
 }
+
+export type ReleaseSourceDefinition = ReleaseSourceDescriptor & ReleaseSourceImplementation;
 
 export interface ReleaseProducerTargetDefinition {
   id: string;
@@ -298,7 +306,8 @@ export interface ArtifactDescriptorTransform {
   remove?: Array<"technology" | "platform" | "architecture" | "format" | "capabilities">;
 }
 
-export interface ReleaseProducerDefinition {
+/** Browser-safe catalog data of a producer; the host-only behavior is {@link ReleaseProducerImplementation}. */
+export interface ReleaseProducerDescriptor {
   id: string;
   label: string;
   description?: string;
@@ -312,8 +321,13 @@ export interface ReleaseProducerDefinition {
    * `accepts` then applies to each input. Such producers implement `compileMany`; `compile` is not used.
    */
   inputs?: "many";
+  /** Whether the host can inspect the project; derived from `inspect` when omitted. */
+  inspectable?: boolean;
   targets: ReleaseProducerTargetDefinition[];
   createDefaultConfig(): Record<string, unknown>;
+}
+
+export interface ReleaseProducerImplementation {
   validate(config: ReleaseProducerConfig, context: ReleaseValidationContext): ValidationIssue[];
   inspect?(
     config: ReleaseProducerConfig,
@@ -334,6 +348,8 @@ export interface ReleaseProducerDefinition {
   acceptsWhen?(artifact: ArtifactDescriptor, context: ReleaseAcceptanceContext): ArtifactAcceptance;
 }
 
+export type ReleaseProducerDefinition = ReleaseProducerDescriptor & ReleaseProducerImplementation;
+
 export interface ReleaseProducerPlanning {
   mode: "build" | "automatic";
 }
@@ -345,7 +361,8 @@ export interface ReleaseAcceptanceContext extends ReleaseProviderContext {
   destination?: ReleaseDestinationDefinition;
 }
 
-export interface ReleaseDestinationDefinition {
+/** Browser-safe catalog data of a destination; the host-only behavior is {@link ReleaseDestinationImplementation}. */
+export interface ReleaseDestinationDescriptor {
   id: string;
   label: string;
   description?: string;
@@ -356,6 +373,9 @@ export interface ReleaseDestinationDefinition {
   /** The destination only takes a build output; a slot may not read the raw source directly. */
   requiresBuild?: boolean;
   createDefaultConfig(): Record<string, unknown>;
+}
+
+export interface ReleaseDestinationImplementation {
   validate(config: ReleaseDestinationConfig, context: ReleaseValidationContext): ValidationIssue[];
   compile(
     artifact: CompiledArtifact,
@@ -365,6 +385,9 @@ export interface ReleaseDestinationDefinition {
   ): WorkflowStep[];
   acceptsWhen?(artifact: ArtifactDescriptor, context: ReleaseAcceptanceContext): ArtifactAcceptance;
 }
+
+export type ReleaseDestinationDefinition = ReleaseDestinationDescriptor &
+  ReleaseDestinationImplementation;
 
 /** What a notification message can say about a finished run. */
 export interface ReleaseNotificationEvent {
@@ -390,15 +413,22 @@ export const NOTIFICATION_TEMPLATE_VARIABLES = [
   "error",
 ] as const;
 
-export interface ReleaseNotificationDefinition {
+/** Browser-safe catalog data of a notification; the host-only behavior is {@link ReleaseNotificationImplementation}. */
+export interface ReleaseNotificationDescriptor {
   id: string;
   label: string;
   description?: string;
   icon?: IconType;
   fields?: ReleaseFieldDefinition[];
   createDefaultConfig(): Record<string, unknown>;
+}
+
+export interface ReleaseNotificationImplementation {
   validate(config: ReleaseNotificationConfig): ValidationIssue[];
 }
+
+export type ReleaseNotificationDefinition = ReleaseNotificationDescriptor &
+  ReleaseNotificationImplementation;
 
 export interface ReleaseBuildTypeDefinition {
   id: string;
@@ -414,11 +444,27 @@ export interface ProviderReleaseDefinition {
   notifications?: ReleaseNotificationDefinition[];
 }
 
+/** The browser-safe part of a provider's Release contribution. */
+export interface ProviderReleaseDescriptor {
+  sources?: ReleaseSourceDescriptor[];
+  producers?: ReleaseProducerDescriptor[];
+  destinations?: ReleaseDestinationDescriptor[];
+  notifications?: ReleaseNotificationDescriptor[];
+}
+
 export interface ReleaseRegistry {
   sources: ReleaseSourceDefinition[];
   producers: ReleaseProducerDefinition[];
   destinations: ReleaseDestinationDefinition[];
   notifications?: ReleaseNotificationDefinition[];
+}
+
+/** What the catalog is built from; a full {@link ReleaseRegistry} satisfies it. */
+export interface ReleaseDescriptorRegistry {
+  sources: ReleaseSourceDescriptor[];
+  producers: ReleaseProducerDescriptor[];
+  destinations: ReleaseDestinationDescriptor[];
+  notifications?: ReleaseNotificationDescriptor[];
 }
 
 export interface ReleaseCatalogTarget {
@@ -583,4 +629,10 @@ export interface ReleasePlanGraphNodes {
 export interface ReleasePlanGraphEdges {
   from: string;
   to: string;
+}
+
+/** The platform and architecture a desktop target is built for. */
+export interface DesktopTargetInputs {
+  platform: "win32" | "linux" | "darwin";
+  arch: "x64" | "arm64";
 }
