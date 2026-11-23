@@ -53,6 +53,10 @@ export const sweepRetention = async (context: PipelabContext): Promise<void> => 
       }
     }
   } catch (error) {
-    logger().warn("Retention sweep failed:", error);
+    logger().warn(
+      "Run history cleanup was skipped because the saved project list could not be read " +
+        "(it may come from a different Pipelab version). Update Pipelab or check the projects file in your config folder.",
+      error,
+    );
   }
 };

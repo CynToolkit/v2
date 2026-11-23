@@ -6,6 +6,7 @@ import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import {
   getTrustedUiOrigins,
   getUiUrl,
+  loadServerUi,
   onServerRestarted,
   startServer,
   stopServer,
@@ -454,8 +455,8 @@ function createWindow(): void {
 
 async function restoreWindowAfterFailedShutdown(): Promise<void> {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  const cliPort = await startServer();
-  await mainWindow?.loadURL(getUiUrl(cliPort));
+  await startServer();
+  await loadServerUi((url) => mainWindow?.loadURL(url) ?? Promise.resolve());
 }
 
 const protocolName = getProtocolName(app.getVersion());
@@ -579,30 +580,33 @@ app.whenReady().then(async () => {
   );
   createWindow();
 
-  // When the server crashes and is restarted, point the window at it again.
-  onServerRestarted((port) => {
-    void mainWindow?.loadURL(getUiUrl(port));
-  });
-
   // Start the background server (this might include downloading the CLI on first run)
   try {
     console.info("[Main] Starting standalone server...");
-    const cliPort = await startServer();
+    await startServer();
     console.info("[Main] Standalone server is ready");
 
     // Do not load any renderer until the in-process server is listening.
-    const uiUrl = getUiUrl(cliPort);
     console.info(`[Main] Loading ${is.dev ? "development" : "production"} UI`);
     if (isDesktopIntegrationTest) {
       await new Promise((resolveDelay) => setTimeout(resolveDelay, 5000));
     }
-    await mainWindow?.loadURL(uiUrl);
+    await loadServerUi((url) => mainWindow?.loadURL(url) ?? Promise.resolve());
+
+    // When the server crashes later and is restarted, point the window at it again.
+    onServerRestarted((port) => {
+      mainWindow?.loadURL(getUiUrl(port)).catch((error: unknown) => {
+        console.error("[Main] Could not reload the UI after a server restart:", error);
+      });
+    });
   } catch (error) {
     console.error("Failed to start standalone server:", error);
     dialog.showErrorBox(
       "Startup Error",
-      "Failed to start the background server. This is required for Pipelab to function.\n\n" +
-        (error instanceof Error ? error.message : String(error)),
+      "Pipelab could not start its background server, which it needs to run.\n\n" +
+        `Cause: ${error instanceof Error ? error.message : String(error)}\n\n` +
+        "Restart Pipelab. If it keeps failing, start it from a terminal and report the " +
+        "'[Server]' lines it prints.",
     );
     app.quit();
     return;

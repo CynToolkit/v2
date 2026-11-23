@@ -44,15 +44,16 @@ const shutdown = async (exitCode: number) => {
   }
 };
 
-// A crash here must never reach Desktop's main process: log it and exit so the
-// supervisor restarts a clean server.
+// A crash here must never reach Desktop's main process. An uncaught exception leaves the
+// process in an unknown state: log it and exit so the supervisor restarts a clean server
+// (Desktop reconnects to it). A rejected background promise is not fatal: log it and keep
+// serving, since the server itself is healthy.
 process.on("uncaughtException", (error) => {
   console.error("[Server] Uncaught exception:", error);
   void shutdown(1);
 });
 process.on("unhandledRejection", (reason) => {
-  console.error("[Server] Unhandled rejection:", reason);
-  void shutdown(1);
+  console.error("[Server] Unhandled background error (the server keeps running):", reason);
 });
 
 process.on("message", (message) => {
