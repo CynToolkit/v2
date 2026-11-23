@@ -14,18 +14,23 @@ interface ServerCloudAuth {
 /**
  * Supabase reads the session from its background initialisation with nothing awaiting the
  * result, so a rejection there would crash the whole server. An unreadable saved session
- * (old format, lost key) is treated as signed out; the file is kept for a fresh sign-in.
+ * (old format, lost key) is discarded and the user is signed out.
  */
-const tolerateUnreadableSession = (storage: DesktopAuthStorage): SupportedStorage => ({
+const discardUnreadableSession = (storage: DesktopAuthStorage): SupportedStorage => ({
   getItem: async (key) => {
     try {
       return await storage.getItem(key);
     } catch (error) {
       console.warn(
-        "[Auth] The saved Pipelab Cloud session could not be read, so you are signed out. " +
-          "Sign in again to replace it.",
+        "[Auth] The saved Pipelab Cloud session could not be read, so it was discarded and you are signed out. " +
+          "Sign in again to continue.",
         error instanceof Error ? error.message : error,
       );
+      try {
+        await storage.discard();
+      } catch (discardError) {
+        console.warn("[Auth] Could not delete the unreadable session:", discardError);
+      }
       return null;
     }
   },
@@ -42,7 +47,7 @@ export const getServerCloudAuth = (context: PipelabContext) => {
   const storage = new DesktopAuthStorage(sessionPath);
   const client = supabase({
     auth: {
-      storage: tolerateUnreadableSession(storage),
+      storage: discardUnreadableSession(storage),
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: false,
