@@ -1430,7 +1430,7 @@ describe("ReleasePersistence", () => {
       }),
     );
     await expect(persistence.load("workflow-1")).rejects.toThrow(
-      /missing project|Project index is invalid/,
+      /missing project|Project index is invalid|not present in the project index/,
     );
   });
 

@@ -8,12 +8,7 @@ import {
   type FileRepo,
 } from "@pipelab/shared";
 import type { PipelabContext } from "./context";
-import {
-  JsonFileMissingError,
-  readJsonFile,
-  writeJsonFileAtomically,
-  writeJsonFileAtomicallyIfMissing,
-} from "./utils/atomic-json";
+import { loadJsonOrRecover, writeJsonFileAtomically } from "./utils/atomic-json";
 import {
   getConnectionSecretKey,
   hasPlaintextSecrets,
@@ -23,21 +18,13 @@ import {
 } from "./utils/connection-secrets";
 import { serializeFileMutation } from "./release-persistence-lock";
 
-export const loadStrictProjects = async (context: PipelabContext): Promise<FileRepo> => {
-  try {
-    return parseFileRepo(await readJsonFile(context.getProjectsPath()));
-  } catch (error) {
-    if (error instanceof JsonFileMissingError) {
-      const created = await writeJsonFileAtomicallyIfMissing(
-        context.getProjectsPath(),
-        defaultFileRepo,
-      );
-      if (created) return defaultFileRepo;
-      return parseFileRepo(await readJsonFile(context.getProjectsPath()));
-    }
-    throw error;
-  }
-};
+export const loadStrictProjects = (context: PipelabContext): Promise<FileRepo> =>
+  loadJsonOrRecover({
+    label: "Projects",
+    path: context.getProjectsPath(),
+    parse: parseFileRepo,
+    fallback: defaultFileRepo,
+  });
 
 export const saveStrictProjects = async (
   context: PipelabContext,
@@ -57,21 +44,14 @@ export const saveStrictProjects = async (
   });
 };
 
-const readConnectionsFile = async (context: PipelabContext) => {
-  try {
-    return parseConnectionsConfig(await readJsonFile(context.getConnectionsPath()));
-  } catch (error) {
-    if (error instanceof JsonFileMissingError) {
-      const created = await writeJsonFileAtomicallyIfMissing(
-        context.getConnectionsPath(),
-        defaultConnections,
-      );
-      if (created) return defaultConnections;
-      return parseConnectionsConfig(await readJsonFile(context.getConnectionsPath()));
-    }
-    throw error;
-  }
-};
+const readConnectionsFile = (context: PipelabContext) =>
+  loadJsonOrRecover({
+    label: "Connections",
+    path: context.getConnectionsPath(),
+    parse: parseConnectionsConfig,
+    fallback: defaultConnections,
+    mode: 0o600,
+  });
 
 /** Writes connections sealed with the keyring key, or 0600 plaintext when no keyring exists. */
 const writeConnectionsFile = async (context: PipelabContext, value: ConnectionsConfig) => {

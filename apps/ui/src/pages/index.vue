@@ -43,7 +43,7 @@
       role="alert"
       class="dashboard-message"
     >
-      {{ projectLoadError }}
+      {{ $t("home.projects-unavailable") }}
       <Button
         :label="$t('home.retry')"
         text

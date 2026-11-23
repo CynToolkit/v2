@@ -1,4 +1,4 @@
-import { hasErrorCode } from "@pipelab/shared";
+import { hasErrorCode, useLogger } from "@pipelab/shared";
 import { randomUUID } from "node:crypto";
 import { link, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -7,6 +7,19 @@ export class JsonFileMissingError extends Error {
   constructor(public readonly filePath: string) {
     super(`JSON file not found: ${filePath}`);
     this.name = "JsonFileMissingError";
+  }
+}
+
+class JsonFileMalformedError extends Error {
+  constructor(
+    public readonly filePath: string,
+    cause: unknown,
+  ) {
+    super(
+      `Malformed JSON in ${filePath}: ${cause instanceof Error ? cause.message : String(cause)}`,
+      { cause },
+    );
+    this.name = "JsonFileMalformedError";
   }
 }
 
@@ -22,10 +35,7 @@ export const readJsonFile = async (filePath: string): Promise<unknown> => {
     const parsed: unknown = JSON.parse(content);
     return parsed;
   } catch (error) {
-    throw new Error(
-      `Malformed JSON in ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
-      { cause: error },
-    );
+    throw new JsonFileMalformedError(filePath, error);
   }
 };
 
@@ -48,7 +58,7 @@ export const writeJsonFileAtomically = async (
   }
 };
 
-export const writeJsonFileAtomicallyIfMissing = async (
+const writeJsonFileAtomicallyIfMissing = async (
   filePath: string,
   value: unknown,
 ): Promise<boolean> => {
@@ -69,4 +79,59 @@ export const writeJsonFileAtomicallyIfMissing = async (
   } finally {
     await rm(temporaryPath, { force: true }).catch((): void => undefined);
   }
+};
+
+export interface RecoverableJsonOptions<T> {
+  /** Shown in the log, e.g. "Projects". */
+  label: string;
+  path: string;
+  /** Validates (and normalizes) the parsed document; throws when it is unusable. */
+  parse: (value: unknown) => T;
+  /** Value used when the file is missing or unreadable. */
+  fallback: T;
+  /** File mode for the default written after a reset. */
+  mode?: number;
+}
+
+/**
+ * Loads a persisted JSON document and never fails because of its content. A missing file is
+ * created from the fallback. A file that is malformed or rejected by `parse` is moved to
+ * `<file>.invalid-<timestamp>` (kept on disk), reported in the log only, and replaced by the
+ * fallback, so the app behaves as if nothing was saved. Real I/O errors still throw.
+ */
+export const loadJsonOrRecover = async <T>(options: RecoverableJsonOptions<T>): Promise<T> => {
+  const { path, parse, fallback } = options;
+  let raw: unknown;
+  try {
+    raw = await readJsonFile(path);
+  } catch (error) {
+    if (error instanceof JsonFileMissingError) {
+      const created = await writeJsonFileAtomicallyIfMissing(path, fallback);
+      if (created) return fallback;
+      return loadJsonOrRecover(options);
+    }
+    if (error instanceof JsonFileMalformedError) return recover(options, error);
+    throw error;
+  }
+  try {
+    return parse(raw);
+  } catch (error) {
+    return recover(options, error);
+  }
+};
+
+const recover = async <T>(
+  { label, path, fallback, mode }: RecoverableJsonOptions<T>,
+  error: unknown,
+): Promise<T> => {
+  const backup = `${path}.invalid-${Date.now()}`;
+  useLogger()
+    .logger()
+    .warn(
+      `[${label}] The saved file could not be read (${error instanceof Error ? error.message : String(error)}). ` +
+        `It was reset to the default; the original is kept at ${backup}.`,
+    );
+  await rename(path, backup);
+  await writeJsonFileAtomically(path, fallback, mode);
+  return fallback;
 };
