@@ -1,5 +1,11 @@
 # @pipelab/app
 
+## 2.0.0-beta.46
+
+### Patch Changes
+
+- [#101](https://github.com/CynToolkit/v2/pull/101) [`ddebe2c`](https://github.com/CynToolkit/v2/commit/ddebe2c51f33e55bbe04fc8e135924da0123755e) Thanks [@Armaldio](https://github.com/Armaldio)! - Build the macOS Apple Silicon release on the standard `macos-latest` runner, so releases are no longer blocked when the `macos-26` arm64 runners are congested.
+
 ## 2.0.0-beta.45
 
 ### Patch Changes
