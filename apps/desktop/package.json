@@ -51,7 +51,7 @@
     "@pipelab/plugin-core": "workspace:*",
     "@pipelab/shared": "workspace:*",
     "@pipelab/tsconfig": "workspace:*",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "1.63.0",
     "@types/node": "24.12.2",
     "@types/semver": "7.7.1",
     "cross-env": "10.1.0",
