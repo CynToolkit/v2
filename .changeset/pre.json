@@ -1,28 +1,4 @@
 {
   "mode": "pre",
-  "tag": "beta",
-  "initialVersions": {
-    "@pipelab/cli": "2.0.0-beta.39",
-    "@pipelab/app": "2.0.0-beta.34",
-    "@pipelab/documentation": "1.0.0",
-    "mini-c3-electron": "0.0.1-beta.24",
-    "@pipelab/ui": "2.0.0-beta.39",
-    "@pipelab/website": "0.0.1-beta.0",
-    "@pipelab/asset-electron": "1.0.0-beta.32",
-    "@pipelab/asset-tauri": "1.0.0-beta.32",
-    "@pipelab/constants": "1.0.0-beta.35",
-    "@pipelab/core-node": "1.0.0-beta.39",
-    "@pipelab/migration": "1.0.0-beta.32",
-    "@pipelab/providers": "1.0.0-beta.1",
-    "@pipelab/shared": "1.0.0-beta.34",
-    "@pipelab/test-utils": "1.0.0-beta.40",
-    "@pipelab/tsconfig": "1.0.0-beta.32",
-    "@pipelab/workflow-runtime": "1.0.0-beta.2",
-    "@pipelab/plugin-core": "1.0.0-beta.40"
-  },
-  "changesets": [
-    "clear-build-history-errors",
-    "lazy-construct-playwright",
-    "v2-initial-baseline"
-  ]
+  "tag": "beta"
 }
