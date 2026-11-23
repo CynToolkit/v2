@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { defaultConnections } from "@pipelab/shared";
+import { defaultConnections, defaultFileRepo } from "@pipelab/shared";
 import { PipelabContext } from "./context";
 import {
   loadStrictConnections,
@@ -24,20 +24,32 @@ describe("strict config persistence", () => {
     ["malformed projects", { version: "1.0.0", projects: null }],
     ["unsupported older version", { version: "3.0.0", projects: [] }],
     ["unknown future version", { version: "5.0.0", projects: [] }],
-  ])("rejects %s without rewriting the source document", async (_label, raw) => {
+  ])("recovers from %s by keeping a backup and starting a default index", async (_l, raw) => {
     const context = await setup();
     const original = JSON.stringify(raw);
     await writeFile(context.getProjectsPath(), original);
 
-    await expect(loadStrictProjects(context)).rejects.toThrow();
-    await expect(readFile(context.getProjectsPath(), "utf8")).resolves.toBe(original);
+    await expect(loadStrictProjects(context)).resolves.toEqual(defaultFileRepo);
+    const backup = (await readdir(context.getConfigPath())).find((name) =>
+      name.startsWith("projects.json.invalid-"),
+    );
+    expect(backup).toBeDefined();
+    await expect(readFile(join(context.getConfigPath(), backup ?? ""), "utf8")).resolves.toBe(
+      original,
+    );
+    await expect(loadStrictProjects(context)).resolves.toEqual(defaultFileRepo);
   });
 
-  it("does not replace corrupt connections with defaults", async () => {
+  it("recovers from corrupt connections by keeping a backup and starting from defaults", async () => {
     const context = await setup();
     await writeFile(context.getConnectionsPath(), "{broken");
-    await expect(loadStrictConnections(context)).rejects.toThrow("Malformed JSON");
-    await expect(readFile(context.getConnectionsPath(), "utf8")).resolves.toBe("{broken");
+    await expect(loadStrictConnections(context)).resolves.toEqual(defaultConnections);
+    const backup = (await readdir(context.getConfigPath())).find((name) =>
+      name.startsWith("connections.json.invalid-"),
+    );
+    await expect(readFile(join(context.getConfigPath(), backup ?? ""), "utf8")).resolves.toBe(
+      "{broken",
+    );
   });
 
   it.skipIf(process.platform === "win32")(
@@ -84,11 +96,16 @@ describe("strict config persistence", () => {
     );
   });
 
-  it("does not replace malformed project JSON with an empty index", async () => {
+  it("recovers from malformed project JSON and keeps the original", async () => {
     const context = await setup();
     await writeFile(context.getProjectsPath(), "{broken");
-    await expect(loadStrictProjects(context)).rejects.toThrow("Malformed JSON");
-    await expect(readFile(context.getProjectsPath(), "utf8")).resolves.toBe("{broken");
+    await expect(loadStrictProjects(context)).resolves.toEqual(defaultFileRepo);
+    const backup = (await readdir(context.getConfigPath())).find((name) =>
+      name.startsWith("projects.json.invalid-"),
+    );
+    await expect(readFile(join(context.getConfigPath(), backup ?? ""), "utf8")).resolves.toBe(
+      "{broken",
+    );
   });
 
   it("prevents deleting a project referenced by a workflow", async () => {

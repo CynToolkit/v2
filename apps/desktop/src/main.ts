@@ -7,6 +7,7 @@ import {
   getTrustedUiOrigins,
   getUiUrl,
   loadServerUi,
+  onServerFailed,
   onServerRestarted,
   startServer,
   stopServer,
@@ -17,7 +18,7 @@ import { registerIpcHandlers } from "./main/ipc-handlers";
 import { isExternalHttpUrl, isTrustedRendererUrl } from "./main/trusted-origin";
 import { installUpdateAfterServerStops } from "./main/update-shutdown";
 import { createUpdater, resolveAvailableUpdate } from "./main/updater";
-import type { UpdateChannel } from "@pipelab/shared";
+import type { UpdateChannel, UpdateState } from "@pipelab/shared";
 import {
   buildCoreReleaseRegistry,
   fetchLatestDesktopRelease,
@@ -481,8 +482,12 @@ async function findUpdateForChannel(channel: unknown) {
   return release && update ? { version: update.version, downloadUrl: release.html_url } : null;
 }
 
+let updater: ReturnType<typeof createUpdater> | undefined;
+/** Set while the app is broken: update results go to a dialog because there is no UI. */
+let failureUpdateReport: ((state: UpdateState) => void) | undefined;
+
 function startUpdater(): void {
-  if (!app.isPackaged) return;
+  if (!app.isPackaged || updater) return;
 
   const currentVersion = app.getVersion();
   // Linux can only update itself when running as an AppImage.
@@ -490,7 +495,7 @@ function startUpdater(): void {
   autoUpdater.autoInstallOnAppQuit = false;
   autoUpdater.allowDowngrade = false;
 
-  const updater = createUpdater({
+  updater = createUpdater({
     currentVersion,
     platform: process.platform,
     native: canSelfUpdate ? autoUpdater : undefined,
@@ -503,11 +508,15 @@ function startUpdater(): void {
         throwOnError: true,
       }),
     feedUrl: (release) => getDesktopReleaseFeedUrl(release, process.env.APP_UPDATE_URL),
-    send: (state) =>
-      mainWindow?.webContents.send("update:set-status", {
-        data: state,
-        requestId: "shell-update",
-      }),
+    send: (state) => {
+      if (failureUpdateReport) failureUpdateReport(state);
+      else {
+        mainWindow?.webContents.send("update:set-status", {
+          data: state,
+          requestId: "shell-update",
+        });
+      }
+    },
     onDownloaded: (update) => {
       void dialog
         .showMessageBox({
@@ -526,8 +535,59 @@ function startUpdater(): void {
   });
 
   // Never delay startup: check shortly after launch, then every few hours.
-  setTimeout(() => void updater.check(), 10_000);
-  setInterval(() => void updater.check(), 6 * 60 * 60 * 1000).unref();
+  setTimeout(() => void updater?.check(), 10_000);
+  setInterval(() => void updater?.check(), 6 * 60 * 60 * 1000).unref();
+}
+
+/**
+ * Pipelab cannot run (the server will not start or keeps crashing). Report why and, since a
+ * newer version may be the fix, let the user update from here instead of just closing.
+ */
+async function reportFatalError(title: string, message: string): Promise<void> {
+  console.error(`[Main] ${title}: ${message}`);
+  const canUpdate = Boolean(updater);
+  const buttons = canUpdate ? ["Check for updates", "Quit"] : ["Quit"];
+  const { response } = await dialog.showMessageBox({
+    type: "error",
+    title,
+    message,
+    buttons,
+    defaultId: 0,
+    cancelId: buttons.length - 1,
+  });
+  if (!updater || response !== 0) {
+    app.quit();
+    return;
+  }
+
+  // The update dialog ("Restart") is shown by the updater once a download completes.
+  failureUpdateReport = (state) => {
+    if (
+      state.status === "update-downloaded" ||
+      state.status === "update-downloading" ||
+      state.status === "checking-for-update"
+    ) {
+      return;
+    }
+    failureUpdateReport = undefined;
+    if (state.status === "update-available" && state.downloadUrl) {
+      void shell.openExternal(state.downloadUrl);
+      app.quit();
+      return;
+    }
+    void dialog
+      .showMessageBox({
+        type: "info",
+        title,
+        message:
+          state.status === "update-not-available"
+            ? "Pipelab is already up to date."
+            : "Pipelab could not check for updates. Check your internet connection.",
+        detail: "Restart Pipelab. If it keeps failing, report the '[Server]' lines it prints.",
+      })
+      .then(() => app.quit());
+  };
+  await updater.check();
 }
 
 app.whenReady().then(async () => {
@@ -579,6 +639,9 @@ app.whenReady().then(async () => {
     (kind) => (kind === "cache" ? workflowContext.getCachePath() : workflowContext.getTempPath()),
   );
   createWindow();
+  // Updates must work even when the server cannot start, so this does not wait for it.
+  startUpdater();
+  onServerFailed((message) => reportFatalError("Server Error", message));
 
   // Start the background server (this might include downloading the CLI on first run)
   try {
@@ -601,18 +664,15 @@ app.whenReady().then(async () => {
     });
   } catch (error) {
     console.error("Failed to start standalone server:", error);
-    dialog.showErrorBox(
+    await reportFatalError(
       "Startup Error",
       "Pipelab could not start its background server, which it needs to run.\n\n" +
         `Cause: ${error instanceof Error ? error.message : String(error)}\n\n` +
-        "Restart Pipelab. If it keeps failing, start it from a terminal and report the " +
-        "'[Server]' lines it prints.",
+        "Restart Pipelab, or update it: a newer version may fix this. If it keeps failing, " +
+        "start it from a terminal and report the '[Server]' lines it prints.",
     );
-    app.quit();
     return;
   }
-
-  startUpdater();
 
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window);

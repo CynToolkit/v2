@@ -45,6 +45,13 @@ let stopping = false;
 let restartTimes: number[] = [];
 let restartListener: ((port: number) => void) | undefined;
 
+let failureListener: ((message: string) => void) | undefined;
+
+/** Called when the server cannot be kept running, so Desktop can report it and offer an update. */
+export const onServerFailed = (listener: (message: string) => void) => {
+  failureListener = listener;
+};
+
 /** Called after the server crashed and was restarted, so the window can reconnect. */
 export const onServerRestarted = (listener: (port: number) => void) => {
   restartListener = listener;
@@ -188,13 +195,16 @@ const recoverServer = async (previousPort: number) => {
   const now = Date.now();
   restartTimes = [...restartTimes.filter((time) => now - time < RESTART_WINDOW_MS), now];
   if (restartTimes.length > MAX_RESTARTS) {
-    dialog.showErrorBox(
-      "Server Error",
-      "The Pipelab background server keeps crashing, so Pipelab will close.\n\n" +
-        "Restart the application. If this happens again, start Pipelab from a terminal and " +
-        "report the '[Server]' error lines it prints.",
-    );
-    app.quit();
+    const message =
+      "The Pipelab background server keeps crashing, so Pipelab cannot continue.\n\n" +
+      "Restart the application, or update it: a newer version may fix this. If it happens " +
+      "again, start Pipelab from a terminal and report the '[Server]' error lines it prints.";
+    if (failureListener) {
+      failureListener(message);
+    } else {
+      dialog.showErrorBox("Server Error", message);
+      app.quit();
+    }
     return;
   }
   // Prefer the previous port so the open window keeps its address; fall back to a free one.
