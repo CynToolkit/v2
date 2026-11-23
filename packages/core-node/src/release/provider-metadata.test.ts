@@ -2,7 +2,7 @@ import { buildReleaseCatalog } from "@pipelab/shared";
 import { builtInProviderMetadata, buildBrowserProviderSpecs } from "@pipelab/providers/metadata";
 import { describe, expect, it } from "vitest";
 import { builtInProviders } from "../providers-registry";
-import { buildCoreReleaseRegistry } from "./registry";
+import { assertInspectableConsistent, buildCoreReleaseRegistry } from "./registry";
 
 describe("browser provider metadata", () => {
   it("lists the same providers, in the same order, as the host registry", () => {
@@ -34,9 +34,14 @@ describe("browser provider metadata", () => {
     );
   });
 
-  it("states inspectability explicitly wherever a definition can inspect", () => {
-    for (const registry of [buildCoreReleaseRegistry()])
-      for (const definition of [...registry.sources, ...registry.producers])
-        expect(definition.inspectable ?? false).toBe(Boolean(definition.inspect));
+  it("rejects a definition whose inspectable flag disagrees with its implementation", () => {
+    const inspect = async () => ({ issues: [] });
+    expect(() => assertInspectableConsistent([{ id: "a", inspectable: true }])).toThrow(/lacks/);
+    expect(() => assertInspectableConsistent([{ id: "b", inspectable: false, inspect }])).toThrow(
+      /has/,
+    );
+    expect(() =>
+      assertInspectableConsistent([{ id: "c", inspectable: true, inspect }, { id: "d" }]),
+    ).not.toThrow();
   });
 });
