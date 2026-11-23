@@ -121,6 +121,16 @@ export const useShell = () => {
   };
 
   /**
+   * Open the app-managed cache or temp folder in the system file explorer
+   */
+  const openManagedFolder = async (kind: "cache" | "temp") => {
+    if (window.electron) {
+      return await window.pipelab!.openManagedFolder(kind);
+    }
+    console.warn("openManagedFolder not supported on web");
+  };
+
+  /**
    * Relaunch the application
    */
   const relaunch = async () => {
@@ -145,6 +155,7 @@ export const useShell = () => {
     saveFile,
     openExternal,
     showItemInFolder,
+    openManagedFolder,
     relaunch,
     installUpdate,
   };

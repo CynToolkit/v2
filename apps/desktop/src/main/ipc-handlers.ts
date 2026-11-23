@@ -2,6 +2,7 @@ import { ipcMain as electronIpcMain, dialog, BrowserWindow, shell, app } from "e
 import type { AvailableUpdate, UpdateChannel } from "@pipelab/shared";
 import { isPathBlacklisted } from "@pipelab/plugin-core";
 import { guardedIpcMain } from "./guarded-ipc";
+import { openManagedFolder, type ManagedFolderKind } from "./open-managed-folder";
 import { showExistingItemInFolder } from "./show-existing-item";
 
 export const registerIpcHandlers = (
@@ -11,6 +12,7 @@ export const registerIpcHandlers = (
   findUpdateForChannel: (channel: unknown) => Promise<AvailableUpdate | null>,
   readWorkflowEnvironment: (workflowId: unknown) => Promise<Record<string, string>>,
   getTrustedOrigins: () => readonly string[],
+  resolveManagedFolder: (kind: ManagedFolderKind) => string,
 ) => {
   const ipcMain = guardedIpcMain(electronIpcMain, getTrustedOrigins);
   const OPEN_DIALOG_CHANNEL = "dialog:showOpenDialog";
@@ -68,6 +70,10 @@ export const registerIpcHandlers = (
   ipcMain.handle("shell:showItemInFolder", async (event, path: string) => {
     await showExistingItemInFolder(path, shell.showItemInFolder);
   });
+
+  ipcMain.handle("shell:openManagedFolder", (_event, kind: unknown) =>
+    openManagedFolder(kind, resolveManagedFolder, shell.openPath),
+  );
 
   ipcMain.handle("window:show", (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);

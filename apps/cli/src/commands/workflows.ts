@@ -124,7 +124,11 @@ export const workflowRunOptions = [
     "--skip-preflight",
     "Run without first checking destination accounts (for offline use); the skip is recorded in the run",
   ),
-  new Option("--fail-on-error", "Exit nonzero when a deployment fails"),
+  new Option(
+    "--fail-on-error",
+    "Exit nonzero when a deployment fails (default; accepted for compatibility)",
+  ),
+  new Option("--no-fail-on-error", "Exit zero even when a deployment fails"),
   new Option("-v, --verbose", "Show workflow logs after completion"),
   new Option("--connection <alias.field=VALUE>", "Override a Connection field for this run")
     .argParser((value, previous: string[] = []) => [...previous, value])
@@ -779,7 +783,8 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
       JSON.stringify({ result: result.safeResult, runId: result.runId }, null, 2),
     );
   }
-  if (options.failOnError && result.result.status === "completed-with-errors") {
+  // Failing deployments exit nonzero unless the caller explicitly opts out.
+  if (options.failOnError !== false && result.result.status === "completed-with-errors") {
     throw new Error("Workflow completed with errors");
   }
 }

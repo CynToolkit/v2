@@ -40,6 +40,7 @@ const pipelab: PipelabBridge = {
   showSaveDialog: (options) => ipcRenderer.invoke("dialog:showSaveDialog", options),
   openExternal: (url) => ipcRenderer.invoke("shell:openExternal", url),
   showItemInFolder: (path) => ipcRenderer.invoke("shell:showItemInFolder", path),
+  openManagedFolder: (kind) => ipcRenderer.invoke("shell:openManagedFolder", kind),
   isPathBlacklisted: (path) => ipcRenderer.invoke("path:isBlacklisted", path),
   relaunch: () => ipcRenderer.invoke("app:relaunch"),
   installUpdate: () => ipcRenderer.invoke("app:install-update"),
