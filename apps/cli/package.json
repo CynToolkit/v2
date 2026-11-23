@@ -63,7 +63,7 @@
     "@pipelab/tsconfig": "workspace:*",
     "@types/node": "24.12.2",
     "cross-env": "10.1.0",
-    "tsdown": "0.21.2",
+    "tsdown": "0.23.7",
     "typescript": "^5.0.0",
     "vitest": "5.1.1"
   },
