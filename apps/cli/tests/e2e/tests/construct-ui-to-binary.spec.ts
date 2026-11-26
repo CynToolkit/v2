@@ -13,11 +13,14 @@ import { BuildHistoryStorage, PipelabContext } from "@pipelab/core-node";
 const repoRoot = resolve(process.cwd(), "../..");
 const constructProfilePath = process.env.CONSTRUCT_CI_PROFILE_PATH;
 const playwrightRequire = createRequire(join(repoRoot, "apps/website/package.json"));
-const { chromium } = playwrightRequire("playwright") as typeof import("playwright");
+const { chromium, _electron } = playwrightRequire("playwright") as typeof import("playwright");
 
-interface StartedProcess {
+interface OutputSource {
+  readonly output: string;
+}
+
+interface StartedProcess extends OutputSource {
   child: ChildProcessWithoutNullStreams;
-  output: string;
   exited: Promise<{ code: number | null; signal: NodeJS.Signals | null }>;
 }
 
@@ -142,7 +145,7 @@ const waitForDevTools = async (url: string, handle: StartedProcess) => {
   throw new Error(`Desktop DevTools did not become ready:\n${handle.output}`);
 };
 
-const waitForOutput = async (handle: StartedProcess, text: string) => {
+const waitForOutput = async (handle: OutputSource, text: string) => {
   const deadline = Date.now() + 30_000;
   while (!handle.output.includes(text) && Date.now() < deadline) await delay(100);
   if (!handle.output.includes(text))
@@ -180,13 +183,13 @@ describe("Construct Desktop Ship to running Electron binary", () => {
       const testProfileRoot = dirname(profilePath);
       const projectFixture = resolve(process.cwd(), "tests/e2e/fixtures/construct/test.c3p");
       const uiPort = await getAvailablePort();
-      const debugPort = await getAvailablePort();
       const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
       let uiBuild: StartedProcess | undefined;
       let uiServer: StartedProcess | undefined;
-      let desktop: StartedProcess | undefined;
+      let desktopBuild: StartedProcess | undefined;
+      let electronApp: import("playwright").ElectronApplication | undefined;
+      let desktop: OutputSource | undefined;
       let game: StartedProcess | undefined;
-      let browser: import("playwright").Browser | undefined;
       let gameBrowser: import("playwright").Browser | undefined;
       let desktopPage: import("playwright").Page | undefined;
 
@@ -217,7 +220,6 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           PIPELAB_TEST_CONSTRUCT_PROFILE_ROOT: testProfileRoot,
           PIPELAB_TEST_DESKTOP: "1",
           PIPELAB_TEST_DESKTOP_USER_DATA_PATH: userDataPath,
-          PIPELAB_TEST_DESKTOP_DEBUG_PORT: String(debugPort),
           PIPELAB_TEST_DESKTOP_UI_PORT: String(uiPort),
           PIPELAB_TEST_DESKTOP_SOURCE_PATH: sourcePath,
           PIPELAB_TEST_DESKTOP_OUTPUT_PATH: outputPath,
@@ -243,19 +245,43 @@ describe("Construct Desktop Ship to running Electron binary", () => {
         );
         await waitForHttp(`http://127.0.0.1:${uiPort}`, uiServer);
 
-        const desktopArgs = ["--filter", "@pipelab/app", "run", "start", "--", "--headless"];
-        if (process.platform === "linux") desktopArgs.push("--no-sandbox");
-        desktop = startProcess(
-          process.platform === "linux" ? "xvfb-run" : pnpmCommand,
-          process.platform === "linux" ? ["-a", pnpmCommand, ...desktopArgs] : desktopArgs,
-          env,
-          true,
+        desktopBuild = startProcess(pnpmCommand, ["--filter", "@pipelab/app", "build:vite"], env);
+        const desktopBuildExit = await desktopBuild.exited;
+        if (desktopBuildExit.code !== 0) {
+          throw new Error(
+            `Desktop build failed (${desktopBuildExit.code}):\n${desktopBuild.output}`,
+          );
+        }
+        // Playwright's Electron launcher owns the window. Attaching over CDP to an already
+        // running Electron no longer lists its BrowserWindow page.
+        const desktopRequire = createRequire(join(repoRoot, "apps/desktop/package.json"));
+        const electronExecutable: unknown = desktopRequire("electron");
+        if (typeof electronExecutable !== "string") {
+          throw new Error("Could not resolve the Electron executable for Desktop.");
+        }
+        const launchEnv = Object.fromEntries(
+          Object.entries(env).filter((entry): entry is [string, string] => entry[1] !== undefined),
         );
-        await waitForDevTools(`http://127.0.0.1:${debugPort}/json`, desktop);
+        electronApp = await _electron.launch({
+          executablePath: electronExecutable,
+          args: [".", "--headless", ...(process.platform === "linux" ? ["--no-sandbox"] : [])],
+          cwd: join(repoRoot, "apps/desktop"),
+          env: launchEnv,
+          timeout: 120_000,
+        });
+        let desktopOutput = "";
+        const appendDesktopOutput = (chunk: Buffer) => {
+          desktopOutput = `${desktopOutput}${chunk.toString()}`.slice(-20_000);
+        };
+        electronApp.process().stdout?.on("data", appendDesktopOutput);
+        electronApp.process().stderr?.on("data", appendDesktopOutput);
+        desktop = {
+          get output() {
+            return desktopOutput;
+          },
+        };
         await waitForOutput(desktop, "Loading development UI");
-        browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`);
-        const desktopContext = browser.contexts()[0];
-        if (!desktopContext) throw new Error("Desktop did not expose its default browser context.");
+        const desktopContext = electronApp.context();
         await desktopContext.route(`http://127.0.0.1:${uiPort}/assets/**`, async (route) => {
           for (let attempt = 0; attempt < 4; attempt++) {
             try {
@@ -273,27 +299,20 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           }
         });
         const rendererDeadline = Date.now() + 60_000;
-        let page = browser
-          .contexts()
-          .flatMap((context) => context.pages())
-          .find((candidate) => new URL(candidate.url()).port === String(uiPort));
+        const findUiWindow = (app: import("playwright").ElectronApplication) =>
+          app.windows().find((candidate) => new URL(candidate.url()).port === String(uiPort));
+        let page = findUiWindow(electronApp);
         while (!page && Date.now() < rendererDeadline) {
           await delay(200);
-          page = browser
-            .contexts()
-            .flatMap((context) => context.pages())
-            .find((candidate) => new URL(candidate.url()).port === String(uiPort));
+          page = findUiWindow(electronApp);
         }
         if (!page) {
-          const pageUrls = browser
-            .contexts()
-            .flatMap((context) => context.pages())
-            .map((candidate) => candidate.url());
-          const targets = await fetch(`http://127.0.0.1:${debugPort}/json`)
-            .then((response) => response.text())
-            .catch((error: unknown) => String(error));
+          // Drop the URL hash: it carries the per-launch Desktop session token.
+          const windowUrls = electronApp
+            .windows()
+            .map((candidate) => candidate.url().split("#")[0]);
           throw new Error(
-            `Desktop did not expose its renderer page on UI port ${uiPort}. Pages: ${JSON.stringify(pageUrls)}. DevTools targets: ${targets}. Desktop output (tail):\n${desktop.output.slice(-6_000)}`,
+            `Desktop did not open its UI on port ${uiPort}. Windows: ${JSON.stringify(windowUrls)}. Desktop output (tail):\n${desktop.output.slice(-6_000)}`,
           );
         }
         desktopPage = page;
@@ -389,7 +408,7 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           .click({ timeout: 10_000 })
           .catch((error: unknown) => {
             throw new Error(
-              `Could not select the configured Construct profile (${profilePath}): ${String(error)}\n${desktop.output}`,
+              `Could not select the configured Construct profile (${profilePath}): ${String(error)}\n${desktop?.output ?? ""}`,
             );
           });
         await sourceDialog.getByRole("button", { name: "Done" }).click();
@@ -528,13 +547,14 @@ describe("Construct Desktop Ship to running Electron binary", () => {
         expect(game.child.exitCode).toBeNull();
       } finally {
         await desktopPage?.evaluate(() => window.close()).catch(() => undefined);
-        if (desktop) {
-          await Promise.race([desktop.exited, delay(15_000)]);
+        if (electronApp) {
+          const desktopProcess = electronApp.process();
+          await Promise.race([electronApp.close().catch(() => undefined), delay(15_000)]);
+          if (desktopProcess.exitCode === null) desktopProcess.kill("SIGKILL");
         }
         await gameBrowser?.close().catch(() => undefined);
-        await browser?.close().catch(() => undefined);
         await stopProcess(game);
-        await stopProcess(desktop);
+        await stopProcess(desktopBuild);
         await stopProcess(uiServer);
         await stopProcess(uiBuild);
         await rm(userDataPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });

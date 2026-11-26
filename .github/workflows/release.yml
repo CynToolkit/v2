@@ -69,6 +69,9 @@ jobs:
     timeout-minutes: 60
     strategy:
       fail-fast: false
+      # All three OS jobs share one Construct test account, and a new sign-in can invalidate a
+      # session another job is exporting with, so they run one at a time.
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
@@ -177,7 +180,7 @@ jobs:
           NODE_ENV: development
           # Chromium ignores --no-sandbox after pnpm's "--", and hosted Linux has no SUID sandbox.
           ELECTRON_DISABLE_SANDBOX: ${{ runner.os == 'Linux' && '1' || '' }}
-        run: pnpm --filter @pipelab/cli exec vitest run -c tests/e2e/vitest.config.mts tests/e2e/tests/construct-ui-to-binary.spec.ts
+        run: ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}pnpm --filter @pipelab/cli exec vitest run -c tests/e2e/vitest.config.mts tests/e2e/tests/construct-ui-to-binary.spec.ts
 
   verify:
     name: CI / ${{ matrix.task }}
