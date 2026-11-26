@@ -509,23 +509,49 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           .flatMap((context) => context.pages())
           .find((candidate) => candidate.url().startsWith("http://127.0.0.1:"));
         if (!gamePage) throw new Error("The produced Electron binary did not expose a game page.");
-        await gamePage.waitForFunction(
-          () => {
-            if (document.title !== "Guess the Number JavaScript") return false;
-            const canvas = document.querySelector("canvas");
-            const bounds = canvas?.getBoundingClientRect();
-            return Boolean(
-              canvas &&
-              canvas.width > 0 &&
-              canvas.height > 0 &&
-              bounds &&
-              bounds.width > 0 &&
-              bounds.height > 0,
-            );
-          },
-          undefined,
-          { timeout: 60_000 },
+        const gameConsole: string[] = [];
+        gamePage.on("console", (message) =>
+          gameConsole.push(`${message.type()}: ${message.text()}`),
         );
+        gamePage.on("pageerror", (error) => gameConsole.push(`pageerror: ${error.message}`));
+        const describeGame = () =>
+          gamePage
+            .evaluate(() => ({
+              url: location.href,
+              title: document.title,
+              readyState: document.readyState,
+              canvases: Array.from(document.querySelectorAll("canvas"), (canvas) => {
+                const bounds = canvas.getBoundingClientRect();
+                return `${canvas.width}x${canvas.height} @ ${bounds.width}x${bounds.height}`;
+              }),
+              viewport: `${window.innerWidth}x${window.innerHeight}`,
+              visibility: document.visibilityState,
+            }))
+            .catch((error: unknown) => ({ error: String(error) }));
+        await gamePage
+          .waitForFunction(
+            () => {
+              if (document.title !== "Guess the Number JavaScript") return false;
+              const canvas = document.querySelector("canvas");
+              const bounds = canvas?.getBoundingClientRect();
+              return Boolean(
+                canvas &&
+                canvas.width > 0 &&
+                canvas.height > 0 &&
+                bounds &&
+                bounds.width > 0 &&
+                bounds.height > 0,
+              );
+            },
+            undefined,
+            { timeout: 60_000 },
+          )
+          .catch(async (error: unknown) => {
+            throw new Error(
+              `The produced game did not render: ${JSON.stringify(await describeGame())}\nGame console: ${gameConsole.slice(-30).join("\n")}\nGame output: ${game?.output.slice(-4_000) ?? ""}`,
+              { cause: error },
+            );
+          });
         expect(game.child.exitCode).toBeNull();
       } finally {
         await desktopPage?.evaluate(() => window.close()).catch(() => undefined);
