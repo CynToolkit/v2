@@ -324,7 +324,7 @@ describe("Construct Desktop Ship to running Electron binary", () => {
             .waitFor({ timeout: 60_000 });
         } catch (error) {
           throw new Error(
-            `Desktop UI did not reach Dashboard (${page.url()}, ${await page.title()}): ${await page
+            `Desktop UI did not reach Dashboard (${page.url().split("#")[0]}, ${await page.title()}): ${await page
               .locator("body")
               .innerText()
               .catch(
