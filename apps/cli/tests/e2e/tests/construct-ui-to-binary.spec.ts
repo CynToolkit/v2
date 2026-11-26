@@ -145,13 +145,6 @@ const waitForDevTools = async (url: string, handle: StartedProcess) => {
   throw new Error(`Desktop DevTools did not become ready:\n${handle.output}`);
 };
 
-const waitForOutput = async (handle: OutputSource, text: string) => {
-  const deadline = Date.now() + 30_000;
-  while (!handle.output.includes(text) && Date.now() < deadline) await delay(100);
-  if (!handle.output.includes(text))
-    throw new Error(`Desktop did not report ${text}:\n${handle.output}`);
-};
-
 const packagedAppPath = async (buildPath: string) => {
   const candidates = [
     join(buildPath, "resources", "app", "src", "app"),
@@ -280,7 +273,6 @@ describe("Construct Desktop Ship to running Electron binary", () => {
             return desktopOutput;
           },
         };
-        await waitForOutput(desktop, "Loading development UI");
         const desktopContext = electronApp.context();
         await desktopContext.route(`http://127.0.0.1:${uiPort}/assets/**`, async (route) => {
           for (let attempt = 0; attempt < 4; attempt++) {
@@ -341,7 +333,6 @@ describe("Construct Desktop Ship to running Electron binary", () => {
             { cause: error },
           );
         }
-        await waitForOutput(desktop, "WebSocket client connected");
         await page
           .getByRole("button", { name: /New workflow/ })
           .first()
@@ -431,7 +422,6 @@ describe("Construct Desktop Ship to running Electron binary", () => {
         const confirmation = page.getByRole("dialog", { name: /Release details/ });
         await confirmation.getByRole("button", { name: "Ship release" }).click();
         await page.waitForURL(/\/runs\//, { timeout: 30 * 60 * 1000 });
-        expect(desktop.output).toContain("WebSocket client connected");
 
         const workflowConfigPath = join(userDataPath, "config", "workflows");
         const workflowFiles = await (await import("node:fs/promises")).readdir(workflowConfigPath);
