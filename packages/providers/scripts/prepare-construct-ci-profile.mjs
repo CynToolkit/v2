@@ -33,7 +33,12 @@ if (
   throw new Error("Construct rejected the CI test account credentials.");
 }
 
-const context = await chromium.launchPersistentContext(userDataDirectory, { headless: true });
+// Match the Construct export's browser: the default headless shell does not write the
+// Default/Preferences file that Pipelab requires in a selected profile.
+const context = await chromium.launchPersistentContext(userDataDirectory, {
+  headless: true,
+  channel: "chromium",
+});
 try {
   const page = await context.newPage();
   await page.goto(
