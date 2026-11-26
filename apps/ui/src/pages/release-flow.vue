@@ -1042,6 +1042,7 @@ const initialLoadSettled = ref(false);
 useRouteReadiness(computed(() => !agent.isReady.value || initialLoadSettled.value));
 const sourceInspectionPending = ref(false);
 const inspectionOptions = ref<Record<string, ReleaseFieldOption[]>>({});
+const inspectionVersion = ref<string | undefined>();
 const addDestinationVisible = ref(false);
 const sourceSettingsVisible = ref(false);
 const destinationSettingsVisible = ref(false);
@@ -2007,11 +2008,13 @@ const inspectSource = async () => {
     sourceInspectionPending.value = false;
     inspectionIssues.value = [];
     inspectionOptions.value = {};
+    inspectionVersion.value = undefined;
     return;
   }
   sourceInspectionPending.value = true;
   inspectionIssues.value = [];
   inspectionOptions.value = {};
+  inspectionVersion.value = undefined;
   const isCurrent = () =>
     requestId === latestSourceInspection &&
     flow.value?.source.provider === provider &&
@@ -2040,6 +2043,7 @@ const inspectSource = async () => {
           : "source",
     }));
     inspectionOptions.value = data.fieldOptions || {};
+    inspectionVersion.value = data.version;
   } catch (cause) {
     if (!isCurrent()) return;
     inspectionIssues.value = [
@@ -2107,7 +2111,10 @@ const ship = async (options: ShipOptions = {}) => {
       if (props.dashboardMode) dashboardRecoveryVisible.value = true;
       return;
     }
-    releaseVersion.value = localStorage.getItem(LAST_RELEASE_VERSION_KEY) || "1.0.0";
+    releaseVersion.value =
+      (flow.value?.settings?.prefillVersionFromSource !== false && inspectionVersion.value) ||
+      localStorage.getItem(LAST_RELEASE_VERSION_KEY) ||
+      "1.0.0";
     releaseDescription.value = flow.value?.description || flow.value?.name || "";
     releaseDetailsVisible.value = true;
     if (props.dashboardMode) dashboardRecoveryVisible.value = false;
@@ -2236,6 +2243,7 @@ const loadWorkflow = async () => {
       throw new Error(appStore.providerError || "Unable to load provider definitions.");
     inspectionIssues.value = [];
     inspectionOptions.value = {};
+    inspectionVersion.value = undefined;
     workflowLoading.value = false;
     // The layout plans a freshly loaded workflow; on its own (the dashboard) this page does.
     await Promise.all([

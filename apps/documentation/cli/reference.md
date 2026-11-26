@@ -72,8 +72,8 @@ with named or multiple slots group uploads under the destination and slot names.
 | `--dry-run`                        | Validate and prepare the workflow without executing deployment tasks or destination account checks.                                                          |
 | `--skip-persistence`               | Keep run history, run outputs, and package/cache data out of the Pipelab user-data store. They use temporary paths.                                          |
 | `--skip-preflight`                 | Run without first checking destination accounts (offline use). The run records that the checks were skipped.                                                 |
-| `--release-version <version>`      | Version to publish. Itch.io, Poki and Steam receive it. Defaults to `0.0.0`.                                                                                 |
-| `--release-notes <notes>`          | Release notes for the run. Poki uses them as notes and Steam includes them in the build description.                                                         |
+| `--release-version <version>`      | Version to publish. Itch.io, Poki and Steam receive it. Prompted for in a terminal when omitted; otherwise defaults to `0.0.0`.                              |
+| `--release-notes <notes>`          | Release notes for the run. Poki uses them as notes and Steam includes them in the build description. Prompted for in a terminal when omitted.                |
 | `--fail-on-error`                  | Exit nonzero if the workflow completes with errors. This is the default; the flag is accepted for compatibility.                                             |
 | `--no-fail-on-error`               | Exit zero even if a deployment fails. The failure is still recorded in the run result and output file.                                                       |
 | `-v, --verbose`                    | Print all captured workflow task logs after the run completes. The interactive view still shows one live output line under the running task or active phase. |

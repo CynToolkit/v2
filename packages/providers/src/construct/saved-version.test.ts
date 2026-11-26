@@ -3,7 +3,11 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { formatSavedConstructVersion, getSavedConstructVersion } from "./saved-version";
+import {
+  formatSavedConstructVersion,
+  getConstructProjectVersion,
+  getSavedConstructVersion,
+} from "./saved-version";
 
 let directory: string;
 beforeEach(async () => {
@@ -50,5 +54,13 @@ describe("saved Construct version", () => {
     await expect(getSavedConstructVersion(noRelease)).resolves.toBeUndefined();
     await expect(getSavedConstructVersion(malformed)).resolves.toBeUndefined();
     await expect(getSavedConstructVersion(join(directory, "missing.c3p"))).resolves.toBeUndefined();
+  });
+
+  it("reads the project's own version from project.c3proj", async () => {
+    const file = await writeProject("game.c3p", {
+      "project.c3proj": JSON.stringify({ name: "Game", version: "1.2.0.0" }),
+    });
+
+    await expect(getConstructProjectVersion(file)).resolves.toBe("1.2.0.0");
   });
 });

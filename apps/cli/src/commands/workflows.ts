@@ -14,6 +14,7 @@ import {
   type ReleaseFieldDefinition,
   type SaveLocationWorkflow,
 } from "@pipelab/shared";
+import * as p from "@clack/prompts";
 import { cleanseAnsi, Listr, ListrTaskState, type ListrTask } from "listr2";
 import type { WorkflowListrTask } from "./workflows.types";
 import type { WorkflowEvent } from "@pipelab/workflow-runtime";
@@ -301,6 +302,49 @@ export async function deleteWorkflowCommand(id: string, options: ForcedUserDataO
   console.log(`Deleted workflow "${id}".`);
 }
 
+/** The version the project source declares, when the workflow allows prefilling from it. */
+const sourceVersionDefault = async (config: ReleaseConfig): Promise<string | undefined> => {
+  if (config.settings?.prefillVersionFromSource === false) return undefined;
+  const source = buildCoreReleaseRegistry().sources.find(
+    (candidate) => candidate.id === config.source.provider,
+  );
+  try {
+    const inspection = await source?.inspect?.(config.source.config, {
+      host: { platform: process.platform, architecture: process.arch },
+    });
+    return inspection?.version;
+  } catch {
+    return undefined;
+  }
+};
+
+/** Ask for the release version and notes that were not passed as flags; only on a terminal. */
+export async function promptReleaseMetadata(
+  options: Pick<RunWorkflowCommandOptions, "releaseVersion" | "releaseNotes">,
+  config: ReleaseConfig,
+): Promise<{ releaseVersion?: string; releaseNotes?: string }> {
+  const result = { releaseVersion: options.releaseVersion, releaseNotes: options.releaseNotes };
+  if (!process.stdin.isTTY || !process.stdout.isTTY) return result;
+  if (result.releaseVersion === undefined) {
+    const answer = await p.text({
+      message: "Release version",
+      initialValue: (await sourceVersionDefault(config)) ?? "",
+      placeholder: "1.0.0",
+    });
+    if (p.isCancel(answer)) throw new Error("Cancelled.");
+    result.releaseVersion = answer;
+  }
+  if (result.releaseNotes === undefined) {
+    const answer = await p.text({
+      message: "Release notes (optional)",
+      initialValue: config.description ?? "",
+    });
+    if (p.isCancel(answer)) throw new Error("Cancelled.");
+    result.releaseNotes = answer;
+  }
+  return result;
+}
+
 export async function runWorkflowCommand(id: string, options: RunWorkflowCommandOptions) {
   const connectionOverrides = parseWorkflowConnectionOverrides(options.connection || []);
   const context = contextFor(options.userData);
@@ -314,6 +358,10 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
       ? workflowInput.config
       : await loadWorkflow(context, workflowInput.entry);
   const prepared = prepareReleaseWorkflow(flow);
+  if (!options.dryRun) {
+    const metadata = await promptReleaseMetadata(options, flow);
+    options = { ...options, ...metadata };
+  }
   if (connectionOverrides.some((override) => override.value.kind === "literal")) {
     console.warn(
       "Warning: literal --connection values may appear in shell history and process listings. Use env:VARIABLE for secrets.",

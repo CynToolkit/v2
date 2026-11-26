@@ -321,7 +321,7 @@ const validateWorkflowSettings = (settings: unknown): ValidationIssue[] => {
   });
   if (!isRecord(settings)) return [issue("", "settings must be an object.")];
   const issues: ValidationIssue[] = [];
-  for (const key of ["checkDestinations", "keepFailedArtifacts"])
+  for (const key of ["checkDestinations", "keepFailedArtifacts", "prefillVersionFromSource"])
     if (settings[key] !== undefined && typeof settings[key] !== "boolean")
       issues.push(issue(`.${key}`, `${key} must be a boolean.`));
   const retention = settings.retention;
