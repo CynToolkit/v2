@@ -43,8 +43,7 @@
           />
         </div>
         <div class="job-title">
-          <strong>{{ titleFor(target) }}</strong
-          ><span>{{ summaryFor(target) }}</span>
+          <strong>{{ titleFor(target) }}</strong><span>{{ summaryFor(target) }}</span>
         </div>
         <ReleaseStatus
           :label="
@@ -451,11 +450,16 @@ const bind = async (
   }
 };
 
+// Nothing is being edited until a notification is opened; the page must still render then.
 const templateField = computed(() =>
-  definitionFor(editing.value!)?.fields?.find((field) => field.key === "template"),
+  editing.value
+    ? definitionFor(editing.value)?.fields?.find((field) => field.key === "template")
+    : undefined,
 );
 const webhookField = computed(() =>
-  definitionFor(editing.value!)?.fields?.find((field) => field.type === "connection"),
+  editing.value
+    ? definitionFor(editing.value)?.fields?.find((field) => field.type === "connection")
+    : undefined,
 );
 const boundConnection = computed(() => {
   const field = webhookField.value;
