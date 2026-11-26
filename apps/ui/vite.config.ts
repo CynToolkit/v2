@@ -172,6 +172,13 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: [
+        // PrimeVue components that PrimeVueResolver auto-imports only on lazily loaded routes.
+        // The dependency scanner cannot see them, so opening such a route would re-optimize
+        // and force-reload the page mid-session.
+        "primevue/column",
+        "primevue/datatable",
+        "primevue/multiselect",
+        "primevue/panel",
         "@codemirror/state",
         "@codemirror/view",
         "@codemirror/language",
