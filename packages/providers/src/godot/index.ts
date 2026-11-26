@@ -46,6 +46,7 @@ const presetInfoForProject = (projectPath: string, preset: string): PresetInfoFo
 const inspect = async (path: string) => {
   const project = await readFile(join(path, "project.godot"), "utf8");
   const projectName = project.match(/^config\/name\s*=\s*"([^"]+)"/m)?.[1] || "Godot project";
+  const version = project.match(/^config\/version\s*=\s*"([^"]+)"/m)?.[1]?.trim() || undefined;
   const presets: string[] = [];
   const presetPlatforms: Record<string, string> = {};
   try {
@@ -75,6 +76,7 @@ const inspect = async (path: string) => {
   let templatesAvailable = false;
   templatesAvailable = await hasGodotTemplates(process.platform);
   return {
+    version,
     metadata: { projectName, godotVersion },
     data: { executable, templatesAvailable, presets, presetPlatforms },
     fieldOptions: {

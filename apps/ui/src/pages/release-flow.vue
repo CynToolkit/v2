@@ -486,9 +486,7 @@
               aria-hidden="true"
             />
           </span>
-          <span
-            ><strong>{{ destination.label }}</strong></span
-          >
+          <span><strong>{{ destination.label }}</strong></span>
           <i class="pi pi-plus" aria-hidden="true" />
         </button>
       </div>
@@ -1044,6 +1042,7 @@ const initialLoadSettled = ref(false);
 useRouteReadiness(computed(() => !agent.isReady.value || initialLoadSettled.value));
 const sourceInspectionPending = ref(false);
 const inspectionOptions = ref<Record<string, ReleaseFieldOption[]>>({});
+const inspectionVersion = ref<string | undefined>();
 const addDestinationVisible = ref(false);
 const sourceSettingsVisible = ref(false);
 const destinationSettingsVisible = ref(false);
@@ -1058,6 +1057,7 @@ const dashboardRecoveryMessage = computed(() =>
 );
 const settingsDestination = ref<ReleaseDestinationConfig>();
 const settingsSlot = ref<ReleaseDestinationSlot>();
+const LAST_RELEASE_VERSION_KEY = "pipelab:last-release-version";
 const releaseVersion = ref("1.0.0");
 const releaseDescription = ref("");
 const connectionVisible = ref(false);
@@ -2008,11 +2008,13 @@ const inspectSource = async () => {
     sourceInspectionPending.value = false;
     inspectionIssues.value = [];
     inspectionOptions.value = {};
+    inspectionVersion.value = undefined;
     return;
   }
   sourceInspectionPending.value = true;
   inspectionIssues.value = [];
   inspectionOptions.value = {};
+  inspectionVersion.value = undefined;
   const isCurrent = () =>
     requestId === latestSourceInspection &&
     flow.value?.source.provider === provider &&
@@ -2041,6 +2043,7 @@ const inspectSource = async () => {
           : "source",
     }));
     inspectionOptions.value = data.fieldOptions || {};
+    inspectionVersion.value = data.version;
   } catch (cause) {
     if (!isCurrent()) return;
     inspectionIssues.value = [
@@ -2108,7 +2111,10 @@ const ship = async (options: ShipOptions = {}) => {
       if (props.dashboardMode) dashboardRecoveryVisible.value = true;
       return;
     }
-    releaseVersion.value = "1.0.0";
+    releaseVersion.value =
+      (flow.value?.settings?.prefillVersionFromSource !== false && inspectionVersion.value) ||
+      localStorage.getItem(LAST_RELEASE_VERSION_KEY) ||
+      "1.0.0";
     releaseDescription.value = flow.value?.description || flow.value?.name || "";
     releaseDetailsVisible.value = true;
     if (props.dashboardMode) dashboardRecoveryVisible.value = false;
@@ -2162,6 +2168,8 @@ const runShip = async () => {
         appStore.providerDefinitions,
         plan.value,
       );
+      if (releaseVersion.value.trim())
+        localStorage.setItem(LAST_RELEASE_VERSION_KEY, releaseVersion.value.trim());
       const result = await submitDesktopWorkflowExecution({
         request: {
           name: `workflows/${flowId.value}`,
@@ -2235,6 +2243,7 @@ const loadWorkflow = async () => {
       throw new Error(appStore.providerError || "Unable to load provider definitions.");
     inspectionIssues.value = [];
     inspectionOptions.value = {};
+    inspectionVersion.value = undefined;
     workflowLoading.value = false;
     // The layout plans a freshly loaded workflow; on its own (the dashboard) this page does.
     await Promise.all([

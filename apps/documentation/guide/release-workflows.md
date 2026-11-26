@@ -198,8 +198,10 @@ the release details confirmation. Enter the release **Version** and
 **Description** (release notes) there; destinations that need them use these
 values, so there is nothing to retype per destination: Poki uploads them as its
 version name and notes, Steam uses the description as the build description,
-and Itch.io passes the version to Butler as `--userversion`. When the
-description is empty, Poki and Steam use the version instead. Dashboard shipping opens the same
+and Itch.io passes the version to Butler as `--userversion`. The desktop
+app remembers the last version you entered. Steam's build description contains the
+version followed by the notes; when the description is empty, Poki uses the version
+as its notes. From the CLI, pass `--release-version` and `--release-notes`; when run in a terminal without them (and not with `--dry-run`), the CLI asks for both. Dashboard shipping opens the same
 preflight as editor shipping while keeping the dashboard in view. Pipelab only
 starts the run after you confirm the release details and the planner reports a
 valid plan. If a workflow needs attention, the dashboard offers its blockers
@@ -225,6 +227,7 @@ The **Settings** tab of a workflow holds options that apply to every run of that
   - **Stop on first failure** is off by default.
   - **Check destinations before running** is on by default. Turn it off to run without the account checks; the run records that they were skipped.
   - **Keep artifacts of failed runs** is on by default. Turn it off to discard what a failed run's completed steps produced.
+  - **Prefill the release version from the project source** is on by default. When the source declares a version (Godot `config/version`, the Construct project Version property), the release details and the CLI prompt start with it; otherwise they use the last version you entered. Turn it off to skip the source.
 - **Retention:** rules for this workflow's finished runs. A rule you leave unticked is not applied, and with no rule ticked nothing is deleted. The policy is applied when a run of the workflow finishes, once in the background each time Pipelab starts (so age rules also move for workflows you do not run), and when you press **Apply now** in the preview. Editing the rules deletes nothing by itself.
   - **Run history:** keep only the last N runs, and/or delete runs older than N days. A pruned run is removed together with its artifacts.
   - **Artifact files:** keep the files of only the last N runs, and/or delete files older than N days. The run stays in history without its files, so you can keep a long history and a short artifact window.

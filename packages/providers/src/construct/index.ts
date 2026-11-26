@@ -3,7 +3,7 @@ import { createProviderDefinition } from "@pipelab/shared";
 import { basename, normalize } from "node:path";
 import { isChromiumProfileDirectory, listChromiumBrowserProfiles } from "./browser-profiles";
 import type { ReleaseFieldOption, ReleaseSourceDefinition } from "@pipelab/shared";
-import { getSavedConstructVersion } from "./saved-version";
+import { getConstructProjectVersion, getSavedConstructVersion } from "./saved-version";
 export { discoverBrowserProfiles, inspectChromiumProfile } from "./browser-profiles";
 
 import { constructWorkflowTaskFactories } from "./export-c3p";
@@ -65,6 +65,10 @@ export const constructSource: ReleaseSourceDefinition = {
       typeof config.path === "string" && config.path.trim()
         ? await getSavedConstructVersion(config.path.trim())
         : undefined;
+    const projectVersion =
+      typeof config.path === "string" && config.path.trim()
+        ? await getConstructProjectVersion(config.path.trim())
+        : undefined;
     const versionOptions: ReleaseFieldOption[] = [
       ...(savedVersion
         ? [{ label: `${savedVersion} · saved in project`, value: savedVersion }]
@@ -82,6 +86,7 @@ export const constructSource: ReleaseSourceDefinition = {
       });
     }
     return {
+      version: projectVersion,
       issues: selectedProfileExists
         ? []
         : [

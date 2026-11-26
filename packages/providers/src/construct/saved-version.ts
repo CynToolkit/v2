@@ -13,8 +13,8 @@ export const formatSavedConstructVersion = (savedWithRelease: unknown): string |
   return `r${release}${patch > 0 ? `-${patch}` : ""}`;
 };
 
-/** Reads the Construct release a `.c3p` was saved with, without extracting the archive. */
-export const getSavedConstructVersion = async (file: string): Promise<string | undefined> => {
+/** Reads the parsed `project.c3proj` of a `.c3p` without extracting the archive. */
+const readConstructProject = async (file: string): Promise<Record<string, unknown> | undefined> => {
   // Construct archives created on Windows can contain backslashes in entry
   // names; we only read the fixed root project.c3proj entry and never extract.
   const archive = new StreamZip.async({ file, skipEntryNameValidation: true });
@@ -23,14 +23,22 @@ export const getSavedConstructVersion = async (file: string): Promise<string | u
     if (!projectEntry || projectEntry.isDirectory) return undefined;
 
     const project: unknown = JSON.parse((await archive.entryData(projectEntry)).toString("utf8"));
-    if (!project || typeof project !== "object" || !("savedWithRelease" in project)) {
-      return undefined;
-    }
-
-    return formatSavedConstructVersion(project.savedWithRelease);
+    return project && typeof project === "object"
+      ? (project as Record<string, unknown>)
+      : undefined;
   } catch {
     return undefined;
   } finally {
     await archive.close().catch(() => {});
   }
+};
+
+/** Reads the Construct release a `.c3p` was saved with, without extracting the archive. */
+export const getSavedConstructVersion = async (file: string): Promise<string | undefined> =>
+  formatSavedConstructVersion((await readConstructProject(file))?.savedWithRelease);
+
+/** Reads the project's own version (the "Version" project property), e.g. `1.2.0.0`. */
+export const getConstructProjectVersion = async (file: string): Promise<string | undefined> => {
+  const version = (await readConstructProject(file))?.version;
+  return typeof version === "string" && version.trim() ? version.trim() : undefined;
 };

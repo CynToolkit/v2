@@ -136,6 +136,8 @@ export interface ReleaseWorkflowSettings {
   /** Keep what a failed run's completed steps produced. Default: true. */
   keepFailedArtifacts?: boolean;
   retention?: ReleaseRetentionPolicy;
+  /** Prefill the release version from the project source when shipping. Default: true. */
+  prefillVersionFromSource?: boolean;
   /**
    * Which finished runs announce themselves, to the desktop (UI-started runs) and to every
    * notification target (any host). Cancelled runs never notify. Both default: true.
@@ -252,6 +254,8 @@ export interface ReleaseFieldOption {
 }
 
 export interface SourceInspection {
+  /** The version the project itself declares, offered as the default release version. */
+  version?: string;
   metadata?: Record<string, unknown>;
   data?: Record<string, unknown>;
   fieldOptions?: Record<string, ReleaseFieldOption[]>;

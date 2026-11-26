@@ -12,6 +12,7 @@ import type {
 } from "./release/types";
 import type { BuildHistoryResponse, BuildHistoryStorageInfo } from "./build-history";
 export interface ReleaseSourceInspection {
+  version?: string;
   issues?: ValidationIssue[];
   fieldOptions?: Record<string, ReleaseFieldOption[]>;
 }

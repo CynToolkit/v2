@@ -91,3 +91,24 @@ describe("Steam release credentials", () => {
     );
   });
 });
+
+describe("Steam build description", () => {
+  it("includes both the version and the release notes", async () => {
+    const { default: steamPlugin } = await import("./index");
+    const { partialDouble } = await import("@pipelab/shared/test-doubles");
+    const destination = steamPlugin.release?.destinations?.[0];
+    const compile = (variables: Record<string, unknown>) =>
+      destination?.compile(
+        partialDouble({ reference: { stepId: "build" } }),
+        partialDouble({ id: "d", config: {}, slots: [] }),
+        partialDouble({ id: "s", config: {} }),
+        partialDouble({ host: {}, variables }),
+      )[0].with;
+    expect(compile({ version: "1.2.0", releaseNotes: "Fixes" })).toMatchObject({
+      description: "1.2.0\n\nFixes",
+    });
+    expect(compile({ version: "1.2.0", releaseNotes: "" })).toMatchObject({
+      description: "1.2.0",
+    });
+  });
+});

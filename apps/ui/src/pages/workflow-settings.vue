@@ -90,6 +90,15 @@
               />
               <span>Keep artifacts of failed runs</span>
             </label>
+            <label class="check-row">
+              <Checkbox
+                binary
+                :model-value="flow.settings?.prefillVersionFromSource !== false"
+                input-id="prefill-version-from-source"
+                @update:model-value="setSetting('prefillVersionFromSource', $event)"
+              />
+              <span>Prefill the release version from the project source</span>
+            </label>
           </template>
 
           <template v-else-if="activeTab === 'retention'">
@@ -254,7 +263,10 @@ const notificationsBlocked = ref(false);
 useRouteReadiness(computed(() => !agent.isReady.value || !!flow.value || !!loadError.value));
 
 const settings = (): ReleaseWorkflowSettings => (flow.value!.settings ??= {});
-const setSetting = (key: "checkDestinations" | "keepFailedArtifacts", value: boolean) => {
+const setSetting = (
+  key: "checkDestinations" | "keepFailedArtifacts" | "prefillVersionFromSource",
+  value: boolean,
+) => {
   settings()[key] = value;
 };
 type RuleGroup = "history" | "artifacts";
