@@ -42,12 +42,10 @@ async function directoryChildDigests(path: string): Promise<Record<string, strin
     await Promise.all(
       includedEntries
         .filter(({ include }) => include)
-        .map(
-          async ({ entry }): Promise<[string, string]> => [
-            entry,
-            await artifactDigest(join(path, entry)),
-          ],
-        ),
+        .map(async ({ entry }): Promise<[string, string]> => [
+          entry,
+          await artifactDigest(join(path, entry)),
+        ]),
     ),
   );
 }
@@ -217,9 +215,18 @@ describe("authenticated local Construct to Electron CI acceptance", () => {
             },
             builds: [
               {
+                id: "construct-web",
+                type: "web",
+                engine: "@pipelab/plugin-construct/producer",
+                input: { source: true },
+                config: {},
+                targets: [{ id: "web", config: {} }],
+              },
+              {
                 id: "electron-profile",
                 type: "desktop",
                 engine: "@pipelab/plugin-electron/producer",
+                input: { buildId: "construct-web", targetId: "web" },
                 config: {},
                 targets: [{ id: targetId, config: {} }],
               },
