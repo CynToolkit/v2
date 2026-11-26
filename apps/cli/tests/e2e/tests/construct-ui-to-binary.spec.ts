@@ -493,6 +493,9 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           "--disable-gpu",
           `--remote-debugging-port=${gameDebugPort}`,
           `--user-data-dir=${join(userDataPath, "game-profile")}`,
+          // On a CI Mac the Safe Storage Keychain prompt blocks Chromium startup, and with it
+          // the DevTools endpoint; Playwright passes the same switch to its own browsers.
+          ...(process.platform === "darwin" ? ["--use-mock-keychain"] : []),
         ];
         game = startProcess(
           process.platform === "linux" ? "xvfb-run" : gamePath,
