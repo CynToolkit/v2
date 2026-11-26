@@ -284,7 +284,18 @@ describe("Construct Desktop Ship to running Electron binary", () => {
             .flatMap((context) => context.pages())
             .find((candidate) => new URL(candidate.url()).port === String(uiPort));
         }
-        if (!page) throw new Error("Desktop did not expose its renderer page.");
+        if (!page) {
+          const pageUrls = browser
+            .contexts()
+            .flatMap((context) => context.pages())
+            .map((candidate) => candidate.url());
+          const targets = await fetch(`http://127.0.0.1:${debugPort}/json`)
+            .then((response) => response.text())
+            .catch((error: unknown) => String(error));
+          throw new Error(
+            `Desktop did not expose its renderer page on UI port ${uiPort}. Pages: ${JSON.stringify(pageUrls)}. DevTools targets: ${targets}. Desktop output (tail):\n${desktop.output.slice(-6_000)}`,
+          );
+        }
         desktopPage = page;
         const rendererErrors: string[] = [];
         page.on("pageerror", (error) => rendererErrors.push(error.message));
