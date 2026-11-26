@@ -231,7 +231,23 @@ describe("authenticated local Construct to Electron CI acceptance", () => {
                 targets: [{ id: targetId, config: {} }],
               },
             ],
-            destinations: [],
+            // A build target only runs when something consumes it, so deliver Electron locally.
+            destinations: [
+              {
+                id: "local-folder",
+                provider: "@pipelab/core/destination/folder",
+                enabled: true,
+                config: {},
+                slots: [
+                  {
+                    id: "electron",
+                    enabled: true,
+                    input: { buildId: "electron-profile", targetId },
+                    config: { outputDir: join(userDataPath, "delivered") },
+                  },
+                ],
+              },
+            ],
           }),
         );
       } else {
