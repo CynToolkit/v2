@@ -128,6 +128,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && runner.os == 'Linux'
         env:
           NODE_ENV: development
+          ELECTRON_DISABLE_SANDBOX: "1"
           PIPELAB_E2E_HISTORY_PATH: /workflows/ci-construct-electron-acceptance/ci-project/runs
           PIPELAB_E2E_EXPECTED_RUNS: "1"
         run: xvfb-run -a pnpm --filter @pipelab/app test:local-release-e2e
@@ -157,6 +158,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && runner.os == 'Linux'
         env:
           NODE_ENV: development
+          ELECTRON_DISABLE_SANDBOX: "1"
           PIPELAB_E2E_HISTORY_PATH: /workflows/ci-construct-electron-acceptance/ci-project/runs
           PIPELAB_E2E_EXPECTED_RUNS: "2"
         run: xvfb-run -a pnpm --filter @pipelab/app test:local-release-e2e

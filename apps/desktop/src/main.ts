@@ -335,12 +335,23 @@ function createWindow(): void {
                 Array.from(document.querySelectorAll("a[href]")).find(
                   (link) => link.getAttribute("href") === path,
                 );
+              // The dashboard shows workflow cards only before any run exists; afterwards it links
+              // to recent runs. Either lands inside the workflow layout, whose tabs link to Runs.
               const workflowLink = await waitFor(
-                () => findLink(workflowPath),
+                () =>
+                  findLink(workflowPath) ||
+                  Array.from(document.querySelectorAll("a[href]")).find((link) =>
+                    link.getAttribute("href")?.startsWith(workflowPath + "/"),
+                  ),
                 "workflow link",
               );
               workflowLink.click();
-              await waitFor(() => window.location.pathname === workflowPath, "workflow page");
+              await waitFor(
+                () =>
+                  window.location.pathname === workflowPath ||
+                  window.location.pathname.startsWith(workflowPath + "/"),
+                "workflow page",
+              );
               const runsLink = await waitFor(() => findLink(runListPath), "workflow runs link");
               runsLink.click();
               await waitFor(() => window.location.pathname === runListPath, "workflow runs page");
