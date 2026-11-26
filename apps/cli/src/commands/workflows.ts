@@ -319,7 +319,7 @@ const sourceVersionDefault = async (config: ReleaseConfig): Promise<string | und
 };
 
 /** Ask for the release version and notes that were not passed as flags; only on a terminal. */
-export async function promptReleaseMetadata(
+async function promptReleaseMetadata(
   options: Pick<RunWorkflowCommandOptions, "releaseVersion" | "releaseNotes">,
   config: ReleaseConfig,
 ): Promise<{ releaseVersion?: string; releaseNotes?: string }> {
