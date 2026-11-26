@@ -14,8 +14,10 @@ const { values } = parseArgs({
     port: { type: "string" },
     "user-data": { type: "string" },
     "cli-dir": { type: "string" },
+    "allowed-origin": { type: "string" },
   },
 });
+const allowedOrigin = values["allowed-origin"];
 const port = values.port;
 const userData = values["user-data"];
 const cliDirname = values["cli-dir"];
@@ -63,7 +65,15 @@ process.on("message", (message) => {
 process.on("disconnect", () => void shutdown(0));
 
 // The Desktop server is only ever reachable from this machine.
-startServer({ port, host: "127.0.0.1", userData, cliDirname, authToken, desktopHosted: true })
+startServer({
+  port,
+  host: "127.0.0.1",
+  userData,
+  cliDirname,
+  authToken,
+  desktopHosted: true,
+  ...(allowedOrigin ? { allowedOrigin } : {}),
+})
   .then(({ port }) => process.send?.({ type: "ready", port }))
   .catch((error: unknown) => {
     console.error("[Server] Failed to start:", error);

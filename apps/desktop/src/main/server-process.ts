@@ -114,6 +114,8 @@ const spawnServer = (preferredPort: number): Promise<SpawnServerResult> => {
     userDataPath,
     "--cli-dir",
     getCliDirectory(),
+    // The server only accepts the default Vite origin; a configured dev UI port must be allowed.
+    ...(is.dev ? ["--allowed-origin", `http://127.0.0.1:${getUiDevelopmentPort()}`] : []),
   ];
 
   // The server is the CLI package bundled into server-entry.js. It runs in its own process

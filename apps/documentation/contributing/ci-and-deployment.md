@@ -34,7 +34,7 @@ project and account with its owner before adding values.
 | `POSTHOG_API_KEY`                                                     | Product telemetry in builds.                                                     |
 | `CERTIFICATE_OSX_APPLICATION`, `CERTIFICATE_OSX_APPLICATION_PASSWORD` | Optional for macOS prereleases; required for stable signed builds.               |
 | `APPLE_ID`, `APPLE_ID_PASSWORD`, `APPLE_TEAM_ID`                      | Optional for macOS prereleases; required for stable signed and notarized builds. |
-| `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Optional authenticated Construct acceptance dispatch.                            |
+| `CONSTRUCT_CI_USERNAME`, `CONSTRUCT_CI_PASSWORD`                      | Authenticated Construct acceptance on `main` pushes and dispatches.              |
 
 Set the three Pages project-name secrets to the intended projects and confirm
 each target with its owner. Deploy jobs fail with a
@@ -48,7 +48,7 @@ of the missing secrets. Stable macOS releases require all five.
 
 | Event                                                           | CI and deployment behavior                                                                                                                                                                        |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Push to `main`                                                  | Run CI, then deploy all three web apps to Pages branch `main` after the CI gate succeeds. Production Supabase values are available to main builds.                                                |
+| Push to `main`                                                  | Run CI, then deploy all three web apps to Pages branch `main` and run authenticated Construct acceptance after the CI gate succeeds. Production Supabase values are available to main builds.     |
 | Push to `develop`                                               | Run CI, then deploy all three web apps to Pages branch `develop` as previews after the CI gate succeeds. Production Supabase values are omitted.                                                  |
 | Pull request targeting `main` or `develop` from this repository | Run CI, then deploy changed web apps as Pages previews on a unique `pr-<number>` branch. Production Supabase values are omitted. Editor and website previews post their deployment URL to the PR. |
 | Pull request targeting `main` or `develop` from a fork          | Run CI and documentation build validation. Secret-bearing editor, website, and documentation deployment jobs are skipped.                                                                         |

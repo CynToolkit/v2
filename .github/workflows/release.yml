@@ -60,13 +60,18 @@ jobs:
         run: pnpm --filter @pipelab/providers test:construct
 
   authenticated-local-release:
-    name: Authenticated local Ship / ${{ matrix.os }}
-    if: github.event_name == 'workflow_dispatch' && inputs.run_authenticated_local_ship
+    name: Smoke Construct to Electron / ${{ matrix.os }}
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.run_authenticated_local_ship)
     needs: ci-passed
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
+      # All three OS jobs share one Construct test account, and a new sign-in can invalidate a
+      # session another job is exporting with, so they run one at a time.
+      max-parallel: 1
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
@@ -112,23 +117,27 @@ jobs:
           CONSTRUCT_CI_PASSWORD: ${{ secrets.CONSTRUCT_CI_PASSWORD }}
         run: node packages/providers/scripts/prepare-construct-ci-profile.mjs
 
+      # Smoke scenario (every push to main): real Construct export, Electron build delivered to a
+      # local folder, then a second Ship that must preserve the first run's history and artifacts.
       - name: Run first authenticated Construct to Electron Ship
         env:
           CONSTRUCT_CI_RUN_NUMBER: "1"
           CONSTRUCT_CI_REQUIRED: "true"
           NODE_ENV: development
-        run: pnpm --filter @pipelab/cli test:construct-live
+        run: pnpm --filter @pipelab/cli exec vitest run -c tests/e2e/vitest.config.mts tests/e2e/tests/construct-electron-live.spec.ts
 
+      # Steps that drive the Desktop app run on manual dispatches only until they pass reliably.
       - name: Cold-start Desktop and verify the first run (Linux)
-        if: runner.os == 'Linux'
+        if: github.event_name == 'workflow_dispatch' && runner.os == 'Linux'
         env:
           NODE_ENV: development
+          ELECTRON_DISABLE_SANDBOX: "1"
           PIPELAB_E2E_HISTORY_PATH: /workflows/ci-construct-electron-acceptance/ci-project/runs
           PIPELAB_E2E_EXPECTED_RUNS: "1"
         run: xvfb-run -a pnpm --filter @pipelab/app test:local-release-e2e
 
       - name: Cold-start Desktop and verify the first run (Windows and macOS)
-        if: runner.os != 'Linux'
+        if: github.event_name == 'workflow_dispatch' && runner.os != 'Linux'
         env:
           NODE_ENV: development
           PIPELAB_E2E_HISTORY_PATH: /workflows/ci-construct-electron-acceptance/ci-project/runs
@@ -141,28 +150,37 @@ jobs:
           CONSTRUCT_CI_PASSWORD: ${{ secrets.CONSTRUCT_CI_PASSWORD }}
         run: node packages/providers/scripts/prepare-construct-ci-profile.mjs
 
-      - name: Run a new Ship after Desktop restart and verify saved history
+      - name: Run a second Ship and verify saved history and prior artifacts
         env:
           CONSTRUCT_CI_RUN_NUMBER: "2"
           CONSTRUCT_CI_REQUIRED: "true"
           NODE_ENV: development
-        run: pnpm --filter @pipelab/cli test:construct-live
+        run: pnpm --filter @pipelab/cli exec vitest run -c tests/e2e/vitest.config.mts tests/e2e/tests/construct-electron-live.spec.ts
 
       - name: Cold-start Desktop and verify both runs and artifacts (Linux)
-        if: runner.os == 'Linux'
+        if: github.event_name == 'workflow_dispatch' && runner.os == 'Linux'
         env:
           NODE_ENV: development
+          ELECTRON_DISABLE_SANDBOX: "1"
           PIPELAB_E2E_HISTORY_PATH: /workflows/ci-construct-electron-acceptance/ci-project/runs
           PIPELAB_E2E_EXPECTED_RUNS: "2"
         run: xvfb-run -a pnpm --filter @pipelab/app test:local-release-e2e
 
       - name: Cold-start Desktop and verify both runs and artifacts (Windows and macOS)
-        if: runner.os != 'Linux'
+        if: github.event_name == 'workflow_dispatch' && runner.os != 'Linux'
         env:
           NODE_ENV: development
           PIPELAB_E2E_HISTORY_PATH: /workflows/ci-construct-electron-acceptance/ci-project/runs
           PIPELAB_E2E_EXPECTED_RUNS: "2"
         run: pnpm --filter @pipelab/app test:local-release-e2e
+
+      - name: Ship through the Desktop wizard to a running Electron binary
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          NODE_ENV: development
+          # Chromium ignores --no-sandbox after pnpm's "--", and hosted Linux has no SUID sandbox.
+          ELECTRON_DISABLE_SANDBOX: ${{ runner.os == 'Linux' && '1' || '' }}
+        run: ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}pnpm --filter @pipelab/cli exec vitest run -c tests/e2e/vitest.config.mts tests/e2e/tests/construct-ui-to-binary.spec.ts
 
   verify:
     name: CI / ${{ matrix.task }}

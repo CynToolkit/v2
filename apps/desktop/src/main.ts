@@ -250,7 +250,8 @@ function createWindow(): void {
     },
   });
 
-  if (is.dev) {
+  // Integration tests drive the window over CDP; an open DevTools window hides it from Playwright.
+  if (is.dev && !isDesktopIntegrationTest) {
     mainWindow.webContents.openDevTools();
   }
 
@@ -335,12 +336,23 @@ function createWindow(): void {
                 Array.from(document.querySelectorAll("a[href]")).find(
                   (link) => link.getAttribute("href") === path,
                 );
+              // The dashboard shows workflow cards only before any run exists; afterwards it links
+              // to recent runs. Either lands inside the workflow layout, whose tabs link to Runs.
               const workflowLink = await waitFor(
-                () => findLink(workflowPath),
+                () =>
+                  findLink(workflowPath) ||
+                  Array.from(document.querySelectorAll("a[href]")).find((link) =>
+                    link.getAttribute("href")?.startsWith(workflowPath + "/"),
+                  ),
                 "workflow link",
               );
               workflowLink.click();
-              await waitFor(() => window.location.pathname === workflowPath, "workflow page");
+              await waitFor(
+                () =>
+                  window.location.pathname === workflowPath ||
+                  window.location.pathname.startsWith(workflowPath + "/"),
+                "workflow page",
+              );
               const runsLink = await waitFor(() => findLink(runListPath), "workflow runs link");
               runsLink.click();
               await waitFor(() => window.location.pathname === runListPath, "workflow runs page");
@@ -362,7 +374,8 @@ function createWindow(): void {
               if (!expectedRow) throw new Error("The expected run is missing from Desktop history");
               const selectedShortId = expectedRow.querySelector(".run-id")?.textContent?.trim().replace(/^#/, "");
               if (!selectedShortId) throw new Error("The expected run has no visible run ID");
-              expectedRow.click();
+              // The row's click handler lives on its inner button.
+              (expectedRow.querySelector("button.run-row") || expectedRow).click();
               await waitFor(() => {
                 if (hasExpectedRunPath) return window.location.pathname === runPath;
                 const selectedPath = window.location.pathname.split("/");
@@ -370,22 +383,23 @@ function createWindow(): void {
                   selectedPath.slice(0, 5).join("/") === runListPath &&
                   selectedPath[5].startsWith(selectedShortId);
               }, "selected run");
-              const summary = await waitFor(
-                () => document.querySelector(".run-page .run-summary"),
+              await waitFor(
+                () => document.querySelector(".run-page .run-header .title-line"),
                 "run details",
               );
-              const status = document.querySelector(".run-page header .status-mark")?.getAttribute("aria-label");
+              // The run status is the header Tag; its label is the status with dashes as spaces.
+              const status = document
+                .querySelector(".run-page .run-header .title-line .p-tag-label")
+                ?.textContent?.trim();
               if (status !== "completed") {
                 throw new Error("Unexpected run status: " + (status || "missing"));
               }
-              const artifactCountText = Array.from(summary.querySelectorAll("span"))
-                .map((span) => span.textContent || "")
-                .find((value) => /\\d+\\s+artifacts/.test(value));
-              const artifactCount = Number(artifactCountText?.match(/(\\d+)\\s+artifacts/)?.[1] || 0);
-              if (artifactCount < 1) throw new Error("The completed Desktop run has no artifacts");
               const artifactsTab = Array.from(document.querySelectorAll(".detail-tabs button"))
                 .find((button) => button.textContent?.includes("Artifacts"));
               if (!artifactsTab) throw new Error("The Desktop Artifacts tab is missing");
+              // The Artifacts tab shows the run's artifact count in its trailing span.
+              const artifactCount = Number(artifactsTab.querySelector("span")?.textContent?.trim() || 0);
+              if (artifactCount < 1) throw new Error("The completed Desktop run has no artifacts");
               artifactsTab.click();
               const artifactRows = await waitFor(
                 () => {
