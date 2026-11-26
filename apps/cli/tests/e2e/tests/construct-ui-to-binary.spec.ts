@@ -490,12 +490,18 @@ describe("Construct Desktop Ship to running Electron binary", () => {
         const gameArgs = [
           "--no-sandbox",
           "--disable-setuid-sandbox",
-          "--disable-gpu",
           `--remote-debugging-port=${gameDebugPort}`,
           `--user-data-dir=${join(userDataPath, "game-profile")}`,
-          // On a CI Mac the Safe Storage Keychain prompt blocks Chromium startup, and with it
-          // the DevTools endpoint; Playwright passes the same switch to its own browsers.
-          ...(process.platform === "darwin" ? ["--use-mock-keychain"] : []),
+          ...(process.platform === "darwin"
+            ? [
+                // The Safe Storage Keychain prompt blocks Chromium startup on a CI Mac.
+                "--use-mock-keychain",
+                // CI Macs are VMs without GPU access, and Construct needs WebGL to create its
+                // canvas: render WebGL in software through ANGLE's SwiftShader backend.
+                "--use-angle=swiftshader",
+                "--enable-unsafe-swiftshader",
+              ]
+            : ["--disable-gpu"]),
         ];
         game = startProcess(
           process.platform === "linux" ? "xvfb-run" : gamePath,
