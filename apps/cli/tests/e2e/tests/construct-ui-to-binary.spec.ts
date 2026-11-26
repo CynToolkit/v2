@@ -319,8 +319,9 @@ describe("Construct Desktop Ship to running Electron binary", () => {
         const cliPort = new URL(page.url()).searchParams.get("cliPort");
         assert.ok(cliPort, "Desktop loaded the UI with the managed CLI port");
         try {
+          // The dashboard heading is the active project's name.
           await page
-            .getByRole("heading", { name: "Project overview" })
+            .getByRole("heading", { level: 1, name: "Default project" })
             .waitFor({ timeout: 60_000 });
         } catch (error) {
           throw new Error(
@@ -337,7 +338,7 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           .getByRole("button", { name: /New workflow/ })
           .first()
           .click();
-        const dialog = page.getByRole("dialog", { name: "New release" });
+        const dialog = page.getByRole("dialog", { name: "New workflow" });
         await dialog.waitFor();
         await dialog.getByLabel("Name", { exact: true }).fill("Construct Desktop E2E");
         await dialog
@@ -355,40 +356,18 @@ describe("Construct Desktop Ship to running Electron binary", () => {
         await page.waitForURL(/\/workflows\/[^/]+\/[^/]+$/);
         await page.getByRole("link", { name: "Builds", exact: true }).click();
         await page.getByRole("heading", { name: "Build profiles" }).waitFor();
-        await page.getByRole("button", { name: "Add build" }).first().click();
-        const addBuildDialog = page.getByRole("dialog", { name: "Add build" });
-        await addBuildDialog.getByText("Choose a build type", { exact: true }).click();
-        await page.getByRole("option", { name: "Desktop", exact: true }).click();
-        await addBuildDialog.getByText("Choose an engine", { exact: true }).click();
-        await page.getByRole("option", { name: "Electron", exact: true }).click();
         const targetId =
           process.platform === "win32"
             ? "windows-x64"
             : process.platform === "darwin"
               ? "macos-arm64"
               : "linux-x64";
-        const targetButtons = addBuildDialog.locator(".target-row");
-        await targetButtons
-          .first()
-          .waitFor({ timeout: 15_000 })
-          .catch(async (error: unknown) => {
-            throw new Error(
-              `No target choices were shown after selecting Electron: ${await addBuildDialog.innerText().catch(() => "<closed>")}\n${String(error)}`,
-            );
-          });
-        const targetLabels = await targetButtons.allTextContents();
-        const targetIndex = targetLabels.findIndex((label) => label.includes(targetId));
-        expect(
-          targetIndex,
-          `available Electron targets: ${targetLabels.join(" | ")}`,
-        ).toBeGreaterThanOrEqual(0);
-        await targetButtons.nth(targetIndex).click();
-        await addBuildDialog.getByRole("button", { name: "Add build" }).click();
-        await page.getByText("Electron", { exact: true }).waitFor();
+        // The wizard adds the Construct web build and an Electron build for the host itself.
+        await page.getByText(`Desktop · Electron · ${targetId}`, { exact: true }).waitFor();
         await page.getByRole("link", { name: "Configuration", exact: true }).click();
         await page
           .locator(".source-card")
-          .getByRole("button", { name: "Edit", exact: true })
+          .getByRole("button", { name: "Edit source", exact: true })
           .click();
         const sourceDialog = page.getByRole("dialog", { name: "Edit source" });
         await sourceDialog.getByText("Select browser profile", { exact: true }).click();
@@ -403,15 +382,19 @@ describe("Construct Desktop Ship to running Electron binary", () => {
             );
           });
         await sourceDialog.getByRole("button", { name: "Done" }).click();
-        const destinationCard = page.locator(".job-card").first();
-        await destinationCard
-          .locator(".job-header")
-          .getByRole("button", { name: "Edit", exact: true })
+        // The output folder belongs to the Folder destination's deployment.
+        await page
+          .getByRole("button", { name: /^Show deployments for / })
+          .first()
           .click();
-        const destinationDialog = page.getByRole("dialog", { name: "Edit destination" });
-        await destinationDialog.getByRole("button", { name: "Choose output folder" }).click();
-        await destinationDialog.getByLabel("Output folder", { exact: true }).waitFor();
-        await destinationDialog.getByRole("button", { name: "Done" }).click();
+        await page
+          .getByRole("button", { name: /^Edit Deployment/ })
+          .first()
+          .click();
+        const deploymentDialog = page.getByRole("dialog", { name: "Deployment settings" });
+        await deploymentDialog.getByRole("button", { name: "Choose output folder" }).click();
+        await deploymentDialog.getByLabel("Output folder", { exact: true }).waitFor();
+        await deploymentDialog.getByRole("button", { name: "Done" }).click();
         await page
           .getByRole("button", { name: "Ship" })
           .waitFor({ state: "visible", timeout: 60_000 });
@@ -446,8 +429,9 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           provider: "@pipelab/plugin-construct/source",
           config: { path: sourcePath, profilePath },
         });
-        expect(workflow.builds[0]).toMatchObject({
-          engine: "@pipelab/plugin-electron/producer",
+        expect(
+          workflow.builds.find((build) => build.engine === "@pipelab/plugin-electron/producer"),
+        ).toMatchObject({
           targets: expect.arrayContaining([expect.objectContaining({ id: targetId })]),
         });
         expect(workflow.destinations[0]).toMatchObject({
