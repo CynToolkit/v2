@@ -250,7 +250,8 @@ function createWindow(): void {
     },
   });
 
-  if (is.dev) {
+  // Integration tests drive the window over CDP; an open DevTools window hides it from Playwright.
+  if (is.dev && !isDesktopIntegrationTest) {
     mainWindow.webContents.openDevTools();
   }
 
