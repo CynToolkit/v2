@@ -603,7 +603,10 @@ export async function runWorkflowCommand(id: string, options: RunWorkflowCommand
   const originalConsoleDebug = console.debug;
   if (!options.verbose) console.debug = () => undefined;
   const execution = executeWorkflow(context, `workflows/${flow.id}.json`, {
-    release: { version: "", description: "" },
+    release: {
+      version: options.releaseVersion ?? "",
+      description: options.releaseNotes ?? "",
+    },
     ...(workflowInput.kind === "file" ? { workflowConfig: workflowInput.config } : {}),
     connectionOverrides,
     persist: !options.skipPersistence,

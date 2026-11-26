@@ -198,8 +198,10 @@ the release details confirmation. Enter the release **Version** and
 **Description** (release notes) there; destinations that need them use these
 values, so there is nothing to retype per destination: Poki uploads them as its
 version name and notes, Steam uses the description as the build description,
-and Itch.io passes the version to Butler as `--userversion`. When the
-description is empty, Poki and Steam use the version instead. Dashboard shipping opens the same
+and Itch.io passes the version to Butler as `--userversion`. The desktop
+app remembers the last version you entered. Steam's build description contains the
+version followed by the notes; when the description is empty, Poki uses the version
+as its notes. From the CLI, pass `--release-version` and `--release-notes`. Dashboard shipping opens the same
 preflight as editor shipping while keeping the dashboard in view. Pipelab only
 starts the run after you confirm the release details and the planner reports a
 valid plan. If a workflow needs attention, the dashboard offers its blockers

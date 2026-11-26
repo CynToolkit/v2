@@ -73,9 +73,10 @@ export const steamDestination: ReleaseDestinationDefinition = {
       with: {
         ...destination.config,
         ...slot.config,
-        description:
-          String(context.variables?.releaseNotes ?? "").trim() ||
-          String(context.variables?.version ?? ""),
+        description: [context.variables?.version, context.variables?.releaseNotes]
+          .map((value) => String(value ?? "").trim())
+          .filter(Boolean)
+          .join("\n\n"),
       },
       delivery: { destinationId: destination.id, slotId: slot.id, artifact: artifact.reference },
     },

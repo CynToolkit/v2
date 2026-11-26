@@ -14,6 +14,8 @@ export interface RunWorkflowCommandOptions {
   dryRun?: boolean;
   skipPreflight?: boolean;
   skipPersistence?: boolean;
+  releaseVersion?: string;
+  releaseNotes?: string;
   verbose?: boolean;
   connection?: readonly string[];
 }

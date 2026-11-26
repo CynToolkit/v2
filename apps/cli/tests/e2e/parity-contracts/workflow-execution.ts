@@ -14,7 +14,7 @@ export const executionInputPolicy = {
 
 /** Classify every engine input so new execution policy must be considered across both hosts. */
 export const engineExecutionOptionPolicy = {
-  release: "UI release metadata; CLI currently uses the engine defaults",
+  release: "shared release metadata; CLI exposes --release-version and --release-notes",
   workflowConfig: "CLI portable-file input; UI loads the saved workflow in the engine",
   env: "UI initiating environment versus CLI process environment",
   connectionValues: "UI identity-backed connection values; CLI has no implicit account identity",

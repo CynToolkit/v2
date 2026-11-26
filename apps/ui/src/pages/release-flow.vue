@@ -486,9 +486,7 @@
               aria-hidden="true"
             />
           </span>
-          <span
-            ><strong>{{ destination.label }}</strong></span
-          >
+          <span><strong>{{ destination.label }}</strong></span>
           <i class="pi pi-plus" aria-hidden="true" />
         </button>
       </div>
@@ -1058,6 +1056,7 @@ const dashboardRecoveryMessage = computed(() =>
 );
 const settingsDestination = ref<ReleaseDestinationConfig>();
 const settingsSlot = ref<ReleaseDestinationSlot>();
+const LAST_RELEASE_VERSION_KEY = "pipelab:last-release-version";
 const releaseVersion = ref("1.0.0");
 const releaseDescription = ref("");
 const connectionVisible = ref(false);
@@ -2108,7 +2107,7 @@ const ship = async (options: ShipOptions = {}) => {
       if (props.dashboardMode) dashboardRecoveryVisible.value = true;
       return;
     }
-    releaseVersion.value = "1.0.0";
+    releaseVersion.value = localStorage.getItem(LAST_RELEASE_VERSION_KEY) || "1.0.0";
     releaseDescription.value = flow.value?.description || flow.value?.name || "";
     releaseDetailsVisible.value = true;
     if (props.dashboardMode) dashboardRecoveryVisible.value = false;
@@ -2162,6 +2161,8 @@ const runShip = async () => {
         appStore.providerDefinitions,
         plan.value,
       );
+      if (releaseVersion.value.trim())
+        localStorage.setItem(LAST_RELEASE_VERSION_KEY, releaseVersion.value.trim());
       const result = await submitDesktopWorkflowExecution({
         request: {
           name: `workflows/${flowId.value}`,
