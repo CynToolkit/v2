@@ -91,19 +91,20 @@ Linux's full test suite covers credential-free local release, run-history,
 artifact IPC, and Construct profile validation. Focused platform jobs run the
 same release coverage on Windows and macOS without duplicating Linux tests.
 Regular CI does not launch Electron; the minimal startup
-smoke remains manual-only. Authenticated Construct-to-Electron acceptance is
-an explicit workflow dispatch with `Run authenticated local Ship` enabled.
-The dispatch runs after the complete CI gate passes; pushes
-and pull requests do not access Construct secrets. It requires the
+smoke remains manual-only. Authenticated Construct-to-Electron acceptance runs
+on every push to `main`, and on a workflow dispatch with
+`Run authenticated local Ship` enabled. It runs after the complete CI gate
+passes; pull requests and pushes to `develop` do not access Construct secrets.
+It requires the
 `CONSTRUCT_CI_USERNAME` and `CONSTRUCT_CI_PASSWORD` GitHub Actions secrets for
 a dedicated test account. CI creates a temporary Chromium profile through
 Construct's account and editor flow. It drives the Desktop Ship wizard with
 the checked-in sample `.c3p`, verifies the real Construct export and generated
 Electron app, then ships again across Desktop cold starts and checks reopened
 run history and artifacts. The profile is removed with the hosted runner.
-Never copy a developer's browser profile into CI. The dispatch fails clearly
+Never copy a developer's browser profile into CI. The job fails clearly
 if either secret is missing, so the live acceptance cannot silently pass
-without running. Regular push and pull request tests remain credential-free.
+without running. Pull request and `develop` tests remain credential-free.
 
 To seed the dedicated Construct profile locally, run `mise run setup-providers`
 (or `mise run setup:construct` alone). It installs Playwright's Chromium if needed, signs in with `CONSTRUCT_USERNAME` and `CONSTRUCT_PASSWORD`

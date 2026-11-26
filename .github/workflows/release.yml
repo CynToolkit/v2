@@ -61,7 +61,9 @@ jobs:
 
   authenticated-local-release:
     name: Authenticated local Ship / ${{ matrix.os }}
-    if: github.event_name == 'workflow_dispatch' && inputs.run_authenticated_local_ship
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.run_authenticated_local_ship)
     needs: ci-passed
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
