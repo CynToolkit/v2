@@ -127,22 +127,27 @@ const waitForHttp = async (url: string, handle: StartedProcess) => {
   throw new Error(`UI server did not start:\n${handle.output}`);
 };
 
-const waitForDevTools = async (url: string, handle: StartedProcess) => {
+const waitForDevTools = async (url: string, handle: StartedProcess, name: string) => {
   const deadline = Date.now() + 90_000;
+  let lastError = "no response yet";
   while (Date.now() < deadline) {
     if (handle.child.exitCode !== null)
       throw new Error(
-        `Desktop exited before DevTools was ready (code ${handle.child.exitCode}, signal ${handle.child.signalCode}):\n${handle.output}`,
+        `${name} exited before DevTools was ready (code ${handle.child.exitCode}, signal ${handle.child.signalCode}):\n${handle.output}`,
       );
     try {
-      const response = await fetch(url);
+      // A process that accepts the connection but never answers must not stall the deadline.
+      const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
       if (response.ok) return;
-    } catch {
-      // Electron is starting.
+      lastError = `HTTP ${response.status}`;
+    } catch (error) {
+      lastError = String(error);
     }
     await delay(200);
   }
-  throw new Error(`Desktop DevTools did not become ready:\n${handle.output}`);
+  throw new Error(
+    `${name} DevTools did not become ready at ${url} (pid ${handle.child.pid}, still running: ${handle.child.exitCode === null}, last error: ${lastError}):\n${handle.output}`,
+  );
 };
 
 const packagedAppPath = async (buildPath: string) => {
@@ -494,7 +499,7 @@ describe("Construct Desktop Ship to running Electron binary", () => {
           process.platform === "linux" ? ["-a", gamePath, ...gameArgs] : gameArgs,
           env,
         );
-        await waitForDevTools(`http://127.0.0.1:${gameDebugPort}/json`, game);
+        await waitForDevTools(`http://127.0.0.1:${gameDebugPort}/json`, game, "Produced game");
         gameBrowser = await chromium.connectOverCDP(`http://127.0.0.1:${gameDebugPort}`);
         const gamePage = gameBrowser
           .contexts()
