@@ -1,5 +1,13 @@
 # @pipelab/app
 
+## 2.0.0-beta.48
+
+### Patch Changes
+
+- [#105](https://github.com/CynToolkit/v2/pull/105) [`2d29b37`](https://github.com/CynToolkit/v2/commit/2d29b3771f7a382ee04dc746e567aab50a49b155) Thanks [@Armaldio](https://github.com/Armaldio)! - Add `--release-version` and `--release-notes` to workflow runs, remember the last release version in the editor, and include both version and notes in Steam build descriptions.
+
+- [#105](https://github.com/CynToolkit/v2/pull/105) [`2d29b37`](https://github.com/CynToolkit/v2/commit/2d29b3771f7a382ee04dc746e567aab50a49b155) Thanks [@Armaldio](https://github.com/Armaldio)! - Add a per-workflow setting to prefill the release version from the project source (Godot, Construct), and prompt for the release version and notes in the CLI when they are not provided.
+
 ## 2.0.0-beta.47
 
 ### Patch Changes
